@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import re
+import time
 
 # ---------------------------------------------------------------- 断言抽取
 ASSERT_MAIN = """把下面这段回答里的**可判真假的陈述**逐条列出来。
@@ -84,17 +85,29 @@ BATCH = 8
 
 
 def check_claims(llm, ask: str, ev: str, claims: list) -> dict:
+    """逐条判定。**解析失败必须重试**——首版不重试，一次 API 抖动就静默丢掉一批断言，
+    后果是分母变小、比率被抬高（实测让 direct 矛盾率显示成 15.4%，实为 59.1%）。"""
     out = {}
     for i in range(0, len(claims), BATCH):
         b = claims[i:i + BATCH]
         lst = "\n".join("%d. %s" % (j + 1, c) for j, c in enumerate(b))
-        t = llm.chat(CHECK4.format(ask=ask, ev=ev, claims=lst), model="MiniMax-M3",
-                     purpose="check", max_tokens=1600, budgets=(2400, 3200),
-                     min_ok=len(b) * 2) or ""
-        lines = [x for x in t.splitlines() if x.strip()]
-        for c, ln in zip(b, lines):
-            m = re.search(r"非主张|支持|矛盾|未提及", ln)
-            out[c] = m.group() if m else "解析失败"
+        got = {}
+        for attempt in range(3):
+            try:
+                t = llm.chat(CHECK4.format(ask=ask, ev=ev, claims=lst), model="MiniMax-M3",
+                             purpose="check", max_tokens=1600, budgets=(2400, 3200, 4000),
+                             min_ok=len(b) * 2) or ""
+            except Exception:
+                t = ""
+            lines = [x for x in t.splitlines() if x.strip()]
+            got = {}
+            for c, ln in zip(b, lines):
+                m = re.search(r"非主张|支持|矛盾|未提及", ln)
+                got[c] = m.group() if m else "解析失败"
+            if "解析失败" not in got.values() and len(got) == len(b):
+                break
+            time.sleep(2 + attempt * 3)
+        out.update(got)
     return out
 
 
