@@ -58,17 +58,31 @@ def main():
     remote = {t["path"]: t["sha"] for t in tree.get("tree", []) if t["type"] == "blob"}
 
     # 候选 = 本地所有跟踪文件 + 未跟踪文件
-    files = [p for p in subprocess.check_output(["git", "ls-files"], text=True).splitlines() if p]
-    files += [p for p in subprocess.check_output(
-        ["git", "ls-files", "--others", "--exclude-standard"], text=True).splitlines() if p]
+    # ★ 2026-10-21 修一个**静默丢文件**的 bug：
+    #   `git ls-files`（不带 -z）默认把**非 ASCII 文件名加引号并转义成八进制**
+    #   （如 "docs/.../fig1_\346\265\213...png"）⇒ 该路径在磁盘上不存在
+    #   ⇒ os.path.isfile() 为 False ⇒ **该文件被跳过**
+    #   ⇒ 而脚本还会报"没有需要推送的改动" ⇒ 看起来像成功的空操作。
+    #   实测后果：**所有中文名文件从未被推上远端**（含 6 张流程图 PNG）。
+    #   修法：用 `-z`（NUL 分隔、不转义）并按 \0 切分。
+    def _ls(args):
+        out = subprocess.check_output(["git", "ls-files", "-z"] + args)
+        return [x for x in out.decode("utf-8").split("\0") if x]
+    files = _ls([])
+    files += _ls(["--others", "--exclude-standard"])
 
-    changed = []
+    changed, skipped = [], []
     for p in files:
         if not os.path.isfile(p):
+            skipped.append(p)          # ★ 记下来，别再静默吞掉
             continue
         sha = local_blob_sha(p)
         if remote.get(p) != sha:
             changed.append(p)
+    if skipped:
+        print("⚠️ 有 %d 个跟踪文件在磁盘上不存在（已跳过，未推送）：" % len(skipped))
+        for p in skipped[:10]:
+            print("   - %s" % p)
     if not changed:
         print("没有需要推送的改动（与远端逐 blob 比对一致）")
         return
@@ -105,6 +119,16 @@ def main():
 
     t = req("GET", "/repos/%s/git/trees/%s?recursive=1" % (REPO, commit["sha"]))
     sizes = {x["path"]: x.get("size") for x in t.get("tree", [])}
+    # ★ 防呆：远端必须包含**全部**本地跟踪文件（含中文名）。
+    #   以前没有这道核对 ⇒ 中文名文件缺失时脚本仍报"成功"。
+    tracked = [p for p in _ls([]) if os.path.isfile(p)]
+    missing = [p for p in tracked if p not in sizes]
+    if missing:
+        print("❌ 远端树缺 %d 个本地跟踪文件（未推送成功）：" % len(missing))
+        for p in missing[:15]:
+            print("   - %s" % p)
+        raise SystemExit("✗ 推送不完整")
+    print("✅ 远端树含全部 %d 个本地跟踪文件（含中文名）" % len(tracked))
     bad = 0
     for p in changed:
         loc, rem = os.path.getsize(p), sizes.get(p)
