@@ -1,0 +1,18 @@
+{
+ "ops": {
+  "GEN_PLAIN": 5,
+  "EXTRACT": 4,
+  "SPLIT": 1
+ },
+ "width": 1,
+ "conflict": 0.0,
+ "n_legal": 0,
+ "n_verify": 0,
+ "hit": 0,
+ "miss": 0,
+ "fallback": false,
+ "claims": [
+  "今晚无法把大量作业全部做到完美。"
+ ],
+ "verd": {}
+}

@@ -1,0 +1,21 @@
+{
+ "ops": {
+  "GEN_PLAIN": 8,
+  "GEN_ANGLE": 1,
+  "EXTRACT": 1
+ },
+ "width": 4,
+ "conflict": 0.0,
+ "n_legal": 0,
+ "n_verify": 0,
+ "hit": 0,
+ "miss": 0,
+ "fallback": false,
+ "claims": [
+  "该考生是湖北省参加高考的考生。",
+  "该考生的高考选考科目类别为物理类。",
+  "该考生的高考物理类成绩为620分。",
+  "该考生有意学习人工智能相关专业。"
+ ],
+ "verd": {}
+}

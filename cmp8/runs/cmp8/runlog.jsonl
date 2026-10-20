@@ -1,0 +1,84 @@
+{"tid": "A3", "rep": 1, "arm": "A1", "chars": 330, "calls": 1, "secs": 12}
+{"tid": "A2", "rep": 1, "arm": "A1", "chars": 301, "calls": 1, "secs": 13}
+{"tid": "A4", "rep": 1, "arm": "A1", "chars": 273, "calls": 1, "secs": 17}
+{"tid": "A1", "rep": 1, "arm": "A1", "chars": 339, "calls": 1, "secs": 109}
+{"tid": "A3", "rep": 1, "arm": "A2", "chars": 383, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 391}
+{"tid": "A4", "rep": 1, "arm": "A2", "chars": 191, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 394}
+{"tid": "A1", "rep": 1, "arm": "A2", "chars": 330, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 621}
+{"tid": "A2", "rep": 1, "arm": "A2", "chars": 323, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 908}
+{"tid": "A4", "rep": 1, "arm": "A3", "chars": 224, "branches": 4, "calls": 8, "secs": 516}
+{"tid": "A3", "rep": 1, "arm": "A3", "chars": 291, "branches": 5, "calls": 8, "secs": 595}
+{"tid": "A4", "rep": 1, "arm": "A4", "chars": 487, "branches": 5, "calls": 6, "secs": 85}
+{"tid": "A3", "rep": 1, "arm": "A4", "chars": 0, "branches": 4, "calls": 6, "secs": 110}
+{"tid": "A1", "rep": 1, "arm": "A3", "chars": 302, "branches": 5, "calls": 8, "secs": 582}
+{"tid": "A1", "rep": 1, "arm": "A4", "chars": 384, "branches": 5, "calls": 6, "secs": 132}
+{"tid": "A2", "rep": 1, "arm": "A3", "chars": 302, "branches": 4, "calls": 8, "secs": 564}
+{"tid": "A4", "rep": 1, "arm": "A5a", "chars": 319, "synth_chars": 240, "width": 10, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 4, "GEN_ANGLE": 4, "EXTRACT": 1, "SPLIT": 1}, "fallback": false, "secs": 491}
+{"tid": "A2", "rep": 1, "arm": "A4", "chars": 406, "branches": 5, "calls": 6, "secs": 180}
+{"tid": "A3", "rep": 1, "arm": "A5a", "chars": 434, "synth_chars": 317, "width": 1, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 5, "EXTRACT": 4, "SPLIT": 1}, "fallback": false, "secs": 734}
+{"tid": "A1", "rep": 1, "arm": "A5a", "chars": 72, "synth_chars": 0, "width": 5, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 6, "EXTRACT": 3, "GEN_ANGLE": 1}, "fallback": false, "secs": 510}
+{"tid": "A2", "rep": 1, "arm": "A5a", "chars": 116, "synth_chars": 0, "width": 4, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 7, "GEN_ANGLE": 3}, "fallback": false, "secs": 475}
+{"tid": "A4", "rep": 1, "arm": "A5b", "chars": 563, "synth_chars": 0, "width": 10, "conflict": 0.0, "n_verify": 1, "ops": {"GEN_PLAIN": 1, "GEN_ANGLE": 6, "EXTRACT": 2, "VERIFY": 1}, "fallback": false, "secs": 764}
+{"tid": "A1", "rep": 1, "arm": "A5b", "chars": 443, "synth_chars": 0, "width": 8, "conflict": 0.0, "n_verify": 3, "ops": {"GEN_ANGLE": 1, "EXTRACT": 3, "SPLIT": 3, "VERIFY": 3}, "fallback": false, "secs": 425}
+{"tid": "A3", "rep": 1, "arm": "A5b", "chars": 209, "synth_chars": 343, "width": 2, "conflict": 0.0, "n_verify": 2, "ops": {"GEN_PLAIN": 3, "EXTRACT": 3, "SPLIT": 2, "VERIFY": 2}, "fallback": false, "secs": 558}
+{"tid": "A4", "rep": 1, "arm": "A5c", "chars": 528, "synth_chars": 309, "width": 9, "conflict": 0.0, "n_verify": 1, "ops": {"GEN_PLAIN": 1, "GEN_ANGLE": 6, "EXTRACT": 2, "VERIFY": 1}, "fallback": false, "secs": 456}
+{"tid": "A4", "rep": 2, "arm": "A1", "chars": 321, "calls": 1, "secs": 9}
+{"tid": "A3", "rep": 1, "arm": "A5c", "chars": 423, "synth_chars": 315, "width": 2, "conflict": 1.0, "n_verify": 2, "ops": {"GEN_PLAIN": 5, "EXTRACT": 2, "VERIFY": 2, "GEN_ANGLE": 1}, "fallback": false, "secs": 405}
+{"tid": "A3", "rep": 2, "arm": "A1", "chars": 357, "calls": 1, "secs": 15}
+{"tid": "A2", "rep": 1, "arm": "A5b", "chars": 177, "synth_chars": 0, "width": 8, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_ANGLE": 4, "EXTRACT": 4, "GEN_PLAIN": 1, "SPLIT": 1}, "fallback": false, "secs": 828}
+{"tid": "A1", "rep": 1, "arm": "A5c", "chars": 486, "synth_chars": 265, "width": 4, "conflict": 0.0, "n_verify": 2, "ops": {"GEN_PLAIN": 3, "EXTRACT": 2, "SPLIT": 2, "GEN_ANGLE": 1, "VERIFY": 2}, "fallback": false, "secs": 717}
+{"tid": "A1", "rep": 2, "arm": "A1", "chars": 359, "calls": 1, "secs": 39}
+{"tid": "A3", "rep": 2, "arm": "A2", "chars": 350, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 358}
+{"tid": "A4", "rep": 2, "arm": "A2", "chars": 393, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 452}
+{"tid": "A2", "rep": 1, "arm": "A5c", "chars": 116, "synth_chars": 0, "width": 5, "conflict": 1.0, "n_verify": 0, "ops": {"GEN_PLAIN": 7, "GEN_ANGLE": 3}, "fallback": false, "secs": 432}
+{"tid": "A4", "rep": 2, "arm": "A3", "chars": 190, "branches": 5, "calls": 8, "secs": 324}
+{"tid": "A2", "rep": 2, "arm": "A1", "chars": 386, "calls": 1, "secs": 173}
+{"tid": "A4", "rep": 2, "arm": "A4", "chars": 427, "branches": 5, "calls": 6, "secs": 160}
+{"tid": "A3", "rep": 2, "arm": "A3", "chars": 354, "branches": 5, "calls": 8, "secs": 637}
+{"tid": "A1", "rep": 2, "arm": "A2", "chars": 340, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 686}
+{"tid": "A3", "rep": 2, "arm": "A4", "chars": 389, "branches": 5, "calls": 6, "secs": 67}
+{"tid": "A3", "rep": 2, "arm": "A5a", "chars": 177, "synth_chars": 412, "width": 4, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_ANGLE": 1, "GEN_PLAIN": 7, "EXTRACT": 1, "SPLIT": 1}, "fallback": false, "secs": 155}
+{"tid": "A4", "rep": 2, "arm": "A5a", "chars": 86, "synth_chars": 0, "width": 3, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_ANGLE": 2, "GEN_PLAIN": 8}, "fallback": false, "secs": 473}
+{"tid": "A4", "rep": 2, "arm": "A5b", "chars": 325, "synth_chars": 255, "width": 9, "conflict": 0.0, "n_verify": 1, "ops": {"GEN_ANGLE": 1, "EXTRACT": 2, "VERIFY": 1, "STOP": 1}, "fallback": false, "secs": 304}
+{"tid": "A1", "rep": 2, "arm": "A3", "chars": 343, "branches": 5, "calls": 8, "secs": 630}
+{"tid": "A2", "rep": 2, "arm": "A2", "chars": 310, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 885}
+{"tid": "A3", "rep": 2, "arm": "A5b", "chars": 332, "synth_chars": 349, "width": 8, "conflict": 0.0, "n_verify": 3, "ops": {"GEN_ANGLE": 3, "EXTRACT": 1, "VERIFY": 3, "GEN_PLAIN": 2, "SPLIT": 1}, "fallback": false, "secs": 503}
+{"tid": "A1", "rep": 2, "arm": "A4", "chars": 429, "branches": 4, "calls": 6, "secs": 144}
+{"tid": "A3", "rep": 2, "arm": "A5c", "chars": 373, "synth_chars": 329, "width": 2, "conflict": 0.0, "n_verify": 1, "ops": {"GEN_ANGLE": 1, "GEN_PLAIN": 6, "EXTRACT": 1, "VERIFY": 1, "STOP": 1}, "fallback": false, "secs": 302}
+{"tid": "A3", "rep": 3, "arm": "A1", "chars": 383, "calls": 1, "secs": 16}
+{"tid": "A4", "rep": 2, "arm": "A5c", "chars": 86, "synth_chars": 0, "width": 3, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_ANGLE": 2, "GEN_PLAIN": 8}, "fallback": false, "secs": 507}
+{"tid": "A4", "rep": 3, "arm": "A1", "chars": 276, "calls": 1, "secs": 22}
+{"tid": "A1", "rep": 2, "arm": "A5a", "chars": 72, "synth_chars": 0, "width": 4, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 8, "GEN_ANGLE": 1, "EXTRACT": 1}, "fallback": false, "secs": 383}
+{"tid": "A2", "rep": 2, "arm": "A3", "chars": 352, "branches": 4, "calls": 8, "secs": 686}
+{"tid": "A2", "rep": 2, "arm": "A4", "chars": 394, "branches": 5, "calls": 6, "secs": 144}
+{"tid": "A3", "rep": 3, "arm": "A2", "chars": 320, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 447}
+{"tid": "A1", "rep": 2, "arm": "A5b", "chars": 401, "synth_chars": 396, "width": 7, "conflict": 0.0, "n_verify": 2, "ops": {"GEN_ANGLE": 2, "EXTRACT": 2, "SPLIT": 4, "VERIFY": 2}, "fallback": false, "secs": 385}
+{"tid": "A4", "rep": 3, "arm": "A2", "chars": 367, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 405}
+{"tid": "A1", "rep": 2, "arm": "A5c", "chars": 163, "synth_chars": 247, "width": 2, "conflict": 0.0, "n_verify": 1, "ops": {"GEN_PLAIN": 7, "GEN_ANGLE": 1, "EXTRACT": 1, "VERIFY": 1}, "fallback": false, "secs": 305}
+{"tid": "A1", "rep": 3, "arm": "A1", "chars": 309, "calls": 1, "secs": 27}
+{"tid": "A2", "rep": 2, "arm": "A5a", "chars": 116, "synth_chars": 0, "width": 4, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 9, "EXTRACT": 1}, "fallback": false, "secs": 461}
+{"tid": "A3", "rep": 3, "arm": "A3", "chars": 255, "branches": 5, "calls": 8, "secs": 475}
+{"tid": "A3", "rep": 3, "arm": "A4", "chars": 413, "branches": 5, "calls": 6, "secs": 107}
+{"tid": "A3", "rep": 3, "arm": "A5a", "chars": 87, "synth_chars": 0, "width": 5, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 8, "GEN_ANGLE": 2}, "fallback": false, "secs": 167}
+{"tid": "A4", "rep": 3, "arm": "A3", "chars": 233, "branches": 5, "calls": 8, "secs": 723}
+{"tid": "A2", "rep": 2, "arm": "A5b", "chars": 497, "synth_chars": 214, "width": 7, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_ANGLE": 1, "EXTRACT": 3, "SPLIT": 6}, "fallback": false, "secs": 444}
+{"tid": "A1", "rep": 3, "arm": "A2", "chars": 348, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 547}
+{"tid": "A4", "rep": 3, "arm": "A4", "chars": 443, "branches": 5, "calls": 6, "secs": 147}
+{"tid": "A3", "rep": 3, "arm": "A5b", "chars": 261, "synth_chars": 403, "width": 1, "conflict": 1.0, "n_verify": 1, "ops": {"GEN_ANGLE": 2, "EXTRACT": 4, "GEN_PLAIN": 1, "SPLIT": 2, "VERIFY": 1}, "fallback": false, "secs": 389}
+{"tid": "A1", "rep": 3, "arm": "A3", "chars": 296, "branches": 4, "calls": 8, "secs": 357}
+{"tid": "A2", "rep": 2, "arm": "A5c", "chars": 116, "synth_chars": 0, "width": 4, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 9, "EXTRACT": 1}, "fallback": false, "secs": 414}
+{"tid": "A3", "rep": 3, "arm": "A5c", "chars": 87, "synth_chars": 0, "width": 6, "conflict": 1.0, "n_verify": 0, "ops": {"GEN_PLAIN": 8, "GEN_ANGLE": 2}, "fallback": false, "secs": 186}
+{"tid": "A2", "rep": 3, "arm": "A1", "chars": 308, "calls": 1, "secs": 26}
+{"tid": "A1", "rep": 3, "arm": "A4", "chars": 467, "branches": 5, "calls": 6, "secs": 86}
+{"tid": "A4", "rep": 3, "arm": "A5a", "chars": 86, "synth_chars": 0, "width": 6, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 7, "GEN_ANGLE": 3}, "fallback": false, "secs": 475}
+{"tid": "A1", "rep": 3, "arm": "A5a", "chars": 72, "synth_chars": 0, "width": 1, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 8, "GEN_ANGLE": 2}, "fallback": false, "secs": 354}
+{"tid": "A4", "rep": 3, "arm": "A5b", "chars": 341, "synth_chars": 340, "width": 6, "conflict": 0.0, "n_verify": 2, "ops": {"GEN_PLAIN": 4, "GEN_ANGLE": 2, "EXTRACT": 2, "VERIFY": 2}, "fallback": false, "secs": 384}
+{"tid": "A2", "rep": 3, "arm": "A2", "chars": 355, "ideas": 24, "calls": 12, "model": "repro:MiniMax-M3.1-Flash-Preview", "secs": 559}
+{"tid": "A1", "rep": 3, "arm": "A5b", "chars": 418, "synth_chars": 282, "width": 4, "conflict": 0.0, "n_verify": 1, "ops": {"GEN_PLAIN": 3, "EXTRACT": 3, "SPLIT": 1, "GEN_ANGLE": 1, "VERIFY": 1, "STOP": 1}, "fallback": false, "secs": 331}
+{"tid": "A4", "rep": 3, "arm": "A5c", "chars": 86, "synth_chars": 0, "width": 4, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 7, "GEN_ANGLE": 3}, "fallback": false, "secs": 453}
+{"tid": "A2", "rep": 3, "arm": "A3", "chars": 350, "branches": 5, "calls": 8, "secs": 496}
+{"tid": "A1", "rep": 3, "arm": "A5c", "chars": 72, "synth_chars": 0, "width": 6, "conflict": 1.0, "n_verify": 0, "ops": {"GEN_PLAIN": 8, "GEN_ANGLE": 2}, "fallback": false, "secs": 321}
+{"tid": "A2", "rep": 3, "arm": "A4", "chars": 389, "branches": 5, "calls": 6, "secs": 96}
+{"tid": "A2", "rep": 3, "arm": "A5a", "chars": 321, "synth_chars": 0, "width": 7, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 8, "EXTRACT": 2}, "fallback": false, "secs": 578}
+{"tid": "A2", "rep": 3, "arm": "A5b", "chars": 524, "synth_chars": 317, "width": 5, "conflict": 0.0, "n_verify": 3, "ops": {"GEN_ANGLE": 3, "EXTRACT": 3, "VERIFY": 3, "GEN_PLAIN": 1}, "fallback": false, "secs": 641}
+{"tid": "A2", "rep": 3, "arm": "A5c", "chars": 116, "synth_chars": 0, "width": 5, "conflict": 0.0, "n_verify": 0, "ops": {"GEN_PLAIN": 9, "EXTRACT": 1}, "fallback": false, "secs": 382}

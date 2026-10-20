@@ -1,0 +1,23 @@
+{
+ "ops": {
+  "GEN_PLAIN": 3,
+  "EXTRACT": 3,
+  "SPLIT": 2,
+  "VERIFY": 2
+ },
+ "width": 2,
+ "conflict": 0.0,
+ "n_legal": 0,
+ "n_verify": 2,
+ "hit": 0,
+ "miss": 0,
+ "fallback": false,
+ "claims": [
+  "今天是五一小长假的最后一天的18:00",
+  "我的作业还一笔没动"
+ ],
+ "verd": {
+  "今天是五一小长假的最后一天的18:00": "非主张",
+  "我的作业还一笔没动": "非主张"
+ }
+}
