@@ -132,6 +132,12 @@ def main():
         json.dump(dict(detail=sc_detail, aborted=True),
                   open("%s/judge_selfcheck.json" % OUT, "w"), ensure_ascii=False, indent=1)
         return
+    # ★ 补「已知真断言」侧检查（同一阈值 0.5，不新增口径；见 patch_gate.py 头注）
+    if (tp + fn) and tp / (tp + fn) < 0.5:
+        print("❌ 判官在「已知真断言」上召回不足 50% ⇒ 判据分不开对错，**拒绝出数**。")
+        json.dump(dict(detail=sc_detail, aborted=True),
+                  open("%s/judge_selfcheck.json" % OUT, "w"), ensure_ascii=False, indent=1)
+        return
     json.dump(dict(detail=sc_detail, tp=tp, fn=fn, tn=tn, fp=fp, aborted=False,
                    judge=orclient.PRIMARY),
               open("%s/judge_selfcheck.json" % OUT, "w"), ensure_ascii=False, indent=1)

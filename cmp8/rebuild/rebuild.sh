@@ -37,6 +37,8 @@ python3 "$HERE/cmp8_p1.py"
 python3 "$HERE/cmp8_p2.py"
 # p3（判官供应商切换）的功能已并入下面的 patch_or.py：重复执行是幂等的
 python3 "$HERE/patch_or.py" cmp8
+# 判官闸门补「已知真断言」侧检查（行级、幂等）
+[ -f cmp8/analyze_cmp6.py ] && python3 "$HERE/patch_gate.py" cmp8/analyze_cmp6.py
 
 # ---- 文档回填 ----
 #   HANDOVER：**包根的是源**（树里那份由它派生）⇒ 包根优先
