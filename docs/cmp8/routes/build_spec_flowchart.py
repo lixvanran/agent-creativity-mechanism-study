@@ -177,10 +177,51 @@ def pick(spec, *keys, default=None):
 
 
 def normalize(spec):
-    """把不同写法的 spec 归一成 {nodes:[{id,label,sub,kind}], edges:[(from,to,label)]}。"""
+    """把不同写法的 spec 归一成 {nodes:[...], edges:[(from,to,label)]}。
+
+    ★ 2026-10-21 扩充（复核指出：只吃顶层 nodes/edges ⇒ 路线 B/C 的 spec 渲染成空页）：
+      支持三种写法，按优先级：
+        ① 顶层 `nodes:` + `edges:`（或 `flowchart:` 块内的同名键）—— 最通用
+        ② `topology.templates[*].stages`（模板菜单，每条一条链）—— 路线 C 写法
+        ③ `topology.stages`（有序阶段字典）—— 单链
+    无论哪种，**图仍然完全由 spec 派生** ⇒ "图与规格同源"的承诺仍然成立。
+    """
+    # ① 先找顶层 nodes/edges；再找 flowchart: 块里的
     nodes = pick(spec, "nodes", "steps", "stages", "phases", default=[]) or []
     edges = pick(spec, "edges", "transitions", "links", default=[]) or []
+    if not nodes and isinstance(spec.get("flowchart"), dict):
+        fc = spec["flowchart"]
+        nodes = fc.get("nodes") or fc.get("steps") or []
+        edges = fc.get("edges") or fc.get("transitions") or []
+    if not nodes:
+        topo = spec.get("topology") or {}
+        tpl = topo.get("templates") or {}
+        if tpl:
+            # ② 模板菜单：每个模板一条链，节点 id = <模板>:<阶段>
+            for tid, t in sorted(tpl.items()):
+                stages = (t or {}).get("stages") or []
+                prev = None
+                for k, st in enumerate(stages):
+                    nid = "%s:%s" % (tid, st)
+                    nodes.append({"id": nid, "label": "%s · %s" % (tid, st),
+                                 "sub": None, "kind": "st"})
+                    if prev:
+                        edges.append((prev, nid, None))
+                    prev = nid
+            # 模板内节点同链 ⇒ 需要"分组泳道"布局，走 render_templates
+            return nodes, edges, "templates"
+        stg = topo.get("stages")
+        if isinstance(stg, dict):
+            # ③ 有序阶段字典
+            prev = None
+            for k in stg:
+                nid = "s:%s" % k
+                nodes.append({"id": nid, "label": str(k), "sub": None, "kind": "st"})
+                if prev:
+                    edges.append((prev, nid, None))
+                prev = nid
     out_nodes, out_edges, order = [], [], []
+    shape = "nodes_edges"
     for i, n in enumerate(nodes):
         if isinstance(n, str):
             nid, lab, sub, kind = "n%d" % i, n, None, "st"
@@ -212,13 +253,17 @@ def normalize(spec):
     if not out_edges and len(order) > 1:
         for a, b in zip(order, order[1:]):
             out_edges.append((a, b, None))
-    return out_nodes, out_edges
+    return out_nodes, out_edges, shape
 
 
 def render(spec, title, subtitle):
-    nodes, edges = normalize(spec)
+    nodes, edges, shape = normalize(spec)
     if not nodes:
-        return "<p>（spec 里没有可渲染的节点）</p>"
+        return ("<p style=\"font-family:monospace;color:#b06367;padding:8px\">"
+                "⚠ 这个 spec 里没有可渲染的节点：顶层既没有 <code>nodes:</code>/<code>edges:</code>，"
+                "也没有 <code>flowchart:</code> 块、没有 <code>topology.templates[*].stages</code>、"
+                "没有 <code>topology.stages</code>。<br>"
+                "⇒ 契约：路线必须交出<b>机器可读</b>的图（上面四种任一），否则图与规格无法同源。</p>")
     W = 760
     # 布局：按"最浅层"分行（简化：拓扑序分层）
     level = {n["id"]: 0 for n in nodes}
@@ -272,6 +317,30 @@ def render(spec, title, subtitle):
             s.append(arrow("M%.1f,%.1f L%.1f,%.1f" % (bcx, (acy + bcy) / 2, bcx, bcy - 2), "ln"))
         if lb:
             s.append(label((acx + bcx) / 2, (acy + bcy) / 2 - 6, lb, "mono", "start"))
+    if shape == "templates":
+        # 泳道：按模板分组，每组一条链
+        groups = {}
+        for n in nodes:
+            tid = n["id"].split(":")[0]
+            groups.setdefault(tid, []).append(n)
+        s2 = []
+        yy = 12
+        bw2, bh2, gap2 = 128, 40, 26
+        for tid, gn in groups.items():
+            s2.append(txt(30, yy + 18, tid, "lbl", "start", 12))
+            xx = 110
+            for j, n in enumerate(gn):
+                s2.append(box(xx, yy, bw2, bh2, n["label"].split(" · ", 1)[-1], None, "st"))
+                if j:
+                    s2.append(arrow("M%.1f,%.1f L%.1f,%.1f" % (
+                        xx - gap2 + 3, yy + bh2 / 2, xx - 3, yy + bh2 / 2)))
+                xx += bw2 + gap2
+            yy += bh2 + 22
+        W = max(W, 110 + max(len(g) for g in groups.values()) * (bw2 + gap2))
+        return ('<svg viewBox="0 0 %d %d" class="figsvg">'
+                '<defs><marker id="ah" markerWidth="9" markerHeight="7" refX="8" refY="3.5" '
+                'orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#3a4256"/></marker></defs>%s</svg>'
+                % (W, yy + 10, "".join(s2)))
     svg = ('<svg viewBox="0 0 %d %d" class="figsvg">'
            '<defs><marker id="ah" markerWidth="9" markerHeight="7" refX="8" refY="3.5" '
            'orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#3a4256"/></marker></defs>%s</svg>'
