@@ -24,8 +24,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from creativity_lab.verify import check_claims, extract_claims   # noqa: E402
 from creativity_lab import orclient                              # noqa: E402
+from creativity_lab import judge_cache                           # noqa: E402
 
 OUT = os.environ.get("CMP_OUT", "runs/cmp8")
+# 答案从 ANS_DIR 读（默认 = OUT）；遍2 用 ANS_DIR=<遍1 目录>，输出仍写到 OUT
+ANS_DIR = os.environ.get("ANS_DIR", OUT)
 ARMS = ["A1", "A2", "A3", "A4", "A5a", "A5b", "A5c"]
 ARM_NAME = {
     "A1": "① 直调", "A2": "② 开源ADHD项目(机制复现)", "A3": "③ 双轴·融合门",
@@ -90,16 +93,19 @@ def dedup_with(emb, claims, thr=0.75):
 def arm_file(arm, tid, rep):
     """A5 系列的交付答案 = 合成版（与其它臂同为流式答复）；机械装配版另存。"""
     if arm.startswith("A5"):
-        s = "%s/%s_r%d_%s_synth.md" % (OUT, tid, rep, arm)
+        s = "%s/%s_r%d_%s_synth.md" % (ANS_DIR, tid, rep, arm)
         if os.path.exists(s) and os.path.getsize(s) > 40:
             return open(s, encoding="utf-8").read()
-    p = "%s/%s_r%d_%s.md" % (OUT, tid, rep, arm)
+    p = "%s/%s_r%d_%s.md" % (ANS_DIR, tid, rep, arm)
     return open(p, encoding="utf-8").read() if os.path.exists(p) else ""
 
 
 def main():
+    os.makedirs(OUT, exist_ok=True)
     judge = orclient.LLM()
     emb = orclient.Embedder()
+    CACHE = judge_cache.load()
+    _cstat = {"hit": 0, "miss": 0}
 
     # ---------- 第一步：判官自检（不过就停）----------
     print("【判官自检】%s" % orclient.PRIMARY, flush=True)
@@ -143,7 +149,7 @@ def main():
                         n_parsefail=0, parsefail_rate=0.0,
                         claims=[], verd={}, empty=True, invalid="short_or_empty_output")
         claims = None
-        j = "%s/%s_r%d_%s.json" % (OUT, tid, rep, arm)
+        j = "%s/%s_r%d_%s.json" % (ANS_DIR, tid, rep, arm)
         if arm.startswith("A5") and os.path.exists(j):
             try:
                 d = json.load(open(j, encoding="utf-8"))
@@ -151,9 +157,20 @@ def main():
                     claims = list(d["claims"])
             except Exception:
                 pass
-        if claims is None:
-            claims = extract_claims(judge, txt)
-        verd = check_claims(judge, QS[tid], EV.get(tid, ""), claims) if claims else {}
+        # ★ 判官结果缓存：遍2 的唯一变量是 embedding 通道 ⇒ verdict 应当原样复用
+        #   （否则判官成本付两遍 ⇒ 破 $1 上限）。键含原文 sha1 ⇒ 原文变了自动失效。
+        with judge_cache.LOCK:
+            _e = judge_cache.get(CACHE, arm, tid, rep, txt)
+            if _e is not None:
+                claims = _e["claims"]
+                verd = {c: _e["verd"].get(c) for c in claims}
+                _cstat["hit"] += 1
+            else:
+                if claims is None:
+                    claims = extract_claims(judge, txt)
+                verd = check_claims(judge, QS[tid], EV.get(tid, ""), claims) if claims else {}
+                judge_cache.put(CACHE, arm, tid, rep, txt, claims, verd)
+                _cstat["miss"] += 1
         n_parsefail = sum(1 for c in claims if verd.get(c) not in
                            ("支持", "矛盾", "未提及", "非主张"))
         legal = [c for c in claims if verd.get(c) in ("支持", "矛盾")]
@@ -239,8 +256,16 @@ def main():
                    parsefail_rate={s_["arm"]: {t: pt[t].get("parsefail_rate", 0.0)
                                                for t in pt} for s_ in summary for pt in [s_["per_t"]]},
                    samples={s_["arm"]: dict(valid=s_.get("n_valid", 0), total=s_.get("n_total", 0),
-                                            excluded=s_.get("excluded", [])) for s_ in summary}),
+                                            excluded=s_.get("excluded", [])) for s_ in summary},
+                   judge_reused=(_cstat["hit"] > 0),
+                   judge_cache=dict(hit=_cstat["hit"], miss=_cstat["miss"], path=judge_cache.path())),
               open("%s/analysis.json" % OUT, "w"), ensure_ascii=False, indent=1, default=str)
+
+    try:
+        judge_cache.save(CACHE)
+        print("  判官缓存已写：%s（命中 %d / 未命中 %d）" % (judge_cache.path(), _cstat["hit"], _cstat["miss"]))
+    except Exception as e:
+        print("  [判官缓存写盘失败] %s" % str(e)[:80])
 
     print("\n" + "=" * 112)
     print("去重体检（判据：保留率 = width / n_raw）")

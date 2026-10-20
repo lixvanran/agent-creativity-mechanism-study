@@ -102,6 +102,18 @@ EMBED_MODEL = os.environ.get("OR_EMBED", "qwen/qwen3-embedding-8b")
 EMBED_FALLBACKS = ["qwen/qwen3-embedding-4b", "baai/bge-m3",
                    "sentence-transformers/all-minilm-l6-v2"]''', alt=_ALT_JUDGE, tag="默认模型")
 
+# 2b) ★ 判官 temperature 1.0 → 0.0（**只动 orclient**；被测侧 client.py 不动）
+#     理由：判官在 temp>0 ⇒ 矛盾率不是确定量；而「种子噪声地板」只测了**被测侧**的波动、
+#     **没测判官侧**的采样噪声 ⇒ ⑤b vs ⑤c 的差异里有多少是策略信号、多少是判官噪声，
+#     **目前分不开**。temp=0 是把这个混淆项直接消掉的省事办法。
+#     实测（2026-10-20 18:15 演练）：deepseek 在 temp=1.0 下同一自检两次分别 5/5+2/5 与 3/5+2/5 ⇒ 都不达标。
+s = sub1(s, '''    def chat(self, prompt: str, *, model: str = "", temp: float = 1.0,
+             max_tokens: int = 2000, budgets=(4000, 6000), min_ok: int = 20,
+             purpose: str = "") -> str:''',
+         '''    def chat(self, prompt: str, *, model: str = "", temp: float = 0.0,
+             max_tokens: int = 2000, budgets=(4000, 6000), min_ok: int = 20,
+             purpose: str = "") -> str:''', "判官 temp=0")
+
 # 3) chat：gone/forbidden 换模型；空产出抛错带原因
 s = sub1(s, '''        model = model or PRIMARY
         last = ""
@@ -345,6 +357,180 @@ a = sub1(a, '''                   parsefail_rate={s_["arm"]: {t: pt[t].get("pars
                                                for t in pt} for s_ in summary for pt in [s_["per_t"]]},
                    samples={s_["arm"]: dict(valid=s_.get("n_valid", 0), total=s_.get("n_total", 0),
                                             excluded=s_.get("excluded", [])) for s_ in summary}),''', "json 样本数")
+
+
+# ---------------------------------------------------------------- 判官结果缓存（遍2 复用）
+JUDGE_CACHE_SRC = '''# -*- coding: utf-8 -*-
+"""判官结果缓存（跨"遍1 / 遍2"复用）。
+
+**为什么需要**：遍2 的唯一变量是 **embedding 通道**（`EMBED_PROVIDER=minimax`）
+⇒ 判官 verdict 应当**原样复用**，只重算 embedding / 去重 / 宽度。
+否则判官成本要付两遍（grok-4.3 是 deepseek 的 4–5 倍）⇒ 会破 $1 成本上限。
+
+**为什么复用是同一个量（不是改口径）**：判官模型、提示词、断言抽取三者在两遍里完全一致；
+断言抽取 `extract_claims` **只吃原文、不吃 embedding** ⇒ 两遍的断言集合必须一致。
+
+**键的设计**：
+- 样本级键 `臂|题|重复` + 原文 sha1 ⇒ 原文变了自动失效
+- verdict 以**断言文本**为键（不是序号）⇒ 对顺序变化也稳
+
+**⚠️ 报告里必须写明**：遍2 复用了遍1 的判官结果（`analysis.json` 的 `judge_reused`）。
+否则读报告的人会以为两遍各自独立判了一遍。
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import threading
+
+LOCK = threading.Lock()
+_HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_PATH = os.path.join(os.path.dirname(_HERE), "runs", "judge_cache.json")
+
+
+def path() -> str:
+    return os.environ.get("JUDGE_CACHE") or DEFAULT_PATH
+
+
+def _h(txt: str) -> str:
+    return hashlib.sha1((txt or "").encode("utf-8")).hexdigest()[:16]
+
+
+def key(arm: str, tid: str, rep: int) -> str:
+    return "%s|%s|%s" % (arm, tid, rep)
+
+
+def load() -> dict:
+    p = path()
+    if os.path.exists(p):
+        try:
+            return json.load(open(p, encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def save(cache: dict) -> None:
+    p = path()
+    d = os.path.dirname(p)
+    if d:
+        os.makedirs(d, exist_ok=True)
+    tmp = p + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(cache, f, ensure_ascii=False)
+    os.replace(tmp, p)
+
+
+def get(cache: dict, arm: str, tid: str, rep: int, txt: str):
+    e = cache.get(key(arm, tid, rep))
+    if not e or e.get("h") != _h(txt):
+        return None
+    return e
+
+
+def put(cache: dict, arm: str, tid: str, rep: int, txt: str, claims: list, verd: dict) -> None:
+    cache[key(arm, tid, rep)] = {
+        "h": _h(txt),
+        "claims": list(claims),
+        "verd": {c: verd.get(c) for c in claims},
+    }
+'''
+_JC_PATH = os.path.join(ROOT, "creativity_lab", "judge_cache.py")
+if not os.path.exists(_JC_PATH) or "judge_reused" not in io.open(_JC_PATH, encoding="utf-8").read():
+    io.open(_JC_PATH, "w", encoding="utf-8").write(JUDGE_CACHE_SRC)
+    print("✓ creativity_lab/judge_cache.py（判官结果缓存）")
+
+a = sub1(a, '''from creativity_lab.verify import check_claims, extract_claims   # noqa: E402
+from creativity_lab import orclient                              # noqa: E402''',
+'''from creativity_lab.verify import check_claims, extract_claims   # noqa: E402
+from creativity_lab import orclient                              # noqa: E402
+from creativity_lab import judge_cache                           # noqa: E402''', "analyze import 缓存")
+
+# 输出目录必须先建：遍2 的 CMP_OUT（runs/cmp8_mmemb）默认不存在 ⇒
+# 写 judge_selfcheck.json 时 FileNotFoundError ⇒ 整遍白跑（2026-10-20 18:50 演练抓到）
+# ★ 答案目录与输出目录分离：遍2 只换 embedding 通道，**答案仍在遍1 的目录**。
+#   之前遍2 把 CMP_OUT 指向新目录 ⇒ 分析器在新目录里找不到任何答案 ⇒
+#   遍2 全空、"两遍对比"变成假的（演练 2026-10-20 18:55 抓到）。
+a = sub1(a, '''OUT = os.environ.get("CMP_OUT", "runs/cmp8")''',
+         '''OUT = os.environ.get("CMP_OUT", "runs/cmp8")
+# 答案从 ANS_DIR 读（默认 = OUT）；遍2 用 ANS_DIR=<遍1 目录>，输出仍写到 OUT
+ANS_DIR = os.environ.get("ANS_DIR", OUT)''', "analyze ANS_DIR")
+
+# arm_file 改读 ANS_DIR（答案目录），输出目录仍用 OUT
+a = sub1(a, '''def arm_file(arm, tid, rep):
+    """A5 系列的交付答案 = 合成版（与其它臂同为流式答复）；机械装配版另存。"""
+    if arm.startswith("A5"):
+        s = "%s/%s_r%d_%s_synth.md" % (OUT, tid, rep, arm)
+        if os.path.exists(s) and os.path.getsize(s) > 40:
+            return open(s, encoding="utf-8").read()
+    p = "%s/%s_r%d_%s.md" % (OUT, tid, rep, arm)
+    return open(p, encoding="utf-8").read() if os.path.exists(p) else ""''',
+'''def arm_file(arm, tid, rep):
+    """A5 系列的交付答案 = 合成版（与其它臂同为流式答复）；机械装配版另存。"""
+    if arm.startswith("A5"):
+        s = "%s/%s_r%d_%s_synth.md" % (ANS_DIR, tid, rep, arm)
+        if os.path.exists(s) and os.path.getsize(s) > 40:
+            return open(s, encoding="utf-8").read()
+    p = "%s/%s_r%d_%s.md" % (ANS_DIR, tid, rep, arm)
+    return open(p, encoding="utf-8").read() if os.path.exists(p) else ""''',
+        "arm_file 读 ANS_DIR")
+
+# A5 的 claims .json 路径也改 ANS_DIR
+a = sub1(a, '''        j = "%s/%s_r%d_%s.json" % (OUT, tid, rep, arm)''',
+         '''        j = "%s/%s_r%d_%s.json" % (ANS_DIR, tid, rep, arm)''', "A5 claims 读 ANS_DIR")
+
+a = sub1(a, '''def main():
+    judge = orclient.LLM()''',
+'''def main():
+    os.makedirs(OUT, exist_ok=True)
+    judge = orclient.LLM()''', "analyze 建 OUT 目录")
+
+a = sub1(a, '''    judge = orclient.LLM()
+    emb = orclient.Embedder()''',
+'''    judge = orclient.LLM()
+    emb = orclient.Embedder()
+    CACHE = judge_cache.load()
+    _cstat = {"hit": 0, "miss": 0}''', "analyze 缓存初始化")
+
+# analysis.json 记 judge_reused（**成本闸门**：遍2 复用 ⇒ 判官不重复付费）
+a = sub1(a, '''                   samples={s_["arm"]: dict(valid=s_.get("n_valid", 0), total=s_.get("n_total", 0),
+                                            excluded=s_.get("excluded", [])) for s_ in summary}),''',
+         '''                   samples={s_["arm"]: dict(valid=s_.get("n_valid", 0), total=s_.get("n_total", 0),
+                                            excluded=s_.get("excluded", [])) for s_ in summary},
+                   judge_reused=(_cstat["hit"] > 0),
+                   judge_cache=dict(hit=_cstat["hit"], miss=_cstat["miss"], path=judge_cache.path())),''',
+         "analyze json 加 judge_reused")
+
+a = sub1(a, '''        if claims is None:
+            claims = extract_claims(judge, txt)
+        verd = check_claims(judge, QS[tid], EV.get(tid, ""), claims) if claims else {}''',
+'''        # ★ 判官结果缓存：遍2 的唯一变量是 embedding 通道 ⇒ verdict 应当原样复用
+        #   （否则判官成本付两遍 ⇒ 破 $1 上限）。键含原文 sha1 ⇒ 原文变了自动失效。
+        with judge_cache.LOCK:
+            _e = judge_cache.get(CACHE, arm, tid, rep, txt)
+            if _e is not None:
+                claims = _e["claims"]
+                verd = {c: _e["verd"].get(c) for c in claims}
+                _cstat["hit"] += 1
+            else:
+                if claims is None:
+                    claims = extract_claims(judge, txt)
+                verd = check_claims(judge, QS[tid], EV.get(tid, ""), claims) if claims else {}
+                judge_cache.put(CACHE, arm, tid, rep, txt, claims, verd)
+                _cstat["miss"] += 1''', "analyze 用缓存")
+
+
+a = sub1(a, '''    print("\\n" + "=" * 112)
+    print("去重体检（判据：保留率 = width / n_raw）")''',
+'''    try:
+        judge_cache.save(CACHE)
+        print("  判官缓存已写：%s（命中 %d / 未命中 %d）" % (judge_cache.path(), _cstat["hit"], _cstat["miss"]))
+    except Exception as e:
+        print("  [判官缓存写盘失败] %s" % str(e)[:80])
+
+    print("\\n" + "=" * 112)
+    print("去重体检（判据：保留率 = width / n_raw）")''', "analyze 写缓存")
 
 io.open(AN, "w", encoding="utf-8").write(a)
 print("✓ analyze_cmp6.py")

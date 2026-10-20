@@ -29,4 +29,8 @@ fi
 # ⚠️ 改了这个脚本之后，"逐字节一致"不足以验收 —— 必须做负向测试：
 #    把某个文件退回未打补丁状态 → 跑 rebuild.sh → 它应该被补回来。
 #    （见同目录 selftest_negative.sh；§7 坑 27 实测：漏一步，逐字节 diff 照样全绿）
+# 最后一批文档修订（判官 temp=0 / 遍2 复用 / 坑 29 / METHOD 3b）
+for d in HANDOVER-cmp8-2026-10-20.md METHOD.md; do
+  if [ -f "cmp8/$d" ]; then python3 rebuild/patch_docs_final.py "cmp8/$d"; fi
+done
 echo ">>> 重建完成：$DEST/cmp8"

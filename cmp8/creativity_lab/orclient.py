@@ -116,7 +116,7 @@ class LLM:
                            json.dumps(d.get("error"), ensure_ascii=False))
         return d
 
-    def chat(self, prompt: str, *, model: str = "", temp: float = 1.0,
+    def chat(self, prompt: str, *, model: str = "", temp: float = 0.0,
              max_tokens: int = 2000, budgets=(4000, 6000), min_ok: int = 20,
              purpose: str = "") -> str:
         model = model or PRIMARY

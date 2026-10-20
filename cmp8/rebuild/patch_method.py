@@ -164,6 +164,13 @@ def patch(path):
             s = s.replace('> 判官 `deepseek/deepseek-chat`：真 4/4 ｜ 假 4/4 ✅', '> 判官 `x-ai/grok-4.3`：真 5/5 ｜ 假 5/5 ✅（2026-10-20 18:15 演练复核）\n> 判官 `deepseek/deepseek-chat`：假 2/5 ❌ **自检不稳 ⇒ 不用**', 1)
             print('  ✓ applied: 改动 4：默认判官改 grok-4.3')
 
+
+    # ===== 改动 5：判官 temp=0 / 遍2 复用 =====
+    if '判官 `x-ai/grok-4.3`：真 5/5 ｜ 假 5/5 ✅（2026-10-20 18:15 演练复核）' not in s:
+        if '> 判官 `x-ai/grok-4.3`：真 5/5 ｜ 假 5/5 ✅（2026-10-20 18:15 演练复核）' in s:
+            s = s.replace('> 判官 `x-ai/grok-4.3`：真 5/5 ｜ 假 5/5 ✅（2026-10-20 18:15 演练复核）', '> 判官 `x-ai/grok-4.3`：真 5/5 ｜ 假 5/5 ✅（2026-10-20 18:15 演练复核，**temp=0 下连跑两次一致**）\n> ⚠️ 判官在 **temperature 0.0** 下运行 ⇒ 矛盾率是确定量（temp>0 时自检带采样噪声，见过同一模型一次 4/4 一次 2/5）\n> ⚠️ **遍2 复用遍1 的判官结果**（`judge_cache.json`）：遍2 的唯一变量是 embedding 通道 ⇒ verdict 是同一个量；**报告里必须写明**（`analysis.json` 的 `judge_reused`）', 1)
+            print('  ✓ applied: 改动 5：判官 temp=0 / 遍2 复用')
+
     if s != orig:
         io.open(path, "w", encoding="utf-8").write(s)
     return s != orig

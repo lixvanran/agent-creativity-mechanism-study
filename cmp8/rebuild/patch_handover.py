@@ -991,10 +991,7 @@ def patch(path):
         if 'export OR_PRIMARY=deepseek/deepseek-chat     # 判官：跨厂商、非 MiniMax' in s:
             s = s.replace('export OR_PRIMARY=deepseek/deepseek-chat     # 判官：跨厂商、非 MiniMax', 'export OR_PRIMARY=x-ai/grok-4.3              # 判官：跨厂商、非 MiniMax（**deepseek 自检不稳 ⇒ 不用它**）', 1)
             print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
-    if '判官自检（2026-10-20）：grok-4.3 **5/5 + 5/5**' not in s:
-        if '- 判官自检（2026-10-20）：deepseek **4/4 + 4/4**；grok-4.3 **4/4 + 4/4**' in s:
-            s = s.replace('- 判官自检（2026-10-20）：deepseek **4/4 + 4/4**；grok-4.3 **4/4 + 4/4**', '- 判官自检（2026-10-20 18:15 演练复核）：**grok-4.3 5/5 + 5/5（fn=0 fp=0）✅**；deepseek **2/5**（两次都不稳）❌', 1)
-            print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
+
 
     if s != orig:
         io.open(path, "w", encoding="utf-8").write(s)

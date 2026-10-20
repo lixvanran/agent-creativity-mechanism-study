@@ -230,6 +230,13 @@ def patch(path):
             s = s.replace('CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=deepseek/deepseek-chat \\', 'CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=x-ai/grok-4.3 \\', 1)
             print('  ✓ applied: 改动 5：默认判官改 grok-4.3')
 
+
+    # ===== 改动 6：遍2 用 ANS_DIR 读同一批答案 =====
+    if 'CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=x-ai/grok-4.3 \\' not in s:
+        if 'CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=x-ai/grok-4.3 \\' in s:
+            s = s.replace('CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=x-ai/grok-4.3 \\', 'CMP_OUT=runs/cmp8_mmemb ANS_DIR=runs/cmp8 EMBED_PROVIDER=minimax OR_PRIMARY=x-ai/grok-4.3 \\', 1)
+            print('  ✓ applied: 改动 6：遍2 用 ANS_DIR 读同一批答案')
+
     if s != orig:
         io.open(path, "w", encoding="utf-8").write(s)
     return s != orig
