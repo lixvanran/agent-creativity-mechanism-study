@@ -1,0 +1,13 @@
+[1] 参数表：12 个参数，默认向量 hash=sha256:839e98e61ea6e962，校验=OK
+[2] 拓扑菜单：全部 PASS
+    手册长度 2149 字符
+[3] 提案器：format_ok=True struct_ok=True → T2
+    原始输出：TOPOLOGY: T2 | REASON: 以多帧生成扩大候选覆盖，并经核验后机械装配，使“远”结构上可达
+[4] CFG_A / SMOKE-S1：calls=2 claims=8 支持=1 冲突=0 去重支持=1 conflict_rate_pre=0.000 答案字符=151 阶段=GEN,EXTRACT,VERIFY,MERGE
+[4] CFG_A / SMOKE-S2：calls=2 claims=5 支持=0 冲突=0 去重支持=0 conflict_rate_pre=0.000 答案字符=130 阶段=GEN,EXTRACT,VERIFY,MERGE
+[4] CFG_B / SMOKE-S1：calls=2 claims=8 支持=2 冲突=0 去重支持=2 conflict_rate_pre=0.000 答案字符=72 阶段=GEN,EXTRACT,VERIFY,MERGE
+[4] CFG_B / SMOKE-S2：calls=2 claims=0 支持=0 冲突=0 去重支持=0 conflict_rate_pre=0.000 答案字符=14 阶段=GEN,EXTRACT,VERIFY,MERGE
+[4] PROBE_multiframe / SMOKE-S1：calls=4 claims=17 支持=2 冲突=0 去重支持=2 conflict_rate_pre=0.000 答案字符=160 阶段=GEN,EXTRACT,VERIFY,MERGE
+[5] 反投机探针：[{"config": "CFG_A", "n_claims_total": 13, "n_supported_distinct": 1, "f2_growth": {"claims_growth": -0.385, "supported_growth": 1.0, "suspicious": false}}, {"config": "CFG_B", "n_claims_total": 8, "n_supported_distinct": 2, "f2_growth": null}]
+[6] 参数是否改变了行为：{"CFG_A": [151, 130], "CFG_B": [72, 14]}
+[7] 调用账：HTTP POST 13 次（上限 20），tokens=13287

@@ -1,0 +1,64 @@
+{
+  "purpose": "可执行性冒烟（不产出任何实验结论）",
+  "endpoint": "https://api.minimaxi.com/v1",
+  "primary_model": "MiniMax-M3.1-Flash-Preview",
+  "openrouter_used": false,
+  "global_call_cap": 20,
+  "total_api_calls": 12,
+  "total_tokens": 19898,
+  "n_prompts": 7,
+  "elapsed_sec": 188.3,
+  "tasks": [
+    {
+      "tid": "DS-01",
+      "meta": {
+        "stage_counts": {
+          "n1_gen": 2,
+          "n2_claims": 10,
+          "n4_resample": 1,
+          "n4_claims": 5,
+          "pool_pre_split": 15,
+          "n5_split": 0,
+          "pool_total": 15,
+          "n6_dedup_strict": 15,
+          "n6_dedup_loose": 15,
+          "n6_impl1_lex": 15,
+          "n6_impl2_struct": 15
+        },
+        "trigger_fired": true,
+        "trigger_kept": 10,
+        "facet_enabled": true,
+        "resample_mode": "structured",
+        "novel_axis": true,
+        "utility_axis": true,
+        "evidence_prompt_checks": 9,
+        "n_calls": 12,
+        "n_tokens": 19898,
+        "n_pool": 15,
+        "n_supported": 0,
+        "n_contradicted": 0,
+        "n_unmentioned": 0,
+        "n_parsefail": 0,
+        "n_unverified": 0,
+        "internal_parsefail_rate": 0.0,
+        "conflict_rate_generated": 0.0,
+        "support_rate_generated": 0.0,
+        "n_slots": 3,
+        "answer_chars": 91,
+        "answer_truncated_count": 0
+      },
+      "n_pool_items": 15,
+      "n_claims_extracted": 15,
+      "answer": "# 某市居民用水阶梯价：第一档每月 0–18 吨，每吨 3.5 元；超过 18 吨的部分每吨 5 元。某户当月用水 24 吨，应缴水费多少元？\n\n## 经核验成立的依据\n\n- （无）"
+    }
+  ],
+  "checks": {
+    "prompts_parse_all_nonempty": true,
+    "no_openrouter_in_prompts_or_endpoints": true,
+    "evidence_not_in_generation_prompts": true,
+    "evidence_leak_count": 0,
+    "every_task_produced_nonempty_answer": true,
+    "every_task_has_parsed_verdicts": true,
+    "within_global_call_cap": true
+  }
+}
