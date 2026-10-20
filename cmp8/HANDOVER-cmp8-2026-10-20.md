@@ -7,8 +7,7 @@
 > **不需要重推任何东西**，§8 的数字都是实测的，别自己重算。
 >
 > 生成：2026-10-20 16:50 Asia/Shanghai（**17:30 修订：接收者视角自查后补 19 处**）
-> 状态：核心装置已交付并自检通过；**主对比实验正在云端跑**，本文件随实验结果更新。
->
+> 状态：主对比实验**已完成**>
 > **本文件是索引，不是唯一真相** —— 最新版以 **GitHub 分支 `cmp8-handover-2026-10-20`** 为准（§4.1/§4.2）。
 
 ---
@@ -199,11 +198,13 @@ python3 -c "import json;d=json.load(open('runs/cmp8/analysis.json'));print(d.get
 | | |
 |---|---|
 | 执行会话 | `454370675753049`（标题「[cron] 打包五族对比实验交付包」）—— **同一个 Mavis 账号下的会话，你可能看不到它的消息，但产物会推到同一分支** |
-| 状态 | **进行中**（最后报告 12/84，2026-10-20 16:48） |
+| 状态 | **已完成**（84/84 跑完 + 两遍分析 + 判读页，2026-10-20 19:45） |
 | 速率 | ≈ 33 s/次调用，总量 ≈ 800 次调用 |
 | ETA | **2026-10-20 18:15–18:30 UTC** |
 | 监控 | `monitor3.sh`（任务 `454379793445195`）：跑完自动做 ① 0 字检查 ② 分析遍 1（OpenRouter embedding）③ 分析遍 2（`EMBED_PROVIDER=minimax` → `runs/cmp8_mmemb`）④ `n_raw<5` 体检 + **逐臂解析失败率体检** ⑤ 判读页 |
 | 产物 | `runs/cmp8/`（答案 + `runlog.jsonl` + `analysis.json`）、`runs/cmp8_mmemb/`、`compare5_report.html` |
+| ★ **数据 commit** | **`20e167207ebb6d18758237b1331d683085247e46`**（报告里要引用它） |
+| ★ **本轮结论** | **矛盾率轴不可用**（全部 84 份答案只有 **21 条**可核验断言，所有非零矛盾率的**分母都恰好是 1**）⇒ **跨臂比较一律「不可分辨」**；**但「权重改变了架构行为」站得住**（⑤b 的 `GEN_PLAIN` 65%→14%、`EXTRACT` 8%→28%、`VERIFY` 6%→17%，n=115/120 步）。**逐条判决见 `cmp8/analysis_denominators.md`** |
 | **答案文件命名** | **`{题号}_r{重复号}_{臂}.md`** —— 例：`A3_r1_A4.md` = 第 3 题 / 第 1 次重复 / A4 臂。**84 个文件 = 4 题 × 3 重复 × 7 臂**。空文件（0 字节）= 该样本无效，**排除 + 如实报 valid/total** |
 | ⚠️ 跑批期间**不许改任何臂的行为** | 改臂 = 改处理方式 = 前后样本不可比。样本无效**只能排除 + 如实报 valid/total** |
 | ★ **已知异常（截至 2026-10-20 17:39）** | **① A4 掉了 1 个样本**（`A3_r1_A4.md` = 0 字节）⇒ A4 是 **11/12**，其余臂全满。**A4 是"去融合门离散度更低"这个正面结论的载体** ⇒ 它掉样本 ⇒ 方差更大 ⇒ **它的离散度必须标样本数，不许给"单点值 + 假装同精度"的读法**。**② 臂2 原版通道死**（`Claude Code process exited with code 1`，1200s 零输出）⇒ 走 Python 复现（见 §10 第 1 条的三处差异）。**③ 无整臂 0 字** |
@@ -329,6 +330,7 @@ git checkout cmp8-handover-2026-10-20
 | `cmp8/answers/` | **★ 84 份原始答案**（顶层也有一份副本，方便直接看） |
 | `cmp8/runs/cmp8/judge_cache.json` | **判官结果缓存**（遍2 复用的证据 ⇒ `analysis.json` 的 `judge_reused`） |
 | `README.md` | 仓库首页：3 分钟版「从哪看起、怎么用」 |
+| **`cmp8/analysis_denominators.md`** | **★ 绝对分母与判决表**（每臂可核验断言条数 / 逐题分母 / 全部非零矛盾率样本 / 种子噪声地板 / ⑤b vs ⑤c 判决 / 能站住与不能站住的逐条清单） |
 | `creativity_lab/`（**仓库根，不是 `cmp8/` 下**） | **训练侧**：`train_policy.py`（产出那 14 维权重）、`arch_v2.py`、`train_agent.py`、`train_selector.py`、`measure_breadth.py`、`measure_paradox2.py`、`check_breadth_validity.py`、`test_verifier.py`、`workflow.py`、`scipy_free.py`、`calibration.py`、`contrasts.py`、`leakage.py`、`prompts.py`、`arms/`、`gates/`、`drill*.py`、`pilot_v2*.py`、`train_pipeline*.py` |
 | `creativity_lab/data/` | **题库与回归集**：`legal_topics.json`、`legal_topics_v2.json`（**核验器回归集，18 题**）、`policy_topics.json`（**8 道政策域训练题**）、`train_topics.json`、`topics.json` |
 | `TRAINING-METHOD-REPORT.md` / `REPORT-ARCHLEARN-2026-10-19.md` / `docs/CORRECTION-2026-10-18-breadth.md` / `POSTMORTEM.md` / `FINDINGS.md` | 历史报告与复盘 |

@@ -54,8 +54,10 @@ def main():
     # ② 收集要推的文件（git status 里的）
     # ★ 文件清单来自「本地 HEAD 相对 base 的差异」——不是 git status
     #   （改动若已 commit，status 是干净的 ⇒ 会误判成"没有待推送的改动"）
+    # ★ 用 origin/<branch> 作参照 —— API 推上去的 commit 本地没有 ⇒ 用 base sha 会报 128
+    subprocess.check_call(["git", "fetch", "-q", "origin", BRANCH])
     out = subprocess.check_output(
-        ["git", "diff", "--name-only", base, "HEAD"], text=True)
+        ["git", "diff", "--name-only", "origin/" + BRANCH], text=True)
     files = [("M", p) for p in out.splitlines() if p.strip()]
     untracked = subprocess.check_output(
         ["git", "ls-files", "--others", "--exclude-standard"], text=True)
