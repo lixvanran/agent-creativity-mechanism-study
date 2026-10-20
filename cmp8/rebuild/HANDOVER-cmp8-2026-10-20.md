@@ -41,6 +41,8 @@ git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-
 ```
 ⚠️ **必须切到 `cmp8-handover-2026-10-20` 分支** —— `main` 上还没有这些文件。
 （若本机 git CA 有问题，用 `gh api` / `https://github.com/.../archive/refs/heads/<branch>.tar.gz` 下载。）
+⇒ tar 解出来的目录名是 **`agent-creativity-mechanism-study-cmp8-handover-2026-10-20/`**，要 `cd` 进去。
+⇒ **拉完先看一眼**：`ls cmp8/runs/cmp8/analysis.json` 在不在（不在 = 跑批还没完，见第 3 步）。
 
 **第 2 步 · 读这三份（别跳）**
 1. `HANDOVER-cmp8-2026-10-20.md`（本文件）
@@ -49,12 +51,15 @@ git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-
 
 **第 3 步 · 确认你要的是哪一类活**
 - **只要结果** → 数据在 `cmp8/runs/cmp8/analysis.json`，判读页 `cmp8/compare5_report.html`。**不要重跑 800 次调用。**
+  ⚠️ **如果 `analysis.json` 不存在 ⇒ 云端还在跑 ⇒ 不要自己重跑**（会造出第二套不可比的数据）⇒ 按 §3.2 的状态判定，或直接问用户要产物。
 - **要复现/重跑** → `cd cmp8 && bash rebuild/rebuild.sh`（会跑补丁脚本）→ `python3 smoke_or.py`（**闸门**）→ `python3 run_compare5.py ...`
 - **要接着做研究** → 读 §9 的 P0/P1/P2
 
 **第 4 步 · 拿凭据**
 - `MINIMAX_SUBSCRIPTION_KEY`（被测侧）、`OPENROUTER_API_KEY`（判官+embedding）
-- 在 Mavis 里用 `mavis secret list` 看有哪些 secret；**没有就让用户给，别硬编码**
+- **在 Mavis 平台内（同账号新会话）⇒ secret 自动注入**，`env | grep -iE 'minimax|openrouter'` 直接看得到
+- **在平台外（自己电脑）⇒ 必须让用户贴 key 值**，只放进环境变量，别写进脚本/文件/git
+- 在 Mavis 里用 `mavis secret list` 看有哪些 secret（**只列名字**，明文拿不到，这是设计如此）；**没有就让用户给，别硬编码、别写进文件**
 - ⚠️ **判官必须是跨厂商**：`OR_PRIMARY=deepseek/deepseek-chat`（`grok-3-mini` 已 404 下架）
 
 **第 5 步 · 开工前先确认三件事**
@@ -146,14 +151,26 @@ git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-
 
 ### 3.2 云端跑批现状
 
+**⚠️ 下表是写这份文件那一刻的快照，会过期。自己查当前状态，别信这张表**：
+```bash
+# 在仓库 cmp8/ 下
+wc -l runs/cmp8/runlog.jsonl          # 做了几次（总 84）
+ls runs/cmp8/analysis.json 2>/dev/null # 存在 = 已分析完 = 有结果了
+```
+**状态判定**：
+- `runlog` 行数 = 84 且 `analysis.json` 在 ⇒ **跑完了**，直接进 §9 P0
+- 行数 < 84 ⇒ **还在跑** ⇒ **不要重跑、不要另起炉灶**（见下面的处置）
+- 整条路径都不存在 ⇒ 云端没推上来 ⇒ 走 §5 本地路径
+
 | | |
 |---|---|
-| 执行会话 | `454370675753049`（标题「[cron] 打包五族对比实验交付包」） |
+| 执行会话 | `454370675753049`（标题「[cron] 打包五族对比实验交付包」）—— **同一个 Mavis 账号下的会话，你可能看不到它的消息，但产物会推到同一分支** |
 | 状态 | **进行中**（最后报告 12/84，2026-10-20 16:48） |
 | 速率 | ≈ 33 s/次调用，总量 ≈ 800 次调用 |
 | ETA | **2026-10-20 18:15–18:30 UTC** |
 | 监控 | `monitor3.sh`（任务 `454379793445195`）：跑完自动做 ① 0 字检查 ② 分析遍 1（OpenRouter embedding）③ 分析遍 2（`EMBED_PROVIDER=minimax` → `runs/cmp8_mmemb`）④ `n_raw<5` 体检 + **逐臂解析失败率体检** ⑤ 判读页 |
 | 产物 | `runs/cmp8/`（答案 + `runlog.jsonl` + `analysis.json`）、`runs/cmp8_mmemb/`、`compare5_report.html` |
+| ⚠️ 跑批期间**不许改任何臂的行为** | 改臂 = 改处理方式 = 前后样本不可比。样本无效**只能排除 + 如实报 valid/total** |
 
 **⚠️ 如果云端跑批还在跑、你没有 bash/凭据**：那就走 §5 的本地路径，两边结果互为验证。
 
@@ -168,15 +185,23 @@ git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-
 
 ## 4. 资产清单（全部在 drive / GitHub，**接手时按这个拉**）
 
-### 4.1 交付包（**主资产**）
+### 4.1 交付包（**zip 只是快照，GitHub 才是权威**）
+
+**⚠️ 取用优先级（按这个来，别按文件新旧猜）**：
+1. **GitHub 分支 `cmp8-handover-2026-10-20`** = **权威副本**，永远是最新的（版本受控、可 diff、可回滚）
+2. **drive 的 zip** = **某一时刻的快照**，可能比 GitHub 旧
+3. 本文件（md）= **索引**，指向上面两者
+
+⚠️ **下表里 node `454384890003597`（203,976 B）那个 zip 是较早的快照**，**它的副本里可能没有 §0.5 / §4.2 / §4.2.1 这几段**。
+⇒ **要最新 ⇒ clone GitHub 分支，别用 zip。**
 
 | 文件 | node_id | 字节 | 内容 |
 |---|---|---:|---|
 | **`cmp8_交付包_v3.zip`** | **`454382563336916`** | **168,677** | **40 个真实文件 ← 接手方拿这个**：完整 cmp8/ 树 + METHOD.md + AGENT_RUNBOOK.md（**含「判官解析失败率」处置规则**）+ cmp8_fetch.py + rebuild/（p0/p1/p2 + patch_or.py + patch_runbook.py + rebuild.sh） |
 | `cmp8_交付包.zip` | `454375285564150` | 166,303 | 39 个文件：同 v3，但**执行手册缺「解析失败率」那一节**（其余一致） |
 | `cmp8_交付包.zip` | `454380578374669` | 165,267 | 旧版（无解析解析失败率统计）——**别用这版** |
-| **`cmp8_交接包.zip`** | **`454384890003597`** | **203,976** | **45 个真实文件 ← 接手方的完整工作集**：本交接文件 ×2 + METHOD ×2 + RUNBOOK ×2 + cmp8_fetch ×2 + 完整 cmp8/ 树 + rebuild/（p0/p1/p2 + patch_or.py + patch_runbook.py + patch_handover.py + rebuild.sh） |
-| `HANDOVER-cmp8-2026-10-20.zip` | 见发包方消息（drive 节点随抽取延迟出现） | ~13.4 KB | **只含本文件一个 md**（`-j` 压平、无目录层级）⇒ **要转手给下一个 Agent 时的最小单文件** |
+| **`cmp8_交接包.zip`** | **`454384890003597`** | **203,976** | **45 个真实文件 ← 接手方的完整工作集**：本交接文件 ×2 + METHOD ×2 + RUNBOOK ×2 + cmp8_fetch ×2 + 完整 cmp8/ 树 + rebuild/（p0/p1/p2 + patch_or.py + patch_runbook.py + patch_handover.py + rebuild.sh） **（快照，可能略旧于 GitHub）** |
+| `HANDOVER-cmp8-2026-10-20.zip` | 见发包方消息（drive 节点随抽取延迟出现） | ~15.1 KB | **只含本文件一个 md**（`-j` 压平、无目录层级）⇒ **要转手给下一个 Agent 时的最小单文件** |
 
 > ⚠️ **为什么本文件里不写「最新那个 zip」的 node_id**：
 > 一个包含自己地址的文件**无法自洽** —— 填进 node_id 会改文件、改文件会改 zip、改 zip 就换了 node_id ⇒ 无限回环。
@@ -255,6 +280,30 @@ curl -sL -o cmp8.tar.gz https://github.com/lixvanran/agent-creativity-mechanism-
 tar xzf cmp8.tar.gz
 ```
 
+### ⚠️ 4.2.1 **最容易拿错的一处：仓库里有两份 `creativity_lab/`**
+
+| 路径 | 是什么 | 谁用 |
+|---|---|---|
+| `creativity_lab/`（仓库根） | **训练侧**：策略学习、核验器训练、测量脚本、题库 | 训练/复盘时用 |
+| `cmp8/creativity_lab/` | **执行侧**：被测客户端、判官客户端、核验器 v4、操作集、依据包 | **跑这套对比实验时用** |
+
+⚠️ **两边的同名文件（`verify.py` / `client.py` / `metrics.py`）可能是不同版本！**
+⇒ **执行侧一律以 `cmp8/creativity_lab/` 为准**；从仓库根 import 会拿到训练侧那份，
+判官就会用旧的 CHECK4（"是不是法律主张"）⇒ 在你的四道题上会误判。
+⇒ **跑实验前先确认 `sys.path` 指向 `cmp8/`**（`run_compare5.py` 里的 `HERE` 已经处理好了）。
+
+**训练侧文件清单（仓库根，204 个文件里）**：
+- `creativity_lab/data/`：`legal_topics.json` / `legal_topics_v2.json`（**核验器回归集 18 题**）/
+  `policy_topics.json`（**8 道政策域训练题**）/ `train_topics.json` / `topics.json`
+- `creativity_lab/train_policy.py`（**产出那 14 维权重的 REINFORCE 脚本**）/
+  `arch_v2.py` / `train_agent.py` / `train_selector.py` / `train_pipeline*.py`
+- `creativity_lab/measure_breadth.py` / `measure_paradox2.py` / `check_breadth_validity.py` /
+  `test_verifier.py` / `gate_policy.py` / `reverify_all.py` / `drill*.py` / `pilot_v2*.py`
+- `creativity_lab/{workflow,scipy_free,calibration,contrasts,leakage,prompts}.py` /
+  `arms/{base,direct,dual}.py` / `gates/{base,__init__}.py`
+
+⇒ **接手者想重训权重、复核训练结论、扩题，都有现成脚本在仓库根，不用从零写。**
+
 ### 4.3 依据包（4 份，各 16 条原子事实）
 
 在包内 `creativity_lab/data/user4_q{1..4}.json`。由 4 个子代理**联网独立构造**、**不读任何已有答案**。
@@ -277,6 +326,15 @@ tar xzf cmp8.tar.gz
 | `GITHUB_TOKEN_LIXVANRAN` | 推仓库 |
 
 用 `mavis secret list` 管理；**绝不要把 key 写进任何文件或提交**。
+
+### 4.5 用户的四道题（题面在哪）
+
+| | |
+|---|---|
+| 题面定义 | **`cmp8/armdeps/topics4.py`**（`TOPICS4`，单一真相源）→ `cmp8/run_compare5.py` 优先从那里读 |
+| 依据包 | `cmp8/creativity_lab/data/user4_q{1..4}.json`（各 16 条原子事实，见 §4.3） |
+| 题目内容 | A1 湖北 620 分选 AI ｜ A2 公路赛战术 ｜ A3 假期作业 ｜ A4 气质量表（**A4 有确定答案**） |
+| ⚠️ **禁止** | 这 4 道题**是最终外部测试集，全程不进训练**；依据包**只进判官/核验侧**，**不许进被测臂的提示词** |
 
 ---
 
@@ -355,6 +413,13 @@ bash go_cmp8.sh     # 冒烟 → 跑批 → 两遍分析 → 判读页
 7. **装配必须机械**；未核验的断言单列一节。
 8. **判官若退到 MiniMax ⇒ 与被测同源 ⇒ 必须在报告里声明**（`analysis.json` 的 `judge_same_vendor`）。
 9. **429 只退避不换模型**（换模型会悄悄改掉"模型构成"这个变量）；**只有连续 529 才降级**，且降级要记录。
+10. **⚠️ 非要改口径怎么办（不许偷偷改）**：
+    - **先写预注册文件再动手**（项目已有先例：第四组的 `PREREG_p1.md`；格式 = 假设 / 操作 / 判据 / 停止条件 / 日期）
+    - 改过的口径**必须在报告里列出"改了哪一条、为什么、什么时候改的"**
+    - **改完之后，这批数据前后不可比** ⇒ 要么重跑全量，要么在报告里划清界限
+    - **理由不成立的改动不许做**：例「某臂解析失败率高/样本数少 ⇒ 重跑那一臂」=
+      **把仪器故障当实验结论 + p-hacking**，明令禁止（与 §7 坑 2/3 同族：都是**仪器坏了却当成好结果**）
+11. **不允许「跑通了就宣布成功」**：判官自检不通过 ⇒ 一切指标无效，先修仪器。
 
 ---
 
@@ -386,6 +451,7 @@ bash go_cmp8.sh     # 冒烟 → 跑批 → 两遍分析 → 判读页
 | 22 | 交付树与重建树手工维护两份 | 改一边忘另一边 | **让 B 从 A 生成**（树 = 重建产物） |
 | 23 | 沙箱重置丢源文件 | —— | 文件正文常留在会话消息历史里（`write` 的 `tool_call_args` 含全文）；也可从 drive 搜回 |
 | 24 | 跨会话文件不可互传 | 挂载单向 | 我的 write → 它看得见；**它的 write → 我看不见** |
+| 25 | **把仪器故障当成实验结论** | 某臂解析失败率高 / 样本数少 / 产出为空 ⇒ "重跑那一臂" | **样本无效只能排除 + 如实报 valid/total**；**重跑 = p-hacking**，明令禁止 |
 
 ---
 
@@ -432,7 +498,8 @@ key **健康**（余额 $4.999/$5，账号 $20 额度）⇒ **不是 key/账号/
 
 ### P0 · 拿到结果（如果云端跑批已结束）
 ```bash
-# 云端：读打包会话的回报，或直接看 runs/cmp8/analysis.json
+# 首选：读仓库里已推上来的产物
+cat cmp8/runs/cmp8/analysis.json | head -100
 # 本地：跑 §5.3→§5.5
 ```
 **要交出的东西**：
@@ -442,10 +509,21 @@ key **健康**（余额 $4.999/$5，账号 $20 额度）⇒ **不是 key/账号/
 4. **【⑤b vs ⑤c】原文**（含**种子间标准差**）—— **整轮实验的胜负手**
 5. **两遍分析的 `n_raw` / `width` / 保留率**对比
 6. **「判官解析失败率」表**（>10% 的臂单独标出）
-7. `judge_selfcheck.json`、`analysis.json` 的 `judge` / `judge_used` / `judge_same_vendor` / `embed` / `census`
+7. `judge_selfcheck.json`、`analysis.json` 的 `judge` / `judge_used` / `judge_same_vendor` / `embed` / `census` / `samples`
 8. **A5 三臂的 `ops` 直方图**（**A5b 与 A5c 分布一样 ⇒ 权重没起作用，这本身就是结论**）
 9. **A5 三臂的 `fallback` 字段**（大面积 true ⇒ **这批 A5 数据要打折**）
 10. 判读页路径（`compare5_report.html`）
+
+**⚠️ 报告放哪儿（别写完就散在聊天里）**：
+- 写到 **`docs/cmp8/REPORT-cmp8-2026-XX-XX.md`**（命名带日期）⇒ **推回同一分支**（`cmp8-handover-2026-10-20` 或新开分支 + PR）
+- 同时在仓库根留一份 **`REPORT-cmp8-LATEST.md`**（指向最新那份）
+- 最终给用户的**必须是一份能下载的文件**（GitHub raw 链接 + drive 里的 zip 附件），不是聊天里的复述
+
+**⚠️ 交回时必须带的东西**（少了这些，结论不能用）：
+① `analysis.json` 的**原样 JSON**（不是截图/不是手抄表）
+② **样本列 valid/total**（哪个臂掉了几个样本）
+③ **判官自检结果**（`judge_selfcheck.json`）—— **没这个 = 判官可能整个是坏的，指标全是假的**
+④ §10 的全部声明（改一个字都不行）
 
 ### P1 · 写结论（**不许提前下**）
 - 唯一仲裁器 = **矛盾率**
