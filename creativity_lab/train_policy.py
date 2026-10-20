@@ -35,7 +35,14 @@ from creativity_lab.metrics import _mat                      # noqa: E402
 from creativity_lab.ops import (OPS, Graph, assemble, op_features)  # noqa: E402
 from creativity_lab.verify import check_claims, extract_claims  # noqa: E402
 
-OUT = "runs/arch_learn_fixed"
+OUT = os.environ.get("POLICY_OUT", "runs/arch_learn_fixed")
+
+
+def ckpt(obj):
+    """原子写：先写 .tmp 再 os.replace ⇒ 进程被杀不会留下半个 json。"""
+    p = "%s/result.json" % OUT
+    json.dump(obj, open(p + ".tmp", "w"), ensure_ascii=False, indent=1)
+    os.replace(p + ".tmp", p)
 os.makedirs(OUT, exist_ok=True)
 DATA = json.load(open("creativity_lab/data/policy_topics.json", encoding="utf-8"))
 LAWS, TOPICS = DATA["laws"], DATA["topics"]
@@ -270,7 +277,21 @@ def main():
 
     base = 0.0
     NROUND = int(os.environ.get("POLICY_ROUNDS", "8"))
-    for ep in range(1, NROUND + 1):
+    # ★ 断点续跑：每个 episode 的 rng 按 (轮号, 题号) 派生 ⇒ **续跑与不续跑逐字等价**
+    ck_path = "%s/result.json" % OUT
+    start_ep = 1
+    if os.environ.get("POLICY_RESUME", "1") == "1" and os.path.exists(ck_path):
+        try:
+            ck = json.load(open(ck_path))
+            if ck.get("history"):
+                w = np.array(ck["w"], dtype=float); base = float(ck.get("base", 0.0))
+                W = [np.array(v, dtype=float) for v in ck["history"]]
+                start_ep = len(W) + 1
+                print("↻ 续跑：已完成 %d 轮，从第 %d 轮继续（‖w‖=%.4f）"
+                      % (len(W), start_ep, float(np.linalg.norm(w))), flush=True)
+        except Exception as e:
+            print("⚠ checkpoint 读取失败，改为从头训练：%s" % e, flush=True)
+    for ep in range(start_ep, NROUND + 1):
         tot, batch = [], []
         # ★ 同一轮内的各个 episode **相互独立**（共用同一个 w）⇒ 可以并行。
         #   每个 episode 用**自己派生的 rng** ⇒ 并行不改变随机序列的可复现性。
@@ -296,8 +317,9 @@ def main():
                  np.mean([x["fin"] for x in tot])), flush=True)
         print("       操作分布: " + "  ".join("%s=%d" % (k, v)
               for k, v in sorted(agg_ops.items(), key=lambda x: -x[1])), flush=True)
-        json.dump(dict(w=w.tolist(), history=[[x.tolist() for x in v] for v in W]),
-                  open("%s/result.json" % OUT, "w"), ensure_ascii=False, indent=1)  # 每轮 checkpoint
+        ckpt(dict(w=w.tolist(), base=float(base),
+                  history=[[x.tolist() for x in v] for v in W]))
+        print("       [checkpoint] 轮 %d/%d 已落盘" % (ep, NROUND), flush=True)
 
     # ---- 测试 ----
     print("\n== 测试（未见题）==", flush=True)
