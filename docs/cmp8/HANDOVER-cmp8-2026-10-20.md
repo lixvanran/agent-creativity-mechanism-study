@@ -4,8 +4,10 @@
 > 这份文件 + 交付包（§4）＝ 接手所需的全部信息。
 > **不需要重推任何东西**，§8 的数字都是实测的，别自己重算。
 >
-> 生成：2026-10-20 16:50 Asia/Shanghai
+> 生成：2026-10-20 16:50 Asia/Shanghai（**17:30 修订：接收者视角自查后补 19 处**）
 > 状态：核心装置已交付并自检通过；**主对比实验正在云端跑**，本文件随实验结果更新。
+>
+> **本文件是索引，不是唯一真相** —— 最新版以 **GitHub 分支 `cmp8-handover-2026-10-20`** 为准（§4.1/§4.2）。
 
 ---
 
@@ -14,6 +16,7 @@
 | 你想知道 | 去哪 |
 |---|---|
 | 这项目在问什么 | §1 |
+| **这项目在多组研究里的位置** | **§0.9** |
 | 现在到哪一步了 | §2（**先读这张**） |
 | 正在跑的是什么、跑完谁接手 | §3 |
 | 资产在哪（zip / GitHub / 依据包 / 权重） | §4 |
@@ -66,6 +69,29 @@ git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-
 1. 判官自检过没过（真 ≥3/4 且 假 ≥3/4）
 2. 你的臂间比较**用的哪个指标**（`n_raw` 还是 `width`）——`width` 依赖 embedding 通道
 3. 你要下结论的话，**⑤b vs ⑤c 的差异 vs 种子噪声地板**比过了没
+
+---
+
+## 0.9 这项目在多组研究里的位置（**接手者先看这段，否则会问"这结论凭什么可信"**）
+
+本项目是「Agent 洞察力机制」研究里的**第四组（论证组）**。四组并行、各自独立：
+
+| 组 | 在干什么 | 产出 |
+|---|---|---|
+| 一组 | 文献审计（ADHD × 创造力） | 结论：「ADHD 整体提高创造力」**未通过证据审计** |
+| 二组 | multi-mind 多 Agent 协作平台工程 | 五层创造力机制 L1–L5、lean 流水线 |
+| 三组 | 机制实证（公开仓） | 训练/巡练相关证据链 |
+| **四组（本组）** | **论证 + 架构学习 + 这套对比实验** | 本文件 + `cmp8/` |
+
+**本组已经确立的三件事（§2.1 有完整表）**：
+1. **写作增强是真实的** —— 双轴**去融合门**（各分支各自成文）让开放文章**逃逸度 0.0377 → 0.1048（2.8×）**，
+   跨重复离散度从 0.9786 降到 0.7006。**这是正面成果，要保留。**
+2. **但"逃逸度 2.8×"后来被证伪**（~90% 置信）—— 它只是个重加权指标，**不是**独立的能力度量（§2.2）。
+3. **架构学习学到的是"更谨慎地核验"，不是"探索更多"** —— v3 留出集：矛盾率 33.3% → 0.0%，
+   但宽度没变（1.33 → 1.33）。**⇒ 目标函数应该是「少说错」而不是「多想到」。**
+
+⚠️ **所以这套对比实验的胜负手不是"谁的答案是空的"，而是"谁在**不打架**的前提下覆盖更多"。**
+唯一仲裁器 = **矛盾率**（§2.3 记录了为什么放弃其他量当仲裁器）。
 
 ---
 
@@ -170,6 +196,7 @@ ls runs/cmp8/analysis.json 2>/dev/null # 存在 = 已分析完 = 有结果了
 | ETA | **2026-10-20 18:15–18:30 UTC** |
 | 监控 | `monitor3.sh`（任务 `454379793445195`）：跑完自动做 ① 0 字检查 ② 分析遍 1（OpenRouter embedding）③ 分析遍 2（`EMBED_PROVIDER=minimax` → `runs/cmp8_mmemb`）④ `n_raw<5` 体检 + **逐臂解析失败率体检** ⑤ 判读页 |
 | 产物 | `runs/cmp8/`（答案 + `runlog.jsonl` + `analysis.json`）、`runs/cmp8_mmemb/`、`compare5_report.html` |
+| **答案文件命名** | **`{题号}_r{重复号}_{臂}.md`** —— 例：`A3_r1_A4.md` = 第 3 题 / 第 1 次重复 / A4 臂。**84 个文件 = 4 题 × 3 重复 × 7 臂**。空文件（0 字节）= 该样本无效，**排除 + 如实报 valid/total** |
 | ⚠️ 跑批期间**不许改任何臂的行为** | 改臂 = 改处理方式 = 前后样本不可比。样本无效**只能排除 + 如实报 valid/total** |
 
 **⚠️ 如果云端跑批还在跑、你没有 bash/凭据**：那就走 §5 的本地路径，两边结果互为验证。
@@ -351,7 +378,11 @@ python3 cmp8_fetch.py --node-id 454382563336916      # 需本机有 mavis CLI
 
 ### 5.1 环境变量
 ```bash
-pip install numpy                        # 唯一第三方依赖
+pip install numpy                        # ★ 唯一第三方依赖
+
+**依赖只有 numpy + Python 标准库**（已核）：`client.py` / `orclient.py` 用 `urllib.request`（**不用 requests**）；
+`creativity_lab/scipy_free.py` 是**刻意避开 scipy** 的实现 ⇒ **不要 `pip install scipy`，也不要改这些文件去 import scipy**。
+（看到 `import requests` 报错？那是你改错文件了。）
 export MINIMAX_SUBSCRIPTION_KEY=...
 export OPENROUTER_API_KEY=...
 export PRIMARY_MODEL=MiniMax-M3.1-Flash-Preview
@@ -363,23 +394,51 @@ export OPENROUTER_BASE_URL=https://api.minimaxi.com/v1   # MiniMax 侧
 export OR_BASE_URL=https://openrouter.ai/api/v1           # OpenRouter 侧
 ```
 
-### 5.2 重建 + 静态自检
+### 5.2 ★ 两条路径，**目录名不一样，别混**
+
+**路径 A · GitHub（推荐，最快）**
 ```bash
-cd cmp8pkg && bash rebuild/rebuild.sh
+git clone https://github.com/lixvanran/agent-creativity-mechanism-study.git
+cd agent-creativity-mechanism-study
+git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-20
+cd cmp8                      # ★ 目录叫 cmp8
+# ↓ 树已经是打好补丁的，**直接往下走 §5.3，不要跑 rebuild.sh**
+```
+
+**路径 B · zip（无 git / CA 坏了）**
+```bash
+unzip cmp8_交接包.zip         # 解压出来的根目录叫 cmp8pkg
+cd cmp8pkg
+bash rebuild/rebuild.sh       # ★ 只有这条路径才需要重建
+```
+
+> **⚠️ `rebuild.sh` 是"从还原脚本重建"的路径，不是"准备环境"的路径。**
+> GitHub 树**已经打好补丁**，再跑 `rebuild.sh` 等于用 p0/p1/p2 重写一遍文件（补丁脚本幂等，最后会补回来，
+> 但**没必要、且多一次把好树写坏的机会**）。
+> ⇒ **路径 A 不要跑 rebuild.sh**；路径 B 必须跑（否则默认模型还是已下架的 `grok-3-mini`）。
+
+**静态自检（两条路径都做）**
+```bash
 for f in $(find . -name "*.py"); do python3 -m py_compile "$f" || echo "FAIL: $f"; done
 ```
+⚠️ **编译过 ≠ 能跑**：`py_compile` 只查语法，查不出**运行时才炸**的错（历史坑：`learnarch.py` 用了
+`time.sleep` 却漏 `import time` ⇒ 只在异常路径触发，指向完全无关的位置）。
+⇒ 编译过之后**至少跑一次 §5.3 冒烟**，再跑一次单臂小样（§5.4 的 `--arms A1 --reps 1 --workers 1`）。
 
 ### 5.3 ★ 冒烟（闸门）
 ```bash
 python3 smoke_or.py
 ```
 **通过标准：判官自检「真断言 ≥3/4 且 假断言 ≥3/4」。不过 ⇒ 不要跑批，直接回报。**
+⚠️ **别跳过这步**：判官整个坏掉时，指标会呈现"全 0 矛盾率"的**完美假象**（§7 坑 2/3）。
 
 ### 5.4 跑批
 ```bash
 python3 run_compare5.py --arms A1,A2,A3,A4,A5a,A5b,A5c --reps 3 --workers 4
 ```
-约 1.5–2 小时。**`--workers 4` 不要调高**（8 并发实测触发 429 整片失败）。**中途不要重跑**（跨批次重复会污染统计）。
+**实测 ≈3.5–4 小时**（总 84 个臂样本、≈800 次调用、~33 s/次 ÷ 4 并发；**A5 三臂偏慢，实测 491–734 s/臂样本** ⇒ 是总时长的主要来源）。
+**`--workers 4` 不要调高**（8 并发实测触发 429 整片失败）。**中途不要重跑**（跨批次重复会污染统计）。
+⚠️ **跑批期间不许改任何臂的行为**（§6 第 10 条：改臂 = 改处理方式 = 前后样本不可比）。
 
 ### 5.5 分析（**两遍都要**）
 ```bash
@@ -387,6 +446,10 @@ CMP_OUT=runs/cmp8         python3 analyze_cmp6.py    # 遍1：OpenRouter qwen em
 CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax python3 analyze_cmp6.py   # 遍2：embo-01（0.75 的标定基准）
 python3 build_compare5_page.py
 ```
+
+⚠️ **遍 1 如果 OpenRouter 不通，`judge_provider.py` 会自动退到 MiniMax**（并打大字警告）⇒
+**判官与被测同源 ⇒ 指标就废了**。⇒ **必须检查 `analysis.json` 的 `judge_same_vendor` / `judge_used` / `embed`
+三个字段**，并在报告里声明（§10 第 3 条）。**不许悄悄用同源结果。**
 
 ### 5.6 一次性跑完
 ```bash

@@ -34,7 +34,11 @@
 ## 阶段 0 · 环境准备
 
 ```bash
-pip install numpy            # 唯一的第三方依赖（其余全标准库）
+pip install numpy            # ★ 唯一的第三方依赖（其余全标准库）
+
+`client.py` / `orclient.py` 用 `urllib.request`（**不用 requests**）；
+`creativity_lab/scipy_free.py` 是**刻意避开 scipy** 的实现 ⇒ **不要 pip install scipy**。
+看到 `import requests` 报错 = 你改错文件了。
 ```
 
 ```bash
@@ -57,20 +61,31 @@ export OR_BASE_URL=https://openrouter.ai/api/v1           # OpenRouter 侧
 
 ---
 
-## 阶段 1 · 重建 + 静态自检
+## 阶段 1 · 定位实验根目录 + 静态自检
+
+### ⚠️ 第一件事：进对目录（**GitHub 和 zip 的目录名不一样**）
 
 ```bash
-# 二选一：
-#  A) 用包内 rebuild/（推荐，保证与包内一致）
-cd cmp8pkg && bash rebuild/rebuild.sh
-#  B) 用源脚本重建
-python3 cmp8_p0.py && python3 cmp8_p1.py && python3 cmp8_p2.py
+#  A) GitHub（推荐）：
+#     cd agent-creativity-mechanism-study
+#     git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-20
+#     cd cmp8                      # ★ 目录叫 cmp8
+#
+#  B) zip（无 git / CA 坏了）：
+#     unzip cmp8_交接包.zip
+#     cd cmp8pkg                   # ★ 目录叫 cmp8pkg
 ```
 
-**静态自检（必须全过再往下）**：
+> **⚠️ `rebuild.sh` 只在路径 B 需要。**
+> GitHub 树**已经打好补丁**（默认模型已是 `deepseek/deepseek-chat`），再跑 `rebuild.sh`
+> 等于用 p0/p1/p2 把整棵树重写一遍（幂等，最后会补回来，但**没必要**）。
+> ⇒ **路径 A 直接跳到下面的静态自检**。
+>
+> 路径 B 的话先跑：`bash rebuild/rebuild.sh`（**别跳**，否则默认模型还是已 404 的 `grok-3-mini`）。
+
+### 静态自检（必须全过再往下）
 
 ```bash
-cd cmp8pkg
 for f in $(find . -name "*.py"); do python3 -m py_compile "$f" || echo "COMPILE FAIL: $f"; done
 python3 - <<'PY'
 import json, sys, os
@@ -88,6 +103,8 @@ PY
 
 **期望**：无 COMPILE FAIL；4 个依据包；权重 14 维；题目 A1–A4。
 **权重范数应该很小（~0.06）——这是正常的**，别以为是文件坏了（见 METHOD §2.5）。
+⚠️ **编译过 ≠ 能跑**：`py_compile` 查不出运行时才炸的错（历史坑：漏 `import time` ⇒ 只在异常路径触发）。
+⇒ 静态自检过了**还要**跑阶段 2 冒烟。
 
 ---
 
@@ -143,11 +160,12 @@ PY
 ## 阶段 3 · 跑批
 
 ```bash
-cd cmp8pkg
+# 已在实验根目录（阶段 1 进对了就别再 cd）
 python3 run_compare5.py --arms A1,A2,A3,A4,A5a,A5b,A5c --reps 3 --workers 4
 ```
 
-**约 1.5–2 小时 / 84 份答案。**
+**实测 ≈3.5–4 小时 / 84 份答案**（≈800 次调用 × ~33 s ÷ 4 并发；
+**A5 三臂偏慢，实测 491–734 s/臂样本** ⇒ 是总时长的主要来源）。
 
 ### 监控规则（跑的过程中就要看，不是跑完再看）
 
@@ -167,13 +185,20 @@ python3 run_compare5.py --arms A1,A2,A3,A4,A5a,A5b,A5c --reps 3 --workers 4
 ## 阶段 4 · 分析（★ 两遍都要跑）
 
 ```bash
-cd cmp8pkg
+# 已在实验根目录
 # 遍一：OpenRouter embedding（qwen3-embedding-8b，4096 维）
 CMP_OUT=runs/cmp8 OR_PRIMARY=deepseek/deepseek-chat python3 analyze_cmp6.py
 # 遍二：MiniMax embo-01（0.75 阈值的标定基准）—— 必须落在独立目录
 CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=deepseek/deepseek-chat \
-  python3 analyze_cmp6.py
+```bash
+# 已在实验根目录
+python3 analyze_cmp6.py && python3 build_compare5_page.py
 ```
+
+⚠️ **遍一如果 OpenRouter 不通，`judge_provider.py` 会自动退到 MiniMax**（并打大字警告）⇒
+**判官与被测同源 ⇒ 矛盾率失效 ⇒ 整套作废**。
+⇒ **必须检查 `analysis.json` 的 `judge_same_vendor` / `judge_used` / `embed` 三个字段**，
+并在回报里声明。**不许悄悄用同源结果。**
 
 ### 为什么要两遍
 
@@ -224,7 +249,9 @@ python3 build_compare5_page.py      # 判读页：每臂每题每重复的原始
 1. **`analyze_cmp6.py` 的全部终端输出**（7 臂表、逐题并集宽度、逐题矛盾率、**去重体检表**）
 2. **【⑤b vs ⑤c】那段原文**（含种子间标准差）—— 整轮实验的胜负手
 3. `judge_selfcheck.json`
-4. `analysis.json` 的 `judge` / `judge_used` / `judge_same_vendor` / `embed` / `census`
+4. `analysis.json` 的 `judge` / `judge_used` / `judge_same_vendor` / `embed` / `census` / **samples**
+4b. **逐臂样本列 `valid/total`**（哪个臂掉了几个样本；掉样本的臂其离散度**必须标样本数**，
+    不许给"单点值 + 假装同精度"的读法）
 5. `runlog.jsonl` 里 **A5 三个臂的 `ops` 直方图**
    （**A5b 与 A5c 的操作分布若一模一样 ⇒ 权重没起作用，这本身就是结论**）
 6. **A5 三个臂的 `fallback` 字段**（机械装配产出空壳时退回最长 ANSWER；
@@ -255,6 +282,7 @@ python3 build_compare5_page.py      # 判读页：每臂每题每重复的原始
 ## 故障排查速查
 
 | 症状 | 大概率原因 | 处理 |
+| `cd: cmp8pkg: No such file or directory` | **目录名搞错了**（GitHub 的是 `cmp8/`，zip 的是 `cmp8pkg/`） | 回阶段 1，看"进对目录"那段 |
 |---|---|---|
 | 冒烟 ① 输出 0 字符 | 模型 404 下架 | 换 `OR_PRIMARY`（见阶段 2 的探针） |
 | 冒烟 ② 报 ToS/403 | 供应商封禁该 embedding | 换 `OR_EMBED`（用 `baai/bge-m3` 或 `sentence-transformers/all-minilm-l6-v2`） |
