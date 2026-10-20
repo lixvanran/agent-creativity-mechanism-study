@@ -47,6 +47,8 @@ RULES = [
 ]
 
 
+
+
 def apply(path):
     name = os.path.basename(path)
     s = io.open(path, encoding="utf-8").read()

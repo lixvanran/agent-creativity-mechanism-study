@@ -586,13 +586,8 @@ E9("**429 只退避不换模型；只有连续 529 才降级。**",
    —— 因为 M3 当天整片返回 529 过载。**429 只退避不换模型；只有连续 529 才降级。**""",
    "9-b 第2条 429/529")
 
-# 9-c 第 3 条
-E9("""3. **判官是跨厂商的**（被测 MiniMax、判官 deepseek/grok）；**若退到 MiniMax 则同源，必须声明**
-   （`analysis.json` 的 `judge_same_vendor`）。""",
-   "3. **判官是跨厂商的**（被测 MiniMax、判官 deepseek/grok）；**若退到 MiniMax 则同源，必须声明**。",
-   """3. **判官是跨厂商的**（被测 MiniMax、判官 deepseek/grok）；**若退到 MiniMax 则同源，必须声明**
-   （`analysis.json` 的 `judge_same_vendor`）。""",
-   "9-c 第3条")
+# 9-c 第 3 条：**已并入 patch_docs_mine.py**（判官改 grok-4.3 + temp=0 + 3b 遍2 复用）
+#   ⇒ 这里删掉旧规则：它的 old 是历史态（根里早已是最终态）⇒ 留着必然报「锚点未命中」。
 
 # 9-d 第 4 条
 E9("**依据包只进判官/核验侧，不进被测臂的提示词。**",
@@ -833,6 +828,8 @@ E13("### ★ 报告骨架（**直接复制这段填**，保证不漏项**）",
     "14-1 §9 报告骨架")
 
 
+
+
 def patch(path):
     s = io.open(path, encoding="utf-8").read()
     orig = s
@@ -991,10 +988,7 @@ def patch(path):
         if 'export OR_PRIMARY=deepseek/deepseek-chat     # 判官：跨厂商、非 MiniMax' in s:
             s = s.replace('export OR_PRIMARY=deepseek/deepseek-chat     # 判官：跨厂商、非 MiniMax', 'export OR_PRIMARY=x-ai/grok-4.3              # 判官：跨厂商、非 MiniMax（**deepseek 自检不稳 ⇒ 不用它**）', 1)
             print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
-    if '判官自检（2026-10-20）：grok-4.3 **5/5 + 5/5**' not in s:
-        if '- 判官自检（2026-10-20）：deepseek **4/4 + 4/4**；grok-4.3 **4/4 + 4/4**' in s:
-            s = s.replace('- 判官自检（2026-10-20）：deepseek **4/4 + 4/4**；grok-4.3 **4/4 + 4/4**', '- 判官自检（2026-10-20 18:15 演练复核）：**grok-4.3 5/5 + 5/5（fn=0 fp=0）✅**；deepseek **2/5**（两次都不稳）❌', 1)
-            print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
+
 
     if s != orig:
         io.open(path, "w", encoding="utf-8").write(s)

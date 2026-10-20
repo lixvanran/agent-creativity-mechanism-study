@@ -24,7 +24,18 @@
 set -u
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-PKGROOT="$(cd "$HERE/.." && pwd)"
+# ★ 布局归一化（2026-10-20 修）：本脚本原本只支持"包布局"（pkg/rebuild + pkg/cmp8）。
+#   仓库布局是 <repo>/cmp8/rebuild + <repo>/cmp8（树就在 rebuild 的上一层）⇒
+#   原写法会把 repo/cmp8 当成 pkg、去找 repo/cmp8/cmp8/xxx ⇒ 全部 FileNotFound。
+#   ⇒ 这里**把两种布局都归一成 work/pkg/cmp8 + work/pkg/rebuild**，
+#     脚本内部所有相对路径（cmp8/xxx、bash rebuild/rebuild.sh）**一行都不用改**。
+if [ -d "$HERE/../cmp8" ]; then
+  TREE="$HERE/../cmp8"     # 包布局
+  DOCROOT="$HERE/.."       # 包根（根目录文档在这）
+else
+  TREE="$HERE/.."          # 仓库布局：树就是 rebuild 的上一层
+  DOCROOT="$HERE/../.."    # 仓库根
+fi
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -32,10 +43,21 @@ PASS=0
 FAIL=0
 say() { printf '%s\n' "$*"; }
 
-# ---------------------------------------------------------------- 准备干净副本
+# ---------------------------------------------------------------- 准备干净副本（归一化布局）
 WORK="$TMP/work"
-rm -rf "$WORK"; mkdir -p "$WORK"
-cp -r "$PKGROOT" "$WORK/pkg"
+rm -rf "$WORK"; mkdir -p "$WORK/pkg/rebuild"
+cp -r "$TREE" "$WORK/pkg/cmp8"
+# ★ rebuild.sh 也要拷 —— 少了它，脚本里 `bash rebuild/rebuild.sh` 直接 No such file
+cp "$HERE"/*.py "$HERE"/*.sh "$WORK/pkg/rebuild/" 2>/dev/null || true
+# 根目录文档也带上（rebuild.sh 的回填步骤会用到）
+for d in METHOD.md AGENT_RUNBOOK.md HANDOVER-cmp8-2026-10-20.md cmp8_fetch.py README.md; do
+  if [ -f "$DOCROOT/$d" ]; then
+    cp "$DOCROOT/$d" "$WORK/pkg/$d"
+  elif [ -f "$TREE/$d" ]; then
+    # 仓库布局下根目录没有这些文档（它们只在树里）⇒ 复制树的副本，让 work/pkg 长得像包布局
+    cp "$TREE/$d" "$WORK/pkg/$d"
+  fi
+done
 cd "$WORK/pkg"
 
 # =====================================================================
@@ -61,25 +83,39 @@ else say "  ✗ 树内默认模型**没有**被换新 ⇒ rebuild.sh 缺 patch_o
 
 say "--- case 1b · patch_or.py（默认模型：变异注入"漏一步"）---"
 cp rebuild/rebuild.sh "$WORK/rebuild.sh.bak"
-python3 - <<'PY'
-import io
+python3 - <<'PYEOF'
+import io, sys
 p = "rebuild/rebuild.sh"
 s = io.open(p, encoding="utf-8").read()
-s = s.replace("python3 rebuild/patch_or.py cmp8\n", "# (变异注入：故意删掉 patch_or 这一步)\n", 1)
-io.open(p, "w", encoding="utf-8").write(s)
-print("  （已把 rebuild.sh 里 patch_or 那一步删掉）")
-PY
-bash rebuild/rebuild.sh > "$WORK/rb1b.log" 2>&1
-if python3 - <<'PY'
+# ★ 用正则删"含 patch_or.py 的执行行"——写死某一种写法会随 rebuild.sh 演进而失效
+#   （踩坑实录：rebuild.sh 从 `python3 rebuild/patch_or.py cmp8` 改成
+#    `python3 "$HERE/patch_or.py" cmp8` 后，旧的字符串替换**什么都没删** ⇒
+#    变异注入成了空操作 ⇒ 测试"抓不到漏一步"却自己以为测了 ⇒ **假绿**）
+lines = s.split("\n")
+hit = [i for i, l in enumerate(lines) if "patch_or.py" in l and not l.strip().startswith("#")]
+if not hit:
+    print("  ✗ 变异注入失败：rebuild.sh 里找不到含 patch_or.py 的执行行")
+    sys.exit(3)
+for i in hit:
+    lines[i] = "# (变异注入：故意删掉 patch_or 这一步)"
+io.open(p, "w", encoding="utf-8").write("\n".join(lines))
+print("  （已把 rebuild.sh 里 patch_or 那一步删掉，命中 %d 行）" % len(hit))
+PYEOF
+if [ $? -ne 0 ]; then
+  say "  ✗ 变异注入本身失败 ⇒ 测试无效"; FAIL=$((FAIL+1))
+else
+  bash rebuild/rebuild.sh > "$WORK/rb1b.log" 2>&1
+  if python3 - <<'PYEOF'
 import io, sys
 import re
 s = io.open("cmp8/creativity_lab/orclient.py", encoding="utf-8").read()
 m = re.search(r'^PRIMARY = .*$', s, re.M)
 sys.exit(0 if (m and "x-ai/grok-3-mini" in m.group(0)) else 1)
-PY
-then say "  ✔ 变异被检测到：删掉 patch_or 后树内确实回到旧默认模型 ⇒ 本测试能抓到『漏一步』"
-     PASS=$((PASS+1))
-else say "  ✗ 变异**没**被检测到 ⇒ 这个测试抓不到『漏一步』（测试本身失效）"; FAIL=$((FAIL+1)); fi
+PYEOF
+  then say "  ✔ 变异被检测到：删掉 patch_or 后树内确实回到旧默认模型 ⇒ 本测试能抓到『漏一步』"
+       PASS=$((PASS+1))
+  else say "  ✗ 变异**没**被检测到 ⇒ 这个测试抓不到『漏一步』（测试本身失效）"; FAIL=$((FAIL+1)); fi
+fi
 cp "$WORK/rebuild.sh.bak" rebuild/rebuild.sh   # 还原
 say "  （已还原 rebuild.sh）"
 
