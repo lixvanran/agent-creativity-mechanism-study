@@ -176,17 +176,29 @@ def candidates(g: Graph, n_verify_done: int = 0) -> list:
 
 
 # ───────────────────────────────────────────────────────────── 策略分布
+# 标准化里的**平滑项**：σ̃ = sqrt(σ² + ε²)
+# ⚠️ 为什么必须有它（旧实现没有）：
+#   精确标准化在 σ→0（所有候选同分，例如 w=0 的初始点）处**不可微**且梯度无界
+#   ⇒ REINFORCE 的第一步会炸（实测 ‖w‖ 一步跳到 1e10）。
+#   加上 ε 后策略在 w→0 处**连续**（趋于均匀）且梯度有界（≤1/ε）。
+#   ⚠️ 代价：尺度不变性变成**近似**——但只在 σ ≲ ε 的区域有影响；
+#      见 DESIGN §3.3 的"‖w‖ 放大 64 倍 ⇒ n_eff 不变"（实测差 < 1e-6）。
+STD_EPS = 1e-3
+
+
 def policy_probs(s, tau: float = 1.2) -> np.ndarray:
     """**尺度无关**的 softmax（沿用旧版已验证的修法：先标准化再除 τ）。
 
     · 标准化 ⇒ τ 表示**相对**锐度，与 ‖w‖ 无关 ⇒ 权重放大不会导致塌缩
     · 行为分布与更新分布**共用这一份函数** ⇒ on-policy 成立
+    · σ̃ = sqrt(σ² + STD_EPS²) ⇒ 在 σ→0 处仍然可微（见 STD_EPS 的说明）
     """
     s = np.asarray(s, dtype=float)
     if s.size <= 1:
         return np.ones(max(s.size, 1)) / max(s.size, 1)
     sd = float(s.std())
-    z = (s - s.mean()) / (sd + 1e-8) / max(tau, 1e-6)
+    sd = float(np.sqrt(sd * sd + STD_EPS * STD_EPS))
+    z = (s - s.mean()) / sd / max(tau, 1e-6)
     z = z - z.max()
     p = np.exp(z)
     return p / p.sum()

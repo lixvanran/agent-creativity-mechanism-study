@@ -8,9 +8,22 @@
   ❸ **特征空间的状态可分性**（v2 vs 旧 14 维的对照，离线、0 次调用）
   ❹ 监控告警**会响**（变异注入自测，离线、0 次调用）
 
-调用预算：硬上限 20 次（`rec` 里每一条 = 一次真实 HTTP 调用，含重试尝试）。
+调用预算：**硬上限 20 次**（`rec` 里每一条 = 一次真实 HTTP 调用，含重试尝试）。
+⚠️ `SMOKE_CALL_CAP` **只能调低**（min(20, env)）⇒ "硬上限 20"不能被环境变量抬高。
 端点断言：`OPENROUTER_BASE_URL` 必须是 MiniMax 订阅端点，否则 **abort**。
+黑名单断言：在**任何 LLM 调用之前**跑 `guard.route_payload()` ⇒ 命中即 **abort**（不烧预算）。
 诊断题：`data/diag_topics.json`（自造 2 道，**不是** U1–U4；已过 guard.py 黑名单检查）。
+
+⚠️ **重试阶梯（F2，2026-10-21 修）**：
+   本脚本历史上用 `kw["budgets"] = (2000,)` **无条件覆盖**所有通道的阶梯 ⇒
+   记录的那次冒烟里 `al_ex` 跑的是 (2000,2000)、判官跑的是 (1200,2000)，
+   **都不是生产配置** ⇒ 那次冒烟**没有**检验 D1（预算阶梯加长）是否有效。
+   现在起：
+     · 默认 `SMOKE_LADDER=override`（保持历史行为，**逐字**复现那次记录）；
+     · `SMOKE_LADDER=production` ⇒ **不覆盖**，各通道用生产阶梯
+       （`train_policy_v2` 的 al_gen/al_ex/al_split + `evidence_index` 的 check2）
+       ⇒ D1 才被真正检验。
+   两种模式的生效阶梯见 `ladder_report()`（离线、0 次调用）。
 """
 from __future__ import annotations
 
@@ -34,10 +47,44 @@ import guard  # noqa: E402
 import monitor as mon  # noqa: E402
 from train_policy_v2 import GEN_Q, run_episode  # noqa: E402
 
-CALL_CAP = int(os.environ.get("SMOKE_CALL_CAP", "20"))
+CALL_CAP = min(20, int(os.environ.get("SMOKE_CALL_CAP", "20")))   # **只能调低**（硬上限 20）
 MODEL = os.environ.get("PRIMARY_MODEL", "MiniMax-M3.1-Flash-Preview")
+# 重试阶梯模式：`override` = 历史行为（无条件 budgets=(2000,)）；`production` = 用生产阶梯（检验 D1）
+LADDER_MODE = os.environ.get("SMOKE_LADDER", "override")
 OUTDIR = os.path.join(os.path.dirname(HERE), "smoke")
 os.makedirs(OUTDIR, exist_ok=True)
+
+# ── 生产重试阶梯（与 train_policy_v2 / evidence_index 里写的完全一致）──
+PRODUCTION_LADDER = {
+    "al_gen": (8000, ()),
+    "al_ex": (2000, (3200, 4400)),
+    "al_split": (1600, (2400, 3200)),
+    "check2": (1200, (1800, 2400)),
+}
+
+
+def ladder_report():
+    """**离线**打印每个通道在两种模式下的生效阶梯（0 次调用）。
+
+    ⚠️ 用途：把"这次冒烟到底跑的是不是生产阶梯"变成**可核对的事实**，而不是靠嘴说。
+    """
+    out = {"mode": LADDER_MODE, "channels": {}}
+    for purpose, (mt, retries) in PRODUCTION_LADDER.items():
+        prod = [mt] + list(retries)
+        if LADDER_MODE == "production":
+            eff = prod
+        else:
+            eff = [mt] + [2000] if mt != 2000 else [2000, 2000]
+        out["channels"][purpose] = {
+            "production": prod,
+            "effective_now": eff,
+            "is_production": eff == prod,
+        }
+    out["tests_D1"] = bool(LADDER_MODE == "production")
+    out["note"] = ("override 模式 ⇒ 冒烟**不测 D1**（预算阶梯加长没有被检验）"
+                   if LADDER_MODE != "production" else
+                   "production 模式 ⇒ D1 被真正检验")
+    return out
 
 
 def _json_default(o):
@@ -73,7 +120,13 @@ class BudgetExhausted(RuntimeError):
 
 class BudgetedLLM:
     """包住 `creativity_lab.client.LLM`：每次 chat 前检查调用预算。
-    冒烟用 `budgets=()` ⇒ **1 次逻辑调用 = 1 次 HTTP 调用**（无重试）⇒ 计数确定。"""
+
+    ⚠️ **重试阶梯由 `SMOKE_LADDER` 决定**（2026-10-21 修 F2）：
+      · `override`（默认，历史行为）：`kw["budgets"] = (2000,)` ⇒ 每个逻辑调用**最多 2 次尝试**
+        ⇒ 计数上界可精确控制；⚠️ 这**不是**生产阶梯 ⇒ 这次冒烟**不测 D1**。
+      · `production`：**不覆盖** budgets ⇒ 各通道用 `PRODUCTION_LADDER` 里的生产阶梯
+        （al_ex: 2000→3200→4400；check2: 1200→1800→2400；…）⇒ D1 被真正检验。
+    """
 
     def __init__(self, cap):
         os.environ.setdefault("OPENROUTER_BASE_URL", "https://api.minimaxi.com/v1")
@@ -86,6 +139,9 @@ class BudgetedLLM:
         return self.inner.rec
 
     def chat(self, prompt, **kw):
+        if LADDER_MODE == "production":
+            # 不覆盖：让调用方给的 max_tokens + 各通道自己的 retries 生效
+            return self.inner.chat(prompt, **kw)
         # 每次逻辑调用**最多 2 次尝试**（1 次重试）⇒ 计数上界可精确控制
         if len(self.rec) + 2 > self.cap:
             raise BudgetExhausted("调用预算耗尽：已达 %d 次上限" % self.cap)
@@ -104,30 +160,22 @@ def check_endpoint():
     return BASE
 
 
-# ───────────────────────────────────────────────────────── ❷ 黑名单自检
+# ───────────────────────────────────────────────────────── ❷ 黑名单自检（命中即 abort）
 def check_blacklist():
-    import train_policy_v2 as tpv
-    texts = {
-        "diag_ask_DS1": "", "diag_ask_DS2": "",
-        "prompt_GEN": tpv.GEN_Q, "prompt_EXTRACT": tpv.EXTRACT_Q,
-        "prompt_SPLIT": tpv.SPLIT_Q,
-        "prompt_CHECK_V2": __import__("evidence_index").CHECK_V2,
-    }
-    data = json.load(open(os.path.join(HERE, "data", "diag_topics.json"), encoding="utf-8"))
-    for t in data["topics"]:
-        texts["diag_ask_%s" % t["topic_id"]] = t["ask"]
-        texts["diag_evidence_%s" % t["topic_id"]] = json.dumps(t["items"], ensure_ascii=False)
-        texts["diag_ct_%s" % t["topic_id"]] = json.dumps(t["conclusion_space"], ensure_ascii=False)
-    extra = [os.path.join(HERE, f) for f in os.listdir(HERE) if f.endswith(".py")]
-    for f in ("DESIGN.md", "spec.yaml"):
-        p = os.path.join(os.path.dirname(HERE), f)
-        if os.path.exists(p):
-            extra.append(p)
-    ok, det = guard.check(texts, extra)
+    """扫 `guard.route_payload()` 的**确切清单**；返回 (ok, 明细)。
+
+    ⚠️ 2026-10-21 修 F9：命中**必须 abort**（且发生在**任何 LLM 调用之前**），
+       否则"命中即 abort"只是一句口号、还会先烧掉模型预算。
+       abort 的执行点在 `main()`（SystemExit），本函数只负责算。
+    """
+    texts, files = guard.route_payload(code_dir=HERE, route_dir=os.path.dirname(HERE))
+    ok, det = guard.check(texts, files)
+    det["scanned_texts"] = sorted(texts.keys())
+    det["scanned_files"] = [os.path.basename(f) for f in files]
     LOG["blacklist"] = det
     ev("blacklist", ok=ok, total_hits=det["total_hits"],
        blacklist_source_files=det["blacklist_source_files"])
-    return ok
+    return ok, det
 
 
 # ───────────────────────────────────────────────────────── ❸ 状态可分性（离线）
@@ -367,7 +415,9 @@ def run_e2e(llm):
     out = []
     raw_all = []
     for t in data["topics"]:
-        evi = EvidenceIndex(t["topic_id"], t["ask"], t["items"])
+        # ⚠️ 2026-10-21 修 F5：必须把**结论空间 C_t** 一起给判官（协议 §4.6:526）
+        #    ⇒ 此前这里漏传，判官拿到的是占位串「（本题未提供结论空间）」。
+        evi = EvidenceIndex(t["topic_id"], t["ask"], t["items"], t.get("conclusion_space", []))
         w = np.zeros(FEAT_DIM)
         g, traj, rewards, info = run_episode(
             {"topic_id": t["topic_id"], "ask": t["ask"]}, evi, w,
@@ -393,7 +443,12 @@ def run_e2e(llm):
 
 def main():
     check_endpoint()
-    bl_ok = check_blacklist()
+    # ★ ❷ 黑名单：**命中即 abort**，且发生在**任何 LLM 调用之前**（F9）
+    bl_ok, _bl_det = check_blacklist()
+    if not bl_ok:
+        raise SystemExit("ABORT：黑名单自检命中（U1–U4 内容泄漏）⇒ 不发起任何模型调用")
+    LOG["ladder"] = ladder_report()
+    ev("ladder", **{k: v for k, v in LOG["ladder"].items() if k != "channels"})
     disc = state_discrimination()
     ev("state_discrimination", **disc)
     pxy = proxy_selftest()

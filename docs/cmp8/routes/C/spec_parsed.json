@@ -6,6 +6,108 @@
  "companion_design": "/workspace/lab/routes/C/DESIGN.md",
  "protocol": "/workspace/lab/routes/PROTOCOL.md",
  "protocol_version": "PROTOCOL-v1.0",
+ "nodes": [
+  {
+   "id": "N1",
+   "label": "生成 GEN",
+   "sub": "多路生成草稿（直答 + 冻结认知位置）；看不到依据包。★回边：深挖回路会再执行本阶段",
+   "kind": "process"
+  },
+  {
+   "id": "N2",
+   "label": "抽取 EXTRACT",
+   "sub": "从草稿抽原子断言；字面二元组 Jaccard 去重（最小距离 ≥ θ_dist）",
+   "kind": "process"
+  },
+  {
+   "id": "N3",
+   "label": "核验 VERIFY",
+   "sub": "唯一接触依据包/判官的阶段；预算 n_verify_max。★回边：拆分与条件重组都回灌本阶段",
+   "kind": "process"
+  },
+  {
+   "id": "N4",
+   "label": "拆分 SPLIT",
+   "sub": "把复合断言拆成可分别核验的独立断言（n_split_max）→ 回灌核验",
+   "kind": "process"
+  },
+  {
+   "id": "N5",
+   "label": "坍缩检测 COLLAPSE",
+   "sub": "坍缩比 = 去重后断言数 / 草稿数；τ = θ_collapse（0 = 关闭 ⇒ passthrough）",
+   "kind": "process"
+  },
+  {
+   "id": "N6",
+   "label": "条件重组 REDISTRIBUTE",
+   "sub": "换采样条件（换认知位置）重新生成；❌不加时间/放空/闲聊；回灌核验",
+   "kind": "process"
+  },
+  {
+   "id": "N7",
+   "label": "停滞检测 STALL",
+   "sub": "两条可核验信号：连续空转 ≥ k（stall_window）｜进展率 < θ_stall ⇒ 预算重分配",
+   "kind": "process"
+  },
+  {
+   "id": "N8",
+   "label": "机械装配 MERGE",
+   "sub": "效用门控 θ_util + 聚类取代表 m_clusters + 字数上限 400；★不由模型重写",
+   "kind": "terminal"
+  }
+ ],
+ "edges": [
+  {
+   "from": "N1",
+   "to": "N2",
+   "label": "草稿"
+  },
+  {
+   "from": "N2",
+   "to": "N3",
+   "label": "原子断言"
+  },
+  {
+   "from": "N3",
+   "to": "N4",
+   "label": "T3/T4：仍有复合断言且 n_split_max > 0"
+  },
+  {
+   "from": "N3",
+   "to": "N5",
+   "label": "T5：去重后断言数 / 草稿数"
+  },
+  {
+   "from": "N5",
+   "to": "N6",
+   "label": "T5：比值 < τ 才触发（默认 τ=0 ⇒ 不触发）"
+  },
+  {
+   "from": "N3",
+   "to": "N7",
+   "label": "T4：进展率 / 连续空转窗口"
+  },
+  {
+   "from": "N3",
+   "to": "N8",
+   "label": "必经：进入机械装配"
+  },
+  {
+   "from": "N4",
+   "to": "N8",
+   "label": "拆出的新断言回灌核验后进入装配"
+  },
+  {
+   "from": "N6",
+   "to": "N8",
+   "label": "重组出的新断言回灌核验后进入装配"
+  },
+  {
+   "from": "N7",
+   "to": "N8",
+   "label": "停滞判定后（可能先做预算重分配）进入装配"
+  }
+ ],
  "redlines": {
   "tested_side_base_url": "https://api.minimaxi.com/v1",
   "tested_side_vendor": "minimax",
@@ -43,6 +145,28 @@
    "REDISTRIBUTE": "条件切换式重组（换采样条件；禁止 sleep/放空/无关闲聊）",
    "STALL": "停滞检测（可核验信号，不用 embedding 相似度）",
    "MERGE": "机械装配（不由模型重写）"
+  },
+  "deep_loop": {
+   "what": "深挖回路（**不是新阶段**）：把已有的 GEN/EXTRACT/VERIFY 三个阶段**再执行一遍**",
+   "controlled_by": "P12 stop_patience（步数上限；0 = 不深挖 ⇒ 搜索空间在第一轮就闭合）",
+   "one_step": "换一个**已授权的认知位置**（P1 授权的那几个；**不新增位置** ⇒ 不改变 P1 语义、也不破坏 T1「远不可得」的消融）+ 深挖提示词（冻结资产 deep_suffix）→ 抽取 → 核验",
+   "empty_step": "一步若**没有新增被支持断言**（= 没有新承重信息）⇒ 记一次「空转」",
+   "stall_signals": [
+    {
+     "id": "P7",
+     "name": "stall_window",
+     "scope": "T4",
+     "rule": "连续 k 步空转 ⇒ 判停滞 ⇒ 预算重分配（换未覆盖的认知位置）并结束深挖"
+    },
+    {
+     "id": "P8",
+     "name": "theta_stall",
+     "scope": "T4",
+     "rule": "进展率 = 被支持断言数 / 已核验断言数 < θ_stall ⇒ 判停滞 ⇒ 预算重分配"
+    }
+   ],
+   "structure_unchanged": "P12 的取值**不改变**「有哪些阶段、谁能看到什么」⇒ 分离判据仍成立",
+   "budget_note": "深挖步与基础轮**争用同一份调用预算**（C3：每 episode ≤ 12 次）⇒ P12 与 P1 的组合会被 C3 作废（不是死参数，是预算约束在起作用）"
   },
   "templates": {
    "T0": {
@@ -207,6 +331,7 @@
   ],
   "frames_change_across_templates": false,
   "gen_prompt": "问题：{ask}\\n\\n{ang}\\n\\n给出你的判断与具体做法，{cap}字以内。",
+  "deep_suffix": "再往前一步：在这个认知位置上，给出**更具体**的一条可核验的判断或做法（要能落到具体的主体、数字、时限或条件），不要重复上面已经说过的内容。",
   "extract_prompt": "从下面这段回答里，逐条列出其中**可判真假的陈述**…（一行一条，最多 {n} 条）",
   "split_prompt": "把下面这条陈述拆成可以分别核验的独立陈述…",
   "answer_cap_chars": 400,
@@ -426,7 +551,7 @@
      3
     ],
     "default": 1,
-    "group": "budget",
+    "group": "stop",
     "applies_to": [
      "T1",
      "T2",
@@ -434,7 +559,7 @@
      "T4",
      "T5"
     ],
-    "desc": "STOP 耐心"
+    "desc": "深挖耐心（何时停）：装配前最多再走几步「换已授权认知位置深挖 → 抽取 → 核验」；0 = 不深挖（搜索空间立即闭合）"
    }
   ],
   "excluded_from_training": [
@@ -480,7 +605,8 @@
  },
  "objective": {
   "kind": "constrained_optimization",
-  "primary_surrogate": "J(theta) = 训练语料上「被训练侧判官判为支持 且 互相不重复」的断言数均值",
+  "primary_surrogate": "J(theta) = 训练语料上「**已交付** ∧ 被训练侧判官判为支持 ∧ 互相不重复」的断言数均值 − 0.5 ×（已交付但未被支持的断言数均值）",
+  "surrogate_computed_on": "delivered_set",
   "surrogate_is_not_the_acceptance_metric": true,
   "acceptance_metric": "PROTOCOL §3.1 的 VD_net（双边净有效维度增益），由独立抽取器 + 跨厂商判官算出",
   "why_not_unconstrained": "track-d §3.9 代价侧（创造成本、调整成本）⇒ 广度有代价 ⇒ 目标必须是约束优化",
@@ -526,7 +652,7 @@
    },
    {
     "id": "C2",
-    "rule": "每题 key_conclusion_hit >= 该题基线",
+    "rule": "每题 key_conclusion_hit ≥ 该题基线（★ 口径：只在**已交付 ∧ 被支持**子集上算；整份机械答案口径仅作描述性参考）",
     "on_violation": "reject_config",
     "maps_to": "协议 R2"
    },
@@ -753,7 +879,35 @@
    "calls_jsonl": "/workspace/lab/routes/C/smoke_calls.jsonl",
    "stdout": "/workspace/lab/routes/C/smoke_stdout.txt"
   },
-  "selfcheck_script": "/workspace/lab/routes/C/verify_blacklist.py"
+  "selfcheck_script": "/workspace/lab/routes/C/verify_blacklist.py",
+  "log_predates_fix_round": "2026-10-21 01:21 产生的冒烟日志**早于**收尾轮（6b 的深挖回路 / 6c / 6d / 6e）⇒ 它只证明当时的管道通；当前执行器的行为证据是 check_wiring.py 的假客户端探针。正式批次前必须重跑一次冒烟。",
+  "selfcheck_scripts": [
+   {
+    "name": "check_spec.py",
+    "checks": "spec.yaml ↔ params.py / topology.py 逐项对账",
+    "exit": "0 = 全部一致"
+   },
+   {
+    "name": "check_wiring.py",
+    "checks": "每个参数 ① 执行器有读点 ② 改它 ⇒ J 真的变；含变异注入",
+    "exit": "0 = 全部命中且变异被抓住"
+   },
+   {
+    "name": "verify_blacklist.py",
+    "checks": "红线自检（黑名单/锚点词/端点/调用数）；跳过 ⇒ 非零退出",
+    "exit": "0 = 全部可执行且通过"
+   },
+   {
+    "name": "test_proposer.py",
+    "checks": "提案者白名单 + 变异注入 + 强制回退",
+    "exit": "0 = PASS"
+   },
+   {
+    "name": "test_train_loop.py",
+    "checks": "训练回路（假客户端）+ C2 的 key_hit 口径",
+    "exit": "0 = PASS"
+   }
+  ]
  },
  "delivery": {
   "design_md": "/workspace/lab/routes/C/DESIGN.md",

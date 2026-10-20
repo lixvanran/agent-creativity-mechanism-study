@@ -54,8 +54,20 @@ SUPPORT, CONTRADICT, UNMENTIONED, NONCLAIM, UNVERIFIED = (
     "支持", "矛盾", "未提及", "非主张", "未核验")
 
 
+#: 效用刻度（D2 的 utility）：门控按这张刻度把"信息"分级。
+#: 关键点：**支持(1.0) 永远 ≥ 任何 theta_util(≤1.0)** ⇒ 支持的断言不会被门控挡掉；
+#: 门控真正挡的是"依据未覆盖/非主张/未核验"这些**不该冒充成立**的内容。
+UTILITY_SCALE = {
+    SUPPORT: 1.00,      # 被依据支持
+    UNMENTIONED: 0.25,  # 依据没覆盖（不一定错，但没有被支持）
+    NONCLAIM: 0.10,     # 非主张（连可核验的命题都不是）
+    UNVERIFIED: 0.00,   # 未经核验
+    CONTRADICT: 0.00,   # 矛盾：**永不交付**（且单独计数）
+}
+
+
 def support_score(v: str) -> float:
-    return 1.0 if v == SUPPORT else 0.0
+    return UTILITY_SCALE.get(v, 0.0)
 
 
 # ---------------------------------------------------------------- 执行器
@@ -188,10 +200,13 @@ class Episode:
         return min(len(uniq) / max(len(self.drafts), 1), 1.0)
 
     def _stall(self) -> bool:
-        """停滞检测：窗口内无新增被支持断言 ⇒ 判停滞（**用可核验信号，不用 embedding**）。"""
-        k = int(self.theta.get("stall_window", 2))
+        """停滞检测（**进展率**信号，P8 `theta_stall`）：用可核验信号，不用 embedding。
+
+        进展率 = 被支持断言数 / 已核验断言数（全 episode 口径）。
+        低于阈值 ⇒ 判停滞 ⇒ 调用方触发预算重分配。
+        """
         th = float(self.theta.get("theta_stall", 0.5))
-        if k <= 0 or not self.claims:
+        if not self.claims:
             return False
         sup = [c for c in self.claims if c["verdict"] == SUPPORT]
         # 用「被支持断言数 / 已核验断言数」作为窗口内的进展率
@@ -200,8 +215,68 @@ class Episode:
             return False
         rate = len(sup) / max(len(verified), 1)
         stalled = rate < th
-        self._log("STALL", k=k, rate=round(rate, 3), th=th, stalled=stalled)
+        self._log("STALL", signal="progress_rate", rate=round(rate, 3), th=th, stalled=stalled)
         return stalled
+
+    # ---------------------------------------------------------- 深挖回路（P12）
+    def _n_supported(self) -> int:
+        return sum(1 for c in self.claims if c["verdict"] == SUPPORT)
+
+    def _deepen(self, stages) -> int:
+        """**深挖回路**（P12 `stop_patience`）：在机械装配前最多再走几步。
+
+        ★ 这是 P12 的**真实读取点**（复核 6b：`stop_patience` 原本是死参数）。
+        - **一步** = 换一个**已授权的认知位置**（P1 授权的那几个，**不新增位置**），
+          用**深挖提示词**（冻结资产 `deep_suffix`）再问一次 → 抽取 → 核验。
+          ⇒ 不改变 P1 的语义；T1（只有「直答」一个位置）深挖只是对同一位置再问一次，
+          **不破坏 T1「远不可得」的消融**。
+        - **步数上限 = P12 `stop_patience`**：`0` = 不深挖 ⇒ 搜索空间在第一轮就闭合
+          （这是「过早闭合」的对照臂）；`k>0` = 最多再走 k 步。
+        - 每步「**没有新增被支持断言**」= 一次**空转**（= 没有新承重信息）；
+          连续空转 ≥ P7 `stall_window`（**仅 T4 生效**）⇒ 判停滞 ⇒ 预算重分配 + 结束深挖。
+        - 预算（`max_calls`）耗尽 ⇒ 立即结束（记 `BUDGET_STOP`）。
+
+        ⚠️ 阶段**集合**不随 P12 改变：深挖只是把已有的 GEN/EXTRACT/VERIFY **再执行一遍**
+        ⇒ 分离判据仍然成立（改变 P12 不改变「有哪些阶段、谁能看到什么」）。
+        """
+        patience = int(self.theta.get("stop_patience", 0))
+        if patience <= 0:
+            self._log("DEEPEN", steps=0, patience=patience,
+                      reason="patience=0 ⇒ 不深挖（搜索空间立即闭合）")
+            return 0
+        positions = self._frames()            # 已授权位置（不新增）
+        if not positions:
+            return 0
+        k = int(self.theta.get("stall_window", 0))    # ← P7 的真实读取点（无条件读）
+        if "STALL" not in stages:
+            k = 0                                    # 只在 T4（唯一含 STALL 阶段的模板）生效
+        stall = 0
+        steps = 0
+        new_sup_total = 0
+        for i in range(patience):
+            if self.n_calls >= self.max_calls:
+                self.stage_log.append(dict(stage="BUDGET_STOP", purpose="deepen", ok=False))
+                break
+            fname, ang = positions[i % len(positions)]
+            deep_ang = ("%s\n%s" % (ang, FROZEN_ASSETS["deep_suffix"])).strip()
+            before = self._n_supported()
+            n0 = len(self.drafts)
+            self._gen(frames=[(fname, deep_ang)], tag="DEEPEN")
+            self._extract(self.drafts[n0:])
+            self._verify("VERIFY_DEEP")
+            new_sup = self._n_supported() - before
+            new_sup_total += new_sup
+            steps += 1
+            stall = 0 if new_sup > 0 else stall + 1
+            if k and stall >= k:
+                # P7（连续空转窗口）⇒ 判停滞 ⇒ 预算重分配（与 P8 互补的第二个停滞信号）
+                self._log("STALL", signal="consecutive_empty_steps", k=k, stall=stall,
+                          steps=steps, stalled=True)
+                self._reallocate()
+                break
+        self._log("DEEPEN", steps=steps, patience=patience, stall=stall,
+                  new_supported=new_sup_total)
+        return steps
 
     def _reallocate(self) -> int:
         """预算重分配：把剩余预算的 realloc_frac 比例给**未用过的认知位置**。"""
@@ -256,17 +331,24 @@ class Episode:
             return body[:ANSWER_CAP]
         m = int(self.theta.get("m_clusters", 4))
         th = float(self.theta.get("theta_util", 0.0))
-        # 效用门控（D2）：支持度 >= theta_util ⇒ 进「已核验成立」节；否则进「依据未覆盖」节
-        main, other, unv, bad = [], [], [], []
+        # ★ 效用门控（D2）：**低于阈值的内容不交付**（不是换个分节塞进去）。
+        #   理由：若低效用内容照样进答案，门控就只是"换个标签"，对指标零影响 ⇒
+        #   它既学不动、也防不住"降门控换宽度"。这里让门控**真的减内容**。
+        #   挡掉的条数在 n_claims_below_gate 里计数上报（不丢账）。
+        main, other, unv, bad, below = [], [], [], [], []
         for c in self.claims:
             if c["verdict"] == CONTRADICT:
                 bad.append(c)
-            elif c["verdict"] == UNVERIFIED:
-                unv.append(c)
-            elif support_score(c["verdict"]) >= th:
-                main.append(c)
+                continue
+            if support_score(c["verdict"]) >= th:
+                if c["verdict"] == SUPPORT:
+                    main.append(c)
+                elif c["verdict"] == UNVERIFIED:
+                    unv.append(c)
+                else:
+                    other.append(c)
             else:
-                other.append(c)
+                below.append(c)
         sup = main
         clusters = self._cluster(sup)
         clusters.sort(key=lambda cl: (-len(cl), -len(cl[0]["text"])))
@@ -286,7 +368,10 @@ class Episode:
         if bad:
             lines += ["", "<!-- 已剔除与依据冲突的内容 %d 条 -->" % len(bad)]
         out = "\n".join(lines)
-        self._log("MERGE", strategy=strat, delivered=len(picked), dropped_conflict=len(bad))
+        self._log("MERGE", strategy=strat, delivered=len(picked), dropped_conflict=len(bad),
+                  below_gate=len(below), theta_util=th, m_clusters=m)
+        self._merge_state = dict(main=picked, other=other[:m], unv=unv[:m],
+                                 bad=bad, below=below, th=th, m=m)
         return out[:ANSWER_CAP]
 
     def _frontier(self, claims, m):
@@ -314,6 +399,9 @@ class Episode:
         if "SPLIT" in stages:
             if self._split():
                 self._verify("VERIFY2")
+        # ★ 深挖回路（P12 stop_patience）：在装配前最多再走几步（何时停 = 可学）
+        if "VERIFY" in stages:
+            self._deepen(stages)
         # 停滞 → 预算重分配
         if "STALL" in stages and self._stall():
             self._reallocate()
@@ -340,6 +428,26 @@ class Episode:
         for c in sup:
             if all(jaccard(c["text"], u) < 0.75 for u in uniq):
                 uniq.append(c["text"])
+        # ★ 被支持子集的文本：训练侧的正确性约束（key_conclusion_hit）**只在这上面算**，
+        #   避免"未核验 / 未提及"的断言里偶然出现答案词就拿命中分（DESIGN.md §4.3）。
+        supported_text = "\n".join(c["text"] for c in sup)
+        # ★ 交付集（真正进了机械答案的断言）——训练目标 J 算在**交付集**上，
+        #   这样装配旋钮（theta_util / m_clusters）才对 J 可见（DESIGN.md §4.3）。
+        ms = getattr(self, "_merge_state", None) or {}
+        delivered = list(ms.get("main") or []) + list(ms.get("other") or []) + \
+            list(ms.get("unv") or [])
+        # ★ 深挖回路的实际步数（P12 的可观测读数）：取最后一条 DEEPEN 汇总记录的 steps
+        _deep = [e for e in self.stage_log if e.get("stage") == "DEEPEN"]
+        n_deepen = int(_deep[-1].get("steps") or 0) if _deep else 0
+        d_supp = [c for c in delivered if c["verdict"] == SUPPORT]
+        d_unsupp = [c for c in delivered if c["verdict"] != SUPPORT]
+        d_supp_u, d_unsupp_u = [], []
+        for c in d_supp:
+            if all(jaccard(c["text"], u) < 0.75 for u in d_supp_u):
+                d_supp_u.append(c["text"])
+        for c in d_unsupp:
+            if all(jaccard(c["text"], u) < 0.75 for u in d_unsupp_u):
+                d_unsupp_u.append(c["text"])
         return dict(
             topology=self.tid,
             theta=dict(self.theta),
@@ -355,6 +463,19 @@ class Episode:
             support_rate=(len(sup) / legal) if legal else 0.0,
             answer_chars=len(answer),
             answer=answer,
+            supported_text=supported_text,
+            # --- 交付集口径（训练目标 J 的输入）---
+            n_delivered_total=len(delivered),
+            n_delivered_supported=len(d_supp),
+            n_delivered_unsupported=len(d_unsupp),
+            n_delivered_supported_distinct=len(d_supp_u),
+            n_delivered_unsupported_distinct=len(d_unsupp_u),
+            n_claims_below_gate=len(ms.get("below") or []),
+            n_deepen_steps=n_deepen,
+            delivered_supported_text="\n".join(d_supp_u),
+            delivered_claims=[dict(text=c["text"], verdict=c["verdict"],
+                                    score=support_score(c["verdict"]))
+                               for c in delivered],
             claims=[dict(text=c["text"], verdict=c["verdict"], origin_op=c["origin_op"],
                          frame=c["frame"]) for c in self.claims],
             stage_log=self.stage_log,
