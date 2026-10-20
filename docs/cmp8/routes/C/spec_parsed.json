@@ -1,0 +1,804 @@
+{
+ "spec_version": "C-1.0",
+ "route_id": "C_design_then_train",
+ "produced_at": "2026-10-21",
+ "status": "DESIGN_ONLY",
+ "companion_design": "/workspace/lab/routes/C/DESIGN.md",
+ "protocol": "/workspace/lab/routes/PROTOCOL.md",
+ "protocol_version": "PROTOCOL-v1.0",
+ "redlines": {
+  "tested_side_base_url": "https://api.minimaxi.com/v1",
+  "tested_side_vendor": "minimax",
+  "judge_side_base_url": "https://openrouter.ai/api/v1",
+  "judge_side_vendor": "cross-vendor",
+  "endpoint_assertion": "tested_side_base_url != judge_side_base_url AND tested_side_vendor != judge_side_vendor ⇒ 否则 abort",
+  "openrouter_on_tested_side": false,
+  "openrouter_calls_in_this_task": 0,
+  "uses_user4_tasks": false,
+  "uses_model_self_report_as_criterion": false,
+  "injects_answer_hints": false,
+  "injects_task_related_features": false,
+  "injects_adhd_persona": false,
+  "temperature_is_a_trained_parameter": false
+ },
+ "topology": {
+  "definition": "拓扑 = 「有哪些阶段、阶段顺序、信息可达性、装配策略」。 分离判据：改变它会改变图结构 ⇒ 拓扑；改变它不会改变「有哪些阶段、谁能看到什么」⇒ 参数。",
+  "menu_frozen_before_training": true,
+  "menu_size": 6,
+  "default_topology": "T2",
+  "default_topology_registered_reason": "单路生成时「远」在结构上不可得（候选集 = 模型众数）⇒ Mednick 的合取条件无法同时满足 ⇒ 默认拓扑必须含多帧生成 + 效用核验 + 聚类装配（T2）。",
+  "node_kinds": [
+   "ASK",
+   "DRAFT",
+   "CLAIM",
+   "VERDICT",
+   "ANSWER"
+  ],
+  "stages": {
+   "GEN": "生成草稿（多路：直答 + 冻结认知位置）；看不到依据包",
+   "EXTRACT": "从草稿抽原子断言",
+   "VERIFY": "核验断言（唯一接触依据包/判官的阶段）",
+   "SPLIT": "拆分复合断言并回灌核验",
+   "COLLAPSE": "坍缩检测（去重后断言数 / 草稿数）",
+   "REDISTRIBUTE": "条件切换式重组（换采样条件；禁止 sleep/放空/无关闲聊）",
+   "STALL": "停滞检测（可核验信号，不用 embedding 相似度）",
+   "MERGE": "机械装配（不由模型重写）"
+  },
+  "templates": {
+   "T0": {
+    "name": "单答（零假设对照）",
+    "stages": [
+     "GEN",
+     "MERGE"
+    ],
+    "merge_strategy": "verbatim",
+    "n_frames": "fixed_1",
+    "uses_verify": false,
+    "info_access": {
+     "GEN": "prompt_only",
+     "MERGE": "draft_only"
+    },
+    "purpose": "拓扑析因的零假设下界"
+   },
+   "T1": {
+    "name": "生成-抽取-核验-装配（有用侧最小实现）",
+    "stages": [
+     "GEN",
+     "EXTRACT",
+     "VERIFY",
+     "MERGE"
+    ],
+    "merge_strategy": "union_clustered",
+    "n_frames": "fixed_1",
+    "uses_verify": true,
+    "info_access": {
+     "GEN": "prompt_only",
+     "EXTRACT": "drafts",
+     "VERIFY": "evidence+claims",
+     "MERGE": "verdicts+claims"
+    },
+    "purpose": "「远不可得」消融：只实现 Mednick 的「有用」一侧"
+   },
+   "T2": {
+    "name": "多帧生成 + 抽取 + 核验 + 聚类装配（默认）",
+    "stages": [
+     "GEN",
+     "EXTRACT",
+     "VERIFY",
+     "MERGE"
+    ],
+    "merge_strategy": "union_clustered",
+    "n_frames": "parameter_P1",
+    "uses_verify": true,
+    "info_access": {
+     "GEN": "prompt_only",
+     "EXTRACT": "drafts",
+     "VERIFY": "evidence+claims",
+     "MERGE": "verdicts+claims"
+    },
+    "purpose": "默认拓扑：同时给出「远」（多帧）与「有用」（核验+门控）两侧"
+   },
+   "T3": {
+    "name": "T2 + 拆分回环",
+    "stages": [
+     "GEN",
+     "EXTRACT",
+     "VERIFY",
+     "SPLIT",
+     "VERIFY",
+     "MERGE"
+    ],
+    "merge_strategy": "union_clustered",
+    "n_frames": "parameter_P1",
+    "uses_verify": true,
+    "info_access": {
+     "GEN": "prompt_only",
+     "EXTRACT": "drafts",
+     "VERIFY": "evidence+claims",
+     "SPLIT": "claims+verdicts",
+     "MERGE": "verdicts+claims"
+    },
+    "purpose": "复合断言拆开再核验 ⇒ 提高可承重粒度"
+   },
+   "T4": {
+    "name": "T3 + 停滞域预算重分配",
+    "stages": [
+     "GEN",
+     "EXTRACT",
+     "VERIFY",
+     "SPLIT",
+     "VERIFY",
+     "STALL",
+     "MERGE"
+    ],
+    "merge_strategy": "union_clustered",
+    "n_frames": "parameter_P1",
+    "uses_verify": true,
+    "info_access": {
+     "GEN": "prompt_only",
+     "EXTRACT": "drafts",
+     "VERIFY": "evidence+claims",
+     "SPLIT": "claims+verdicts",
+     "STALL": "claims+verdicts",
+     "MERGE": "verdicts+claims"
+    },
+    "purpose": "D4；停滞判据必须是可核验信号，避免「无判据重分配 = 随机游走」"
+   },
+   "T5": {
+    "name": "生成空间校准 + 条件切换式重组",
+    "stages": [
+     "GEN",
+     "EXTRACT",
+     "VERIFY",
+     "COLLAPSE",
+     "REDISTRIBUTE",
+     "MERGE"
+    ],
+    "merge_strategy": "union_clustered",
+    "n_frames": "parameter_P1",
+    "uses_verify": true,
+    "info_access": {
+     "GEN": "prompt_only",
+     "EXTRACT": "drafts",
+     "VERIFY": "evidence+claims",
+     "COLLAPSE": "claims",
+     "REDISTRIBUTE": "drafts+claims",
+     "MERGE": "verdicts+claims"
+    },
+    "purpose": "D6 + D3；默认 theta_collapse=0 ⇒ 多数任务 passthrough"
+   }
+  },
+  "structural_hard_constraints": [
+   {
+    "id": "H1",
+    "rule": "必须存在生成阶段"
+   },
+   {
+    "id": "H2",
+    "rule": "若含 VERIFY，则 VERIFY 必须在 MERGE 之前"
+   },
+   {
+    "id": "H3",
+    "rule": "MERGE 的输入只含断言与判官标签，不得含题面暗示/答案键/结论空间"
+   },
+   {
+    "id": "H4",
+    "rule": "总调用数 ≤ 14（每 episode）"
+   },
+   {
+    "id": "H5",
+    "rule": "必须存在机械装配阶段，且装配不得由模型重写"
+   },
+   {
+    "id": "H6",
+    "rule": "不得出现无状态等待/放空/与任务无关闲聊阶段（模拟走神）"
+   }
+  ],
+  "structural_checker_reads_oracle_statistics": false
+ },
+ "frozen_assets": {
+  "frames": [
+   "规则来源与适用条件",
+   "程序步骤与时限",
+   "例外情形与边界条件",
+   "数量阈值与计算关系",
+   "主体之间的权利义务关系",
+   "证据覆盖与信息缺口"
+  ],
+  "frames_change_across_templates": false,
+  "gen_prompt": "问题：{ask}\\n\\n{ang}\\n\\n给出你的判断与具体做法，{cap}字以内。",
+  "extract_prompt": "从下面这段回答里，逐条列出其中**可判真假的陈述**…（一行一条，最多 {n} 条）",
+  "split_prompt": "把下面这条陈述拆成可以分别核验的独立陈述…",
+  "answer_cap_chars": 400,
+  "distance_metric": "char_bigram_jaccard（不依赖 embedding ⇒ 不依赖厂商）",
+  "judge_prompt_version_train": "train-judge-v1（训练侧判官，与验收侧判官不同源）",
+  "judge_prompt_version_accept": "PROTOCOL §4.6 的判官提示词（跨厂商）",
+  "answer_template": "PROTOCOL §4.5 的机械答案模板（全体臂一致）"
+ },
+ "parameters": {
+  "separation_rule": "改变它**不会**改变「有哪些阶段、谁能看到什么」；取值域是区间/档位，由训练选",
+  "default_hash": "sha256:839e98e61ea6e962",
+  "live_set_rule": "只有 applies_to 包含该拓扑的参数才参与该拓扑下的搜索",
+  "table": [
+   {
+    "id": "P1",
+    "name": "n_frames",
+    "type": "int",
+    "values": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "default": 3,
+    "group": "breadth",
+    "applies_to": [
+     "T2",
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "生成路数"
+   },
+   {
+    "id": "P2",
+    "name": "n_cand_per_frame",
+    "type": "int",
+    "values": [
+     1,
+     2,
+     3
+    ],
+    "default": 1,
+    "group": "breadth",
+    "applies_to": [
+     "T1",
+     "T2",
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "每路采样份数"
+   },
+   {
+    "id": "P3",
+    "name": "theta_util",
+    "type": "cont",
+    "lo": 0.0,
+    "hi": 1.0,
+    "default": 0.5,
+    "group": "gate",
+    "applies_to": [
+     "T1",
+     "T2",
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "效用门控阈值（D2 theta_util）"
+   },
+   {
+    "id": "P4",
+    "name": "theta_dist",
+    "type": "cont",
+    "lo": 0.25,
+    "hi": 1.0,
+    "default": 0.25,
+    "group": "gate",
+    "applies_to": [
+     "T2",
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "远端门控下限（D1 d*），= 最小距离"
+   },
+   {
+    "id": "P5",
+    "name": "n_verify_max",
+    "type": "int",
+    "values": [
+     0,
+     2,
+     4,
+     6,
+     8,
+     12
+    ],
+    "default": 6,
+    "group": "budget",
+    "applies_to": [
+     "T1",
+     "T2",
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "VERIFY 调用预算"
+   },
+   {
+    "id": "P6",
+    "name": "n_split_max",
+    "type": "int",
+    "values": [
+     0,
+     1,
+     2,
+     4
+    ],
+    "default": 0,
+    "group": "budget",
+    "applies_to": [
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "SPLIT 次数上限"
+   },
+   {
+    "id": "P7",
+    "name": "stall_window",
+    "type": "int",
+    "values": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "default": 2,
+    "group": "stall",
+    "applies_to": [
+     "T4"
+    ],
+    "desc": "停滞窗口 k"
+   },
+   {
+    "id": "P8",
+    "name": "theta_stall",
+    "type": "cont",
+    "lo": 0.0,
+    "hi": 1.0,
+    "default": 0.5,
+    "group": "stall",
+    "applies_to": [
+     "T4"
+    ],
+    "desc": "停滞进展率阈值"
+   },
+   {
+    "id": "P9",
+    "name": "realloc_frac",
+    "type": "cont",
+    "lo": 0.0,
+    "hi": 1.0,
+    "default": 0.0,
+    "group": "stall",
+    "applies_to": [
+     "T4"
+    ],
+    "desc": "停滞后重分配比例"
+   },
+   {
+    "id": "P10",
+    "name": "theta_collapse",
+    "type": "cont",
+    "lo": 0.0,
+    "hi": 1.0,
+    "default": 0.0,
+    "group": "trigger",
+    "applies_to": [
+     "T5"
+    ],
+    "desc": "坍缩阈值 tau（D6），0 = 关闭"
+   },
+   {
+    "id": "P11",
+    "name": "m_clusters",
+    "type": "int",
+    "values": [
+     1,
+     2,
+     3,
+     4,
+     6,
+     8
+    ],
+    "default": 4,
+    "group": "assembly",
+    "applies_to": [
+     "T1",
+     "T2",
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "装配进答案的聚类代表数（D5 的 m）"
+   },
+   {
+    "id": "P12",
+    "name": "stop_patience",
+    "type": "int",
+    "values": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "default": 1,
+    "group": "budget",
+    "applies_to": [
+     "T1",
+     "T2",
+     "T3",
+     "T4",
+     "T5"
+    ],
+    "desc": "STOP 耐心"
+   }
+  ],
+  "excluded_from_training": [
+   {
+    "name": "temperature",
+    "reason": "协议 §4.3：生成臂 temperature 事前写死且三臂一致；作为参数会破坏跨臂可比性"
+   },
+   {
+    "name": "answer_cap_chars",
+    "reason": "协议 §4.5：字数上限是公平性约束，不是可调参数"
+   },
+   {
+    "name": "judge_prompt",
+    "reason": "换了判官 = 换了缓存身份（协议 §5）"
+   },
+   {
+    "name": "frames_content",
+    "reason": "冻结资产；跨模板不变 ⇒ 拓扑析因里结构是唯一变化因子"
+   }
+  ],
+  "degenerate_config_filter": [
+   {
+    "topology": "T2/T3/T4/T5",
+    "condition": "n_frames == 1",
+    "reason": "多帧结构塌成单路（等价 T1）"
+   },
+   {
+    "topology": "T3/T4/T5",
+    "condition": "n_split_max == 0",
+    "reason": "拆分回环失效（等价 T2）"
+   },
+   {
+    "topology": "T4",
+    "condition": "realloc_frac == 0",
+    "reason": "重分配失效（等价 T3）"
+   },
+   {
+    "topology": "T5",
+    "condition": "theta_collapse == 0",
+    "reason": "条件分支永不触发（等价 T1）"
+   }
+  ]
+ },
+ "objective": {
+  "kind": "constrained_optimization",
+  "primary_surrogate": "J(theta) = 训练语料上「被训练侧判官判为支持 且 互相不重复」的断言数均值",
+  "surrogate_is_not_the_acceptance_metric": true,
+  "acceptance_metric": "PROTOCOL §3.1 的 VD_net（双边净有效维度增益），由独立抽取器 + 跨厂商判官算出",
+  "why_not_unconstrained": "track-d §3.9 代价侧（创造成本、调整成本）⇒ 广度有代价 ⇒ 目标必须是约束优化",
+  "training_signal": {
+   "source": "训练侧判官（MiniMax 侧，$0，cmp8 四分类核验提示词 v4）",
+   "not_model_self_report": true,
+   "diversity_side_judge_free": true,
+   "diversity_side_detail": "「远」这一侧由字面二元组 Jaccard 去重产生，不经任何模型评分 ⇒ 无自评偏好",
+   "train_judge_vs_accept_judge": "不同源（train-judge-v1 vs 协议 §4.6 判官）⇒ 参数不会过拟合验收判官口味"
+  },
+  "shrinkage": {
+   "method": "选档时扣 lambda * |档位索引 - 先验档位索引| / (档位数-1)",
+   "lambda": 0.25,
+   "pre_registered": true
+  },
+  "algorithm": {
+   "name": "coordinate_descent_with_shrinkage",
+   "n_pass": 2,
+   "folds": {
+    "A": [
+     "P1",
+     "P3",
+     "P5",
+     "P7"
+    ],
+    "B": [
+     "P2",
+     "P4",
+     "P6",
+     "P8"
+    ]
+   },
+   "fold_assignment": "事前按题号奇偶定，不看结果",
+   "tie_break": "同分则保留先验档位",
+   "report": "折外增量（held-out delta）才是「参数学习是否泛化」的唯一报告量"
+  },
+  "constraints": [
+   {
+    "id": "C1",
+    "rule": "conflict_rate_pre(filter 前) <= min(0.33, baseline + 0.05)",
+    "on_violation": "reject_config",
+    "maps_to": "协议 R1 / F4"
+   },
+   {
+    "id": "C2",
+    "rule": "每题 key_conclusion_hit >= 该题基线",
+    "on_violation": "reject_config",
+    "maps_to": "协议 R2"
+   },
+   {
+    "id": "C3",
+    "rule": "每 episode 调用数 <= 12 且 token <= 12000",
+    "on_violation": "reject_config",
+    "maps_to": "协议 R3"
+   },
+   {
+    "id": "C4",
+    "rule": "断言数涨 >= 20% 而被支持去重数涨 < 10% ⇒ 作废",
+    "on_violation": "reject_config",
+    "maps_to": "协议 F2"
+   },
+   {
+    "id": "C5",
+    "rule": "退化配置作废（见 degenerate_config_filter）",
+    "on_violation": "reject_config",
+    "maps_to": "拓扑可辨识性"
+   },
+   {
+    "id": "C6",
+    "rule": "参数越界作废",
+    "on_violation": "reject_config",
+    "maps_to": "参数表"
+   }
+  ],
+  "violation_handling": "违反 ⇒ 配置**直接作废**（不是扣分）⇒ 优化器无法靠钻约束的空子拿分"
+ },
+ "topology_source": {
+  "default_mode": "human_registered",
+  "human_registered": {
+   "who": "路线 C 的设计者（人）；复核者独立检查",
+   "what": "从 6 个模板的冻结菜单里选 1 个；选择与理由**事前登记**在本文件",
+   "when": "训练开始前；一旦登记不得改（改则须重跑并重报）",
+   "fallback": "人定默认 = T2"
+  },
+  "constrained_proposer_mode": {
+   "enabled_by_default": false,
+   "why_off_by_default": "若人在提案之后仍可改写选择，则「设计环节」的贡献无法归因（人 or 提案器？）；默认人定 ⇒ 归因干净。若要启用，需同时把「提案器 vs 人」做成对照臂。",
+   "inputs_visible": [
+    "行动空间说明书（模板全集 + 阶段含义 + 硬约束 + 输出格式）",
+    "结构性运行日志：每阶段调用次数、是否超预算、是否空产出、是否解析失败、阶段覆盖表",
+    "各模板的定性描述（用途列）"
+   ],
+   "inputs_forbidden": [
+    "任何题面/结论空间/依据包内容",
+    "判官逐条判定，以及由它们算出的任何统计量（矛盾率、支持率、有效维度数、承重卡数、关键结论命中率、去重宽度）",
+    "任何跨臂比较数字",
+    "任何逐任务结果",
+    "oracle 统计的任何聚合（含均值/中位数/比例）"
+   ],
+   "repair_attempts_max": 2,
+   "on_reject": "回退到人定默认 T2，并把「设计环节被回退」作为**可报告事件**记入 run 元数据",
+   "checker": "structural_checker（H1–H6），只查结构，不查任何 oracle 统计"
+  }
+ },
+ "control_arms": [
+  {
+   "id": "A_fixed",
+   "content": "人定拓扑 + 人定参数（先验默认值，零训练）",
+   "role": "A 臂：纯人定参数"
+  },
+  {
+   "id": "B_learned",
+   "content": "拓扑与参数都交给学（路线 B 的策略学习，ops.py 特征空间）",
+   "role": "B 臂：纯学"
+  },
+  {
+   "id": "C_design_then_train",
+   "content": "人定拓扑 + 学参数（收缩 + 折外评估）",
+   "role": "C 臂：本路线"
+  },
+  {
+   "id": "B0_direct",
+   "content": "直调基线：每任务 R=3 次独立完整生成",
+   "role": "协议 (c) 参考点"
+  },
+  {
+   "id": "B1_eq_calls",
+   "content": "等调用数：每任务 R=3，每次内部采样 K=K_C 份，固定取最后一份",
+   "role": "排除调用数混淆"
+  },
+  {
+   "id": "B2_eq_token",
+   "content": "等 token：每任务 R=3，采样到 token 预算 T_W 为止，固定取最后一份",
+   "role": "排除 token 预算混淆"
+  },
+  {
+   "id": "B3_best_of_n",
+   "content": "best-of-N（可选）：由**外部核验器**在 K 份里挑矛盾最少的一份",
+   "role": "强基线"
+  },
+  {
+   "id": "TOPO_factorial",
+   "content": "同一训练程序跑在 T0/T1/T3/T4/T5 上（默认 T2 之外的全部模板）",
+   "role": "分离「拓扑」这一项的贡献（设计环节的否证实验）"
+  },
+  {
+   "id": "TOPO_random_null",
+   "content": "从菜单里随机抽一个拓扑，同一训练程序",
+   "role": "设计环节的零假设对照"
+  }
+ ],
+ "budget_rule": "选样规则必须与内容无关（固定取最后一份），否则变成 best-of-N",
+ "conclusion_rule": "若增益在 B1 下方向一致但在 B2 下消失 ⇒ 增益由预算解释，不构成架构证据（协议 §4.4）",
+ "falsification": {
+  "inherited_from_protocol": [
+   "F1",
+   "F2",
+   "F3a",
+   "F3b",
+   "F4",
+   "F5",
+   "F6",
+   "F7",
+   "F8"
+  ],
+  "route_specific": [
+   {
+    "id": "C-F1",
+    "name": "设计环节无贡献",
+    "trigger": "默认拓扑 T2 的 VD_net_median 与菜单内其它拓扑（或随机拓扑）落在同一噪声带内（|Δ| ≤ 2×种子噪声地板）",
+    "consequence": "「人定拓扑」这一步判为无贡献（即使 C 整体不劣于 A/B）"
+   },
+   {
+    "id": "C-F2",
+    "name": "代理目标失效",
+    "trigger": "折外上训练代理量与协议 VD_net 的秩相关 < 0.30，或代理最优配置不在验收前 2 名内",
+    "consequence": "训练信号判为无效 ⇒ 本轮参数学习不算完成（路线作废，须重写代理目标后重跑）"
+   },
+   {
+    "id": "C-F3",
+    "name": "参数过拟合",
+    "trigger": "折内增益 > 2×噪声地板，但折外增益 ≤ 1×噪声地板",
+    "consequence": "参数未泛化 ⇒ C 退化为「带噪声的 A」"
+   },
+   {
+    "id": "C-F4",
+    "name": "收缩前提被否",
+    "trigger": "lambda=0（不收缩）在折外严格优于 lambda>0",
+    "consequence": "「先验有帮助」这一 C 的核心前提被否证"
+   },
+   {
+    "id": "C-F5",
+    "name": "预算解释",
+    "trigger": "增益在 B1 下仍在、在 B2 下消失",
+    "consequence": "增益不可归因于架构"
+   },
+   {
+    "id": "C-F6",
+    "name": "投机配置",
+    "trigger": "学到的参数在留出折上触发 F2 或 G1（dimension_per_card 上升）",
+    "consequence": "该参数配置作废"
+   },
+   {
+    "id": "C-F7",
+    "name": "C 退化为 A",
+    "trigger": "C 的 VD_net_median ≤ A_fixed + 1×噪声地板",
+    "consequence": "「训练参数」这一步无净增量 ⇒ C 的卖点不成立（合法且重要的结果）"
+   },
+   {
+    "id": "C-F8",
+    "name": "代价侧违规",
+    "trigger": "R1/F4 触发",
+    "consequence": "路线判死（协议）"
+   },
+   {
+    "id": "C-F9",
+    "name": "拓扑封死",
+    "trigger": "默认拓扑在训练语料上的代理量上界低于 B0 直调基线",
+    "consequence": "拓扑本身是瓶颈 ⇒ 设计环节需重做"
+   }
+  ]
+ },
+ "cost": {
+  "tested_side": {
+   "vendor": "minimax",
+   "unit_usd": 0.0,
+   "training_calls_cap": 4000,
+   "training_wall_clock_min_cap": 60,
+   "training_tokens_estimate": 2400000
+  },
+  "judge_side": {
+   "vendor": "cross-vendor (OpenRouter, 仅判官/embedding)",
+   "usd_per_sample": 0.0064,
+   "batch1": {
+    "arms": 4,
+    "tasks": 12,
+    "reps": 3,
+    "samples": 144,
+    "usd_estimate": 0.92
+   },
+   "batch2_topology_factorial": {
+    "arms": 4,
+    "tasks": 12,
+    "reps": 3,
+    "samples": 144,
+    "usd_estimate": 0.92
+   },
+   "per_batch_cap_usd": 1.5,
+   "embedding_usd_estimate": 0.05
+  },
+  "smoke": {
+   "final_batch_posts": 13,
+   "cap": 20,
+   "cumulative_posts_incl_aborted_orphan": 29,
+   "note": "一次被沙箱 30s 超时中断的早期批次变成孤儿进程并跑完 16 次；两批合计 29 次，已在 DESIGN.md §9 如实披露"
+  }
+ },
+ "smoke": {
+  "purpose": "只验证流程能跑通、提示词能解析；**不产出任何实验结论**",
+  "tasks": [
+   "SMOKE-S1",
+   "SMOKE-S2"
+  ],
+  "tasks_are_self_authored": true,
+  "uses_user4": false,
+  "verifier": "STUB_LEXICAL_NOT_A_JUDGE（词法桩，不是判官）",
+  "logs": {
+   "json": "/workspace/lab/routes/C/smoke_log.json",
+   "txt": "/workspace/lab/routes/C/smoke_log.txt",
+   "calls_jsonl": "/workspace/lab/routes/C/smoke_calls.jsonl",
+   "stdout": "/workspace/lab/routes/C/smoke_stdout.txt"
+  },
+  "selfcheck_script": "/workspace/lab/routes/C/verify_blacklist.py"
+ },
+ "delivery": {
+  "design_md": "/workspace/lab/routes/C/DESIGN.md",
+  "spec_yaml": "/workspace/lab/routes/C/spec.yaml",
+  "summary_json": "由协议指定的独立抽取器/判官流程生成（**不是本路线自己填**）",
+  "run_output_dir": "/workspace/lab/routes/RUNS/C_design_then_train/",
+  "run_output_layout": [
+   "{task_id}/rep{k}.answer.md",
+   "{task_id}/rep{k}.meta.json"
+  ],
+  "summary_json_fields": "严格按协议 §8 (b) 的字段表，不删不改名",
+  "cross_arm_metadata": [
+   "devset_id",
+   "devset_hash",
+   "evidence_pack_version",
+   "evidence_hash",
+   "judge_model",
+   "judge_prompt_version",
+   "judge_temp",
+   "judge_same_vendor",
+   "judge_selfcheck",
+   "embedding_model",
+   "aligner_version",
+   "extractor_version",
+   "extractor_f1",
+   "lexical_baseline_f1",
+   "arm_id",
+   "arm_config_hash",
+   "seed_policy",
+   "temperature",
+   "models_tier",
+   "budget_caps",
+   "n_calls_total",
+   "n_tokens_total",
+   "cost_usd"
+  ],
+  "seed_policy": {
+   "seeds": [
+    "S1",
+    "S2",
+    "S3"
+   ],
+   "reps_per_task": 3,
+   "temperature": 0.7,
+   "shared_across_arms": true
+  }
+ }
+}
