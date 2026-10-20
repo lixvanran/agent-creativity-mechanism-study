@@ -201,7 +201,9 @@ def parse_yaml(text: str):
                 else:
                     arr.append(None)
             elif ":" in item and not item.startswith(("{", "[")):
-                # "- key: value" 形式 ⇒ 该项是一个 map，续行同缩进
+                # "- key: value" 形式 ⇒ 该项是一个 map；续行可以是**标准块式**（缩进更深，
+                #   与 `build_spec_flowchart.py` 的迷你 YAML 一致），也可以是同缩进（旧写法）。
+                #   遇到下一个同缩进的 "- " 项就停。
                 sub = {}
                 k, v = item.split(":", 1)
                 k = k.strip()
@@ -216,9 +218,14 @@ def parse_yaml(text: str):
                     sub[k] = None
                 else:
                     sub[k] = _flow(v)
-                while pos[0] < len(lines) and lines[pos[0]][0] == indent and \
-                        not lines[pos[0]][1].startswith("- "):
+                while pos[0] < len(lines):
                     ind2, c2, _r2 = lines[pos[0]]
+                    if ind2 < indent:
+                        break
+                    if ind2 == indent and c2.startswith("- "):
+                        break
+                    if ":" not in c2:
+                        break
                     k2, v2 = c2.split(":", 1)
                     k2, v2 = k2.strip(), v2.strip()
                     pos[0] += 1

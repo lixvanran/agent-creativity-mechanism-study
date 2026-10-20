@@ -33,6 +33,166 @@ protocol:
     - "R-12 报任何比率必带 valid/total、parsefail_rate、conflict_n/den"
     - "R-13 不用 U1–U4 的结论空间/依据包建 DEV 或校准抽取器"
 
+# ───────────────────────────────────────────────────────── 流程图（顶层 nodes / edges）
+# ★ 硬契约：`/workspace/lab/build_spec_flowchart.py` 的 `normalize()` 只吃**顶层**
+#   `nodes:` / `edges:`（另有 flowchart: 块 / topology.* 两种兜底写法，本 spec 不用）。
+#   没有这两块 ⇒ 渲染结果是**空页**（2026-10-21 独立复核实测：0 rect / 0 path / 0 text）。
+#   节点 id ↔ DESIGN.md §3.9「流程图节点对照」一一对应（一个节点 = DESIGN 正文里的一个环节）。
+nodes:
+  - id: n0_start
+    label: "第 r 轮开始"
+    sub: "8 题 × 10 步"
+    kind: terminal
+  - id: n1_cand
+    label: "候选集 candidates(g)"
+    sub: "合法性过滤 3 条"
+    kind: process
+  - id: n2_feat
+    label: "特征与分数（成对）"
+    sub: "30 维交叉项；s=w·f"
+    kind: process
+  - id: n3_pi
+    label: "策略分布 pi(a|s)"
+    sub: "标准化后 softmax"
+    kind: process
+  - id: n4_neff
+    label: "n_eff 达标？"
+    sub: "1/Σp² ≥ 2.8"
+    kind: decision
+  - id: n5_tau
+    label: "τ 控制器调 τ"
+    sub: "塌缩对策 C3"
+    kind: process
+  - id: n6_sample
+    label: "采样 a ~ pi"
+    sub: "记录 tau_used"
+    kind: process
+  - id: n7_op
+    label: "选中的 op a"
+    sub: "6 op 动作空间"
+    kind: decision
+  - id: n8_gen
+    label: "GEN_PLAIN / GEN_ANGLE"
+    sub: "生成一份答案"
+    kind: process
+  - id: n9_proc
+    label: "EXTRACT / SPLIT"
+    sub: "抽断言 / 拆断言"
+    kind: process
+  - id: n10_verify
+    label: "VERIFY"
+    sub: "判官归因 关系|编号"
+    kind: process
+  - id: n11_step
+    label: "步级奖励"
+    sub: "新锚定条目 +1.0"
+    kind: process
+  - id: n12_proxy
+    label: "代理 w_hat"
+    sub: "覆盖锚定条目占比"
+    kind: process
+  - id: n13_term
+    label: "终局奖励"
+    sub: "alpha·w_hat - 矛盾罚"
+    kind: process
+  - id: n14_update
+    label: "reinforce 更新 w"
+    sub: "精确 log-pi 梯度 + L2"
+    kind: process
+  - id: n15_ema
+    label: "EMA 部署权重"
+    sub: "v ← 0.9v + 0.1w"
+    kind: process
+  - id: n16_monitor
+    label: "监控面板：fatal？"
+    sub: "16 项阈值告警"
+    kind: decision
+  - id: n17_stop
+    label: "停该策略并记录"
+    sub: "早停 + 报 FB"
+    kind: terminal
+  - id: n18_next
+    label: "下一轮 r+1"
+    sub: "回到候选集（循环）"
+    kind: terminal
+  - id: n19_eval
+    label: "FB1-FB12 判死检查"
+    sub: "训练结束后执行"
+    kind: terminal
+edges:
+  - from: n0_start
+    to: n1_cand
+    label: "取候选"
+  - from: n1_cand
+    to: n2_feat
+    label: "成对构造"
+  - from: n2_feat
+    to: n3_pi
+    label: "打分"
+  - from: n3_pi
+    to: n4_neff
+    label: "看 n_eff"
+  - from: n4_neff
+    to: n5_tau
+    label: "n_eff < 目标 ⇒ 调大 τ"
+  - from: n4_neff
+    to: n6_sample
+    label: "n_eff ≥ 目标"
+  - from: n5_tau
+    to: n6_sample
+    label: "调完重算 π"
+  - from: n6_sample
+    to: n7_op
+    label: "on-policy 采样"
+  - from: n7_op
+    to: n8_gen
+    label: "a ∈ {GEN_PLAIN, GEN_ANGLE}"
+  - from: n7_op
+    to: n9_proc
+    label: "a ∈ {EXTRACT, SPLIT}"
+  - from: n7_op
+    to: n10_verify
+    label: "a = VERIFY"
+  - from: n7_op
+    to: n13_term
+    label: "a = STOP ⇒ 终局"
+  - from: n8_gen
+    to: n11_step
+    label: "步奖励 0.0"
+  - from: n9_proc
+    to: n11_step
+    label: "步奖励 0.0"
+  - from: n10_verify
+    to: n11_step
+    label: "按条目去重计分"
+  - from: n11_step
+    to: n12_proxy
+    label: "episode 结束"
+  - from: n12_proxy
+    to: n13_term
+    label: "算终局奖励"
+  - from: n13_term
+    to: n14_update
+    label: "逐 episode 更新"
+  - from: n14_update
+    to: n15_ema
+    label: "部署权重"
+  - from: n15_ema
+    to: n16_monitor
+    label: "逐轮评估"
+  - from: n16_monitor
+    to: n17_stop
+    label: "fatal 告警 ⇒ 早停"
+  - from: n16_monitor
+    to: n18_next
+    label: "无 fatal ⇒ 继续"
+  - from: n17_stop
+    to: n19_eval
+    label: "触发否证条件"
+  - from: n18_next
+    to: n19_eval
+    label: "r = R ⇒ 训练结束"
+
 # ───────────────────────────────────────────────────────── 动作空间
 action_space:
   ops:
@@ -184,11 +344,15 @@ truncation_accounting:              # 协议 F8 同族风险
 # ───────────────────────────────────────────────────────── 奖励项
 reward:
   step_terms:
-    - {event: "VERIFY -> 支持",        value: 1.0}
-    - {event: "VERIFY -> 矛盾",        value: -2.0}
+    - {event: "VERIFY -> 支持 且**新覆盖**一条锚定依据条目", value: 1.0,
+       unit: "每条**新覆盖**的锚定依据条目（按条目去重；重复覆盖 +0）"}
+    - {event: "VERIFY -> 矛盾",        value: -2.0,
+       unit: "每条断言（**不**按条目去重 ⇒ 重复写错会重复扣分，保守方向）"}
     - {event: "VERIFY -> 未提及/非主张/解析失败", value: 0.0}
     - {event: "GEN_*/EXTRACT/SPLIT",   value: 0.0,
        reason: "形状动作的价值只能通过后续核验兑现 ⇒ 不给形状奖励（防『多写多抽』被直接奖励）"}
+    - {event: "VERIFY -> 支持但归因到**非锚定**（花絮）条目", value: 0.0,
+       reason: "步级只对承载结论的锚定条目计分"}
   terminal_terms:
     - {event: "代理 Ŵ", formula: "alpha * w_hat", alpha: 3.0}
     - {event: "矛盾率 > cap", formula: "-2.0", conflict_cap: 0.33}
@@ -210,6 +374,11 @@ reward:
       - "G4 判官误判『未提及』⇒ 代理偏小"
       - "G5 anchored 标记是人工写的 ⇒ 分母可能标错"
       - "G6 截断/空产出 ⇒ 断言变少 ⇒ 代理系统性偏低，且偏差与策略效应混在一起（见 truncation_accounting）"
+      - "G7 步级奖励的『矛盾 -2.0』按断言条数计、不按条目去重；步级只对锚定条目计分（花絮 +0）⇒ 见 reward.step_terms"
+    mednick_coverage:
+      useful_承重: "✅ 代理 Ŵ 实现（分子 = 被『判为支持』的断言覆盖到的锚定条目数，分母固定）"
+      far_远去冗余: "❌ **未实现**：训练信号里没有『远』；它由**协议主判据 VD 在验收层**强制（协议按删除反事实归族）⇒ 代理对此系统性偏大（G1）"
+      consequence: "代理的偏离由 **FB6** 判死：§4.4 预注册校准（Spearman(Ŵ,vd_final) ≥ 0.50 且方向一致率 ≥ 0.75）不过 ⇒ 训练目标判定为未验证 ⇒ 结果不得支持任何结论"
   calibration:                        # 预注册交叉校验
     subset: "训练题中事先指定的 2 题 × 4 episode = 8 episode"
     restrict_to_untruncated: true      # 只在 truncated_rate == 0 的 episode 上做校准（D4）
@@ -343,23 +512,29 @@ cost:
   measured_smoke:
     calls: 14
     call_cap: 20
-    logical_calls: 12
-    retries: 2
-    total_secs: 197.9
-    mean_secs_per_call: 14.1
-    attempts_truncated: 2            # 尝试级：都被重试救回
-    step_truncated: 0                # 步级：0 ⇒ 没有测量被污染的步
+    logical_steps: 12                 # n_logical_calls = sum(e2e[].steps)（**步骤数**，不是客户端 chat 次数）
+    client_chat_calls: 13             # 判官有 1 个批次多试了 1 次（12 步 + 1 次逻辑重试）
+    calls_ok: 12
+    retries: 2                        # 多出的 2 次 HTTP 尝试
+    wall_clock_secs: 184.0            # t0 "2026-10-21 01:50:06" → t_end "2026-10-21 01:53:10"
+    total_secs_field: 197.9           # total_secs = sum(calls[].secs)：**逐次尝试秒数之和**（client 每次 chat() 只设一次 t0 ⇒ 重复计时），**不是** wall clock
+    mean_secs_per_call: 13.1          # 184.0 ÷ 14（wall clock 口径）
+    attempts_truncated: 2             # 尝试级：都在**判官通道 check2**（calls[4]=1200/length/0、calls[5]=2000/length/0）
+    attempts_truncated_channel: check2
+    attempts_empty: 2
+    step_truncated: 0                 # 步级：0 ⇒ 没有测量被污染的步
     n_empty: 0
     cost_usd: 0.0
-    note: "预算阶梯加长前的那次冒烟：al_ex 3 次调用 2 次截断、其中 1 次用尽预算返回空串 ⇒ 该 episode 断言数=0（DESIGN §3.8 的原始现场）"
+    source_fields: "smoke/smoke_log.json → calls[] / e2e[] / t0 / t_end / total_secs（逐字段对照见 DESIGN §9.1）"
+    note: "记录在案的那次冒烟**不测 D1**（smoke.py 当时把所有通道阶梯覆盖成 (2000,) ⇒ 跑的不是生产阶梯）⇒ D1 至今**未经检验**（DESIGN §3.8.1 / §11 L10）"
   training_estimate:
     episodes: 64
     calls_per_episode: 10
     calls_single_policy: 640
     calls_full_population_M3: 1920
     cost_usd: 0.0
-    wall_clock_hours: "1.5–2（单策略，8 worker）｜ 4–6（完整 C4 种群，15 worker）"
-    extrapolation: "按冒烟实测 16.6 s/次外推，未跑"
+    wall_clock_hours: "单策略 0.29 h（640 次 × 13.1 s ÷ 8 worker；串行 2.33 h）｜ 完整 C4 种群 0.47 h（1920 次 × 13.1 s ÷ 15 worker；串行 6.99 h）"
+    extrapolation: "按冒烟 **wall clock** 口径 13.1 s/次外推，**未跑**；分通道均值（al_gen 43.7 / al_ex 13.7 / check2 8.3 秒）交叉核对 ≈ 0.28 h，一致"
   calibration_estimate:
     calls: 80
     judge_usd: 0.10
@@ -378,11 +553,14 @@ smoke:
   log_json: "/workspace/lab/routes/B/smoke/smoke_log.json"
   log_md: "/workspace/lab/routes/B/smoke/smoke_log.md"
   call_cap: 20
+  call_cap_note: "硬上限 20；SMOKE_CALL_CAP **只能调低**（min(20, env)）⇒ 环境变量抬不高它"
   calls_used: 14
-  logical_calls: 12
+  logical_steps: 12
+  client_chat_calls: 13
   retries: 2
   endpoint: "https://api.minimaxi.com/v1"
   endpoint_assert: "脚本启动时断言端点不含 openrouter.ai，否则 abort"
+  blacklist_assert: "脚本启动时（**任何 LLM 调用之前**）跑 guard.route_payload() ⇒ 命中即 abort"
   openrouter_calls: 0
   diagnostic_topics: "/workspace/lab/routes/B/code/data/diag_topics.json（2 道自造题）"
   verifies:
@@ -391,24 +569,39 @@ smoke:
     - "特征空间状态可分性对照（离线）"
     - "监控告警变异注入自测（离线）"
     - "见证回归断言（离线，含 --mutate 变异注入 ⇒ 必须 FAIL）"
-    - "截断被记账（步级 0 / 尝试级 2）"
+    - "截断被记账（步级 0 / 尝试级 2，**都在判官通道 check2**）"
   does_not_verify:
     - "训练是否学到东西（冒烟用 w=0 与固定优先策略，无梯度更新）"
     - "Ŵ 与真 VD 的关系（需协议独立抽取器，尚未就绪）"
     - "任何 DEV 题或 U1–U4"
-  runs_during_development: 5         # 前 4 次用于定位三个真问题；每次调用上限都是 20
+    - "D1 预算阶梯加长（smoke 当时把所有通道的阶梯覆盖成 (2000,) ⇒ 不是生产阶梯）"
+    - "C_t 真的送进判官（smoke 当时漏传 conclusion_space ⇒ 判官拿到的是占位串）"
+    - "训练循环 / 策略梯度 / 步级奖励去重（这三项由**离线自测**覆盖，0 次模型调用）"
+  ladder_modes:
+    default: override
+    override: "各通道 budgets 统一覆盖成 (2000,)（历史行为；记录在案的那次）⇒ **不测 D1**"
+    production: "SMOKE_LADDER=production ⇒ **不覆盖**，各通道用生产阶梯（al_ex 2000→3200→4400；check2 1200→1800→2400）⇒ D1 被真正检验"
+    effective_report: "smoke.ladder_report()（离线、0 次调用）⇒ 把「这次跑的是不是生产阶梯」变成可核对的事实"
+  runs_during_development: 5         # 前 4 次用于定位三个真问题；每次调用上限都是 20（前 4 次的日志未保留）
 
 # ───────────────────────────────────────────────────────── 实现文件
 files:
   - {path: "/workspace/lab/routes/B/DESIGN.md", role: "人读规格"}
   - {path: "/workspace/lab/routes/B/spec.yaml", role: "机器读规格（本文件）"}
   - {path: "/workspace/lab/routes/B/code/ops_v2.py", role: "v2 动作空间/候选集/30 维特征/策略分布"}
-  - {path: "/workspace/lab/routes/B/code/evidence_index.py", role: "编号化依据包 + 带条目归因的判官 + 代理 Ŵ"}
+  - {path: "/workspace/lab/routes/B/code/evidence_index.py", role: "编号化依据包 + 带条目归因的判官（协议 §4.6 逐字）+ 代理 Ŵ"}
   - {path: "/workspace/lab/routes/B/code/monitor.py", role: "监控面板 + τ 控制器 + 告警变异自测"}
-  - {path: "/workspace/lab/routes/B/code/train_policy_v2.py", role: "训练循环参考实现（on-policy + EMA）"}
-  - {path: "/workspace/lab/routes/B/code/guard.py", role: "U1–U4 黑名单自检"}
-  - {path: "/workspace/lab/routes/B/code/smoke.py", role: "冒烟脚本"}
+  - {path: "/workspace/lab/routes/B/code/train_policy_v2.py", role: "训练循环（on-policy + EMA + 早停 + 校准闸门）+ 精确策略梯度 + 步级奖励去重"}
+  - {path: "/workspace/lab/routes/B/code/stub_llm.py", role: "离线 stub 模型（0 次真实调用；只为证明训练循环可执行）"}
+  - {path: "/workspace/lab/routes/B/code/guard.py", role: "U1–U4 黑名单自检（命中即 abort）"}
+  - {path: "/workspace/lab/routes/B/code/smoke.py", role: "冒烟脚本（阶梯模式开关 + 黑名单前置 abort + 硬上限 20）"}
   - {path: "/workspace/lab/routes/B/code/test_v2_witness.py", role: "见证回归断言（含 --mutate 变异注入自测）"}
+  - {path: "/workspace/lab/routes/B/code/test_train_loop.py", role: "训练循环离线自测（0 次真实调用）"}
+  - {path: "/workspace/lab/routes/B/code/test_policy_grad.py", role: "策略梯度对拍（精确式 vs 数值梯度；并量化旧解析式的偏差）"}
+  - {path: "/workspace/lab/routes/B/code/test_step_reward_dedup.py", role: "步级奖励去重探针（A/B/C/D 四情形）"}
+  - {path: "/workspace/lab/routes/B/code/test_judge_parser.py", role: "判官解析器行为表（接受什么/丢什么/已知弱点）"}
+  - {path: "/workspace/lab/routes/B/code/test_judge_prompt.py", role: "判官提示词自查（协议 §4.6:522-526 逐字 + C_t 非空）"}
+  - {path: "/workspace/lab/routes/B/code/test_spec_flowchart.py", role: "spec 可渲染性自检（双解析 + 渲染非空 + 变异注入）"}
   - {path: "/workspace/lab/routes/B/code/yaml_lite.py", role: "YAML 解析校验器（证明本 spec.yaml 可被机器解析）"}
   - {path: "/workspace/lab/routes/B/code/data/diag_topics.json", role: "2 道自造诊断题"}
 untouched:

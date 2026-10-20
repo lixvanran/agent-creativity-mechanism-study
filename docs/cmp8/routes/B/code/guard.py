@@ -6,6 +6,12 @@
   * 本模块**不打印**黑名单字符串，只打印**命中数量与位置**（字符串一律用 `<命中>` 占位）；
   * 扫描范围：诊断题面 / 诊断依据包 / 代码里的所有提示词 / DESIGN.md / spec.yaml。
 
+⚠️ **"命中即 abort"的两个执行点**（2026-10-21 修 F9：此前 `__main__` 扫的是空文本 ⇒ 恒 0 命中）：
+  ① `smoke.py`：在**任何 LLM 调用之前**跑 `route_payload()` + `check()` ⇒ 命中 ⇒ SystemExit；
+  ② 本文件 `__main__`：`python3 guard.py` 扫**同一份清单** ⇒ 命中 ⇒ 退出码 **2**。
+  ⚠️ guard 的覆盖范围**就是** `route_payload()` 列出的那一份清单（见该函数 docstring）；
+     运行期模型输出**不在**覆盖范围内 ⇒ 不许把它说成"全量扫描"。
+
 黑名单三类（协议 §4.1）：
   ① 题面字符串（`ask` 逐字）
   ② 依据包片段（`evidence` 的每一条原子事实文本及其 ≥8 字的连续片段）
@@ -117,7 +123,51 @@ def check(prompt_texts: dict, extra_files=()):
     return (total == 0), detail
 
 
+# ───────────────────────────────────────── 本路线的**确切覆盖范围**（F9）
+def route_payload(code_dir=None, route_dir=None):
+    """本路线**实际交付/会用到**的全部文本 ⇒ (texts, files)。
+
+    ⚠️ 这份清单就是「guard 覆盖哪些入口」的**确切口径**（DESIGN §11 L10）：
+      · **覆盖**：四条提示词（GEN / EXTRACT / SPLIT / CHECK_V2）、2 道诊断题的题面与依据包、
+        `code/*.py`、`DESIGN.md`、`spec.yaml`。
+      · **不覆盖**：运行期模型输出、训练中间产物、用户四道题（红线 R-1：本路线不接触）。
+    ⚠️ 命中即 abort 的**执行点**有两个：
+      ① `smoke.py` 在**任何 LLM 调用之前**调用它（命中 ⇒ SystemExit，不烧预算）；
+      ② 本文件 `__main__`（`python3 guard.py`）扫同一份清单 ⇒ 命中 ⇒ 退出码 2。
+    """
+    code_dir = code_dir or os.path.dirname(os.path.abspath(__file__))
+    route_dir = route_dir or os.path.dirname(code_dir)
+    import evidence_index
+    import train_policy_v2 as tpv
+
+    texts = {
+        "prompt_GEN": tpv.GEN_Q,
+        "prompt_EXTRACT": tpv.EXTRACT_Q,
+        "prompt_SPLIT": tpv.SPLIT_Q,
+        "prompt_CHECK_V2": evidence_index.CHECK_V2,
+    }
+    data_path = os.path.join(code_dir, "data", "diag_topics.json")
+    if os.path.exists(data_path):
+        data = json.load(open(data_path, encoding="utf-8"))
+        for t in data["topics"]:
+            texts["diag_ask_%s" % t["topic_id"]] = t["ask"]
+            texts["diag_evidence_%s" % t["topic_id"]] = json.dumps(t["items"], ensure_ascii=False)
+            texts["diag_ct_%s" % t["topic_id"]] = json.dumps(t.get("conclusion_space", []),
+                                                              ensure_ascii=False)
+    files = [os.path.join(code_dir, f) for f in sorted(os.listdir(code_dir))
+             if f.endswith(".py")]
+    for extra in (data_path, os.path.join(route_dir, "DESIGN.md"), os.path.join(route_dir, "spec.yaml")):
+        if os.path.exists(extra):
+            files.append(extra)
+    return texts, files
+
+
 if __name__ == "__main__":
-    ok, det = check({})
+    _texts, _files = route_payload()
+    ok, det = check(_texts, _files)
+    det["scanned_texts"] = len(_texts)
+    det["scanned_files"] = [os.path.basename(f) for f in _files]
+    det["scope_caveat"] = ("guard 只覆盖本清单里的文本（提示词/诊断题/代码/文档）；"
+                           "运行期模型输出不在覆盖范围内")
     print(json.dumps(det, ensure_ascii=False, indent=1))
     sys.exit(0 if ok else 2)

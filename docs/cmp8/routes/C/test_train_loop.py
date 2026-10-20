@@ -95,6 +95,30 @@ def main():
     print("[6] 档位/端点一致性：%s（期望 []）" % bad_alphabet)
     ok = ok and not bad_alphabet
 
+    # 7. ★ C2 的 key_hit 口径（复核 6e）：只在「已交付 ∧ 被支持」子集上算
+    kc = [dict(must_any=[["罚款总额为 9 元"]])]
+    d_sup = dict(delivered_supported_text="罚款总额为 9 元",
+                 delivered_claims=[dict(text="罚款总额为 9 元", verdict="支持", score=1.0)])
+    d_unsup = dict(delivered_supported_text="",
+                   delivered_claims=[dict(text="罚款总额为 9 元", verdict="未核验", score=0.0)],
+                   answer="罚款总额为 9 元")
+    kh_sup = TP.key_hit_supported(d_sup, kc)
+    kh_any = TP.key_hit(d_unsup["answer"], kc)        # 整份机械答案口径（仅参考）
+    kh_c2 = TP.key_hit_supported(d_unsup, kc)          # C2 真正用的口径
+    print("[7] key_hit 口径：被支持子集=%.2f｜整份答案(未核验文本)=%.2f｜C2 用(未核验文本)=%.2f"
+          "（期望 1.00 / 1.00 / 0.00）" % (kh_sup, kh_any, kh_c2))
+    ok = ok and kh_sup == 1.0 and kh_any == 1.0 and kh_c2 == 0.0
+
+    # 8. ★ 断言护栏：把**未支持**的断言塞进 supported_text ⇒ 必须抛错（不静默降级）
+    try:
+        TP.supported_text_of(dict(
+            delivered_supported_text="机密文本",
+            delivered_claims=[dict(text="机密文本", verdict="未核验", score=0.0)]))
+        print("[8] 未支持断言混入 supported_text：**未抛错** ⇒ FAIL")
+        ok = False
+    except AssertionError as e:
+        print("[8] 未支持断言混入 supported_text：已抛错（%s）" % str(e)[:48])
+
     print("\n结果：%s（假客户端，0 次真实 API 调用）" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 
