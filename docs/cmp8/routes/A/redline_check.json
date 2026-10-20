@@ -1,0 +1,52 @@
+{
+ "model_facing_strings_checked": 324,
+ "R2_rubric_term_hits": [
+  {
+   "src": "FACET:FA1:why",
+   "term": "承重",
+   "sha1": "3294de4b"
+  },
+  {
+   "src": "FACET:FA6:why",
+   "term": "承重",
+   "sha1": "dfcaa1f5"
+  }
+ ],
+ "R2_width_proxy_hits": [],
+ "R3_self_report_hits": [],
+ "R5_adhd_hits": [],
+ "R6_answer_hint_hits": [],
+ "R1_blacklist_strict_hits": 0,
+ "R1_blacklist_hint_hits": 1,
+ "R1_blacklist_source_files": 8,
+ "R1_blacklist_files_scanned": 8,
+ "R1_hit_details": [
+  {
+   "path": "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/A/DESIGN.md",
+   "chars": 32440,
+   "lines": 640,
+   "hits": [
+    {
+     "line": 432,
+     "cls": "hint",
+     "len": 4,
+     "sha1": "c15d632e"
+    }
+   ]
+  }
+ ],
+ "M4_generation_templates_have_no_evidence_slot": true,
+ "M4_verify_template_has_evidence_slot": true,
+ "R8_endpoint": "https://api.minimaxi.com/v1",
+ "R8_endpoint_ok": true,
+ "hard_fail_counts": {
+  "R2_rubric_term_hits": 2,
+  "R2_width_proxy_hits": 0,
+  "R3_self_report_hits": 0,
+  "R5_adhd_hits": 0,
+  "R6_answer_hint_hits": 0
+ },
+ "hard_fail_total": 2,
+ "R1_blacklist_strict_total": 0,
+ "all_pass": false
+}

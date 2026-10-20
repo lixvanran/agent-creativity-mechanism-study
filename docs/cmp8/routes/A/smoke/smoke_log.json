@@ -5,9 +5,95 @@
   "openrouter_used": false,
   "global_call_cap": 20,
   "total_api_calls": 12,
-  "total_tokens": 19898,
-  "n_prompts": 7,
-  "elapsed_sec": 188.3,
+  "total_tokens": 23727,
+  "n_prompts": 12,
+  "elapsed_sec": 181.9,
+  "usage": [
+    {
+      "i": 1,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 316,
+      "completion_tokens": 237,
+      "total_tokens": 553
+    },
+    {
+      "i": 2,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 320,
+      "completion_tokens": 411,
+      "total_tokens": 731
+    },
+    {
+      "i": 3,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 369,
+      "completion_tokens": 1334,
+      "total_tokens": 1703
+    },
+    {
+      "i": 4,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 409,
+      "completion_tokens": 593,
+      "total_tokens": 1002
+    },
+    {
+      "i": 5,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 511,
+      "completion_tokens": 2175,
+      "total_tokens": 2686
+    },
+    {
+      "i": 6,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 434,
+      "completion_tokens": 3866,
+      "total_tokens": 4300
+    },
+    {
+      "i": 7,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 822,
+      "completion_tokens": 984,
+      "total_tokens": 1806
+    },
+    {
+      "i": 8,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 332,
+      "completion_tokens": 569,
+      "total_tokens": 901
+    },
+    {
+      "i": 9,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 331,
+      "completion_tokens": 240,
+      "total_tokens": 571
+    },
+    {
+      "i": 10,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 380,
+      "completion_tokens": 570,
+      "total_tokens": 950
+    },
+    {
+      "i": 11,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 378,
+      "completion_tokens": 3237,
+      "total_tokens": 3615
+    },
+    {
+      "i": 12,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "prompt_tokens": 739,
+      "completion_tokens": 4170,
+      "total_tokens": 4909
+    }
+  ],
   "tasks": [
     {
       "tid": "DS-01",
@@ -18,38 +104,88 @@
           "n4_resample": 1,
           "n4_claims": 5,
           "pool_pre_split": 15,
+          "pool_truncated": 3,
           "n5_split": 0,
-          "pool_total": 15,
-          "n6_dedup_strict": 15,
-          "n6_dedup_loose": 15,
-          "n6_impl1_lex": 15,
-          "n6_impl2_struct": 15
+          "pool_total": 12,
+          "n6_dedup_strict": 11,
+          "n6_dedup_loose": 12,
+          "n6_impl1_lex": 12,
+          "n6_impl2_struct": 11
         },
         "trigger_fired": true,
-        "trigger_kept": 10,
+        "trigger_kept": 9,
         "facet_enabled": true,
         "resample_mode": "structured",
         "novel_axis": true,
         "utility_axis": true,
         "evidence_prompt_checks": 9,
-        "n_calls": 12,
-        "n_tokens": 19898,
-        "n_pool": 15,
-        "n_supported": 0,
+        "n_calls": 7,
+        "n_tokens": 12781,
+        "n_pool": 12,
+        "n_supported": 1,
         "n_contradicted": 0,
-        "n_unmentioned": 0,
+        "n_unmentioned": 11,
         "n_parsefail": 0,
         "n_unverified": 0,
         "internal_parsefail_rate": 0.0,
         "conflict_rate_generated": 0.0,
-        "support_rate_generated": 0.0,
+        "support_rate_generated": 1.0,
         "n_slots": 3,
-        "answer_chars": 91,
-        "answer_truncated_count": 0
+        "answer_chars": 133,
+        "answer_truncated_count": 0,
+        "answer_fallback": false,
+        "n_empty_retry": 0,
+        "n_silent_empty": 0
       },
-      "n_pool_items": 15,
-      "n_claims_extracted": 15,
-      "answer": "# 某市居民用水阶梯价：第一档每月 0–18 吨，每吨 3.5 元；超过 18 吨的部分每吨 5 元。某户当月用水 24 吨，应缴水费多少元？\n\n## 经核验成立的依据\n\n- （无）"
+      "n_pool_items": 12,
+      "n_claims_extracted": 12,
+      "answer": "# 某市居民用水阶梯价：第一档每月 0–18 吨，每吨 3.5 元；超过 18 吨的部分每吨 5 元。某户当月用水 24 吨，应缴水费多少元？\n\n## 经核验成立的依据\n\n- [EV-DS01-03] 住户甲超过18吨阶梯上限的水量为6吨，计算式为24－18＝6吨。"
+    },
+    {
+      "tid": "DS-02",
+      "meta": {
+        "stage_counts": {
+          "n1_gen": 2,
+          "n2_claims": 10,
+          "n4_resample": 0,
+          "n4_claims": 0,
+          "pool_pre_split": 10,
+          "pool_truncated": 0,
+          "n5_split": 0,
+          "pool_total": 10,
+          "n6_dedup_strict": 10,
+          "n6_dedup_loose": 10,
+          "n6_impl1_lex": 10,
+          "n6_impl2_struct": 10
+        },
+        "trigger_fired": false,
+        "trigger_kept": 10,
+        "facet_enabled": true,
+        "resample_mode": "structured",
+        "novel_axis": true,
+        "utility_axis": true,
+        "evidence_prompt_checks": 8,
+        "n_calls": 5,
+        "n_tokens": 23727,
+        "n_pool": 10,
+        "n_supported": 9,
+        "n_contradicted": 0,
+        "n_unmentioned": 1,
+        "n_parsefail": 0,
+        "n_unverified": 0,
+        "internal_parsefail_rate": 0.0,
+        "conflict_rate_generated": 0.0,
+        "support_rate_generated": 1.0,
+        "n_slots": 2,
+        "answer_chars": 401,
+        "answer_truncated_count": 0,
+        "answer_fallback": false,
+        "n_empty_retry": 0,
+        "n_silent_empty": 0
+      },
+      "n_pool_items": 10,
+      "n_claims_extracted": 10,
+      "answer": "# 某快递规定：普通件 10 公斤以内每件 12 元；超出部分每公斤加收 3 元。生鲜件不得保价，含液体时另付 20 元包装费。寄一件 8 公斤的生鲜件（含液体）应付多少元？该件是否可以保价？\n\n## 经核验成立的依据\n\n- [EV-DS02-01] 重量为8公斤的货物属于10公斤以内。\n- [EV-DS02-01] 普通件重量在10公斤以内时，每件运费为12元。\n- [EV-DS02-02] 重量为8公斤的货物不触发超重加收。\n- [EV-DS02-03] 含液体的生鲜件不得保价。\n- [EV-DS02-01] 本次寄件重量未超过10公斤。\n- [EV-DS02-04] 含液体的生鲜件需要另付包装费。\n- [EV-DS02-01] 本次寄件的运费为12元。\n- [EV-DS02-01] 寄送1件重量为8公斤且含液体的生鲜件，应付费用为32元。\n- [EV-DS02-03] 生鲜件不得保价。"
     }
   ],
   "checks": {

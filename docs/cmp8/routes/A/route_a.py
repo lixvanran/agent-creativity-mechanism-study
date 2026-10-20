@@ -64,7 +64,7 @@ DEFAULTS = dict(
     collapse_mult=1.0,           # 塌缩判据：存活断言数 < collapse_mult × K₁ ⇒ 触发
     # --- 采样 ---
     temp=0.7,                    # 协议 §4.3 三臂一致
-    max_out_tokens=3000,
+    max_out_tokens=6000,
 )
 
 # 断言抽取的行过滤（沿用项目既有口径：8–70 字）
@@ -231,26 +231,49 @@ def run_route(ask: str, evidence_items: list, cfg: dict = None, llm=None,
 
     gen_prompts: list = []          # 生成类提示词（末尾断言依据包不在其中）
 
+    _calls_at_start = getattr(llm, "n_api_calls", 0)
+
     def _calls():
-        return getattr(llm, "n_api_calls", 0)
+        """**本次 route 调用内**已用的调用数（预算守卫按任务计，不按进程计）。"""
+        return getattr(llm, "n_api_calls", 0) - _calls_at_start
 
     def _tokens():
         return getattr(llm, "n_tokens", 0)
 
-    # ⚠️ budgets=() ⇒ **只试一次**。共享 client 的默认 budgets=(12000,16000) 会在
-    #    finish_reason=="length" 时重试 2 次，代价是双倍的 token 与调用数
+    # ⚠️ budgets=() ⇒ **不交给共享 client 兜底**。client 的默认 budgets=(12000,16000)
+    #    会在 finish_reason=="length" 时重试 2 次，代价是双倍的 token 与调用数
     #    （本项目 client 文档已记「<think> 块会吃光 max_tokens」）。
-    #    max_tokens 给足 ⇒ 一次成型；万一被截断就接受截断结果并记账。
+    #    本函数自己管升级：空输出 ⇒ 加预算重来**一次**（上限 2 次尝试）。
+    n_empty_retry = [0]
+    n_silent_empty = [0]
+
+    def _est_call_cost(prompt, mt):
+        """本次调用的预计 token 成本：prompt 长度 + max(实测均值×1.5, 1500)，上限 mt。"""
+        avg = (_tokens() / max(_calls(), 1)) if _calls() else 1500
+        return len(prompt) + int(max(1500, min(avg * 1.5, mt)))
+
     def call(prompt, purpose, max_tokens=None, min_ok=10, budgets=()):
-        if _calls() >= C["max_calls"]:
-            raise BudgetExceeded("调用数超过上限 %d" % C["max_calls"])
         mt = max_tokens or C["max_out_tokens"]
-        out = llm.chat(prompt,
-                       model=os.environ.get("PRIMARY_MODEL", "MiniMax-M3.1-Flash-Preview"),
-                       temp=C["temp"], max_tokens=mt, budgets=budgets,
-                       purpose=purpose, min_ok=min_ok)
-        log.append(dict(purpose=purpose, prompt=prompt, output=out,
-                        n_api_calls=_calls(), n_tokens=_tokens()))
+        out = ""
+        for attempt in range(2):
+            if _calls() >= C["max_calls"]:
+                raise BudgetExceeded("调用数超过上限 %d" % C["max_calls"])
+            if _tokens() + _est_call_cost(prompt, mt) > C["max_tokens"]:
+                raise BudgetExceeded("token 预算不足：已用 %d / 上限 %d" % (_tokens(), C["max_tokens"]))
+            out = llm.chat(prompt,
+                           model=os.environ.get("PRIMARY_MODEL", "MiniMax-M3.1-Flash-Preview"),
+                           temp=C["temp"], max_tokens=mt, budgets=budgets,
+                           purpose=purpose, min_ok=min_ok)
+            log.append(dict(purpose=purpose, prompt=prompt, output=out,
+                            n_api_calls=_calls(), n_tokens=_tokens(),
+                            attempt=attempt + 1))
+            if (out or "").strip():
+                return out
+            # 空输出：思考块吃光了预算（E3「疑似静默空」）⇒ 记一次并加预算重来
+            n_silent_empty[0] += 1
+            if attempt == 0:
+                n_empty_retry[0] += 1
+                mt = min(mt * 2, 16000)
         return out
 
     def gen_call(prompt, purpose, min_ok=40):
@@ -280,7 +303,7 @@ def run_route(ask: str, evidence_items: list, cfg: dict = None, llm=None,
         if not a:
             slot_claims.append([])
             continue
-        t = call(F.EXTRACT_Q.format(t=a[:1200]), "A_extract_%s" % fid, max_tokens=3000)
+        t = call(F.EXTRACT_Q.format(t=a[:1200]), "A_extract_%s" % fid, max_tokens=6000)
         slot_claims.append(_lines(t, cap=C["extract_cap"]))
     meta["stage_counts"]["n2_claims"] = sum(len(x) for x in slot_claims)
 
@@ -313,7 +336,7 @@ def run_route(ask: str, evidence_items: list, cfg: dict = None, llm=None,
     r2_claims: list = []
     if r2_answers:
         t = call(F.EXTRACT_Q.format(t="\n\n".join(r2_answers)[:2000]), "A_extract_r2",
-                 max_tokens=3500)
+                 max_tokens=6000)
         got = _lines(t, cap=C["extract_cap"] * len(r2_answers))
         per = max(1, len(got) // max(len(r2_answers), 1))
         r2_claims = [got[i * per:(i + 1) * per] for i in range(len(r2_answers))]
@@ -330,14 +353,16 @@ def run_route(ask: str, evidence_items: list, cfg: dict = None, llm=None,
         if g:
             groups.append(g)
     pool = _roundrobin(groups)
-    split_cands = [c for c in pool if len(c) >= 40]     # 长度是格式属性，不是内容判断
-    room = max(0, C["max_claims"] - len(pool))
     meta["stage_counts"]["pool_pre_split"] = len(pool)
+    pool = pool[:C["max_claims"]]                        # 定容：按轮转序截，内容无关
+    split_cands = [c for c in pool if len(c) >= 40]      # 长度是格式属性，不是内容判断
+    room = max(0, C["max_claims"] - len(pool))
+    meta["stage_counts"]["pool_truncated"] = meta["stage_counts"]["pool_pre_split"] - len(pool)
 
     # ---------------- N5 原子化拆分
     split_out: list = []
     if split_cands and room > 0 and _calls() + 1 <= C["max_calls"]:
-        t = call(F.SPLIT_Q.format(t="\n".join(split_cands[:10])), "A_split", max_tokens=2000)
+        t = call(F.SPLIT_Q.format(t="\n".join(split_cands[:10])), "A_split", max_tokens=6000)
         exist = set(pool)
         split_out = [g for g in _lines(t, cap=min(room, 16)) if g not in exist][:room]
     pool = pool + split_out
@@ -363,7 +388,7 @@ def run_route(ask: str, evidence_items: list, cfg: dict = None, llm=None,
             b = pool[i:i + C["verify_batch"]]
             lst = "\n".join("%d. %s" % (n + 1, b[n]) for n in range(len(b)))
             t = call(F.CHECK_Q.format(ask=ask, ev=ev_text, claims=lst), "A_verify",
-                     max_tokens=4000, min_ok=len(b))
+                     max_tokens=8000, min_ok=len(b))
             lines = [x for x in (t or "").splitlines() if x.strip()]
             for n, ln in enumerate(lines[:len(b)]):
                 m = VERDICT_RE.search(ln)
@@ -400,7 +425,23 @@ def run_route(ask: str, evidence_items: list, cfg: dict = None, llm=None,
             break
         lines.append(item)
         used += len(item) + 1
-    answer = "# %s\n\n## 经核验成立的依据\n\n%s" % (ask, "\n".join(lines) if lines else "- （无）")
+    fallback = False
+    if not lines:
+        # 兜底（沿用本项目既有先例 learnarch.run_episode）：一条都没被支持时，
+        # 退回「依据未覆盖」的条目，避免产出空壳；**必须如实标注 fallback**。
+        for i in order:
+            c = pool[i]
+            if verdicts.get(c, {}).get("verdict") in ("未提及", "非主张", "未核验"):
+                item = "- %s" % c
+                if used + len(item) + 1 > C["answer_char_cap"]:
+                    break
+                lines.append(item)
+                used += len(item) + 1
+        fallback = bool(lines)
+    if fallback:
+        answer = "# %s\n\n## 依据未覆盖、仅供参考的事项\n\n%s" % (ask, "\n".join(lines))
+    else:
+        answer = "# %s\n\n## 经核验成立的依据\n\n%s" % (ask, "\n".join(lines) if lines else "- （无）")
 
     # ---------------- 自检：依据包**超出题面的部分**不得出现在生成提示词里
     # ⚠️ 只检查「不在题面里的依据条目」：题面本身可能与依据包有字面重合
@@ -430,6 +471,9 @@ def run_route(ask: str, evidence_items: list, cfg: dict = None, llm=None,
         n_slots=len(slot_answers) + len(r2_answers),
         answer_chars=len(answer),
         answer_truncated_count=max(0, n_sup - len(lines)),
+        answer_fallback=fallback,
+        n_empty_retry=n_empty_retry[0],
+        n_silent_empty=n_silent_empty[0],
     )
     return dict(answer=answer, meta=meta, pool=pool, verdicts=verdicts,
                 gen_prompts=gen_prompts, log=log)

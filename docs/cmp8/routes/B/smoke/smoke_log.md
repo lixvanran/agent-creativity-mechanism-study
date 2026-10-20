@@ -1,28 +1,29 @@
 # 路线 B v2 · 冒烟日志
 
-- 时间：2026-10-21 01:33:17 → 2026-10-21 01:36:45
+- 时间：2026-10-21 01:50:06 → 2026-10-21 01:53:10
 - 模型：MiniMax-M3.1-Flash-Preview ｜ 端点：https://api.minimaxi.com/v1（被测侧**不走 OpenRouter**）
-- **调用数：14 / 上限 20**（成功 12）｜ 端到端耗时 232 s
-- 黑名单自检：PASS ｜ 状态可分性对照：PASS ｜ 代理自测：PASS ｜ 告警自测：PASS
+- **调用数：14 / 上限 20**（成功 12；逻辑调用 12 次）｜ 端到端耗时 198 s
+- **截断**：2 次尝试 `finish_reason=length`（其中 0 次逻辑调用最终仍被截断）｜ 步级截断率 0.00｜ 空产出尝试 2 次
+- 黑名单自检：PASS ｜ 状态可分性对照：PASS ｜ 代理自测：PASS ｜ 告警自测：PASS ｜ 见证回归：PASS
 
 ## 调用清单（每行 = 一次真实 HTTP 调用）
 
 | # | purpose | model | max_tokens | finish | 内容长度 | ok | 秒 |
 |---:|---|---|---:|---|---:|:-:|---:|
-| 1 | al_gen | MiniMax-M3.1-Flash-Preview | 8000 | stop | 254 | True | 84.8 |
-| 2 | al_ex | MiniMax-M3.1-Flash-Preview | 1400 | stop | 225 | True | 9.6 |
-| 3 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 16 | True | 2.5 |
-| 4 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 15 | True | 1.7 |
-| 5 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 3.0 |
-| 6 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 3.2 |
-| 7 | al_gen | MiniMax-M3.1-Flash-Preview | 8000 | stop | 393 | True | 31.5 |
-| 8 | al_ex | MiniMax-M3.1-Flash-Preview | 1400 | length | 0 | False | 13.8 |
-| 9 | al_ex | MiniMax-M3.1-Flash-Preview | 2000 | stop | 343 | True | 30.1 |
-| 10 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 2.3 |
-| 11 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 15 | True | 13.4 |
-| 12 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | length | 0 | False | 11.1 |
-| 13 | check2 | MiniMax-M3.1-Flash-Preview | 2000 | stop | 16 | True | 22.2 |
-| 14 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 16 | True | 2.9 |
+| 1 | al_gen | MiniMax-M3.1-Flash-Preview | 8000 | stop | 261 | True | 49.5 |
+| 2 | al_ex | MiniMax-M3.1-Flash-Preview | 2000 | stop | 245 | True | 15.3 |
+| 3 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 6.1 |
+| 4 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 16 | True | 4.5 |
+| 5 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | length | 0 | False | 14.0 |
+| 6 | check2 | MiniMax-M3.1-Flash-Preview | 2000 | length | 0 | False | 38.6 |
+| 7 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 4.3 |
+| 8 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 5.0 |
+| 9 | al_gen | MiniMax-M3.1-Flash-Preview | 8000 | stop | 367 | True | 38.0 |
+| 10 | al_ex | MiniMax-M3.1-Flash-Preview | 2000 | stop | 297 | True | 12.2 |
+| 11 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 1.4 |
+| 12 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 17 | True | 2.4 |
+| 13 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 16 | True | 4.2 |
+| 14 | check2 | MiniMax-M3.1-Flash-Preview | 1200 | stop | 16 | True | 2.5 |
 
 ## 状态可分性对照（离线，0 次调用）
 
@@ -179,5 +180,24 @@
  "closure_fires": true,
  "tau_increases_when_collapsed": true,
  "all_pass": true
+}
+```
+
+## 见证回归断言（离线）
+
+```json
+{
+ "argmax_by_state": {
+  "none": "VERIFY",
+  "unmentioned": "SPLIT",
+  "supported": "GEN_PLAIN",
+  "contradicted": "GEN_PLAIN",
+  "unverified": "VERIFY"
+ },
+ "witness_holds": true,
+ "argmax_varies": true,
+ "legacy_order_state_invariant": true,
+ "v2_features_differ_across_states": true,
+ "PASS": true
 }
 ```

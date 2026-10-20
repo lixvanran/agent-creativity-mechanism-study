@@ -92,8 +92,8 @@ def main() -> int:
                   % (r["meta"]["n_calls"], r["meta"]["n_tokens"], r["meta"]["n_pool"],
                      r["meta"]["n_supported"], r["meta"]["n_contradicted"],
                      r["meta"]["n_unmentioned"], r["meta"]["n_parsefail"]), flush=True)
-            print("   trigger_fired=%s modes=%s" % (r["meta"]["trigger_fired"],
-                                                    r["meta"]["trigger_modes"]), flush=True)
+            print("   trigger_fired=%s kept_r1=%s" % (r["meta"]["trigger_fired"],
+                                                     r["meta"]["trigger_kept"]), flush=True)
             print("   --- 答案 ---", flush=True)
             print(r["answer"], flush=True)
         except BudgetExceeded as e:

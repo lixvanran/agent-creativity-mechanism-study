@@ -1,5 +1,5 @@
 {
- "t0": "2026-10-21 01:33:17",
+ "t0": "2026-10-21 01:50:06",
  "call_cap": 20,
  "model": "MiniMax-M3.1-Flash-Preview",
  "events": [
@@ -166,6 +166,21 @@
    "all_pass": true
   },
   {
+   "tag": "witness_regression",
+   "argmax_by_state": {
+    "none": "VERIFY",
+    "unmentioned": "SPLIT",
+    "supported": "GEN_PLAIN",
+    "contradicted": "GEN_PLAIN",
+    "unverified": "VERIFY"
+   },
+   "witness_holds": true,
+   "argmax_varies": true,
+   "legacy_order_state_invariant": true,
+   "v2_features_differ_across_states": true,
+   "PASS": true
+  },
+  {
    "tag": "episode",
    "topic_id": "DS1",
    "steps": 6,
@@ -174,13 +189,13 @@
     "EXTRACT": 1,
     "VERIFY": 4
    },
-   "n_claims": 10,
+   "n_claims": 8,
    "proxy": {
     "w_hat": 0.3333333333333333,
     "n_anchored": 3,
     "covered_anchored": 1,
     "covered_any": 1,
-    "n_supported": 3,
+    "n_supported": 1,
     "n_contradicted": 0,
     "conflict_rate": 0.0,
     "support_rate": 1.0,
@@ -188,12 +203,16 @@
    },
    "final_reward": 1.0,
    "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
-   "answer_len": 316
+   "answer_len": 307,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": []
   },
   {
    "tag": "answer_head",
    "topic_id": "DS1",
-   "head": "# 我在市图书馆借了一本小说，第一次续借之后还能再续吗？读者证有效期是多久？ |  | ## 经核验成立的依据 | - 按所述普通图书通行规则，小说首次借期为30天。 | - 小说最多续借1次，续借后再延30天。 | - 小说第一次续借后一般不能再次续借。 |  | ## 依据未覆盖、仅供参考的事项 | - 国家规范未统一规定图书续借次数和读者证有效期年限。 | - 续借须在原到期日前办理。 | - 续借时须无逾期，且该册图书无他人预约。 | - 续借可登录馆方公众号或网站办理。"
+   "head": "# 我在市图书馆借了一本小说，第一次续借之后还能再续吗？读者证有效期是多久？ |  | ## 经核验成立的依据 | - 规则写明“最多续借1次”时，完成第一次续借后不能再次续借。 |  | ## 依据未覆盖、仅供参考的事项 | - 续借次数和读者证有效期并非全国统一。 | - 《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。 | - 规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。 | - 读者证期限以卡面标示"
   },
   {
    "tag": "episode",
@@ -204,26 +223,30 @@
     "EXTRACT": 1,
     "VERIFY": 4
    },
-   "n_claims": 10,
+   "n_claims": 9,
    "proxy": {
-    "w_hat": 0.6666666666666666,
+    "w_hat": 0.3333333333333333,
     "n_anchored": 3,
-    "covered_anchored": 2,
-    "covered_any": 2,
-    "n_supported": 4,
+    "covered_anchored": 1,
+    "covered_any": 1,
+    "n_supported": 2,
     "n_contradicted": 0,
     "conflict_rate": 0.0,
     "support_rate": 1.0,
-    "unverified": 6
+    "unverified": 7
    },
-   "final_reward": 2.0,
+   "final_reward": 1.0,
    "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
-   "answer_len": 425
+   "answer_len": 312,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": []
   },
   {
    "tag": "answer_head",
    "topic_id": "DS2",
-   "head": "# 我在健身房办了年卡，明年要出差两个月，这期间能不能冻结会员？到期没去能退吗？ |  | ## 经核验成立的依据 | - 合同约定停卡条款的，停卡按约定的期限、次数和费用办理。 | - 冻结是否顺延到期日需要确认。 | - 完全未消费且未享受服务的，可要求退还未履行部分价款。 | - 已经消费的，可返还扣除实际消费及有依据的合理费用后的余额。 |  | ## 依据未覆盖、仅供参考的事项 | - 不存在“出差即可冻结”或“到期未去一律退款”的全国统一规定。 | - 相关依据的"
+   "head": "# 我在健身房办了年卡，明年要出差两个月，这期间能不能冻结会员？到期没去能退吗？ |  | ## 经核验成立的依据 | - 健身卡到期未消费，不当然退款。 | - 合同约定未使用可退的，应退未消费余额。 |  | ## 依据未覆盖、仅供参考的事项 | - 不存在“健身年卡全国统一冻结或退费”标准。 | - 会员协议和办卡时公示条款优先于门店书面确认。 | - 业务员的口头承诺无效。 | - 冻结次数、费用及提前申请期限均以合同为准。 | - 合同没有冻结条款的，可以协商转卡或延期"
   }
  ],
  "endpoint": {
@@ -268,8 +291,20 @@
    "smoke.py": {
     "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/smoke.py": 0
    },
+   "test_v2_witness.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/test_v2_witness.py": 0
+   },
    "train_policy_v2.py": {
     "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/train_policy_v2.py": 0
+   },
+   "yaml_lite.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/yaml_lite.py": 0
+   },
+   "DESIGN.md": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/DESIGN.md": 0
+   },
+   "spec.yaml": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/spec.yaml": 0
    }
   },
   "total_hits": 0,
@@ -282,18 +317,27 @@
    "purpose": "al_gen",
    "max_tokens": 8000,
    "finish_reason": "stop",
-   "content_len": 254,
+   "content_len": 261,
    "ok": true,
-   "secs": 84.83
+   "secs": 49.53
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
    "purpose": "al_ex",
-   "max_tokens": 1400,
+   "max_tokens": 2000,
    "finish_reason": "stop",
-   "content_len": 225,
+   "content_len": 245,
    "ok": true,
-   "secs": 9.6
+   "secs": 15.26
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 17,
+   "ok": true,
+   "secs": 6.12
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
@@ -302,16 +346,25 @@
    "finish_reason": "stop",
    "content_len": 16,
    "ok": true,
-   "secs": 2.51
+   "secs": 4.52
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
    "purpose": "check2",
    "max_tokens": 1200,
-   "finish_reason": "stop",
-   "content_len": 15,
-   "ok": true,
-   "secs": 1.66
+   "finish_reason": "length",
+   "content_len": 0,
+   "ok": false,
+   "secs": 13.99
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 2000,
+   "finish_reason": "length",
+   "content_len": 0,
+   "ok": false,
+   "secs": 38.61
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
@@ -320,7 +373,7 @@
    "finish_reason": "stop",
    "content_len": 17,
    "ok": true,
-   "secs": 3.0
+   "secs": 4.28
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
@@ -329,34 +382,25 @@
    "finish_reason": "stop",
    "content_len": 17,
    "ok": true,
-   "secs": 3.17
+   "secs": 4.96
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
    "purpose": "al_gen",
    "max_tokens": 8000,
    "finish_reason": "stop",
-   "content_len": 393,
+   "content_len": 367,
    "ok": true,
-   "secs": 31.53
-  },
-  {
-   "model": "MiniMax-M3.1-Flash-Preview",
-   "purpose": "al_ex",
-   "max_tokens": 1400,
-   "finish_reason": "length",
-   "content_len": 0,
-   "ok": false,
-   "secs": 13.75
+   "secs": 37.95
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
    "purpose": "al_ex",
    "max_tokens": 2000,
    "finish_reason": "stop",
-   "content_len": 343,
+   "content_len": 297,
    "ok": true,
-   "secs": 30.12
+   "secs": 12.15
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
@@ -365,34 +409,16 @@
    "finish_reason": "stop",
    "content_len": 17,
    "ok": true,
-   "secs": 2.33
+   "secs": 1.4
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
    "purpose": "check2",
    "max_tokens": 1200,
    "finish_reason": "stop",
-   "content_len": 15,
+   "content_len": 17,
    "ok": true,
-   "secs": 13.43
-  },
-  {
-   "model": "MiniMax-M3.1-Flash-Preview",
-   "purpose": "check2",
-   "max_tokens": 1200,
-   "finish_reason": "length",
-   "content_len": 0,
-   "ok": false,
-   "secs": 11.06
-  },
-  {
-   "model": "MiniMax-M3.1-Flash-Preview",
-   "purpose": "check2",
-   "max_tokens": 2000,
-   "finish_reason": "stop",
-   "content_len": 16,
-   "ok": true,
-   "secs": 22.17
+   "secs": 2.36
   },
   {
    "model": "MiniMax-M3.1-Flash-Preview",
@@ -401,11 +427,22 @@
    "finish_reason": "stop",
    "content_len": 16,
    "ok": true,
-   "secs": 2.87
+   "secs": 4.24
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 16,
+   "ok": true,
+   "secs": 2.49
   }
  ],
  "n_calls": 14,
  "n_calls_ok": 12,
+ "n_attempts_truncated": 2,
+ "n_attempts_empty": 2,
  "e2e": [
   {
    "topic_id": "DS1",
@@ -415,13 +452,13 @@
     "EXTRACT": 1,
     "VERIFY": 4
    },
-   "n_claims": 10,
+   "n_claims": 8,
    "proxy": {
     "w_hat": 0.3333333333333333,
     "n_anchored": 3,
     "covered_anchored": 1,
     "covered_any": 1,
-    "n_supported": 3,
+    "n_supported": 1,
     "n_contradicted": 0,
     "conflict_rate": 0.0,
     "support_rate": 1.0,
@@ -429,8 +466,12 @@
    },
    "final_reward": 1.0,
    "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
-   "answer_len": 316,
-   "answer_head": "# 我在市图书馆借了一本小说，第一次续借之后还能再续吗？读者证有效期是多久？ |  | ## 经核验成立的依据 | - 按所述普通图书通行规则，小说首次借期为30天。 | - 小说最多续借1次，续借后再延30天。 | - 小说第一次续借后一般不能再次续借。 |  | ## 依据未覆盖、仅供参考的事项 | - 国家规范未统一规定图书续借次数和读者证有效期年限。 | - 续借须在原到期日前办理。 | - 续借时须无逾期，且该册图书无他人预约。 | - 续借可登录馆方公众号或网站办理。"
+   "answer_len": 307,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": [],
+   "answer_head": "# 我在市图书馆借了一本小说，第一次续借之后还能再续吗？读者证有效期是多久？ |  | ## 经核验成立的依据 | - 规则写明“最多续借1次”时，完成第一次续借后不能再次续借。 |  | ## 依据未覆盖、仅供参考的事项 | - 续借次数和读者证有效期并非全国统一。 | - 《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。 | - 规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。 | - 读者证期限以卡面标示"
   },
   {
    "topic_id": "DS2",
@@ -440,106 +481,120 @@
     "EXTRACT": 1,
     "VERIFY": 4
    },
-   "n_claims": 10,
+   "n_claims": 9,
    "proxy": {
-    "w_hat": 0.6666666666666666,
+    "w_hat": 0.3333333333333333,
     "n_anchored": 3,
-    "covered_anchored": 2,
-    "covered_any": 2,
-    "n_supported": 4,
+    "covered_anchored": 1,
+    "covered_any": 1,
+    "n_supported": 2,
     "n_contradicted": 0,
     "conflict_rate": 0.0,
     "support_rate": 1.0,
-    "unverified": 6
+    "unverified": 7
    },
-   "final_reward": 2.0,
+   "final_reward": 1.0,
    "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
-   "answer_len": 425,
-   "answer_head": "# 我在健身房办了年卡，明年要出差两个月，这期间能不能冻结会员？到期没去能退吗？ |  | ## 经核验成立的依据 | - 合同约定停卡条款的，停卡按约定的期限、次数和费用办理。 | - 冻结是否顺延到期日需要确认。 | - 完全未消费且未享受服务的，可要求退还未履行部分价款。 | - 已经消费的，可返还扣除实际消费及有依据的合理费用后的余额。 |  | ## 依据未覆盖、仅供参考的事项 | - 不存在“出差即可冻结”或“到期未去一律退款”的全国统一规定。 | - 相关依据的"
+   "answer_len": 312,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": [],
+   "answer_head": "# 我在健身房办了年卡，明年要出差两个月，这期间能不能冻结会员？到期没去能退吗？ |  | ## 经核验成立的依据 | - 健身卡到期未消费，不当然退款。 | - 合同约定未使用可退的，应退未消费余额。 |  | ## 依据未覆盖、仅供参考的事项 | - 不存在“健身年卡全国统一冻结或退费”标准。 | - 会员协议和办卡时公示条款优先于门店书面确认。 | - 业务员的口头承诺无效。 | - 冻结次数、费用及提前申请期限均以合同为准。 | - 合同没有冻结条款的，可以协商转卡或延期"
   }
  ],
  "raw_outputs": [
   {
    "op": "GEN_ANGLE",
-   "raw": "**适用规则来源**：应查本市图书馆官网或服务台现行《图书借阅与续借规则》《读者证管理办法》及证面注记；国家规范并未统一规定续借次数和证件年限。按普通图书通行规则，小说首次借期30天，最多续借1次，续借后再延30天，因此**第一次续借后一般不能再续**；须在原到期日前办理，且无逾期、该册无他人预约。读者证通常自最近核验起有效**3年**，具体以证面到期日为准。\n\n续借可登录馆方公众号/网站，或持读者证、身份证到服务台办理；读者证到期前携身份证和原证换证。因未注明城市，办理前应核对本市馆是否另有不同规定。"
+   "raw": "**判断：**续借次数和读者证有效期并非全国统一。《公共图书馆条例》未规定具体次数、年限；应适用市图书馆官网/公众号最新《借阅规则》《办证须知》，以借阅系统结果为准；如该市另有统一规则，适用较新、较具体的市级规则。\n\n**做法：**在到期前登录读者账户，或持读者证、该书到服务台查询。规则写“最多续借1次”，则第一次后不能再续；写“最多2次”，且未逾期、未超累计借期、未被他人预约，才可再续1次。读者证期限以卡面或系统“有效期至”为准，续借不会自动延期；换证通常需原读者证和身份证件。因未提供城市或馆名，无法确定唯一数值。"
   },
   {
    "op": "EXTRACT",
-   "raw": "- 国家规范未统一规定图书续借次数和读者证有效期年限。\n- 按所述普通图书通行规则，小说首次借期为30天。\n- 小说最多续借1次，续借后再延30天。\n- 小说第一次续借后一般不能再次续借。\n- 续借须在原到期日前办理。\n- 续借时须无逾期，且该册图书无他人预约。\n- 续借可登录馆方公众号或网站办理。\n- 到服务台办理续借须持读者证和身份证。\n- 读者证通常自最近核验起有效3年，具体到期日以证面注记为准。\n- 读者证到期前可携身份证和原证办理换证。"
+   "raw": "1. 续借次数和读者证有效期并非全国统一。\n2. 《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。\n3. 规则写明“最多续借1次”时，完成第一次续借后不能再次续借。\n4. 规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。\n5. 读者证期限以卡面标示或读者账户系统中“有效期至”的日期为准。\n6. 续借不会自动延期。\n7. 换证通常需要提供原读者证和身份证件。\n8. 未提供城市或馆名时，无法确定唯一的续借次数和读者证有效期数值。"
   },
   {
    "batch": [
-    "国家规范未统一规定图书续借次数和读者证有效期年限。",
-    "按所述普通图书通行规则，小说首次借期为30天。"
-   ],
-   "attempt": 0,
-   "raw": "未提及 | -1\n支持 | E2"
-  },
-  {
-   "batch": [
-    "小说最多续借1次，续借后再延30天。",
-    "小说第一次续借后一般不能再次续借。"
-   ],
-   "attempt": 0,
-   "raw": "支持 | E2\n支持 | E2"
-  },
-  {
-   "batch": [
-    "续借须在原到期日前办理。",
-    "续借时须无逾期，且该册图书无他人预约。"
+    "续借次数和读者证有效期并非全国统一。",
+    "《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。"
    ],
    "attempt": 0,
    "raw": "未提及 | -1\n未提及 | -1"
   },
   {
    "batch": [
-    "续借可登录馆方公众号或网站办理。",
-    "到服务台办理续借须持读者证和身份证。"
+    "规则写明“最多续借1次”时，完成第一次续借后不能再次续借。",
+    "规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。"
    ],
    "attempt": 0,
+   "raw": "支持 | E2\n未提及 | -1"
+  },
+  {
+   "batch": [
+    "读者证期限以卡面标示或读者账户系统中“有效期至”的日期为准。",
+    "续借不会自动延期。"
+   ],
+   "attempt": 0,
+   "raw": ""
+  },
+  {
+   "batch": [
+    "读者证期限以卡面标示或读者账户系统中“有效期至”的日期为准。",
+    "续借不会自动延期。"
+   ],
+   "attempt": 1,
    "raw": "未提及 | -1\n未提及 | -1"
+  },
+  {
+   "batch": [
+    "换证通常需要提供原读者证和身份证件。",
+    "未提供城市或馆名时，无法确定唯一的续借次数和读者证有效期数值。"
+   ],
+   "attempt": 0,
+   "raw": "未提及 | -1\n非主张 | -1"
   },
   {
    "op": "GEN_ANGLE",
-   "raw": "**判断：**不存在“出差即可冻结”或“到期未去一律退款”的全国统一规定。适用来源依次为：①已签年卡合同及办卡时明确公示、纳入合同的会员规则；②当地预付卡规定；③《民法典》《消费者权益保护法》。合同有停卡条款的，按约定期限、次数、费用办理，并确认冻结是否顺延到期日；无条款的，应与经营者协商，不能当然免费冻结。\n\n完全未消费、未享受服务的，可要求退未履行价款；已经消费的，返还余额并扣除实际消费及有依据的合理费用。“概不退款”等不合理格式条款可能无效（《民法典》第496、497条）。\n\n**做法：**建议出发前7日，通过官方渠道书面申请“冻结自×日至×日，共2个月，说明收费及到期日是否顺延”，要求5个工作日内答复（属操作建议）。留存合同、付款记录、会员编号、申请及聊天记录。协商不成可投诉12315，并依合同申请仲裁或起诉；符合《民法典》第563、577条时，可主张解除或违约责任。"
+   "raw": "**判断：**不存在“健身年卡全国统一冻结或退费”标准。适用来源依次为：当地预付健身卡规定（如有）及《消费者权益保护法实施条例》中按约提供、应退未履行预付款的要求＞你签署的《会员服务协议》和办卡时公示条款＞门店书面确认；业务员口头承诺无效。\n\n**做法：**在原卡到期日前书面申请停卡，提交卡号、身份证、出差起止日期及单位证明或行程单，并确认“冻结60天、有效期顺延至×年×月×日、是否收费、申请提前期限”。冻结次数、费用及提前申请期限均以合同为准；合同无冻结条款的，可协商转卡或延期。\n\n到期未消费不当然退款。合同约定未使用可退的，应退未消费余额，已消费部分及事先明示的合理手续费可扣；已激活且无退款约定通常不退，未提供服务或格式条款不合理的，可要求退未履行部分。拒付时保存合同、付款及沟通记录，向12315或当地体育主管部门投诉。"
   },
   {
    "op": "EXTRACT",
-   "raw": "1. 不存在“出差即可冻结”或“到期未去一律退款”的全国统一规定。\n2. 相关依据的适用顺序为：年卡合同及纳入合同的会员规则、当地预付卡规定、《民法典》《消费者权益保护法》。\n3. 合同约定停卡条款的，停卡按约定的期限、次数和费用办理。\n4. 冻结是否顺延到期日需要确认。\n5. 合同未约定停卡条款的，应与经营者协商，不能当然免费冻结。\n6. 完全未消费且未享受服务的，可要求退还未履行部分价款。\n7. 已经消费的，可返还扣除实际消费及有依据的合理费用后的余额。\n8. “概不退款”等不合理格式条款可能无效（《民法典》第496条、第497条）。\n9. 协商不成的，可投诉至12315，并可依合同申请仲裁或起诉。\n10. 符合《民法典》第563条、第577条时，可主张合同解除或违约责任。"
+   "raw": "1. 不存在“健身年卡全国统一冻结或退费”标准。\n2. 当地预付健身卡规定（如有）及《消费者权益保护法实施条例》中关于按约提供、应退未履行预付款的要求，优先于会员协议和办卡时公示条款。\n3. 会员协议和办卡时公示条款优先于门店书面确认。\n4. 业务员的口头承诺无效。\n5. 冻结次数、费用及提前申请期限均以合同为准。\n6. 合同没有冻结条款的，可以协商转卡或延期。\n7. 健身卡到期未消费，不当然退款。\n8. 合同约定未使用可退的，应退未消费余额。\n9. 退款时可以扣除已消费部分及事先明示的合理手续费。\n10. 已激活且无退款约定通常不退；未提供服务或格式条款不合理的，可以要求退未履行部分。"
   },
   {
    "batch": [
-    "不存在“出差即可冻结”或“到期未去一律退款”的全国统一规定。",
-    "相关依据的适用顺序为：年卡合同及纳入合同的会员规则、当地预付卡规定、《民法典》《消费者权益保护法》。"
+    "不存在“健身年卡全国统一冻结或退费”标准。",
+    "会员协议和办卡时公示条款优先于门店书面确认。"
    ],
    "attempt": 0,
    "raw": "未提及 | -1\n未提及 | -1"
   },
   {
    "batch": [
-    "合同约定停卡条款的，停卡按约定的期限、次数和费用办理。",
-    "冻结是否顺延到期日需要确认。"
+    "业务员的口头承诺无效。",
+    "冻结次数、费用及提前申请期限均以合同为准。"
    ],
    "attempt": 0,
-   "raw": "支持 | E1\n支持 | E1"
+   "raw": "未提及 | -1\n未提及 | -1"
   },
   {
    "batch": [
-    "合同未约定停卡条款的，应与经营者协商，不能当然免费冻结。",
-    "完全未消费且未享受服务的，可要求退还未履行部分价款。"
+    "合同没有冻结条款的，可以协商转卡或延期。",
+    "健身卡到期未消费，不当然退款。"
    ],
    "attempt": 0,
    "raw": "未提及 | -1\n支持 | E2"
   },
   {
    "batch": [
-    "已经消费的，可返还扣除实际消费及有依据的合理费用后的余额。",
-    "“概不退款”等不合理格式条款可能无效（《民法典》第496条、第497条）。"
+    "合同约定未使用可退的，应退未消费余额。",
+    "退款时可以扣除已消费部分及事先明示的合理手续费。"
    ],
    "attempt": 0,
    "raw": "支持 | E2\n未提及 | -1"
   }
  ],
+ "n_logical_calls": 12,
+ "truncated_rate_overall": 0.0,
  "state_discrimination": {
   "states": [
    "none",
@@ -683,7 +738,21 @@
   "tau_increases_when_collapsed": true,
   "all_pass": true
  },
+ "witness_regression": {
+  "argmax_by_state": {
+   "none": "VERIFY",
+   "unmentioned": "SPLIT",
+   "supported": "GEN_PLAIN",
+   "contradicted": "GEN_PLAIN",
+   "unverified": "VERIFY"
+  },
+  "witness_holds": true,
+  "argmax_varies": true,
+  "legacy_order_state_invariant": true,
+  "v2_features_differ_across_states": true,
+  "PASS": true
+ },
  "blacklist_ok": true,
- "t_end": "2026-10-21 01:36:45",
- "total_secs": 232.0
+ "t_end": "2026-10-21 01:53:10",
+ "total_secs": 197.9
 }

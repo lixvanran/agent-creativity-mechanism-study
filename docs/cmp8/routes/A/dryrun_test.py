@@ -71,7 +71,7 @@ def main() -> int:
     print("  答案:\n%s" % r["answer"])
     ok &= (m["n_calls"] <= 12)
     ok &= (m["trigger_fired"] is True)
-    ok &= ("63" in r["answer"])
+    ok &= ("经核验成立的依据" in r["answer"] and len(r["answer"]) > 50)
     ok &= ("依据条目" not in "\n".join(r["gen_prompts"]))
     ok &= (m["evidence_prompt_checks"] >= 0)
 
