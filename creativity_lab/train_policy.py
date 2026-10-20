@@ -25,13 +25,17 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# ★ 修正：这里必须插**仓库根**（脚本所在目录的上一级），
+#   否则 `from creativity_lab.client import ...` 找不到模块（脚本不能直接跑）。
+_PKG_PARENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _PKG_PARENT)
+sys.path.insert(0, os.path.join(_PKG_PARENT, "creativity_lab"))
 from creativity_lab.client import LLM                        # noqa: E402
 from creativity_lab.metrics import _mat                      # noqa: E402
 from creativity_lab.ops import (OPS, Graph, assemble, op_features)  # noqa: E402
 from creativity_lab.verify import check_claims, extract_claims  # noqa: E402
 
-OUT = "runs/arch_learn"
+OUT = "runs/arch_learn_fixed"
 os.makedirs(OUT, exist_ok=True)
 DATA = json.load(open("creativity_lab/data/policy_topics.json", encoding="utf-8"))
 LAWS, TOPICS = DATA["laws"], DATA["topics"]
@@ -45,6 +49,9 @@ ANGLES = ["适用规则来源", "踩红线的做法", "办理流程与材料", "
 GEN_Q = "问题：{ask}\n\n{ang}\n\n给出你的判断与具体做法，400字以内。"
 EXTRACT_Q = ("从下面这段回答里，逐条列出其中**可判真假的陈述**（数字、法规、权利义务、"
              "程序、时限、主体责任）。不要观点和建议。一行一条，最多 10 条。\n\n{t}")
+# softmax 温度：w·f 的量级只有 ~0.09，不放大就几乎均匀分布（策略信号被噪声压没）
+TAU = float(os.environ.get("POLICY_TAU", "0.02"))
+
 SPLIT_Q = ("把下面这条陈述拆成可以分别核验的独立陈述（如果它含多个断言就拆开）。"
            "一行一条，只输出拆分结果。\n\n{c}")
 
@@ -69,6 +76,36 @@ def dedup_n(claims, thr=0.75):
         if all(S[i, j] < thr for j in keep):
             keep.append(i)
     return [claims[i] for i in keep]
+
+
+# ---------------------------------------------------------------- 候选选择（可测）
+def rank_and_pick(cands, g, w, step, rng, explore=0.25):
+    """给候选打分、排序、采样。**返回的 F 与 s_all 严格同序，choice 是真实下标。**
+
+    ★ 2026-10-20 审计修复的三个点都在这里：
+      1) 分数与特征**成对**排序 ⇒ F[i] 与 s_all[i] 描述的是**同一个候选**
+      2) s_all 是**干净分**（探索噪声不混进来）
+      3) 行为分布 = softmax(s/τ) = 更新时假定的分布 ⇒ **on-policy**
+    """
+    pairs = []
+    for op, tgt in cands:
+        f = np.array(op_features(g, op, tgt, step))
+        pairs.append((float(w @ f), op, tgt, f))
+    if not pairs:
+        return None, None, None, None, None, []
+    pairs.sort(key=lambda p: -p[0])
+    s_clean = np.array([p[0] for p in pairs])
+    F = np.array([p[3] for p in pairs])              # ★ 与 s_all 同序
+    s_all = s_clean                                   # ★ 干净分
+    if explore > 0:
+        z = s_clean / max(TAU, 1e-6)
+        z = z - z.max()
+        p = np.exp(z); p = p / p.sum()
+        choice = int(rng.choices(range(len(pairs)), weights=list(p))[0])
+    else:
+        choice = 0
+    sc, op, tgt, _f = pairs[choice]
+    return op, tgt, F, s_all, choice, pairs
 
 
 # ---------------------------------------------------------------- 一个 episode
@@ -104,25 +141,18 @@ def run_episode(topic, w, rng, budget=10, explore=0.25):
         if n_verify >= 1:
             cands.append(("STOP", None))
         # ---- 打分（学出来的权重）----
-        cand_f = []
-        scored = []
-        for op, tgt in cands:
-            f = np.array(op_features(g, op, tgt, step))
-            cand_f.append(f)
-            sc = float(w @ f)
-            if rng.random() < explore:          # ε-greedy
-                sc += rng.random() * 2.0
-            scored.append((sc, op, tgt))
-        scored.sort(key=lambda x: -x[0])
-        op, tgt = scored[0][1], scored[0][2]
+            # ★ 修复（2026-10-20 审计）：**特征必须与分数同序、且 choice 必须是真实下标**。
+        #   旧实现：scored 先排序、cand_f 却是原始顺序 ⇒ order 索引错位
+        #          ⇒ F[choice] 记功给了**错的特征行** ⇒ 梯度归因是错的。
+        #   另一处旧实现：探索噪声直接加进 sc ⇒ s_all 被污染 ⇒ softmax 建立在噪声上，
+        #          且行为策略(带噪 argmax) 与更新假定的分布(线性 softmax) **不一致**。
+        # 现在：**分数与特征成对排序**；**s_all 是干净分**；**从同一 softmax 采样**
+        #        ⇒ 行为策略 == 更新时假定的策略 ⇒ on-policy。
+        op, tgt, F, s_all, choice, _pairs = rank_and_pick(cands, g, w, step, rng, explore)
+        if op is None:
+            break
         ophist[op] = ophist.get(op, 0) + 1
-        # 存**候选特征矩阵**（按分数降序）与选中项的下标 —— softmax 的期望项要用
-        order = [i for i, _ in sorted(enumerate(scored), key=lambda x: -x[1][0])]
-        F = np.array([cand_f[i] for i in order])
-        s_all = np.array([scored[i][0] for i in order])
-        choice = 0
-        traj.append((F, s_all, choice))
-        op, tgt = scored[0][1], scored[0][2]
+        traj.append((F, s_all, choice))              # ★ choice 是真实下标
 
         if op == "STOP":
             break
@@ -219,7 +249,9 @@ def reinforce(w, traj, rewards, lr=0.05, gamma=0.9, baseline=0.0):
     gw = np.zeros_like(w)
     for (F, s_all, choice), a in zip(traj, adv):
         # 线性 softmax：∇log π(a*) = φ_{a*} − Σ_i π_i φ_i
-        z = s_all - s_all.max()
+        # ★ s_all 现在是**干净分**（探索噪声不再混进来）⇒ π 就是真实的行为策略
+        z = s_all / max(TAU, 1e-6)
+        z = z - z.max()
         p = np.exp(z); p = p / p.sum()
         grad = F[choice] - (p[:, None] * F).sum(axis=0)
         gw += a * grad
@@ -237,10 +269,18 @@ def main():
           flush=True)
 
     base = 0.0
-    for ep in range(1, 9):
+    NROUND = int(os.environ.get("POLICY_ROUNDS", "8"))
+    for ep in range(1, NROUND + 1):
         tot, batch = [], []
-        for T in TRAIN:
-            g, rew, info = run_episode(T, w, rng)
+        # ★ 同一轮内的各个 episode **相互独立**（共用同一个 w）⇒ 可以并行。
+        #   每个 episode 用**自己派生的 rng** ⇒ 并行不改变随机序列的可复现性。
+        def _run(pair):
+            i, T = pair
+            r = random.Random((7 * 1000 + ep * 97 + i) & 0x7fffffff)
+            return run_episode(T, w, r)
+        with ThreadPoolExecutor(max_workers=int(os.environ.get("POLICY_WORKERS", "5"))) as ex:
+            results = list(ex.map(_run, list(enumerate(TRAIN))))
+        for g, rew, info in results:
             tot.append(info)
             batch.append((getattr(g, "_traj", []), rew))
         for (traj, rew) in batch:
@@ -256,6 +296,8 @@ def main():
                  np.mean([x["fin"] for x in tot])), flush=True)
         print("       操作分布: " + "  ".join("%s=%d" % (k, v)
               for k, v in sorted(agg_ops.items(), key=lambda x: -x[1])), flush=True)
+        json.dump(dict(w=w.tolist(), history=[[x.tolist() for x in v] for v in W]),
+                  open("%s/result.json" % OUT, "w"), ensure_ascii=False, indent=1)  # 每轮 checkpoint
 
     # ---- 测试 ----
     print("\n== 测试（未见题）==", flush=True)

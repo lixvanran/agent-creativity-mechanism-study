@@ -428,14 +428,14 @@ HTML = """<!DOCTYPE html>
 <div class="sec">
   <h2>图 1 · 直调（A1）</h2>
   <p>没有结构：一次调用出答案，不接触依据包。</p>
-  __FIG_A1__
+  <div class="fig">__FIG_A1__</div>
   <p class="cap">图 1　A1 直调：无分支、无判断、无依据包</p>
 </div>
 
 <div class="sec">
   <h2>图 2 · 双轴（A3 融合门 / A4 去融合门）—— 人设计的树形</h2>
   <p>5 路扇出后，<b>末步模式在构造时就定了</b>（<code>mode</code> 参数），不是运行时判断。</p>
-  __FIG_DUAL__
+  <div class="fig">__FIG_DUAL__</div>
   <p class="cap">图 2　双轴：扇出 5 路 → 末步二选一 → 一篇答案</p>
 </div>
 
@@ -443,12 +443,12 @@ HTML = """<!DOCTYPE html>
   <h2>图 3 · 新架构（A5）—— 链式执行 + 图状态</h2>
   <p>主循环每一步<b>枚举候选 → 打分 → 选一条边执行</b>；<code>VERIFY</code> 是唯一接触依据包的操作；
      <code>STOP</code> 需要先核验过一次才合法（否则策略永远走不到 VERIFY）。</p>
-  __FIG_A5__
+  <div class="fig">__FIG_A5__</div>
   <p class="cap">图 3　A5：while 步数 &lt; 10 的主循环，操作由 w · f 选出</p>
   <div class="grid2" style="margin-top:14px">
     <div class="card">
       <h3>装配规则（机械拼装，不由模型重写）</h3>
-      __FIG_ASM__
+      <div class="fig">__FIG_ASM__</div>
     </div>
     <div class="card">
       <h3>这一步的代价</h3>
@@ -468,14 +468,14 @@ HTML = """<!DOCTYPE html>
 <div class="sec">
   <h2>图 4 · 训练闭环（REINFORCE）—— 那个"训练出来的流程"是怎么来的</h2>
   <p>人只定「7 个操作」和「14 维特征」，<b>走法由训练产出</b>。目标函数是<b>约束优化</b>：<code>max 宽度 s.t. 矛盾率 ≤ 最优基线</code>。</p>
-  __FIG_TRAIN__
+  <div class="fig">__FIG_TRAIN__</div>
   <p class="cap">图 4　训练：rollout → 约束判定 → policy gradient → 更新 w</p>
 </div>
 
 <div class="sec">
   <h2>图 5 · 评估闭环（判官闸门）</h2>
   <p>判官是跨厂商的（被测 MiniMax / 判官 <code>x-ai/grok-4.3</code>，temperature 0.0）。<b>自检不过就拒绝出数</b>，不是出完数再解释。</p>
-  __FIG_EVAL__
+  <div class="fig">__FIG_EVAL__</div>
   <p class="cap">图 5　评估：自检闸门 → 逐条核验 → 去重 → 统计</p>
 </div>
 
