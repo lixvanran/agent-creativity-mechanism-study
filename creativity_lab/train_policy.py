@@ -35,7 +35,14 @@ from creativity_lab.metrics import _mat                      # noqa: E402
 from creativity_lab.ops import (OPS, Graph, assemble, op_features)  # noqa: E402
 from creativity_lab.verify import check_claims, extract_claims  # noqa: E402
 
-OUT = "runs/arch_learn_fixed"
+OUT = os.environ.get("POLICY_OUT", "runs/arch_learn_fixed")
+
+
+def ckpt(obj):
+    """原子写：先写 .tmp 再 os.replace ⇒ 进程被杀不会留下半个 json。"""
+    p = "%s/result.json" % OUT
+    json.dump(obj, open(p + ".tmp", "w"), ensure_ascii=False, indent=1)
+    os.replace(p + ".tmp", p)
 os.makedirs(OUT, exist_ok=True)
 DATA = json.load(open("creativity_lab/data/policy_topics.json", encoding="utf-8"))
 LAWS, TOPICS = DATA["laws"], DATA["topics"]
@@ -49,8 +56,9 @@ ANGLES = ["适用规则来源", "踩红线的做法", "办理流程与材料", "
 GEN_Q = "问题：{ask}\n\n{ang}\n\n给出你的判断与具体做法，400字以内。"
 EXTRACT_Q = ("从下面这段回答里，逐条列出其中**可判真假的陈述**（数字、法规、权利义务、"
              "程序、时限、主体责任）。不要观点和建议。一行一条，最多 10 条。\n\n{t}")
-# softmax 温度：w·f 的量级只有 ~0.09，不放大就几乎均匀分布（策略信号被噪声压没）
-TAU = float(os.environ.get("POLICY_TAU", "0.02"))
+# softmax 温度（**作用于标准化后的分数** ⇒ 相对锐度，与 ‖w‖ 无关）
+# 旧默认 0.02 是在**未标准化**分数上用的 ⇒ 实测 n_eff=1.19 ⇒ 策略塌成确定性 ⇒ 权重冻结
+TAU = float(os.environ.get("POLICY_TAU", "1.2"))
 
 SPLIT_Q = ("把下面这条陈述拆成可以分别核验的独立陈述（如果它含多个断言就拆开）。"
            "一行一条，只输出拆分结果。\n\n{c}")
@@ -79,6 +87,28 @@ def dedup_n(claims, thr=0.75):
 
 
 # ---------------------------------------------------------------- 候选选择（可测）
+def policy_probs(s):
+    """★ 尺度无关的策略分布（行为采样与梯度更新**共用这一份** ⇒ 仍然 on-policy）。
+
+    **为什么必须标准化分数**（2026-10-21 实测）：
+      softmax(s/τ) 的锐度取决于 **s 的绝对跨度**，而 s = w·f 的跨度随 ‖w‖ 增长。
+      实测：τ=0.02、‖w‖=0.11 时 n_eff 已只剩 **1.19**（≈确定性）⇒ 轨迹无方差
+            ⇒ 优势≈0 ⇒ 梯度≈0 ⇒ **权重冻结**（实测轮1→轮2 ‖w‖ 一点没变）。
+      ⇒ 固定 τ 只会把塌缩往后推几轮。
+    **修法**：先把分数标准化（减均值除标准差），再除以 τ ⇒
+      τ 表示的是**相对**锐度，与 ‖w‖ 无关 ⇒ 全程保持探索。
+      副带好处：π 对 ‖w‖ 缩放不变 ⇒ 梯度始终与 w 正交 ⇒ 不会"越长越锐"。
+    """
+    s = np.asarray(s, dtype=float)
+    if s.size <= 1:
+        return np.ones(max(s.size, 1)) / max(s.size, 1)
+    sd = float(s.std())
+    z = (s - s.mean()) / (sd + 1e-8) / max(TAU, 1e-6)
+    z = z - z.max()
+    p = np.exp(z)
+    return p / p.sum()
+
+
 def rank_and_pick(cands, g, w, step, rng, explore=0.25):
     """给候选打分、排序、采样。**返回的 F 与 s_all 严格同序，choice 是真实下标。**
 
@@ -98,9 +128,7 @@ def rank_and_pick(cands, g, w, step, rng, explore=0.25):
     F = np.array([p[3] for p in pairs])              # ★ 与 s_all 同序
     s_all = s_clean                                   # ★ 干净分
     if explore > 0:
-        z = s_clean / max(TAU, 1e-6)
-        z = z - z.max()
-        p = np.exp(z); p = p / p.sum()
+        p = policy_probs(s_clean)          # ★ 尺度无关（与更新端同一份函数）
         choice = int(rng.choices(range(len(pairs)), weights=list(p))[0])
     else:
         choice = 0
@@ -250,9 +278,7 @@ def reinforce(w, traj, rewards, lr=0.05, gamma=0.9, baseline=0.0):
     for (F, s_all, choice), a in zip(traj, adv):
         # 线性 softmax：∇log π(a*) = φ_{a*} − Σ_i π_i φ_i
         # ★ s_all 现在是**干净分**（探索噪声不再混进来）⇒ π 就是真实的行为策略
-        z = s_all / max(TAU, 1e-6)
-        z = z - z.max()
-        p = np.exp(z); p = p / p.sum()
+        p = policy_probs(s_all)             # ★ 与行为端**同一个函数** ⇒ on-policy
         grad = F[choice] - (p[:, None] * F).sum(axis=0)
         gw += a * grad
     return w + lr * gw / len(traj), float(np.mean(G))
@@ -270,7 +296,21 @@ def main():
 
     base = 0.0
     NROUND = int(os.environ.get("POLICY_ROUNDS", "8"))
-    for ep in range(1, NROUND + 1):
+    # ★ 断点续跑：每个 episode 的 rng 按 (轮号, 题号) 派生 ⇒ **续跑与不续跑逐字等价**
+    ck_path = "%s/result.json" % OUT
+    start_ep = 1
+    if os.environ.get("POLICY_RESUME", "1") == "1" and os.path.exists(ck_path):
+        try:
+            ck = json.load(open(ck_path))
+            if ck.get("history"):
+                w = np.array(ck["w"], dtype=float); base = float(ck.get("base", 0.0))
+                W = [np.array(v, dtype=float) for v in ck["history"]]
+                start_ep = len(W) + 1
+                print("↻ 续跑：已完成 %d 轮，从第 %d 轮继续（‖w‖=%.4f）"
+                      % (len(W), start_ep, float(np.linalg.norm(w))), flush=True)
+        except Exception as e:
+            print("⚠ checkpoint 读取失败，改为从头训练：%s" % e, flush=True)
+    for ep in range(start_ep, NROUND + 1):
         tot, batch = [], []
         # ★ 同一轮内的各个 episode **相互独立**（共用同一个 w）⇒ 可以并行。
         #   每个 episode 用**自己派生的 rng** ⇒ 并行不改变随机序列的可复现性。
@@ -278,8 +318,17 @@ def main():
             i, T = pair
             r = random.Random((7 * 1000 + ep * 97 + i) & 0x7fffffff)
             return run_episode(T, w, r)
+        def _run_safe(pair):
+            g, rew, info = _run(pair)
+            try:
+                print("     · 轮%d 完成 %s ｜ 宽度 %s ｜ 步数 %s"
+                      % (ep, pair[1].get("tid", "?"), info.get("width", "?"),
+                         info.get("steps", "?")), flush=True)
+            except Exception:
+                pass
+            return g, rew, info
         with ThreadPoolExecutor(max_workers=int(os.environ.get("POLICY_WORKERS", "5"))) as ex:
-            results = list(ex.map(_run, list(enumerate(TRAIN))))
+            results = list(ex.map(_run_safe, list(enumerate(TRAIN))))
         for g, rew, info in results:
             tot.append(info)
             batch.append((getattr(g, "_traj", []), rew))
@@ -296,8 +345,9 @@ def main():
                  np.mean([x["fin"] for x in tot])), flush=True)
         print("       操作分布: " + "  ".join("%s=%d" % (k, v)
               for k, v in sorted(agg_ops.items(), key=lambda x: -x[1])), flush=True)
-        json.dump(dict(w=w.tolist(), history=[[x.tolist() for x in v] for v in W]),
-                  open("%s/result.json" % OUT, "w"), ensure_ascii=False, indent=1)  # 每轮 checkpoint
+        ckpt(dict(w=w.tolist(), base=float(base),
+                  history=[[x.tolist() for x in v] for v in W]))
+        print("       [checkpoint] 轮 %d/%d 已落盘" % (ep, NROUND), flush=True)
 
     # ---- 测试 ----
     print("\n== 测试（未见题）==", flush=True)

@@ -67,7 +67,15 @@ def op_features(g: Graph, op: str, target: Node | None, depth: int) -> list:
         fail = sum(1 for a in anc if g.nodes[a].verdict == "矛盾")
         f[12] = min(succ / 5.0, 1.0)
         f[13] = min(fail / 3.0, 1.0)
-    f[6] = min(depth / 6.0, 1.0)
+    # ★ 修 f[6] 索引冲突（2026-10-21）：
+    #   原来这里写的是 `f[6] = min(depth / 6.0, 1.0)`，而 f[6] 本来是 STOP 的 one-hot
+    #   （OPS 有 7 个，索引 0..6）⇒ 同一个下标被写两次：
+    #   - STOP 的 one-hot 被 depth 覆盖 ⇒ **STOP 永远选不中**（只有 ε 能触发）
+    #   - depth 对**所有** op 是同一个值 ⇒ softmax 里是公共常数 ⇒ **完全抵消** ⇒ 零作用
+    #   实测：STOP 在 depth=3 时 f[6]=0.5（应为 1.0）；同状态下各 op 分数差异与 depth 无关。
+    #   修法：**丢掉 depth**（它对决策可证明为零），把 f[6] 还给 STOP。
+    #   ★ 保持 14 维不变（特征空间不变 ⇒ 与既有对照仍可比）。
+    #   ⚠️ 行为变化：STOP 从"不可选"变成"可选" ⇒ **新权重与 cmp8 旧权重不可比**。
     return f
 
 
