@@ -98,7 +98,7 @@ features:
        target_state: "target 依据未覆盖"}
   class_order: [GENERATE, PROCESS, VERIFY, STOP]
   excluded_features:                # 明确不做的（及其理由）
-    - {name: "text_length",  reason: "R-2：长度不是维度证据，且旧 f[11] 会把"写得长"当偏好"}
+    - {name: "text_length",  reason: "R-2：长度不是维度证据，且旧 f[11] 会把『写得长』当偏好"}
     - {name: "raw_global_gap_terms", reason: "与 op 无关的项在 softmax 里是公共常数 ⇒ 对选择零作用（实测 L4）"}
     - {name: "tgt_supported / tgt_contradicted", reason: "结构上不可达（见 target_reachability）⇒ 属死维"}
   target_reachability:
@@ -149,9 +149,37 @@ training_hyperparams:
   seed_policy: "每 episode 的 rng 由 (round, topic) 派生 ⇒ 续跑与不续跑逐字等价"
   checkpoint: "原子写（.tmp → os.replace），每轮落盘"
   early_stop:
-    trigger: "fatal 级监控告警（塌缩 / 权重冻结 / 矛盾越界 / 留出漂移 / 搜索闭合）"
+    trigger: "fatal 级监控告警（塌缩 / 权重冻结 / 矛盾越界 / 留出漂移 / 搜索闭合 / 截断越界）"
     max_reruns: 2                   # 协议 S5
     rule: "重跑必须换种子、事前登记、同时报首跑结果（R-10）"
+  token_budget_ladder:              # 每次逻辑调用的 max_tokens 与重试阶梯（**重试是真实调用，计入预算**）
+    al_gen:  {max_tokens: 8000, retries: []}
+    al_ex:   {max_tokens: 2000, retries: [3200, 4400]}
+    al_split: {max_tokens: 1600, retries: [2400, 3200]}
+    check2:  {max_tokens: 1200, retries: [1800, 2400]}
+    note: "阶梯加长的原因：MiniMax-M3.1 会把预算花在 <think> 块上，正文被挤掉 ⇒ finish_reason=length（见 DESIGN §3.8）"
+
+truncation_accounting:              # 协议 F8 同族风险
+  step_level:
+    name: truncated_rate
+    def: "最终产出**仍**被 max_tokens 截断的步数 / 步数"
+    impact: "断言变少 ⇒ 代理 Ŵ 偏低 ⇒ **污染测量**"
+    reported_as: ["truncated_rate", "n_empty", "truncated_steps"]
+    gate: "truncated_rate > 10% ⇒ 该臂该通道不可跨臂比较（FB12）"
+  attempt_level:
+    name: truncated_attempt_rate
+    def: "曾撞 max_tokens 的尝试数 / 尝试数（含重试）"
+    impact: "只影响成本（重试成功即无污染）"
+    reported_as: ["n_attempts_truncated", "n_attempts_empty"]
+  actions:
+    - "D1 预算阶梯加长（见 training_hyperparams.token_budget_ladder）"
+    - "D2 每次逻辑调用后读 rec[-1].finish_reason ⇒ 显式记账（train_policy_v2._call_flags）"
+    - "D3 truncated_rate / n_empty 与 parsefail_rate / valid-total 并列必报"
+    - "D4 代理校准（Ŵ↔VD）**只在 truncated_rate==0 的 episode 上做**"
+    - "D5 对被截断的 episode 跑加大预算的配对复现，单报 ΔŴ_truncated（把测量误差与策略效应分开）"
+    - "D6 跨臂闸门 truncated_rate>10%（F8 同族扩展；需协议 owner 确认，确认前本路线自行执行）"
+    - "D7 重试计入调用预算（按尝试数计）"
+  never: "不得把截断样本从统计里悄悄删掉（那正是 F8 的病根）"
 
 # ───────────────────────────────────────────────────────── 奖励项
 reward:
@@ -160,7 +188,7 @@ reward:
     - {event: "VERIFY -> 矛盾",        value: -2.0}
     - {event: "VERIFY -> 未提及/非主张/解析失败", value: 0.0}
     - {event: "GEN_*/EXTRACT/SPLIT",   value: 0.0,
-       reason: "形状动作的价值只能通过后续核验兑现 ⇒ 不给形状奖励（防"多写多抽"被直接奖励）"}
+       reason: "形状动作的价值只能通过后续核验兑现 ⇒ 不给形状奖励（防『多写多抽』被直接奖励）"}
   terminal_terms:
     - {event: "代理 Ŵ", formula: "alpha * w_hat", alpha: 3.0}
     - {event: "矛盾率 > cap", formula: "-2.0", conflict_cap: 0.33}
@@ -181,8 +209,10 @@ reward:
       - "G3 代理算在图上；装配只保留『支持』的断言 ⇒ 图上的 Ŵ 与最终答案上的 Ŵ 相等"
       - "G4 判官误判『未提及』⇒ 代理偏小"
       - "G5 anchored 标记是人工写的 ⇒ 分母可能标错"
+      - "G6 截断/空产出 ⇒ 断言变少 ⇒ 代理系统性偏低，且偏差与策略效应混在一起（见 truncation_accounting）"
   calibration:                        # 预注册交叉校验
     subset: "训练题中事先指定的 2 题 × 4 episode = 8 episode"
+    restrict_to_untruncated: true      # 只在 truncated_rate == 0 的 episode 上做校准（D4）
     measures: ["w_hat", "真 VD（协议独立抽取器 + 判官 + 归族）"]
     thresholds:
       spearman_min: 0.50
@@ -206,6 +236,7 @@ arms:
   - {id: R_rand,       kind: routeB,   desc: "均匀随机策略（在候选集上均匀抽）", uses_features: true}
   - {id: A_fixed,      kind: cross,    desc: "路线 A 的固定架构（读 /workspace/lab/routes/A/spec.yaml；缺失则用 fallback 并标 route_a_spec=fallback）", uses_features: false}
   - {id: A_script,     kind: routeB,   desc: "人定固定脚本 GEN_ANGLE×2 → EXTRACT → VERIFY×2 → ASSEMBLE", uses_features: false}
+arms_meta:
   note_w0_vs_random: "旧实现下 w=0 与均匀随机在数值上等价 ⇒ 本设计用**不同代码路径**实现并显式声明，否则两条臂重复"
   budget_freeze:
     K: "学到策略在 DEV 集上调用数的中位数，由一次预注册运行确定"
@@ -231,6 +262,7 @@ falsification:
   - {id: FB9,  cond: "与 R_rand 的 VD 差不可分辨（≤ 2× 种子噪声地板）", verdict: "与瞎选无异 ⇒ 判死"}
   - {id: FB10, cond: "相对 B0 的增益在 B1/B2 下消失", verdict: "增益由预算解释 ⇒ 不构成架构证据"}
   - {id: FB11, cond: "搜索闭合告警（轨迹签名多样性 < 0.30）持续 2 轮", verdict: "搜索空间过早闭合 ⇒ 判死"}
+  - {id: FB12, cond: "步级 truncated_rate > 10%（任一臂、任一通道）", verdict: "F8 同族扩展：该臂该通道不可跨臂比较（对协议的提案，需 owner 确认；确认前本路线自行执行）"}
 
 # ───────────────────────────────────────────────────────── 监控项
 monitoring:
@@ -261,6 +293,10 @@ monitoring:
        action: "协议 E4 作废计数；作废 > 20% ⇒ 停臂", selftest: null}
     - {id: judge_quality,     def: "parsefail_rate / silent_empty_count", warn: "> 10%", level: crit,
        action: "协议 F8：该臂不可跨臂比较", selftest: null}
+    - {id: truncated_rate,    def: "步级：最终产出仍被 max_tokens 截断的步数 / 步数（并报 n_empty）", warn: "> 10%", level: crit,
+       action: "FB12（F8 同族）：该臂该通道不可跨臂比较；加长预算阶梯后重跑（换种子 + 同时报首跑结果）", selftest: "冒烟实测复现"}
+    - {id: truncated_attempt_rate, def: "尝试级：曾撞 max_tokens 的尝试数 / 尝试数", warn: "> 20%", level: warn,
+       action: "只影响成本：记账 + 决定是否再加长预算阶梯", selftest: null}
     - {id: tau_trace,         def: "τ 随轮次变化", warn: "单调上升不下降", level: warn,
        action: "查塌缩", selftest: tau_increases_when_collapsed}
   no_oracle_stats_in_diagnostics: true
@@ -307,11 +343,15 @@ cost:
   measured_smoke:
     calls: 14
     call_cap: 20
-    total_secs: 232
-    mean_secs_per_call: 16.6
-    slowest_call_secs: 84.8
+    logical_calls: 12
     retries: 2
+    total_secs: 197.9
+    mean_secs_per_call: 14.1
+    attempts_truncated: 2            # 尝试级：都被重试救回
+    step_truncated: 0                # 步级：0 ⇒ 没有测量被污染的步
+    n_empty: 0
     cost_usd: 0.0
+    note: "预算阶梯加长前的那次冒烟：al_ex 3 次调用 2 次截断、其中 1 次用尽预算返回空串 ⇒ 该 episode 断言数=0（DESIGN §3.8 的原始现场）"
   training_estimate:
     episodes: 64
     calls_per_episode: 10
@@ -339,6 +379,8 @@ smoke:
   log_md: "/workspace/lab/routes/B/smoke/smoke_log.md"
   call_cap: 20
   calls_used: 14
+  logical_calls: 12
+  retries: 2
   endpoint: "https://api.minimaxi.com/v1"
   endpoint_assert: "脚本启动时断言端点不含 openrouter.ai，否则 abort"
   openrouter_calls: 0
@@ -348,10 +390,13 @@ smoke:
     - "提示词可解析（判官输出 关系|条目编号）"
     - "特征空间状态可分性对照（离线）"
     - "监控告警变异注入自测（离线）"
+    - "见证回归断言（离线，含 --mutate 变异注入 ⇒ 必须 FAIL）"
+    - "截断被记账（步级 0 / 尝试级 2）"
   does_not_verify:
     - "训练是否学到东西（冒烟用 w=0 与固定优先策略，无梯度更新）"
     - "Ŵ 与真 VD 的关系（需协议独立抽取器，尚未就绪）"
     - "任何 DEV 题或 U1–U4"
+  runs_during_development: 5         # 前 4 次用于定位三个真问题；每次调用上限都是 20
 
 # ───────────────────────────────────────────────────────── 实现文件
 files:
@@ -363,6 +408,8 @@ files:
   - {path: "/workspace/lab/routes/B/code/train_policy_v2.py", role: "训练循环参考实现（on-policy + EMA）"}
   - {path: "/workspace/lab/routes/B/code/guard.py", role: "U1–U4 黑名单自检"}
   - {path: "/workspace/lab/routes/B/code/smoke.py", role: "冒烟脚本"}
+  - {path: "/workspace/lab/routes/B/code/test_v2_witness.py", role: "见证回归断言（含 --mutate 变异注入自测）"}
+  - {path: "/workspace/lab/routes/B/code/yaml_lite.py", role: "YAML 解析校验器（证明本 spec.yaml 可被机器解析）"}
   - {path: "/workspace/lab/routes/B/code/data/diag_topics.json", role: "2 道自造诊断题"}
 untouched:
   - "/workspace/lab/cmp8repo/creativity_lab/** （在跑的训练进程依赖；check_ops_consistency.py 要求两份 ops.py 逐字节一致）"

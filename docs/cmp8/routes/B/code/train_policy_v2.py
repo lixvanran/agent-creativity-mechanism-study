@@ -43,6 +43,27 @@ CONFLICT_CAP = 0.33
 ALPHA = 3.0
 
 
+def _last_call(llm):
+    """取**最后一次尝试**的调用记录（client 每个 attempt 记一条）。
+
+    ⚠️ 截断判定：`finish_reason == "length"` ⇒ 该次尝试**撞 max_tokens 被砍**。
+    ⚠️ client 的行为：`finish_reason == "length"` 时会**用更大的预算重试**；
+       若预算用尽，它把**截断的残缺内容当成正常结果返回**（旧 client 的行为），
+       空串时返回 "" ⇒ **该步静默变成空操作**（分母被悄悄缩小 ⇒ 协议 F8 同族风险）。
+    ⇒ 因此每次逻辑调用后都要**显式**判定截断，并把它记进 episode 的账。
+    """
+    rec = getattr(llm, "rec", None)
+    return rec[-1] if rec else None
+
+
+def _call_flags(llm):
+    """返回 (truncated, empty) 两个布尔。"""
+    c = _last_call(llm)
+    if c is None:
+        return False, False
+    return (c.finish_reason == "length"), (c.content_len == 0)
+
+
 # ───────────────────────────────────────── 一个 episode
 def run_episode(topic: dict, ev_index: EvidenceIndex, w, rng, *, llm=None,
                 model="MiniMax-M3.1-Flash-Preview", budget=10,
@@ -64,6 +85,9 @@ def run_episode(topic: dict, ev_index: EvidenceIndex, w, rng, *, llm=None,
     ophist = {}
     n_verify = 0
     slot_idx = 0
+    n_trunc = 0          # 被 max_tokens 截断的步数
+    n_empty = 0          # 产出为空的步数（静默空操作）
+    trunc_steps = []
     for step in range(budget):
         cands, s, F = score_all(g, w, n_verify)
         if not cands:
@@ -98,16 +122,26 @@ def run_episode(topic: dict, ev_index: EvidenceIndex, w, rng, *, llm=None,
                          purpose="al_gen", min_ok=60)
             if raw_log is not None:
                 raw_log.append(dict(op=op, raw=(a or "")[:1200]))
+            tr, em = _call_flags(llm)
+            n_trunc += int(tr)
+            n_empty += int(em)
+            if tr:
+                trunc_steps.append(op)
             if a and len(a) > 20:
                 g.add("ANSWER", a, op=op)
             rewards.append(0.0)
         elif op == "EXTRACT":
             src = tgt
             t = llm.chat(EXTRACT_Q.format(t=src.text[:1200]), model=model,
-                         purpose="al_ex", max_tokens=1400, budgets=(2000,),
+                         purpose="al_ex", max_tokens=2000, budgets=(3200, 4400),
                          min_ok=15)
             if raw_log is not None:
                 raw_log.append(dict(op="EXTRACT", raw=(t or "")[:1200]))
+            tr, em = _call_flags(llm)
+            n_trunc += int(tr)
+            n_empty += int(em)
+            if tr:
+                trunc_steps.append("EXTRACT")
             for ln in (t or "").splitlines():
                 ln = re.sub(r"^\s*[-*\u2022]\s*", "", ln)
                 ln = re.sub(r"^\s*\d+[.、)]\s*", "", ln).strip()
@@ -118,9 +152,15 @@ def run_episode(topic: dict, ev_index: EvidenceIndex, w, rng, *, llm=None,
             rewards.append(0.0)
         elif op == "SPLIT":
             t = llm.chat(SPLIT_Q.format(c=tgt.text), model=model,
-                         purpose="al_split", max_tokens=800, budgets=(1200,), min_ok=10)
+                         purpose="al_split", max_tokens=1600, budgets=(2400, 3200),
+                         min_ok=10)
             if raw_log is not None:
                 raw_log.append(dict(op="SPLIT", raw=(t or "")[:1200]))
+            tr, em = _call_flags(llm)
+            n_trunc += int(tr)
+            n_empty += int(em)
+            if tr:
+                trunc_steps.append("SPLIT")
             for ln in (t or "").splitlines():
                 ln = re.sub(r"^\s*[-*\u2022]\s*", "", ln)
                 ln = re.sub(r"^\s*\d+[.、)]\s*", "", ln).strip()
@@ -142,6 +182,11 @@ def run_episode(topic: dict, ev_index: EvidenceIndex, w, rng, *, llm=None,
                     continue
                 n.verdict = v["rel"]
                 n.meta["items"] = v["items"]
+            tr, em = _call_flags(llm)
+            n_trunc += int(tr)
+            n_empty += int(em)
+            if tr:
+                trunc_steps.append("VERIFY")
             n_verify += 1
             rels = [verd.get(n.text, {}).get("rel", "解析失败") for n in tgt_list]
             if "矛盾" in rels:
@@ -160,7 +205,12 @@ def run_episode(topic: dict, ev_index: EvidenceIndex, w, rng, *, llm=None,
     rewards.append(fin)
     info = dict(topic_id=topic["topic_id"], width=len(claims), ops=dict(ophist),
                 n_verify=n_verify, final_reward=fin, proxy=rep,
-                steps=len(traj), signature=seq_signature([t[4] for t in traj]))
+                steps=len(traj), signature=seq_signature([t[4] for t in traj]),
+                # ── 截断/空产出（协议 F8 同族风险，必须单独记账）──
+                n_truncated=n_trunc,
+                n_empty=n_empty,
+                truncated_rate=(n_trunc / max(len(traj), 1)),
+                truncated_steps=trunc_steps)
     return g, traj, rewards, info
 
 

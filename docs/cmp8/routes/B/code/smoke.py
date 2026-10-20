@@ -380,6 +380,10 @@ def run_e2e(llm):
                    n_claims=info["width"], proxy=info["proxy"],
                    final_reward=info["final_reward"], signature=info["signature"],
                    answer_len=len(final),
+                   # ── 截断 / 空产出（协议 F8 同族风险，必须单独记账）──
+                   n_truncated=info["n_truncated"], n_empty=info["n_empty"],
+                   truncated_rate=info["truncated_rate"],
+                   truncated_steps=info["truncated_steps"],
                    answer_head=final[:220].replace("\n", " | "))
         out.append(row)
         ev("episode", **{k: v for k, v in row.items() if k != "answer_head"})
@@ -396,6 +400,9 @@ def main():
     ev("proxy_selftest", **pxy)
     mt = mon.selftest()
     ev("monitor_selftest", **mt)
+    import test_v2_witness
+    wt = test_v2_witness.check(mutate=False)
+    ev("witness_regression", **wt)
 
     llm = BudgetedLLM(CALL_CAP)
     e2e, raw_all = run_e2e(llm)
@@ -404,13 +411,19 @@ def main():
               "finish_reason": c.finish_reason, "content_len": c.content_len,
               "ok": c.ok, "secs": round(c.secs, 2)} for c in llm.rec]
     LOG["calls"] = calls
-    LOG["n_calls"] = len(calls)
+    LOG["n_calls"] = len(calls)                 # **尝试**数（含重试）= 真实 HTTP 调用数
     LOG["n_calls_ok"] = sum(1 for c in calls if c["ok"])
+    LOG["n_attempts_truncated"] = sum(1 for c in calls if c["finish_reason"] == "length")
+    LOG["n_attempts_empty"] = sum(1 for c in calls if c["content_len"] == 0)
     LOG["e2e"] = e2e
     LOG["raw_outputs"] = raw_all
+    LOG["n_logical_calls"] = sum(e["steps"] for e in e2e)
+    LOG["truncated_rate_overall"] = round(
+        sum(e["n_truncated"] for e in e2e) / max(sum(e["steps"] for e in e2e), 1), 4)
     LOG["state_discrimination"] = disc
     LOG["proxy_selftest"] = pxy
     LOG["monitor_selftest"] = mt
+    LOG["witness_regression"] = wt
     LOG["blacklist_ok"] = bl_ok
     LOG["t_end"] = time.strftime("%Y-%m-%d %H:%M:%S")
     LOG["total_secs"] = round(sum(c["secs"] for c in calls), 1)
@@ -421,13 +434,19 @@ def main():
     md = ["# 路线 B v2 · 冒烟日志", "",
           "- 时间：%s → %s" % (LOG["t0"], LOG["t_end"]),
           "- 模型：%s ｜ 端点：%s（被测侧**不走 OpenRouter**）" % (MODEL, LOG["endpoint"]["base_url"]),
-          "- **调用数：%d / 上限 %d**（成功 %d）｜ 端到端耗时 %.0f s" % (
-              LOG["n_calls"], CALL_CAP, LOG["n_calls_ok"], LOG["total_secs"]),
-          "- 黑名单自检：%s ｜ 状态可分性对照：%s ｜ 代理自测：%s ｜ 告警自测：%s" % (
+          "- **调用数：%d / 上限 %d**（成功 %d；逻辑调用 %d 次）｜ 端到端耗时 %.0f s" % (
+              LOG["n_calls"], CALL_CAP, LOG["n_calls_ok"], LOG["n_logical_calls"],
+              LOG["total_secs"]),
+          "- **截断**：%d 次尝试 `finish_reason=length`（其中 %d 次逻辑调用最终仍被截断）"
+          "｜ 步级截断率 %.2f｜ 空产出尝试 %d 次" % (
+              LOG["n_attempts_truncated"], sum(e["n_truncated"] for e in e2e),
+              LOG["truncated_rate_overall"], LOG["n_attempts_empty"]),
+          "- 黑名单自检：%s ｜ 状态可分性对照：%s ｜ 代理自测：%s ｜ 告警自测：%s ｜ 见证回归：%s" % (
               "PASS" if bl_ok else "FAIL",
               "PASS" if disc["V1_v2_4states_not_all_identical"] else "FAIL",
               "PASS" if pxy["all_pass"] else "FAIL",
-              "PASS" if mt["all_pass"] else "FAIL"),
+              "PASS" if mt["all_pass"] else "FAIL",
+              "PASS" if wt["PASS"] else "FAIL"),
           "", "## 调用清单（每行 = 一次真实 HTTP 调用）", "",
           "| # | purpose | model | max_tokens | finish | 内容长度 | ok | 秒 |",
           "|---:|---|---|---:|---|---:|:-:|---:|"]
@@ -440,11 +459,13 @@ def main():
            "", "## 代理自测（离线）", "",
            "```json", jdumps(pxy, indent=1), "```",
            "", "## 告警变异自测（离线）", "",
-           "```json", jdumps(mt, indent=1), "```", ""]
+           "```json", jdumps(mt, indent=1), "```",
+           "", "## 见证回归断言（离线）", "",
+           "```json", jdumps(wt, indent=1), "```", ""]
     open(os.path.join(OUTDIR, "smoke_log.md"), "w", encoding="utf-8").write("\n".join(md))
     print("\n== 冒烟结束：调用 %d 次（上限 %d）→ %s" % (LOG["n_calls"], CALL_CAP, p))
     return 0 if (bl_ok and disc["V1_v2_4states_not_all_identical"]
-                 and pxy["all_pass"] and mt["all_pass"]
+                 and pxy["all_pass"] and mt["all_pass"] and wt["PASS"]
                  and LOG["n_calls"] <= CALL_CAP) else 1
 
 
