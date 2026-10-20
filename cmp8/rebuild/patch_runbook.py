@@ -211,6 +211,25 @@ def patch(path):
     if applied4:
         print("  ✓ 改动 4：应用了 %d 处（A2–A6）" % applied4)
 
+
+    # ===== 改动 5：默认判官改 grok-4.3 =====
+    if 'export OR_PRIMARY=x-ai/grok-4.3          # 判官' not in s:
+        if 'export OR_PRIMARY=deepseek/deepseek-chat          # 判官：跨厂商，非 MiniMax' in s:
+            s = s.replace('export OR_PRIMARY=deepseek/deepseek-chat          # 判官：跨厂商，非 MiniMax', 'export OR_PRIMARY=x-ai/grok-4.3                   # 判官：跨厂商，非 MiniMax（**deepseek 自检不稳 ⇒ 不用它**）', 1)
+            print('  ✓ applied: 改动 5：默认判官改 grok-4.3')
+    if '默认模型已是 `x-ai/grok-4.3`' not in s:
+        if '> GitHub 树**已经打好补丁**（默认模型已是 `deepseek/deepseek-chat`），再跑 `rebuild.sh`' in s:
+            s = s.replace('> GitHub 树**已经打好补丁**（默认模型已是 `deepseek/deepseek-chat`），再跑 `rebuild.sh`', '> GitHub 树**已经打好补丁**（默认模型已是 `x-ai/grok-4.3`），再跑 `rebuild.sh`', 1)
+            print('  ✓ applied: 改动 5：默认判官改 grok-4.3')
+    if 'OR_PRIMARY=x-ai/grok-4.3 python3 analyze_cmp6.py' not in s:
+        if 'CMP_OUT=runs/cmp8 OR_PRIMARY=deepseek/deepseek-chat python3 analyze_cmp6.py' in s:
+            s = s.replace('CMP_OUT=runs/cmp8 OR_PRIMARY=deepseek/deepseek-chat python3 analyze_cmp6.py', 'CMP_OUT=runs/cmp8 OR_PRIMARY=x-ai/grok-4.3 python3 analyze_cmp6.py', 1)
+            print('  ✓ applied: 改动 5：默认判官改 grok-4.3')
+    if 'OR_PRIMARY=x-ai/grok-4.3 \\\\' not in s:
+        if 'CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=deepseek/deepseek-chat \\' in s:
+            s = s.replace('CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=deepseek/deepseek-chat \\', 'CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=x-ai/grok-4.3 \\', 1)
+            print('  ✓ applied: 改动 5：默认判官改 grok-4.3')
+
     if s != orig:
         io.open(path, "w", encoding="utf-8").write(s)
     return s != orig

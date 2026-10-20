@@ -28,7 +28,8 @@
 | 最终报告必须保留的声明 | §10 |
 
 **三个最重要的纪律**（违反其一，这轮数据就废了）：
-1. **判官必须跨厂商**（`deepseek/deepseek-chat`），且**必须先过判官自检闸门**（真 ≥3/4 且 假 ≥3/4）再跑批。
+1. **判官必须跨厂商**（`x-ai/grok-4.3`），且**必须先过判官自检闸门**（真 ≥3/4 且 假 ≥3/4）再跑批。
+   ⚠️ **实测（2026-10-20 18:15 全链路演练）：`deepseek/deepseek-chat` 在同一自检上两次都只有假断言召回 2/5（< 0.5）⇒ 分析器会「拒绝出数」**；`x-ai/grok-4.3` 是 **5/5 + 5/5（fn=0, fp=0）** ⇒ **默认判官用 grok-4.3**。判官调用在 temperature 1.0 ⇒ **自检本身有采样随机性**，判官一次不过先换模型、再考虑重试。
 2. **不许改任何阈值**（去重 0.75、矛盾率分母定义、自检门槛）——那是预注册的。
 3. **⑤b vs ⑤c 的差异必须与种子噪声地板比**；超不过 ⇒ 写「**不可分辨**」，**不写「无效应」**。
 
@@ -63,7 +64,7 @@ git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-
 - **在 Mavis 平台内（同账号新会话）⇒ secret 自动注入**，`env | grep -iE 'minimax|openrouter'` 直接看得到
 - **在平台外（自己电脑）⇒ 必须让用户贴 key 值**，只放进环境变量，别写进脚本/文件/git
 - 在 Mavis 里用 `mavis secret list` 看有哪些 secret（**只列名字**，明文拿不到，这是设计如此）；**没有就让用户给，别硬编码、别写进文件**
-- ⚠️ **判官必须是跨厂商**：`OR_PRIMARY=deepseek/deepseek-chat`（`grok-3-mini` 已 404 下架）
+- ⚠️ **判官必须是跨厂商**：`OR_PRIMARY=x-ai/grok-4.3`（`grok-3-mini` 已 404 下架；**deepseek 便宜但自检不稳 ⇒ 换模型**）
 
 **第 5 步 · 开工前先确认三件事**
 1. 判官自检过没过（真 ≥3/4 且 假 ≥3/4）
@@ -208,7 +209,8 @@ python3 -c "import json;d=json.load(open('runs/cmp8/analysis.json'));print(d.get
 ### 3.3 判官自检（已过，2026-10-20）
 
 ```
-判官 deepseek/deepseek-chat ：真断言 4/4 ｜ 假断言 4/4   ✅
+判官 x-ai/grok-4.3 ：真断言 5/5 ｜ 假断言 5/5   ✅（2026-10-20 18:15 演练复核：fn=0 fp=0）
+判官 deepseek/deepseek-chat ：真断言 3/5 ｜ 假断言 2/5   ❌ **自检不过 ⇒ 拒绝出数**（同一组断言两次跑都不过）
 判官 x-ai/grok-4.3          ：真断言 4/4 ｜ 假断言 4/4   ✅
 ```
 
@@ -412,7 +414,7 @@ pip install numpy                        # ★ 唯一第三方依赖
 export MINIMAX_SUBSCRIPTION_KEY=...
 export OPENROUTER_API_KEY=...
 export PRIMARY_MODEL=MiniMax-M3.1-Flash-Preview
-export OR_PRIMARY=deepseek/deepseek-chat     # 判官：跨厂商、非 MiniMax
+export OR_PRIMARY=x-ai/grok-4.3              # 判官：跨厂商、非 MiniMax（**deepseek 自检不稳 ⇒ 不用它**）
 export OR_EMBED=qwen/qwen3-embedding-8b       # embedding：4096 维
 export CMP_OUT=runs/cmp8
 export ADH_MODE=repro                          # 臂2 走 Python 复刻
@@ -552,7 +554,7 @@ bash go_cmp8.sh     # 冒烟 → 跑批 → 两遍分析 → 判读页
 ### 8.1 仪器
 - 核验器 v4：法律域 **27/27**；矛盾召回 **9/9 = 100%**；支持 **11/11 = 100%**
 - 泛化后新域自检：真 **7/7**、假 **8/10**、**漏判 0**（那 2 条"误判"是自检期望写错：oracle 没写的数字应判「未提及」）
-- 判官自检（2026-10-20）：deepseek **4/4 + 4/4**；grok-4.3 **4/4 + 4/4**
+- 判官自检（2026-10-20 18:15 演练复核）：**grok-4.3 5/5 + 5/5（fn=0 fp=0）✅**；deepseek **2/5**（两次都不稳）❌
 
 ### 8.2 v3 架构学习
 | | 宽度 | 矛盾率 | 终局奖 |

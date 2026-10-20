@@ -153,6 +153,17 @@ def patch(path):
     if applied3:
         print("  ✓ 改动 3：应用了 %d 处（§8 体检清单）" % applied3)
 
+
+    # ===== 改动 4：默认判官改 grok-4.3 =====
+    if '默认 `x-ai/grok-4.3`）' not in s:
+        if '（默认 `deepseek/deepseek-chat`）。embedding 同理独立于被测。' in s:
+            s = s.replace('（默认 `deepseek/deepseek-chat`）。embedding 同理独立于被测。', '（默认 `x-ai/grok-4.3`）。embedding 同理独立于被测。\n> ⚠️ **2026-10-20 18:15 全链路演练实测**：`deepseek/deepseek-chat` 在分析器自检上**两次都只有假断言召回 2/5**（< 0.5 阈值）⇒ **分析器会直接拒绝出数**；`x-ai/grok-4.3` 是 **5/5 + 5/5（fn=0, fp=0）**。判官调用在 temperature 1.0 ⇒ 自检有采样随机性，**判官一次不过先换模型**。', 1)
+            print('  ✓ applied: 改动 4：默认判官改 grok-4.3')
+    if '判官 `x-ai/grok-4.3`：真 5/5 ｜ 假 5/5' not in s:
+        if '> 判官 `deepseek/deepseek-chat`：真 4/4 ｜ 假 4/4 ✅' in s:
+            s = s.replace('> 判官 `deepseek/deepseek-chat`：真 4/4 ｜ 假 4/4 ✅', '> 判官 `x-ai/grok-4.3`：真 5/5 ｜ 假 5/5 ✅（2026-10-20 18:15 演练复核）\n> 判官 `deepseek/deepseek-chat`：假 2/5 ❌ **自检不稳 ⇒ 不用**', 1)
+            print('  ✓ applied: 改动 4：默认判官改 grok-4.3')
+
     if s != orig:
         io.open(path, "w", encoding="utf-8").write(s)
     return s != orig

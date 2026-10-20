@@ -45,7 +45,7 @@ pip install numpy            # ★ 唯一的第三方依赖（其余全标准库
 export MINIMAX_SUBSCRIPTION_KEY=<你的 minimax 订阅 key>
 export OPENROUTER_API_KEY=<你的 openrouter key>
 export PRIMARY_MODEL=MiniMax-M3.1-Flash-Preview   # M3 当天持续 529，用健康档位
-export OR_PRIMARY=deepseek/deepseek-chat          # 判官：跨厂商，非 MiniMax
+export OR_PRIMARY=x-ai/grok-4.3                   # 判官：跨厂商，非 MiniMax（**deepseek 自检不稳 ⇒ 不用它**）
 export OR_EMBED=qwen/qwen3-embedding-8b            # embedding：4096 维
 export CMP_OUT=runs/cmp8
 export ADH_MODE=repro                              # 臂2 走 Python 复刻
@@ -77,7 +77,7 @@ export OR_BASE_URL=https://openrouter.ai/api/v1           # OpenRouter 侧
 ```
 
 > **⚠️ `rebuild.sh` 只在路径 B 需要。**
-> GitHub 树**已经打好补丁**（默认模型已是 `deepseek/deepseek-chat`），再跑 `rebuild.sh`
+> GitHub 树**已经打好补丁**（默认模型已是 `x-ai/grok-4.3`），再跑 `rebuild.sh`
 > 等于用 p0/p1/p2 把整棵树重写一遍（幂等，最后会补回来，但**没必要**）。
 > ⇒ **路径 A 直接跳到下面的静态自检**。
 >
@@ -187,9 +187,9 @@ python3 run_compare5.py --arms A1,A2,A3,A4,A5a,A5b,A5c --reps 3 --workers 4
 ```bash
 # 已在实验根目录
 # 遍一：OpenRouter embedding（qwen3-embedding-8b，4096 维）
-CMP_OUT=runs/cmp8 OR_PRIMARY=deepseek/deepseek-chat python3 analyze_cmp6.py
+CMP_OUT=runs/cmp8 OR_PRIMARY=x-ai/grok-4.3 python3 analyze_cmp6.py
 # 遍二：MiniMax embo-01（0.75 阈值的标定基准）—— 必须落在独立目录
-CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=deepseek/deepseek-chat \
+CMP_OUT=runs/cmp8_mmemb EMBED_PROVIDER=minimax OR_PRIMARY=x-ai/grok-4.3 \
 ```bash
 # 已在实验根目录
 python3 analyze_cmp6.py && python3 build_compare5_page.py

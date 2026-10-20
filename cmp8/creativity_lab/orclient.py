@@ -20,11 +20,14 @@ from dataclasses import dataclass, field
 
 BASE = os.environ.get("OR_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/")
 _KEY = os.environ.get("OPENROUTER_API_KEY", "")
-# ⚠️ 默认值是 2026-10-20 **实测**能出内容的模型。
+# ⚠️ 默认值是 2026-10-20 **实测**能出内容、且**自检稳定**的模型。
 #   原来的 "x-ai/grok-3-mini" 已下架（404：xAI 建议改用 grok-4.3）；
 #   原来的 embedding 默认 "openai/text-embedding-3-small" 被供应商 ToS 拦（403）。
-PRIMARY = os.environ.get("OR_PRIMARY", "deepseek/deepseek-chat")
-FALLBACKS = [m for m in ("x-ai/grok-4.3", "qwen/qwen3.7-plus",
+#   默认判官选 grok-4.3 而不是更便宜的 deepseek/deepseek-chat：
+#   **演练实测 deepseek 在分析器自检上两次都只有假断言召回 2/5（<0.5）⇒ 会被拒绝出数**；
+#   grok-4.3 是 5/5 + 5/5（fn=0, fp=0）。判官调用在 temperature 1.0 ⇒ 自检有采样随机性。
+PRIMARY = os.environ.get("OR_PRIMARY", "x-ai/grok-4.3")
+FALLBACKS = [m for m in ("deepseek/deepseek-chat", "qwen/qwen3.7-plus",
                          "meta-llama/llama-3.3-70b-instruct", "z-ai/glm-4.5")
              if m != PRIMARY]
 EMBED_MODEL = os.environ.get("OR_EMBED", "qwen/qwen3-embedding-8b")

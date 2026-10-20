@@ -23,6 +23,22 @@ AN = os.path.join(ROOT, "analyze_cmp6.py")
 SM = os.path.join(ROOT, "smoke_or.py")
 
 
+
+def sub_soft(text, old, new, alt=None, tag=""):
+    """容错版 sub1：找不到 old 时不报错（视为已打过）。
+
+    场景：同一个 edit 的"中间态"曾经存在过（v10 默认判官是 deepseek，
+    v12 改成 grok-4.3）⇒ old(最老态) 与 new 都不在、但中间态在 ⇒ 必须能迁移。
+    """
+    if new in text:
+        return text
+    if old in text:
+        return text.replace(old, new, 1)
+    if alt and alt in text:
+        return text.replace(alt, new, 1)
+    print("  · %s：旧文本不在（视为已打过），跳过" % tag)
+    return text
+
 def sub1(text, old, new, tag):
     if old not in text:
         if new in text:
@@ -60,21 +76,31 @@ s = sub1(s, '''def classify(status: int, body: str) -> str:
     if status == 401:
         return "auth"''', "classify")
 
-# 2) 默认模型：换成实测可用的
-s = sub1(s, '''PRIMARY = os.environ.get("OR_PRIMARY", "x-ai/grok-3-mini")
-FALLBACKS = [m for m in ("x-ai/grok-4-fast", "x-ai/grok-4.1-fast") if m != PRIMARY]
-EMBED_MODEL = os.environ.get("OR_EMBED", "openai/text-embedding-3-small")
-EMBED_FALLBACKS = ["qwen/qwen3-embedding-8b", "baai/bge-m3", "google/gemini-embedding-001"]''',
-'''# ⚠️ 默认值是 2026-10-20 **实测**能出内容的模型。
-#   原来的 "x-ai/grok-3-mini" 已下架（404：xAI 建议改用 grok-4.3）；
-#   原来的 embedding 默认 "openai/text-embedding-3-small" 被供应商 ToS 拦（403）。
-PRIMARY = os.environ.get("OR_PRIMARY", "deepseek/deepseek-chat")
+# 2) 默认模型：换成实测可用的（默认判官 = grok-4.3，见下方注释）
+_ALT_JUDGE = '''PRIMARY = os.environ.get("OR_PRIMARY", "deepseek/deepseek-chat")
 FALLBACKS = [m for m in ("x-ai/grok-4.3", "qwen/qwen3.7-plus",
                          "meta-llama/llama-3.3-70b-instruct", "z-ai/glm-4.5")
              if m != PRIMARY]
 EMBED_MODEL = os.environ.get("OR_EMBED", "qwen/qwen3-embedding-8b")
 EMBED_FALLBACKS = ["qwen/qwen3-embedding-4b", "baai/bge-m3",
-                   "sentence-transformers/all-minilm-l6-v2"]''', "默认模型")
+                   "sentence-transformers/all-minilm-l6-v2"]'''
+s = sub_soft(s, '''PRIMARY = os.environ.get("OR_PRIMARY", "x-ai/grok-3-mini")
+FALLBACKS = [m for m in ("x-ai/grok-4-fast", "x-ai/grok-4.1-fast") if m != PRIMARY]
+EMBED_MODEL = os.environ.get("OR_EMBED", "openai/text-embedding-3-small")
+EMBED_FALLBACKS = ["qwen/qwen3-embedding-8b", "baai/bge-m3", "google/gemini-embedding-001"]''',
+'''# ⚠️ 默认值是 2026-10-20 **实测**能出内容、且**自检稳定**的模型。
+#   原来的 "x-ai/grok-3-mini" 已下架（404：xAI 建议改用 grok-4.3）；
+#   原来的 embedding 默认 "openai/text-embedding-3-small" 被供应商 ToS 拦（403）。
+#   默认判官选 grok-4.3 而不是更便宜的 deepseek/deepseek-chat：
+#   **演练实测 deepseek 在分析器自检上两次都只有假断言召回 2/5（<0.5）⇒ 会被拒绝出数**；
+#   grok-4.3 是 5/5 + 5/5（fn=0, fp=0）。判官调用在 temperature 1.0 ⇒ 自检有采样随机性。
+PRIMARY = os.environ.get("OR_PRIMARY", "x-ai/grok-4.3")
+FALLBACKS = [m for m in ("deepseek/deepseek-chat", "qwen/qwen3.7-plus",
+                         "meta-llama/llama-3.3-70b-instruct", "z-ai/glm-4.5")
+             if m != PRIMARY]
+EMBED_MODEL = os.environ.get("OR_EMBED", "qwen/qwen3-embedding-8b")
+EMBED_FALLBACKS = ["qwen/qwen3-embedding-4b", "baai/bge-m3",
+                   "sentence-transformers/all-minilm-l6-v2"]''', alt=_ALT_JUDGE, tag="默认模型")
 
 # 3) chat：gone/forbidden 换模型；空产出抛错带原因
 s = sub1(s, '''        model = model or PRIMARY

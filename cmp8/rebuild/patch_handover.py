@@ -973,6 +973,29 @@ def patch(path):
     if applied12:
         print("  ✓ 改动 12：应用了 %d 处（回环纪律分情况）" % applied12)
 
+
+    # ===== 改动 15：默认判官改 grok-4.3 =====
+    if '判官必须跨厂商**（`x-ai/grok-4.3`）' not in s:
+        if '1. **判官必须跨厂商**（`deepseek/deepseek-chat`），且**必须先过判官自检闸门**（真 ≥3/4 且 假 ≥3/4）再跑批。' in s:
+            s = s.replace('1. **判官必须跨厂商**（`deepseek/deepseek-chat`），且**必须先过判官自检闸门**（真 ≥3/4 且 假 ≥3/4）再跑批。', '1. **判官必须跨厂商**（`x-ai/grok-4.3`），且**必须先过判官自检闸门**（真 ≥3/4 且 假 ≥3/4）再跑批。\n   ⚠️ **实测（2026-10-20 18:15 全链路演练）：`deepseek/deepseek-chat` 在同一自检上两次都只有假断言召回 2/5（< 0.5）⇒ 分析器会「拒绝出数」**；`x-ai/grok-4.3` 是 **5/5 + 5/5（fn=0, fp=0）** ⇒ **默认判官用 grok-4.3**。判官调用在 temperature 1.0 ⇒ **自检本身有采样随机性**，判官一次不过先换模型、再考虑重试。', 1)
+            print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
+    if 'OR_PRIMARY=x-ai/grok-4.3`（`grok-3-mini` 已 404 下架）' not in s:
+        if '- ⚠️ **判官必须是跨厂商**：`OR_PRIMARY=deepseek/deepseek-chat`（`grok-3-mini` 已 404 下架）' in s:
+            s = s.replace('- ⚠️ **判官必须是跨厂商**：`OR_PRIMARY=deepseek/deepseek-chat`（`grok-3-mini` 已 404 下架）', '- ⚠️ **判官必须是跨厂商**：`OR_PRIMARY=x-ai/grok-4.3`（`grok-3-mini` 已 404 下架；**deepseek 便宜但自检不稳 ⇒ 换模型**）', 1)
+            print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
+    if '判官 x-ai/grok-4.3 ：真断言 5/5 ｜ 假断言 5/5' not in s:
+        if '判官 deepseek/deepseek-chat ：真断言 4/4 ｜ 假断言 4/4   ✅' in s:
+            s = s.replace('判官 deepseek/deepseek-chat ：真断言 4/4 ｜ 假断言 4/4   ✅', '判官 x-ai/grok-4.3 ：真断言 5/5 ｜ 假断言 5/5   ✅（2026-10-20 18:15 演练复核：fn=0 fp=0）\n判官 deepseek/deepseek-chat ：真断言 3/5 ｜ 假断言 2/5   ❌ **自检不过 ⇒ 拒绝出数**（同一组断言两次跑都不过）', 1)
+            print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
+    if 'export OR_PRIMARY=x-ai/grok-4.3     # 判官' not in s:
+        if 'export OR_PRIMARY=deepseek/deepseek-chat     # 判官：跨厂商、非 MiniMax' in s:
+            s = s.replace('export OR_PRIMARY=deepseek/deepseek-chat     # 判官：跨厂商、非 MiniMax', 'export OR_PRIMARY=x-ai/grok-4.3              # 判官：跨厂商、非 MiniMax（**deepseek 自检不稳 ⇒ 不用它**）', 1)
+            print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
+    if '判官自检（2026-10-20）：grok-4.3 **5/5 + 5/5**' not in s:
+        if '- 判官自检（2026-10-20）：deepseek **4/4 + 4/4**；grok-4.3 **4/4 + 4/4**' in s:
+            s = s.replace('- 判官自检（2026-10-20）：deepseek **4/4 + 4/4**；grok-4.3 **4/4 + 4/4**', '- 判官自检（2026-10-20 18:15 演练复核）：**grok-4.3 5/5 + 5/5（fn=0 fp=0）✅**；deepseek **2/5**（两次都不稳）❌', 1)
+            print('  ✓ applied: 改动 15：默认判官改 grok-4.3')
+
     if s != orig:
         io.open(path, "w", encoding="utf-8").write(s)
     return s != orig

@@ -54,7 +54,7 @@ import io, sys
 import re
 s = io.open("cmp8/creativity_lab/orclient.py", encoding="utf-8").read()
 m = re.search(r'^PRIMARY = .*$', s, re.M)
-sys.exit(0 if (m and "deepseek/deepseek-chat" in m.group(0)) else 1)
+sys.exit(0 if (m and "x-ai/grok-4.3" in m.group(0) and "grok-3-mini" not in m.group(0)) else 1)
 PY
 then say "  ✔ 树内默认模型已被 patch_or 换新"; PASS=$((PASS+1))
 else say "  ✗ 树内默认模型**没有**被换新 ⇒ rebuild.sh 缺 patch_or 这一步"; FAIL=$((FAIL+1)); fi
