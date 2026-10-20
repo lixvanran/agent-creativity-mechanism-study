@@ -331,6 +331,8 @@ git checkout cmp8-handover-2026-10-20
 | `cmp8/runs/cmp8/judge_cache.json` | **判官结果缓存**（遍2 复用的证据 ⇒ `analysis.json` 的 `judge_reused`） |
 | `README.md` | 仓库首页：3 分钟版「从哪看起、怎么用」 |
 | **`cmp8/analysis_denominators.md`** | **★ 绝对分母与判决表**（每臂可核验断言条数 / 逐题分母 / 全部非零矛盾率样本 / 种子噪声地板 / ⑤b vs ⑤c 判决 / 能站住与不能站住的逐条清单） |
+| **`REPORT-cmp8-2026-10-20.md`** | **★ 完整报告**（仓库根 + `docs/cmp8/` 各一份）：§0–§8 结论 + **附录 A = 分析器原始终端输出（逐字）** + **附录 B = 84 份答案原文（逐字）** |
+（每臂可核验断言条数 / 逐题分母 / 全部非零矛盾率样本 / 种子噪声地板 / ⑤b vs ⑤c 判决 / 能站住与不能站住的逐条清单） |
 | `creativity_lab/`（**仓库根，不是 `cmp8/` 下**） | **训练侧**：`train_policy.py`（产出那 14 维权重）、`arch_v2.py`、`train_agent.py`、`train_selector.py`、`measure_breadth.py`、`measure_paradox2.py`、`check_breadth_validity.py`、`test_verifier.py`、`workflow.py`、`scipy_free.py`、`calibration.py`、`contrasts.py`、`leakage.py`、`prompts.py`、`arms/`、`gates/`、`drill*.py`、`pilot_v2*.py`、`train_pipeline*.py` |
 | `creativity_lab/data/` | **题库与回归集**：`legal_topics.json`、`legal_topics_v2.json`（**核验器回归集，18 题**）、`policy_topics.json`（**8 道政策域训练题**）、`train_topics.json`、`topics.json` |
 | `TRAINING-METHOD-REPORT.md` / `REPORT-ARCHLEARN-2026-10-19.md` / `docs/CORRECTION-2026-10-18-breadth.md` / `POSTMORTEM.md` / `FINDINGS.md` | 历史报告与复盘 |
