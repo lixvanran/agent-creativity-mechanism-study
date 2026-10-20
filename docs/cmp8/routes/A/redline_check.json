@@ -1,6 +1,12 @@
 {
- "model_facing_strings_checked": 324,
- "R2_rubric_term_hits": [
+ "model_facing_strings_checked": 631,
+ "injected_strings_checked": 19,
+ "R2_rubric_term_hits": [],
+ "R2_width_proxy_hits": [],
+ "R3_self_report_hits": [],
+ "R5_adhd_hits": [],
+ "R6_answer_hint_hits": [],
+ "R2_rubric_term_hits_in_derivation_only": [
   {
    "src": "FACET:FA1:why",
    "term": "承重",
@@ -12,41 +18,243 @@
    "sha1": "dfcaa1f5"
   }
  ],
- "R2_width_proxy_hits": [],
- "R3_self_report_hits": [],
- "R5_adhd_hits": [],
- "R6_answer_hint_hits": [],
+ "R2_derivation_only_note": "这些命中只出现在**推导注释**里（facets.FACETS[*][2]），facet_text() 只取第 2 列 ⇒ 它们从不进任何提示词；故不判失败，只报告。",
+ "prompt_level_prompts_checked": 24,
+ "R2_prompt_level_hits": [],
+ "R3_prompt_level_self_report_hits": [],
+ "R5_prompt_level_adhd_hits": [],
+ "M4_prompt_level_evidence_leak": [],
  "R1_blacklist_strict_hits": 0,
- "R1_blacklist_hint_hits": 1,
+ "R1_blacklist_hint_hits": 0,
  "R1_blacklist_source_files": 8,
  "R1_blacklist_files_scanned": 8,
- "R1_hit_details": [
-  {
-   "path": "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/A/DESIGN.md",
-   "chars": 32440,
-   "lines": 640,
-   "hits": [
-    {
-     "line": 432,
-     "cls": "hint",
-     "len": 4,
-     "sha1": "c15d632e"
-    }
-   ]
-  }
- ],
+ "R1_hit_details": [],
  "M4_generation_templates_have_no_evidence_slot": true,
  "M4_verify_template_has_evidence_slot": true,
  "R8_endpoint": "https://api.minimaxi.com/v1",
  "R8_endpoint_ok": true,
+ "R11_strong_claims_in_docs": [
+  {
+   "file": "DESIGN.md",
+   "line": 36,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 73,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 74,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 100,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 158,
+   "term": "完全固定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 159,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 196,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 230,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 231,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 261,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 263,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 284,
+   "term": "不可能"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 349,
+   "term": "必然"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 415,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 427,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 429,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 433,
+   "term": "不可能"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 435,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 451,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 452,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 454,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 512,
+   "term": "不可能"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 591,
+   "term": "必然"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 626,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 630,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 716,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 716,
+   "term": "必然"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 716,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 720,
+   "term": "恒定"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 791,
+   "term": "保证"
+  },
+  {
+   "file": "DESIGN.md",
+   "line": 799,
+   "term": "保证"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 130,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 143,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 157,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 167,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 183,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 204,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 244,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 303,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 437,
+   "term": "恒定"
+  },
+  {
+   "file": "spec.yaml",
+   "line": 438,
+   "term": "必然"
+  }
+ ],
+ "R11_strong_claims_note": "不判失败（语义判定不是脚本能做的），但**必须**由人逐条核对：每一条强断言都要有代码或产物支撑；无支撑的必须改写。",
  "hard_fail_counts": {
-  "R2_rubric_term_hits": 2,
+  "R2_rubric_term_hits": 0,
   "R2_width_proxy_hits": 0,
   "R3_self_report_hits": 0,
   "R5_adhd_hits": 0,
-  "R6_answer_hint_hits": 0
+  "R6_answer_hint_hits": 0,
+  "R2_prompt_level_hits": 0,
+  "R3_prompt_level_self_report_hits": 0,
+  "R5_prompt_level_adhd_hits": 0,
+  "M4_prompt_level_evidence_leak": 0
  },
- "hard_fail_total": 2,
+ "hard_fail_total": 0,
  "R1_blacklist_strict_total": 0,
- "all_pass": false
+ "guards_failed": [],
+ "checks_skipped": [],
+ "all_pass": true
 }

@@ -33,6 +33,10 @@
 """
 from __future__ import annotations
 
+# 提示词版本：任何**注入文本**改动都必须 +1，并同步写进 meta.json 的 prompt_version。
+# （协议 §4.3「缓存身份」：提示词版本是跨臂可比的前提。）
+PROMPT_VERSION = "ROUTE-A-prompt-v2.0"
+
 # ---------------------------------------------------------------- 承载面目录
 # id -> (短名, 注入提示词的那一段程序说明, 推导说明)
 FACETS: dict[str, tuple[str, str, str]] = {
@@ -110,6 +114,19 @@ RESAMPLE_Q = """问题：{ask}
 这一面里上面没覆盖到的部分优先写。
 {out_spec}"""
 
+# 第二轮的**无清单**变体（消融臂 A_minus_D3；track-d §4.3 的 `no_rest_structured`）。
+# ⚠️ 这是 F2 修复新增的模板：旧版执行器只认 structured/random/none，
+#    `structured_no_cover` 会掉进「带清单」分支 ⇒ 该臂与 A_fixed **逐字节相同** ⇒
+#    FA-7 变成一条「对任何数据都恒触发」的否证条件。
+#    现在它是一份**独立模板**：第二轮仍然发生（拓扑不变），但 prompt 里**没有**已覆盖清单。
+RESAMPLE_Q_NC = """问题：{ask}
+
+你现在只从【{facet_name}】这一面来看这个问题。
+{facet_text}
+
+要求：直接回答问题，给出必要依据；这一面没有涉及的内容不要写。
+{out_spec}"""
+
 # 断言抽取：在既有 ASSERT_MAIN 基础上加一条**自足性**要求（减少 F5 风险：
 # 关键结论常常靠「多血质」这类专名被命中，代词会让命中失败）。
 EXTRACT_Q = """从下面这段回答里，逐条列出其中**可判真假的陈述**。
@@ -175,12 +192,21 @@ def facet_name(fid: str) -> str:
     return FACETS[fid][0]
 
 
-def all_prompt_strings() -> list[tuple[str, str]]:
-    """返回 (来源, 字符串) 列表，供 leakage / 黑名单扫描用。"""
+def injected_strings() -> list[tuple[str, str]]:
+    """返回**真正会发给模型的字符串**（来源, 字符串）。
+
+    ⚠️ 这份清单是红线自检的**唯一权威对象**：
+    目录的第三列（推导说明）只是**给复核者看的注释**，从不进任何提示词
+    （`facet_text()` 只取第 2 列），因此它**不能**与「模型看到的字符串」混在一起判红线
+    —— 混在一起会把「注释里讨论评价口径」误判成「把评价口径写进了提示词」。
+    （这是 F7 的修法：旧版 `all_prompt_strings()` 把推导注释也算进去，
+      于是 `redline_check.json` 记录 `all_pass=false`，而实际注入串零命中。）
+    """
     out = [
         ("OUT_SPEC", OUT_SPEC),
         ("SLOT_Q", SLOT_Q),
         ("RESAMPLE_Q", RESAMPLE_Q),
+        ("RESAMPLE_Q_NC", RESAMPLE_Q_NC),
         ("EXTRACT_Q", EXTRACT_Q),
         ("SPLIT_Q", SPLIT_Q),
         ("CHECK_Q", CHECK_Q),
@@ -188,5 +214,14 @@ def all_prompt_strings() -> list[tuple[str, str]]:
     for fid, (name, text, _why) in FACETS.items():
         out.append(("FACET:%s:name" % fid, name))
         out.append(("FACET:%s:text" % fid, text))
-        out.append(("FACET:%s:why" % fid, _why))
     return out
+
+
+def derivation_strings() -> list[tuple[str, str]]:
+    """返回**只给复核者看的推导注释**（不进任何提示词）。"""
+    return [("FACET:%s:why" % fid, why) for fid, (_n, _t, why) in FACETS.items()]
+
+
+def all_prompt_strings() -> list[tuple[str, str]]:
+    """注入串 + 推导注释（**仅供文档/注释级扫描**；红线判定请用 `injected_strings()`）。"""
+    return injected_strings() + derivation_strings()

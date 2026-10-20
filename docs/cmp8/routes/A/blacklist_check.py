@@ -101,10 +101,11 @@ def _h(s: str) -> str:
 def scan(paths: list) -> dict:
     strict, hint, n_src = build_blacklist()
     res = dict(source_files=n_src, blacklist_strict=len(strict), blacklist_hint=len(hint),
-               files=[], strict_hits=0, hint_hits=0)
+               files=[], strict_hits=0, hint_hits=0, files_scanned=0, files_missing=0)
     for path in paths:
         if not os.path.exists(path):
             res["files"].append(dict(path=path, missing=True))
+            res["files_missing"] += 1
             continue
         text = open(path, encoding="utf-8").read()
         lines = text.splitlines()
@@ -119,11 +120,44 @@ def scan(paths: list) -> dict:
                     fh.append(dict(line=ln_no, cls="hint", len=len(s), sha1=_h(s)))
                     res["hint_hits"] += 1
         res["files"].append(dict(path=path, chars=len(text), lines=len(lines), hits=fh))
+        res["files_scanned"] += 1
     return res
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
     out = scan(args)
+
+    # ⚠️ **空目标守卫**（第二轮返工 F7 的修法）。
+    #    旧版：`args=sys.argv[1:]` → `scan(args)` → `exit(1 if strict_hits else 0)`，
+    #    于是「一个文件都没扫」会打印 `"files": []` 并 **exit 0**（= 橡皮图章）。
+    #    现在：被扫对象为空 / 黑名单来源没找到 / 黑名单本身为空 ⇒
+    #    显式报「未执行」并以**非零**退出码结束，**绝不**能报 PASS。
+    guards = []
+    if not args:
+        guards.append("no_target_args: 命令行没有给出任何被扫文件")
+    if out["files_scanned"] == 0:
+        guards.append("no_files_scanned: 被扫对象列表里没有一个存在的文件")
+    if out["source_files"] == 0:
+        guards.append("no_blacklist_source: 找不到 U1–U4 的 user4_*.json（黑名单是空的）")
+    if out["blacklist_strict"] == 0:
+        guards.append("empty_blacklist: strict 黑名单为空（检查无意义）")
+
+    out["guards_failed"] = guards
+    out["status"] = "NOT_RUN" if guards else ("FAIL" if out["strict_hits"] else "PASS")
+    out["scanned_files"] = [f.get("path") for f in out["files"]]
+    # 落盘产物（与 redline_check.json 同款，便于复核者直接查）
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "blacklist_check.json"), "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1)
     print(json.dumps(out, ensure_ascii=False, indent=2))
-    sys.exit(1 if out["strict_hits"] else 0)
+    if guards:
+        print("\n结论：未执行（守卫触发）—— 不可据此声称「零泄漏」", file=sys.stderr)
+        for g in guards:
+            print("  - %s" % g, file=sys.stderr)
+        sys.exit(2)
+    if out["strict_hits"]:
+        print("\n结论：strict 命中 ⇒ 存在泄漏", file=sys.stderr)
+        sys.exit(1)
+    print("\n结论：扫了 %d 个文件，strict 命中 0" % out["files_scanned"], file=sys.stderr)
+    sys.exit(0)

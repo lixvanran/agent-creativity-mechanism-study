@@ -1,0 +1,86 @@
+[
+ {
+  "i": 1,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 316,
+  "completion_tokens": 237,
+  "total_tokens": 553
+ },
+ {
+  "i": 2,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 320,
+  "completion_tokens": 411,
+  "total_tokens": 731
+ },
+ {
+  "i": 3,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 369,
+  "completion_tokens": 1334,
+  "total_tokens": 1703
+ },
+ {
+  "i": 4,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 409,
+  "completion_tokens": 593,
+  "total_tokens": 1002
+ },
+ {
+  "i": 5,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 511,
+  "completion_tokens": 2175,
+  "total_tokens": 2686
+ },
+ {
+  "i": 6,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 434,
+  "completion_tokens": 3866,
+  "total_tokens": 4300
+ },
+ {
+  "i": 7,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 822,
+  "completion_tokens": 984,
+  "total_tokens": 1806
+ },
+ {
+  "i": 8,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 332,
+  "completion_tokens": 569,
+  "total_tokens": 901
+ },
+ {
+  "i": 9,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 331,
+  "completion_tokens": 240,
+  "total_tokens": 571
+ },
+ {
+  "i": 10,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 380,
+  "completion_tokens": 570,
+  "total_tokens": 950
+ },
+ {
+  "i": 11,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 378,
+  "completion_tokens": 3237,
+  "total_tokens": 3615
+ },
+ {
+  "i": 12,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "prompt_tokens": 739,
+  "completion_tokens": 4170,
+  "total_tokens": 4909
+ }
+]

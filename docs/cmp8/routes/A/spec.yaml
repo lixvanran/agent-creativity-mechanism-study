@@ -3,15 +3,22 @@
 # ⚠️ 本文件只描述**拓扑**（人设计的固定 DAG，零训练、零策略权重）。
 #    所有阈值都是**事前预注册**的（DESIGN.md §3.5），事后不得修改（协议 R-9）。
 # ⚠️ 本文件不含任何题目实体、答案暗示、评价口径词。
+#
+# ⚠️ 节点编号：**N0…N8**（9 个），与 `DESIGN.md` §3.1 的图、`route_a.py` 的模块
+#    docstring、`dryrun_test.py` 的回归断言**一一对应**（第二轮返工 F8 的修法）。
+#    ⚠️ 注释一律**整行**写在上一行（不用行尾注释）⇒ 两种 YAML 解析器
+#    （PyYAML 与 `build_spec_flowchart.py` 自带的极简解析器）读出的值完全一致。
+# ⚠️ `edges:` 用**块状**写法（不用行内 `{...}`）⇒ 极简解析器也能正确读出边
+#    （旧版行内写法被解析成 `{'{from': 'N0, to: N1, ...'}` ⇒ 流程图退化成一条链）。
 
 meta:
   route: A
   name: "路线 A · 固定承载面分解 + 条件重采样 + 硬效用门 + 机械装配"
-  version: "ROUTE-A-v1.0"
+  version: "ROUTE-A-v2.0"
   status: "设计稿 + 已通过可执行性冒烟（未跑真实实验）"
   arm_id: A_fixed
   trained: false
-  learned_components: []          # 零训练：没有 policy、没有权重、没有特征
+  learned_components: []
   source_of_truth:
     design: /workspace/lab/routes/A/DESIGN.md
     spec: /workspace/lab/routes/A/spec.yaml
@@ -21,9 +28,11 @@ meta:
     executor: /workspace/lab/routes/A/route_a.py
     prompts: /workspace/lab/routes/A/facets.py
     dryrun: /workspace/lab/routes/A/dryrun_test.py
+    calibration: /workspace/lab/routes/A/calibrate_thresholds.py
     smoke: /workspace/lab/routes/A/smoke/smoke_a.py
     redline: /workspace/lab/routes/A/redline_check.py
     blacklist: /workspace/lab/routes/A/blacklist_check.py
+  fix_notes: /workspace/lab/routes/A/FIX-NOTES.md
 
 # ---------------------------------------------------------------- 端点与模型（协议 §8 (a1)）
 endpoints:
@@ -44,17 +53,27 @@ endpoints:
 constants:
   round1_facets: [FA1, FA2, FA3, FA4]
   round2_facets: [FA5, FA6]
+  # ⚠️ 预算的作用域 = **每 (臂, 任务, rep)**，**不是进程累计**（第二轮返工 F1）
   max_calls_per_rep: 24
-  max_tokens_per_rep: 40000
+  # ⚠️ **预注册修订（DEV 数据之前）**：40 000 → 60 000。
+  #    依据：预注册拓扑一个 rep 的实测 46 217 token（smoke/smoke_log.json）⇒ 原值装不下。
+  #    ⚠️ 新值**未经活体验证**（本轮 API 预算已用尽）⇒ DESIGN §3.5「预注册修订记录」。
+  max_tokens_per_rep: 60000
   max_claims: 48
   extract_cap_per_slot: 8
   verify_batch: 12
   answer_char_cap: 400
-  lex_thr: 0.75            # char-bigram Jaccard（实现 1）
-  struct_thr: 0.70         # 4-gram 覆盖率 + 数字指纹包含（实现 2）
-  collapse_mult: 1.0       # 诊断量，不作开关
+  lex_thr: 0.75
+  struct_thr: 0.70
+  # ⚠️ collapse_mult 是**纯诊断量**：只报 collapse_flag，**不控制任何分支**
+  #    （第二轮返工 F3：旧版把它当开关 ⇒ 拓扑数据依赖 ⇒ 与路线 A 的定义冲突）
+  collapse_mult: 1.0
   temperature: 0.7
-  seeds: [S1, S2, S3]
+  prompt_version: "ROUTE-A-prompt-v2.0"
+  # ⚠️ **没有 API 级种子**：共享 client 的 chat() 没有 seed 参数（不改共享包）
+  #    ⇒ seed 只是**运行标签**；reproducibility = not_reproducible__no_api_seed_parameter
+  seed_policy: "api_seed_unsupported__label_only__NOT_reproducible"
+  seed_labels: [S1, S2, S3]
   reps_per_task: 3
   models_tier:
     - "MiniMax-M3.1-Flash-Preview"
@@ -67,17 +86,18 @@ constants:
     extract: 6000
     split: 6000
     verify: 8000
-  client_budgets: []       # budgets=()：不交给共享 client 兜底（避免双倍烧调用）
+  client_budgets: []
+  client_budgets_note: "budgets=()：不交给共享 client 兜底（避免双倍烧调用）"
 
 # ---------------------------------------------------------------- 输入 / 输出
 io:
   input:
     - name: ask
       desc: "题面（路线只能看到这个）"
-      used_by: [N1, N2, N4, N5, N6, N8]
+      used_by: [N1, N2, N4, N5, N6, N7, N8]
     - name: evidence_items
       desc: "依据包条目 [{id, text}]（**只进核验侧**，禁止进任何生成提示词）"
-      used_by: [N6]
+      used_by: [N7]
     - name: cfg
       desc: "上表的预注册常量"
       used_by: [ALL]
@@ -89,40 +109,45 @@ io:
   output:
     - path: "/workspace/lab/routes/RUNS/<arm_id>/<task_id>/rep<k>.answer.md"
       desc: "机械答案（协议 §4.5 的唯一评分对象）"
+      written_by: "route_a.save_run()"
     - path: "/workspace/lab/routes/RUNS/<arm_id>/<task_id>/rep<k>.meta.json"
-      desc: "调用数/token/种子/模型/诊断量"
+      desc: "调用数/token/运行标签/实际模型/诊断量（字段清单见 DESIGN §6.4）"
+      written_by: "route_a.save_run()"
   not_output:
     - "rep<k>.cards.json —— 卡片由协议侧独立抽取器产出（协议 §8 (a3)）"
     - "summary.json —— 由协议侧抽取器+判官+对齐器产出（协议 §8 (e)）"
 
-# ---------------------------------------------------------------- 节点
+# ---------------------------------------------------------------- 节点（N0…N8）
 nodes:
   - id: N0
     name: "读题 / 装配输入"
-    kind: deterministic
+    kind: io
+    sub: "0 次调用"
     reads: [ask, evidence_items, cfg]
     writes: [g]
     calls: 0
     tokens: 0
-    condition: "无"
+    condition: "恒定执行"
     notes: "路由与预算初始化；不产生任何模型输出"
 
   - id: N1
     name: "槽位生成（第一轮）"
-    kind: llm
-    op: "GEN_ANGLE（固定槽位）"
+    kind: st
+    sub: "4 次调用"
+    op: "GEN_SLOT（固定槽位）"
     reads: [ask, "constants.round1_facets"]
     writes: [slot_answers[4]]
     calls: 4
     prompt: "facets.SLOT_Q"
     output_schema: "纯文本答复（≤400 字）"
     condition: "恒定执行"
-    budget_guard: "calls+1 <= max_calls_per_rep；tokens+est <= max_tokens_per_rep"
+    budget_guard: "calls+1 <= max_calls_per_rep；tokens+est <= max_tokens_per_rep（作用域=本次 route 调用）"
     notes: "生成端**不评价**（D5 的『门控放宽』）；注入的承载面指令是任务无关的程序"
 
   - id: N2
     name: "断言抽取（逐槽位）"
-    kind: llm
+    kind: st
+    sub: "4 次调用"
     op: "EXTRACT"
     reads: [slot_answers]
     writes: [slot_claims[4]]
@@ -133,68 +158,88 @@ nodes:
     notes: "不读模型自述（协议 R-3）"
 
   - id: N3
-    name: "离散去冗余 + 塌缩诊断"
-    kind: deterministic
+    name: "离散去冗余（塌缩诊断）"
+    kind: st
+    sub: "0 次调用"
     reads: [slot_claims]
-    writes: [strict_idx, loose_idx, collapse_flag]
+    writes: [collapse_flag, collapse_kept]
     calls: 0
     condition: "恒定执行"
     impl_1: "词法：char-bigram Jaccard >= lex_thr"
     impl_2: "结构：数字指纹互为子集（都非空）且 4-gram 覆盖率 >= struct_thr"
     combine: "strict = 两实现都认为不重复（优先占字数预算）；loose = 至少一个认为不重复（填尾）"
-    notes: "**不用 embedding**（本项目实测 embo-01 句级几何无分辨率；冒烟实测会把 27 条断言压成 1 条）"
+    notes: "**不用 embedding**（本项目实测 embo-01 句级几何无分辨率）。⚠️ 塌缩量是**诊断量**，不控制任何分支（F3）"
 
   - id: N4
     name: "条件重采样（第二轮）"
-    kind: llm
-    op: "GEN_ANGLE（条件改写）"
+    kind: st
+    sub: "2 次调用"
+    op: "GEN_SLOT（条件改写）"
     reads: [ask, "constants.round2_facets", "第一轮已覆盖清单"]
     writes: [r2_answers[2]]
     calls: 2
     prompt: "facets.RESAMPLE_Q"
     output_schema: "纯文本答复（≤400 字）"
-    condition: "**恒定执行**（固定拓扑；不做数据依赖的开关）"
+    condition: "恒定执行（臂级常量；**无数据依赖的开关**，F3）"
     d3_form: "✅ 改写下一次采样的条件分布：prompt 里的『已覆盖清单』= 上一轮状态"
     forbidden_forms:
       - "❌ sleep(N)"
       - "❌ 随便想点别的"
       - "❌ 注入与任务无关的闲聊上下文（只在消融臂 A_random_rest 里作为对照出现）"
     ablation_variants:
-      A_minus_D3: "第二轮不带已覆盖清单"
+      A_minus_D3: "第二轮不带已覆盖清单（facets.RESAMPLE_Q_NC，**独立模板**）"
       A_random_rest: "第二轮带与任务无关的占位上下文（❌ 形式的对照）"
+      A_minus_R2: "没有第二轮（臂级常量 resample_mode=none）"
 
   - id: N5
-    name: "断言抽取（第二轮）+ 原子化拆分"
-    kind: llm
-    op: "EXTRACT + SPLIT"
-    reads: [r2_answers, slot_claims]
-    writes: [pool]
-    calls: 2
-    prompt: ["facets.EXTRACT_Q", "facets.SPLIT_Q"]
+    name: "断言抽取（第二轮）"
+    kind: st
+    sub: "1 次调用"
+    op: "EXTRACT"
+    reads: [r2_answers]
+    writes: [r2_claims]
+    calls: 1
+    prompt: "facets.EXTRACT_Q"
     output_schema: "一行一条，8–70 字"
-    condition: "抽取恒定执行；拆分仅当存在长度>=40 字的条目且预算允许"
+    condition: "恒定执行（第二轮有答复时）"
+    notes: "批量一次调用；抽取上限 = extract_cap × 第二轮答复数"
+
+  - id: N6
+    name: "原子化拆分"
+    kind: st
+    sub: "≤1 次调用"
+    op: "SPLIT"
+    reads: [pool]
+    writes: [split_claims]
+    calls: 1
+    prompt: "facets.SPLIT_Q"
+    output_schema: "一行一条，8–70 字"
+    condition: "仅当存在长度>=40 字的条目且 max_claims 还有余量"
     ordering: "轮转（round-robin）定序 + 按 max_claims 定容（**内容无关**）"
     notes: "拆分候选的判据是**长度**（格式属性），不是内容判断"
 
-  - id: N6
-    name: "D2 门：效用轴（依据核验）+ 新颖轴（预算分配）"
-    kind: llm + deterministic
-    op: "VERIFY"
+  - id: N7
+    name: "D2 门：效用轴 + 新颖轴"
+    kind: st
+    sub: "≤4 次调用"
+    op: "VERIFY + 冗余判定"
     reads: [pool, ask, evidence_items]
     writes: [verdicts, order]
-    calls: 3
+    calls: 4
     prompt: "facets.CHECK_Q"
     output_schema: "一行一条：支持|矛盾|未提及|非主张，支持/矛盾后跟依据编号"
     condition: "分批核验（batch=12）；任一批解析失败即计入 internal_parsefail_rate"
     oracle_contact: "**本路线唯一接触 oracle 的地方**"
     exception_clause: "协议 §4.6 的「非主张」例外条款：题面数值 + 依据规则推导出的结论判『支持』，不得判『非主张』"
+    axis_order: "**效用轴先、新颖轴后**（F4）：去冗余只在**被支持子集**上做"
     notes: "内部核验器与生成器同厂商 ⇒ 交付侧矛盾率非独立 ⇒ R1 判在生成侧口径（DESIGN §6.3）"
 
-  - id: N7
-    name: "机械装配（不由模型重写）"
-    kind: deterministic
-    reads: [pool, verdicts, strict_idx, loose_idx]
-    writes: [answer]
+  - id: N8
+    name: "机械装配 + 自检与记账"
+    kind: term
+    sub: "0 次调用"
+    reads: [pool, verdicts, order]
+    writes: [answer, meta]
     calls: 0
     condition: "恒定执行"
     template:
@@ -203,80 +248,114 @@ nodes:
       - "## 经核验成立的依据"
       - "- [依据编号] 条目"
     rules:
-      - "只装 verdict == 支持 的条目"
+      - "只装 verdict == 支持 的条目；一条都没被支持时退回『依据未覆盖』的条目并标 answer_fallback"
       - "顺序 = strict 优先、loose 填尾（**内容无关**，不做自评择优）"
-      - "字数上限 400（三臂一致）"
-      - "一条都没被支持时：按项目既有先例退回『依据未覆盖』的条目，并标注 meta.answer_fallback"
-    notes: "协议 §4.5：机械答案是所有臂同一模板的产物 ⇒ 可比"
-
-  - id: N8
-    name: "自检与记账"
-    kind: deterministic
-    reads: [gen_prompts, evidence_items, meta]
-    writes: [meta.json]
-    calls: 0
-    condition: "恒定执行"
+      - "装配期冗余否决：与已装入条目在任一实现下冗余的 loose 条目不再装入"
+      - "字数上限 400 = **整份答案**（含题面回显与段标题），三臂一致"
+      - "超限用 continue 而不是 break（不因一条长条目丢掉后面的短条目）"
     checks:
       - "生成类提示词中不得出现『题面之外』的依据条目文本 ⇒ 违反则 abort（必留声明 #4）"
-      - "记录 n_calls / n_tokens / 空输出重试次数 / 静默空次数 / 作废计数"
+      - "记录 n_calls / n_tokens（**本 rep 的增量**）/ 空输出重试 / 静默空 / 作废计数 / 实际使用的模型"
+    notes: "协议 §4.5：机械答案是所有臂同一模板的产物 ⇒ 可比"
 
 # ---------------------------------------------------------------- 边
 edges:
-  - {from: N0, to: N1, label: "题面"}
-  - {from: N1, to: N2, label: "4 份答复"}
-  - {from: N2, to: N3, label: "断言（带槽位出处）"}
-  - {from: N3, to: N4, label: "已覆盖清单（改写条件分布）"}
-  - {from: N4, to: N5, label: "2 份第二轮答复"}
-  - {from: N5, to: N6, label: "断言池（定序定容）"}
-  - {from: N6, to: N7, label: "verdicts + 顺序"}
-  - {from: N7, to: N8, label: "answer.md"}
-  - {from: N3, to: N5, label: "第一轮断言也进池（并集）"}
-  - {from: N6, to: N8, label: "生成侧冲突率等诊断量"}
+  - from: N0
+    to: N1
+    label: "题面"
+  - from: N1
+    to: N2
+    label: "4 份答复"
+  - from: N2
+    to: N3
+    label: "断言池"
+  - from: N3
+    to: N4
+    label: "已覆盖清单（改写条件分布）"
+  - from: N4
+    to: N5
+    label: "2 份第二轮答复"
+  - from: N2
+    to: N6
+    label: "第一轮断言也进池"
+  - from: N5
+    to: N6
+    label: "第二轮断言进池"
+  - from: N6
+    to: N7
+    label: "断言池（定序定容）"
+  - from: N7
+    to: N8
+    label: "verdicts + 顺序"
+  - from: N3
+    to: N8
+    label: "塌缩诊断量"
 
 # ---------------------------------------------------------------- 臂（对照 + 消融）
 arms:
   - id: A_fixed
     role: "本路线"
-    config: {facet_enabled: true, resample_mode: structured, novel_axis: true, utility_axis: true}
-    notes: "拓扑固定，零训练"
+    config:
+      facet_enabled: true
+      resample_mode: structured
+      novel_axis: true
+      utility_axis: true
+    notes: "拓扑固定，零训练；第二轮恒定执行"
   - id: B0_direct
     role: "协议强制：直调基线"
-    config: {generation: "1 次直调 + 与 A_fixed 完全相同的尾（抽取→核验→装配）"}
-    notes: "「直调」指生成端只调一次；尾是所有臂共用的测量装置（协议 §4.5）"
+    config:
+      generation: "1 次无承载面指令的直调 + 与 A_fixed 完全相同的尾（抽取→核验→装配）"
+    notes: "实现见 route_a.run_b_arm(kind='B0')；「直调」指生成端只调一次；尾是所有臂共用的测量装置（协议 §4.5）"
   - id: B1_eq_calls
     role: "协议强制：等调用数"
-    config: {generation: "K 次无承载面指令的直调，K = A_fixed 本任务本 rep 的生成类调用数", selection: "固定取最后一份"}
+    config:
+      generation: "K 次无承载面指令的直调，K = A_fixed 本任务本 rep 的生成类调用数"
+      selection: "固定取最后一份"
+    notes: "实现见 route_a.run_b_arm(kind='B1', K=...)；K 必须由调用方按 A 臂实读数填入"
   - id: B2_eq_token
     role: "协议强制：等 token"
-    config: {generation: "采样到 token 预算 T_W = A_fixed 本任务本 rep 的实际 token", selection: "固定取最后一份"}
+    config:
+      generation: "采样到 token 预算 T_W = A_fixed 本任务本 rep 的实际 token"
+      selection: "固定取最后一份"
+    notes: "实现见 route_a.run_b_arm(kind='B2', T_W=...)；T_W 必须由调用方按 A 臂实读数填入"
   - id: B3_best_of_n
     role: "协议强制（可选）：best-of-N"
-    config: {selection: "由**外部核验器**在 K 份里挑矛盾最少的一份"}
-    notes: "禁止由生成臂自评挑选（协议 R-4 / track-d §5.4）"
+    config:
+      selection: "由**外部核验器**在 K 份里挑矛盾最少的一份"
+    notes: "实现见 route_a.run_b_arm(kind='B3', K=..., selector=...)；默认 selector 用依据包核验（判官≠生成臂，但**同厂商**）⇒ 跨厂商判官属协议侧，本轮不发起 OpenRouter"
   - id: A_minus_facet
     role: "消融：承载面分解"
-    config: {facet_enabled: false}
+    config:
+      facet_enabled: false
     tests: "FA-1"
   - id: A_minus_D3
     role: "消融：条件改写"
-    config: {resample_mode: structured_no_cover}
+    config:
+      resample_mode: structured_no_cover
     tests: "FA-7（对应 track-d §4.3 的 no_rest_structured）"
+    notes: "⚠️ 必须是**独立模板** facets.RESAMPLE_Q_NC；否则与 A_fixed 逐字节相同 ⇒ 该臂静默退化 ⇒ FA-7 恒触发（F2）"
   - id: A_random_rest
     role: "消融：噪声对照"
-    config: {resample_mode: random}
+    config:
+      resample_mode: random
     tests: "FA-9（对应 track-d §4.3 的 random_rest）"
   - id: A_minus_R2
     role: "消融：去掉第二轮"
-    config: {resample_mode: none}
+    config:
+      resample_mode: none
     tests: "对应 track-d §4.3 的 baseline"
+    notes: "臂级常量（与数据无关），不是数据依赖开关"
   - id: A_minus_utility
     role: "负对照：去掉 D2 的『有用』半"
-    config: {utility_axis: false}
-    tests: "FA-8"
+    config:
+      utility_axis: false
+    tests: "FA-8b"
+    notes: "⚠️ 该臂的 conflict_rate_generated **构造上恒为 0** ⇒ 不能拿它判 FA-8 的矛盾率条款（F10）"
   - id: A_minus_novel
     role: "负对照：去掉 D2 的『远』半"
-    config: {novel_axis: false}
-    tests: "FA-8"
+    config:
+      novel_axis: false
+    tests: "FA-8a"
 
 # ---------------------------------------------------------------- 跑批计划与预算
 run_plan:
@@ -299,7 +378,7 @@ run_plan:
   cap_usd: 1.50
   stop_conditions:
     S1: "累计判官+embedding > $1.50 ⇒ 立即停，报 partial（写明哪些臂先跑）"
-    S2: "单臂单任务超 T_max ⇒ 该样本作废并计数；该臂累计作废 > 20% ⇒ 停该臂"
+    S2: "单臂单任务超 T_max ⇒ 该样本作废并计数（route_a.run_task 记 over_budget_count=1）；该臂累计作废 > 20% ⇒ 停该臂"
     S3: "判官或抽取器自检不过 ⇒ 整批拒绝出数"
     S4: "F1/F3/F4/F5 任一触发 ⇒ 该路线判死，停止追加运行（禁止『再跑一次直到通过』）"
     S5: "每臂最多 2 轮重跑；第 3 轮需重新预注册"
@@ -308,18 +387,42 @@ run_plan:
 falsification:
   protocol_standard: "F1..F8（PROTOCOL §3.3，原样适用）"
   route_specific:
-    - {id: FA-1, trigger: "VD_net(A_fixed vs A_minus_facet) 任务级中位数 <= 0", conclusion: "承载面分解无效"}
-    - {id: FA-2, trigger: "B2（等 token）下 VD_net 相对 B0 的增益消失", conclusion: "增益由预算解释，不构成架构证据"}
-    - {id: FA-3, trigger: "conflict_rate_generated 差值 > 2x 种子噪声地板", conclusion: "代价侧违规，判死"}
-    - {id: FA-4, trigger: "F2 触发", conclusion: "条数灌水，判死"}
-    - {id: FA-5, trigger: "F5 触发", conclusion: "正确答案丢失，判死"}
-    - {id: FA-6, trigger: "dimension_per_card 相对 B0 上升", conclusion: "代理错位，降级为描述性"}
-    - {id: FA-7, trigger: "在第二轮发生的题上 VD_net(A_fixed vs A_minus_D3) 中位数 <= 0", conclusion: "D3 组件判死；按 A_minus_D3 规格重跑（换种子、事前登记、同时报首跑）"}
-    - {id: FA-8, trigger: "A_minus_novel 或 A_minus_utility 不劣于 A_fixed", conclusion: "Mednick 双条件的某一半在本任务集上不起作用"}
-    - {id: FA-9, trigger: "A_random_rest 与 A_fixed 不可分辨（<= 1x 地板）", conclusion: "结构化条件改写不可区分于噪声注入；不得声称 D3 有效"}
-    - {id: FA-10, trigger: "某承载面在 >= 3 个 DEV 题上产出 0 条断言", conclusion: "该面空转；事前登记后删除并重跑（同时报首跑结果）"}
-    - {id: FA-11, trigger: "internal_parsefail_rate > 10%", conclusion: "内部门失效；该批重跑（换种子）"}
-
+    - id: FA-1
+      trigger: "VD_net(A_fixed vs A_minus_facet) 任务级中位数 <= 0"
+      conclusion: "承载面分解无效"
+    - id: FA-2
+      trigger: "B2（等 token）下 VD_net 相对 B0 的增益消失"
+      conclusion: "增益由预算解释，不构成架构证据"
+    - id: FA-3
+      trigger: "conflict_rate_generated 差值 > 2x 种子噪声地板"
+      conclusion: "代价侧违规，判死"
+    - id: FA-4
+      trigger: "F2 触发"
+      conclusion: "条数灌水，判死"
+    - id: FA-5
+      trigger: "F5 触发"
+      conclusion: "正确答案丢失，判死"
+    - id: FA-6
+      trigger: "dimension_per_card 相对 B0 上升"
+      conclusion: "代理错位，降级为描述性"
+    - id: FA-7
+      trigger: "在第二轮确实发生的题上 VD_net(A_fixed vs A_minus_D3) 中位数 <= 0"
+      conclusion: "D3 组件判死；按 A_minus_D3 规格重跑（换种子、事前登记、同时报首跑）"
+    - id: FA-8a
+      trigger: "在 A_fixed 确实因新颖轴改变了装配的题上，VD_net(A_fixed vs A_minus_novel) 任务级中位数 <= 0"
+      conclusion: "Mednick 的『远』这一半在本任务集上不起作用"
+    - id: FA-8b
+      trigger: "在 A_fixed 确实有条目被效用门挡掉的题上，VD_net(A_fixed vs A_minus_utility) 任务级中位数 <= 0"
+      conclusion: "Mednick 的『有用』这一半在本任务集上不起作用"
+    - id: FA-9
+      trigger: "A_random_rest 与 A_fixed 不可分辨（<= 1x 地板）"
+      conclusion: "结构化条件改写不可区分于噪声注入；不得声称 D3 有效"
+    - id: FA-10
+      trigger: "某承载面在 >= 3 个 DEV 题上产出 0 条断言"
+      conclusion: "该面空转；事前登记后删除并重跑（同时报首跑结果）"
+    - id: FA-11
+      trigger: "internal_parsefail_rate > 10%"
+      conclusion: "内部门失效；该批重跑（换种子）"
 # ---------------------------------------------------------------- 硬约束（实现里必须有断言）
 hard_constraints:
   - "生成类提示词不得包含题面之外的依据条目文本（必留声明 #4）"
@@ -330,3 +433,6 @@ hard_constraints:
   - "不用字数/断言条数/角色数/表面新颖性当宽度证据（协议 R-2）"
   - "装配顺序内容无关（轮转 + 字数上限），不做自评择优"
   - "阈值事前冻结；重跑必须换种子、事前登记、同时报首跑结果（协议 R-9 / R-10）"
+  - "预算作用域 = 每 (臂, 任务, rep)；不得用进程累计（第二轮返工 F1）"
+  - "N4 恒定执行；塌缩量只做诊断量，不得当开关（第二轮返工 F3）"
+  - "任何否证条件都不得是『对任何数据都必然触发』的（第二轮返工 F2 / F10）"

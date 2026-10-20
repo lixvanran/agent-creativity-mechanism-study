@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>思维面 = 有效信息维度数 · 三路线程序流程图</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5f0; --card:#fff; --line:#e9e3d6; --line-soft:#f0ebe0;
+    --ink:#14171e; --ink2:#3a4256; --ink3:#7c7a72;
+    --primary:#2f6f5e; --primary-l:#4a8e7c; --accent:#c97b3f; --warn:#b06367; --gold:#b08430;
+    --mono:'JetBrains Mono',monospace; --sans:'Outfit',sans-serif; --serif:'DM Serif Display',serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 24px 72px}
+  h1{font-family:var(--serif);font-weight:400;font-size:33px;line-height:1.22;margin:0 0 8px}
+  h2{font-family:var(--serif);font-weight:400;font-size:23px;margin:0 0 6px}
+  p{margin:0 0 10px;color:var(--ink2)}
+  code{font-family:var(--mono);font-size:12.5px;background:#f1ede3;padding:1px 5px;border-radius:4px;color:var(--primary)}
+  .lede{font-size:16px;margin:0 0 4px}
+  .meta{font-size:13px;color:var(--ink3);font-family:var(--mono);margin:0 0 22px}
+  .sec{margin:0 0 44px}
+  .fig{background:#fcfbf8;border:1px solid var(--line);border-radius:12px;padding:12px 8px;margin:10px 0 4px;overflow-x:auto}
+  .figsvg{display:block;min-width:600px;width:100%;height:auto}
+  .cap{font-size:12.5px;color:var(--ink3);font-family:var(--mono);text-align:center;margin:0 0 12px}
+  .lgd{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink2);font-family:var(--mono);margin:0 0 10px}
+  .lgd span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:16px;height:13px;border-radius:2px;display:inline-block;border-width:1.6px;border-style:solid}
+  .note{font-size:13px;color:var(--ink3);border-left:2px solid var(--line);padding-left:12px;margin:10px 0 0}
+  .hl{background:rgba(47,111,94,.07);border-radius:10px;padding:13px 16px;margin:0 0 14px}
+  .warnbox{background:rgba(176,99,103,.07);border-radius:10px;padding:13px 16px;margin:0 0 14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th{font-weight:600;background:#faf8f3;font-size:13px}
+  .yes{color:var(--primary);font-weight:600}.no{color:var(--warn);font-weight:600}
+  .foot{border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;color:var(--ink3);font-family:var(--mono)}
+  .st{fill:#ffffff;stroke:#3a4256;stroke-width:1.6}
+  .stHot{fill:#eef4f1;stroke:#2f6f5e;stroke-width:1.6}
+  .stBad{fill:#fbf0f0;stroke:#b06367;stroke-width:1.6}
+  .term{fill:#eef4f1;stroke:#2f6f5e;stroke-width:1.8}
+  .io{fill:#fdf4ec;stroke:#c97b3f;stroke-width:1.6}
+  .dec{fill:#faf4e6;stroke:#b08430;stroke-width:1.6}
+  .lane{fill:#fbfaf6;stroke:#e9e3d6;stroke-width:1.4}
+  .ln{fill:none;stroke:#3a4256;stroke-width:1.6}
+  .lnSoft{fill:none;stroke:#b9b3a4;stroke-width:1.4;stroke-dasharray:4 3}
+  .lbl{font-family:'Outfit',sans-serif;font-size:13px;fill:#14171e}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;fill:#7c7a72}
+  @media(max-width:768px){.wrap{padding:24px 16px 56px}h1{font-size:27px}h2{font-size:21px}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>思维面 ＝ 有效信息维度数</h1>
+<p class="lede">三条路线（设计架构 / 训练架构 / 先设计再训练）共用<b>同一套测量协议</b>，
+否则三条路线测的不是同一个东西。全部用标准流程图记号画：
+<b>胶囊＝起止</b>、<b>矩形＝处理</b>、<b>菱形＝判断</b>、<b>平行四边形＝输入输出</b>。</p>
+<p class="meta">2026-10-21 ｜ 负责人拍板：思维面 = 有效信息维度数 ｜ 今晚不跑 OpenRouter</p>
+
+<div class="hl">
+  <b>图例</b>
+  <div class="lgd" style="margin-top:8px">
+    <span><i class="sw" style="background:#eef4f1;border-color:#2f6f5e"></i>起止（胶囊）</span>
+    <span><i class="sw" style="background:#fff;border-color:#3a4256"></i>处理（矩形）</span>
+    <span><i class="sw" style="background:#faf4e6;border-color:#b08430"></i>判断（菱形）</span>
+    <span><i class="sw" style="background:#fdf4ec;border-color:#c97b3f"></i>输入输出</span>
+    <span><i class="sw" style="background:#eef4f1;border-color:#2f6f5e"></i>关键步骤</span>
+    <span><i class="sw" style="background:#fbf0f0;border-color:#b06367"></i>剔除/失败</span>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>图 1 · 有效信息维度的测量流水线</h2>
+  <p class="cap">从答案到净维度增益。承重检验与去冗余检验是两道硬闸门；质量闸门不过就停该臂，不重跑到好看。</p>
+  <div class="fig"><svg viewBox="0 0 700 1088" class="figsvg"><rect x="264.0" y="14.0" width="132.0" height="34.0" rx="18" class="term"/><text x="330.0" y="36.0" text-anchor="middle" class="lbl">开始</text><path d="M330.0,48.0 L330.0,68.0" class="ln" marker-end="url(#ah)"/><polygon points="217.0,68.0 455.0,68.0 443.0,114.0 205.0,114.0" class="io"/><text x="330.0" y="82.0" text-anchor="middle" class="lbl">输入：问题 ask</text><text x="330.0" y="102.0" text-anchor="middle" class="mono">＋ 依据包（16 条原子事实）</text><path d="M330.0,114.0 L330.0,134.0" class="ln" marker-end="url(#ah)"/><rect x="195.0" y="134.0" width="270.0" height="46.0" rx="2" class="st"/><text x="330.0" y="148.0" text-anchor="middle" class="lbl">生成答案（被测臂）</text><text x="330.0" y="168.0" text-anchor="middle" class="mono">直调 / 路线A / 路线B / 路线C · 等预算</text><path d="M330.0,180.0 L330.0,200.0" class="ln" marker-end="url(#ah)"/><rect x="210.0" y="200.0" width="240.0" height="44.0" rx="2" class="st"/><text x="330.0" y="213.0" text-anchor="middle" class="lbl">机械抽取断言</text><text x="330.0" y="233.0" text-anchor="middle" class="mono">extract_claims · 不由模型重写</text><path d="M330.0,244.0 L330.0,264.0" class="ln" marker-end="url(#ah)"/><rect x="195.0" y="264.0" width="270.0" height="46.0" rx="2" class="st"/><text x="330.0" y="278.0" text-anchor="middle" class="lbl">核验 verdict</text><text x="330.0" y="298.0" text-anchor="middle" class="mono">支持 / 矛盾 / 未提及 / 非主张</text><path d="M330.0,310.0 L330.0,330.0" class="ln" marker-end="url(#ah)"/><polygon points="330.0,330.0 495.0,372.0 330.0,414.0 165.0,372.0" class="dec"/><text x="330.0" y="363.0" text-anchor="middle" class="lbl">质量闸门通过？</text><text x="330.0" y="383.0" text-anchor="middle" class="mono">parsefail · valid/total · 判官自检可复现</text><path d="M330.0,330.0 L330.0,350.0" class="ln" marker-end="url(#ah)"/><text x="508.0" y="376.0" text-anchor="start" class="mono">否 ⇒ 停该臂</text><rect x="508.0" y="388.0" width="168.0" height="48.0" rx="2" class="stBad"/><text x="592.0" y="403.0" text-anchor="middle" class="lbl">如实报 valid/total</text><text x="592.0" y="423.0" text-anchor="middle" class="mono">不许重跑到好看</text><path d="M496.0,392.0 L506.0,392.0" class="lnSoft" marker-end="url(#ah)"/><path d="M330.0,434.0 L330.0,454.0" class="ln" marker-end="url(#ah)"/><rect x="180.0" y="454.0" width="300.0" height="48.0" rx="2" class="st"/><text x="330.0" y="469.0" text-anchor="middle" class="lbl">构造成「维度卡片」</text><text x="330.0" y="489.0" text-anchor="middle" class="mono">证据类别分层 · 原题映射 · 决策含义</text><path d="M330.0,502.0 L330.0,522.0" class="ln" marker-end="url(#ah)"/><polygon points="330.0,522.0 500.0,564.0 330.0,606.0 160.0,564.0" class="dec"/><text x="330.0" y="555.0" text-anchor="middle" class="lbl">承重检验：改变了哪个决策/结论？</text><text x="330.0" y="575.0" text-anchor="middle" class="mono">写不出来 ⇒ 不是维度，只是内容</text><path d="M330.0,522.0 L330.0,542.0" class="ln" marker-end="url(#ah)"/><text x="512.0" y="568.0" text-anchor="start" class="mono">否 ⇒ 剔除</text><rect x="512.0" y="580.0" width="168.0" height="48.0" rx="2" class="stBad"/><text x="596.0" y="609.0" text-anchor="middle" class="lbl">剔除（不计入维度数）</text><path d="M500.0,584.0 L510.0,584.0" class="lnSoft" marker-end="url(#ah)"/><path d="M330.0,626.0 L330.0,646.0" class="ln" marker-end="url(#ah)"/><polygon points="330.0,646.0 510.0,688.0 330.0,730.0 150.0,688.0" class="dec"/><text x="330.0" y="679.0" text-anchor="middle" class="lbl">去冗余：I(A,B)=D(A∪B)−D(A)−D(B)+D(∅)</text><text x="330.0" y="699.0" text-anchor="middle" class="mono">≈0 ⇒ 与已有维度冗余 ⇒ 合并</text><path d="M330.0,646.0 L330.0,666.0" class="ln" marker-end="url(#ah)"/><text x="522.0" y="692.0" text-anchor="start" class="mono">是 ⇒ 合并/剔除</text><rect x="522.0" y="704.0" width="168.0" height="48.0" rx="2" class="stBad"/><text x="606.0" y="733.0" text-anchor="middle" class="lbl">合并进已有维度</text><path d="M510.0,708.0 L520.0,708.0" class="lnSoft" marker-end="url(#ah)"/><path d="M330.0,750.0 L330.0,770.0" class="ln" marker-end="url(#ah)"/><rect x="210.0" y="770.0" width="240.0" height="44.0" rx="2" class="st"/><text x="330.0" y="783.0" text-anchor="middle" class="lbl">维度集合 D</text><text x="330.0" y="803.0" text-anchor="middle" class="mono">每张卡片带关系标注</text><path d="M330.0,814.0 L330.0,834.0" class="ln" marker-end="url(#ah)"/><rect x="180.0" y="834.0" width="300.0" height="48.0" rx="2" class="st"/><text x="330.0" y="849.0" text-anchor="middle" class="lbl">与基线（直调）比对</text><text x="330.0" y="869.0" text-anchor="middle" class="mono">新增 = D臂 \ D基线 ｜ 丢失 = D基线 \ D臂</text><path d="M330.0,882.0 L330.0,902.0" class="ln" marker-end="url(#ah)"/><rect x="190.0" y="902.0" width="280.0" height="50.0" rx="2" class="stHot"/><text x="330.0" y="918.0" text-anchor="middle" class="lbl">净维度增益 = |新增| − |丢失|</text><text x="330.0" y="938.0" text-anchor="middle" class="mono">必须同时报绝对条数与分母</text><path d="M330.0,952.0 L330.0,972.0" class="ln" marker-end="url(#ah)"/><rect x="190.0" y="972.0" width="280.0" height="46.0" rx="2" class="st"/><text x="330.0" y="986.0" text-anchor="middle" class="lbl">反判据</text><text x="330.0" y="1006.0" text-anchor="middle" class="mono">矛盾率(带分母) · 成本 · 正确答案是否丢失</text><path d="M330.0,1018.0 L330.0,1038.0" class="ln" marker-end="url(#ah)"/><rect x="264.0" y="1038.0" width="132.0" height="34.0" rx="18" class="term"/><text x="330.0" y="1060.0" text-anchor="middle" class="lbl">结束</text></svg></div>
+</div>
+
+<div class="sec">
+  <h2>图 2 · 维度卡片的准入流水线</h2>
+  <p class="cap">一条断言要成为"维度"，必须依次通过：证据类别分层 → 原题映射 → 承重检验 → 去冗余检验。</p>
+  <div class="fig"><svg viewBox="0 0 902 264" class="figsvg"><rect x="16.0" y="20.0" width="126.0" height="56.0" rx="2" class="io"/><text x="79.0" y="39.0" text-anchor="middle" class="lbl">候选断言</text><text x="79.0" y="59.0" text-anchor="middle" class="mono">来自抽取</text><rect x="164.0" y="20.0" width="126.0" height="56.0" rx="2" class="st"/><text x="227.0" y="39.0" text-anchor="middle" class="lbl">证据类别分层</text><text x="227.0" y="59.0" text-anchor="middle" class="mono">事实/推论/价值判断/建议</text><path d="M144.0,48.0 L162.0,48.0" class="ln" marker-end="url(#ah)"/><rect x="312.0" y="20.0" width="126.0" height="56.0" rx="2" class="st"/><text x="375.0" y="39.0" text-anchor="middle" class="lbl">原题映射</text><text x="375.0" y="59.0" text-anchor="middle" class="mono">映射不回去 ⇒ 剔除</text><path d="M292.0,48.0 L310.0,48.0" class="ln" marker-end="url(#ah)"/><rect x="460.0" y="20.0" width="126.0" height="56.0" rx="2" class="dec"/><text x="523.0" y="39.0" text-anchor="middle" class="lbl">承重检验</text><text x="523.0" y="59.0" text-anchor="middle" class="mono">改变了哪个决策？</text><path d="M440.0,48.0 L458.0,48.0" class="ln" marker-end="url(#ah)"/><rect x="608.0" y="20.0" width="126.0" height="56.0" rx="2" class="dec"/><text x="671.0" y="39.0" text-anchor="middle" class="lbl">去冗余检验</text><text x="671.0" y="59.0" text-anchor="middle" class="mono">I(A,B) &gt; 0 ？</text><path d="M588.0,48.0 L606.0,48.0" class="ln" marker-end="url(#ah)"/><rect x="756.0" y="20.0" width="126.0" height="56.0" rx="2" class="stHot"/><text x="819.0" y="39.0" text-anchor="middle" class="lbl">维度卡片</text><text x="819.0" y="59.0" text-anchor="middle" class="mono">带关系标注</text><path d="M736.0,48.0 L754.0,48.0" class="ln" marker-end="url(#ah)"/><path d="M375.0,76.0 L375.0,112.0" class="lnSoft" marker-end="url(#ah)"/><text x="375.0" y="126.0" text-anchor="middle" class="mono">剔除</text><path d="M523.0,76.0 L523.0,112.0" class="lnSoft" marker-end="url(#ah)"/><text x="523.0" y="126.0" text-anchor="middle" class="mono">剔除</text><path d="M671.0,76.0 L671.0,112.0" class="lnSoft" marker-end="url(#ah)"/><text x="671.0" y="126.0" text-anchor="middle" class="mono">合并</text><rect x="16.0" y="152.0" width="866.0" height="92" rx="3" class="st"/><text x="449.0" y="176.0" text-anchor="middle" class="lbl">关系标注（与已有卡片）</text><rect x="36.0" y="198.0" width="153.2" height="34" rx="2" class="st"/><text x="112.6" y="219.0" text-anchor="middle" class="mono">重复</text><rect x="201.2" y="198.0" width="153.2" height="34" rx="2" class="st"/><text x="277.8" y="219.0" text-anchor="middle" class="mono">细化</text><rect x="366.4" y="198.0" width="153.2" height="34" rx="2" class="st"/><text x="443.0" y="219.0" text-anchor="middle" class="mono">矛盾</text><rect x="531.6" y="198.0" width="153.2" height="34" rx="2" class="st"/><text x="608.2" y="219.0" text-anchor="middle" class="mono">互补</text><rect x="696.8" y="198.0" width="153.2" height="34" rx="2" class="st"/><text x="773.4" y="219.0" text-anchor="middle" class="mono">条件依赖</text><path d="M745.0,76.0 L745.0,152.0" class="lnSoft" marker-end="url(#ah)"/><path d="M745.0,152.0 L36.0,152.0" class="ln" marker-end="url(#ah)"/></svg></div>
+  <p class="note">⚠️ <b>U4 校准点</b>：气质量表那题的有效维度可以<b>很少</b>（一条承重规则就够），
+  但必须<b>能推出结论</b>。⇒ 「维度数」绝不能退化成「条数多」。</p>
+</div>
+
+<div class="sec">
+  <h2>图 3 · 三条路线泳道对照</h2>
+  <p class="cap">差别只在<b>谁决定什么</b>：A 全人定；B 全学；C 人定拓扑、训练调参数。三者共用同一层。</p>
+  <div class="fig"><svg viewBox="0 0 692 536" class="figsvg"><rect x="16" y="16.0" width="676.0" height="116.0" rx="3" class="lane"/><rect x="16" y="16.0" width="104" height="116.0" rx="3" class="stHot"/><text x="68.0" y="62.0" text-anchor="middle" class="lbl">路线A</text><text x="68.0" y="80.0" text-anchor="middle" class="lbl">设计架构</text><text x="68.0" y="98.0" text-anchor="middle" class="mono">人定拓扑 · 零训练</text><rect x="132.0" y="44.0" width="123.0" height="58.0" rx="2" class="st"/><text x="193.5" y="64.0" text-anchor="middle" class="lbl">人定拓扑</text><text x="193.5" y="84.0" text-anchor="middle" class="mono">可证伪的结构</text><rect x="267.0" y="44.0" width="123.0" height="58.0" rx="2" class="st"/><text x="328.5" y="64.0" text-anchor="middle" class="lbl">固定执行</text><text x="328.5" y="84.0" text-anchor="middle" class="mono">固定流程</text><path d="M255.0,73.0 L265.0,73.0" class="ln" marker-end="url(#ah)"/><rect x="402.0" y="44.0" width="123.0" height="58.0" rx="2" class="st"/><text x="463.5" y="64.0" text-anchor="middle" class="lbl">联合门控</text><text x="463.5" y="84.0" text-anchor="middle" class="mono">新颖-效用</text><path d="M390.0,73.0 L400.0,73.0" class="ln" marker-end="url(#ah)"/><rect x="537.0" y="44.0" width="123.0" height="58.0" rx="2" class="st"/><text x="598.5" y="78.0" text-anchor="middle" class="lbl">输出答案</text><path d="M525.0,73.0 L535.0,73.0" class="ln" marker-end="url(#ah)"/><rect x="16" y="148.0" width="676.0" height="116.0" rx="3" class="lane"/><rect x="16" y="148.0" width="104" height="116.0" rx="3" class="st"/><text x="68.0" y="194.0" text-anchor="middle" class="lbl">路线B</text><text x="68.0" y="212.0" text-anchor="middle" class="lbl">训练架构</text><text x="68.0" y="230.0" text-anchor="middle" class="mono">操作序列由训练学出</text><rect x="132.0" y="176.0" width="123.0" height="58.0" rx="2" class="st"/><text x="193.5" y="196.0" text-anchor="middle" class="lbl">w=0 起始</text><text x="193.5" y="216.0" text-anchor="middle" class="mono">零先验</text><rect x="267.0" y="176.0" width="123.0" height="58.0" rx="2" class="st"/><text x="328.5" y="196.0" text-anchor="middle" class="lbl">采样操作</text><text x="328.5" y="216.0" text-anchor="middle" class="mono">图状态</text><path d="M255.0,205.0 L265.0,205.0" class="ln" marker-end="url(#ah)"/><rect x="402.0" y="176.0" width="123.0" height="58.0" rx="2" class="st"/><text x="463.5" y="196.0" text-anchor="middle" class="lbl">奖励</text><text x="463.5" y="216.0" text-anchor="middle" class="mono">有效维度代理</text><path d="M390.0,205.0 L400.0,205.0" class="ln" marker-end="url(#ah)"/><rect x="537.0" y="176.0" width="123.0" height="58.0" rx="2" class="st"/><text x="598.5" y="196.0" text-anchor="middle" class="lbl">更新 w</text><text x="598.5" y="216.0" text-anchor="middle" class="mono">on-policy</text><path d="M525.0,205.0 L535.0,205.0" class="ln" marker-end="url(#ah)"/><rect x="16" y="280.0" width="676.0" height="116.0" rx="3" class="lane"/><rect x="16" y="280.0" width="104" height="116.0" rx="3" class="st"/><text x="68.0" y="326.0" text-anchor="middle" class="lbl">路线C</text><text x="68.0" y="344.0" text-anchor="middle" class="lbl">先设计再训练</text><text x="68.0" y="362.0" text-anchor="middle" class="mono">人定拓扑 + 训练调参数</text><rect x="132.0" y="308.0" width="123.0" height="58.0" rx="2" class="st"/><text x="193.5" y="328.0" text-anchor="middle" class="lbl">定拓扑</text><text x="193.5" y="348.0" text-anchor="middle" class="mono">人或受约束提案器</text><rect x="267.0" y="308.0" width="123.0" height="58.0" rx="2" class="st"/><text x="328.5" y="328.0" text-anchor="middle" class="lbl">拓扑冻结</text><text x="328.5" y="348.0" text-anchor="middle" class="mono">变量少</text><path d="M255.0,337.0 L265.0,337.0" class="ln" marker-end="url(#ah)"/><rect x="402.0" y="308.0" width="123.0" height="58.0" rx="2" class="st"/><text x="463.5" y="328.0" text-anchor="middle" class="lbl">训练参数</text><text x="463.5" y="348.0" text-anchor="middle" class="mono">阈值/预算/门控</text><path d="M390.0,337.0 L400.0,337.0" class="ln" marker-end="url(#ah)"/><rect x="537.0" y="308.0" width="123.0" height="58.0" rx="2" class="st"/><text x="598.5" y="342.0" text-anchor="middle" class="lbl">输出答案</text><path d="M525.0,337.0 L535.0,337.0" class="ln" marker-end="url(#ah)"/><rect x="16" y="420.0" width="676.0" height="96" rx="3" class="stHot"/><text x="30.0" y="442.0" text-anchor="start" class="lbl">三条路线共用同一层（否则不可比）</text><rect x="32.0" y="458.0" width="141.0" height="42.0" rx="2" class="st"/><text x="102.5" y="484.0" text-anchor="middle" class="lbl">同一测量协议</text><rect x="187.0" y="458.0" width="141.0" height="42.0" rx="2" class="st"/><text x="257.5" y="484.0" text-anchor="middle" class="lbl">同一对照片</text><rect x="342.0" y="458.0" width="141.0" height="42.0" rx="2" class="st"/><text x="412.5" y="484.0" text-anchor="middle" class="lbl">统计单位=任务</text><rect x="497.0" y="458.0" width="141.0" height="42.0" rx="2" class="st"/><text x="567.5" y="484.0" text-anchor="middle" class="lbl">同一成本闸门</text></svg></div>
+</div>
+
+<div class="sec">
+  <h2>图 4 · 预注册 → 跑批 → 否证判定</h2>
+  <p class="cap">指标只提供证据，决策由负责人拍板。"不显著"要记成「不可分辨」，不能记成"失败"，也不能记成"成功"。</p>
+  <div class="fig"><svg viewBox="0 0 700 678" class="figsvg"><rect x="130.0" y="14.0" width="380.0" height="48.0" rx="2" class="st"/><text x="320.0" y="29.0" text-anchor="middle" class="lbl">预注册（写死）</text><text x="320.0" y="49.0" text-anchor="middle" class="mono">假设 / 对照臂 / 预算 / 统计单位 / 排除口径 / 否证条件</text><path d="M320.0,62.0 L320.0,80.0" class="ln" marker-end="url(#ah)"/><polygon points="202.0,80.0 450.0,80.0 438.0,126.0 190.0,126.0" class="io"/><text x="320.0" y="94.0" text-anchor="middle" class="lbl">跑批</text><text x="320.0" y="114.0" text-anchor="middle" class="mono">等预算 · 任务为统计单位 · 种子固定</text><path d="M320.0,126.0 L320.0,144.0" class="ln" marker-end="url(#ah)"/><polygon points="320.0,144.0 480.0,186.0 320.0,228.0 160.0,186.0" class="dec"/><text x="320.0" y="177.0" text-anchor="middle" class="lbl">仪器闸门通过？</text><text x="320.0" y="197.0" text-anchor="middle" class="mono">判官自检可复现 · temp=0 · parsefail 率</text><path d="M320.0,144.0 L320.0,162.0" class="ln" marker-end="url(#ah)"/><text x="492.0" y="188.0" text-anchor="start" class="mono">否 ⇒ 停</text><rect x="492.0" y="200.0" width="168.0" height="48.0" rx="2" class="stBad"/><text x="576.0" y="215.0" text-anchor="middle" class="lbl">判官不可用</text><text x="576.0" y="235.0" text-anchor="middle" class="mono">不换模型、不静默变空串</text><path d="M480.0,204.0 L490.0,204.0" class="lnSoft" marker-end="url(#ah)"/><path d="M320.0,246.0 L320.0,264.0" class="ln" marker-end="url(#ah)"/><rect x="170.0" y="264.0" width="300.0" height="48.0" rx="2" class="st"/><text x="320.0" y="279.0" text-anchor="middle" class="lbl">算指标</text><text x="320.0" y="299.0" text-anchor="middle" class="mono">净维度增益(带绝对分母) · 矛盾率 · 成本</text><path d="M320.0,312.0 L320.0,330.0" class="ln" marker-end="url(#ah)"/><polygon points="320.0,330.0 490.0,372.0 320.0,414.0 150.0,372.0" class="dec"/><text x="320.0" y="363.0" text-anchor="middle" class="lbl">与噪声地板相比？</text><text x="320.0" y="383.0" text-anchor="middle" class="mono">逐任务重复的臂内波动</text><path d="M320.0,330.0 L320.0,348.0" class="ln" marker-end="url(#ah)"/><path d="M320.0,390.0 L320.0,400.0 L320.0,400.0" class="lnSoft" fill="none"/><path d="M100.0,400.0 L100.0,418.0" class="lnSoft" marker-end="url(#ah)"/><rect x="-5.0" y="420.0" width="210.0" height="44.0" rx="2" class="stHot"/><text x="100.0" y="447.0" text-anchor="middle" class="lbl">显著 ⇒ 记「观察到净增益」</text><path d="M320.0,400.0 L320.0,418.0" class="lnSoft" marker-end="url(#ah)"/><rect x="215.0" y="420.0" width="210.0" height="44.0" rx="2" class="st"/><text x="320.0" y="447.0" text-anchor="middle" class="lbl">不显著 ⇒ 记「不可分辨」</text><path d="M540.0,400.0 L540.0,418.0" class="lnSoft" marker-end="url(#ah)"/><rect x="435.0" y="420.0" width="210.0" height="44.0" rx="2" class="stBad"/><text x="540.0" y="447.0" text-anchor="middle" class="lbl">矛盾率上升 ⇒ 该臂判死</text><path d="M320.0,464.0 L320.0,482.0" class="ln" marker-end="url(#ah)"/><rect x="170.0" y="482.0" width="300.0" height="48.0" rx="2" class="st"/><text x="320.0" y="497.0" text-anchor="middle" class="lbl">留出集复核（防过拟合）</text><text x="320.0" y="517.0" text-anchor="middle" class="mono">训练排名 vs 留出排名的 Spearman</text><path d="M320.0,530.0 L320.0,548.0" class="ln" marker-end="url(#ah)"/><rect x="200.0" y="548.0" width="240.0" height="38.0" rx="18" class="term"/><text x="320.0" y="572.0" text-anchor="middle" class="lbl">否证条件逐条判定</text><path d="M320.0,586.0 L320.0,604.0" class="ln" marker-end="url(#ah)"/><rect x="220.0" y="604.0" width="200.0" height="44.0" rx="2" class="stHot"/><text x="320.0" y="617.0" text-anchor="middle" class="lbl">决策（由负责人拍板）</text><text x="320.0" y="637.0" text-anchor="middle" class="mono">指标只提供证据</text></svg></div>
+</div>
+
+<div class="sec">
+  <h2>三条路线一句话</h2>
+  <table>
+    <tr><th>路线</th><th>谁决定架构</th><th>能拿到什么</th><th>最大风险</th><th>怎么被否证</th></tr>
+    <tr><td><b>A 设计架构</b></td><td>人（写死拓扑）</td><td>稳定、可复现、归因清楚</td><td>人的偏见无处收敛</td><td>与等预算多次采样比，净维度增益不显著</td></tr>
+    <tr><td><b>B 训练架构</b></td><td>训练（策略学出）</td><td>能适应信息缺口</td><td>样本少必过拟合；搜索空间可能闭死</td><td>留出集不优于随机/固定；或只改了行为没改内容</td></tr>
+    <tr><td><b>C 先设计再训练</b></td><td>人定拓扑 + 训练调参数</td><td>A 的归因清楚 + B 的自适应性</td><td>拓扑定错 ⇒ 参数再优也救不回来</td><td>与 A/B 对比分离不出"拓扑"这一项的贡献</td></tr>
+  </table>
+</div>
+
+<div class="foot">
+  图为<b>设计</b>（尚未跑实验）｜ 今晚不跑 OpenRouter 真实调用 ｜ 用户四道题全程不进训练/诊断集
+</div>
+
+</div>
+<script>
+</script>
+</body>
+</html>
