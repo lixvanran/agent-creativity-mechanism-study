@@ -26,4 +26,7 @@ fi
 if [ -f cmp8/HANDOVER-cmp8-2026-10-20.md ]; then
   python3 rebuild/patch_handover.py cmp8/HANDOVER-cmp8-2026-10-20.md
 fi
+# ⚠️ 改了这个脚本之后，"逐字节一致"不足以验收 —— 必须做负向测试：
+#    把某个文件退回未打补丁状态 → 跑 rebuild.sh → 它应该被补回来。
+#    （见同目录 selftest_negative.sh；§7 坑 27 实测：漏一步，逐字节 diff 照样全绿）
 echo ">>> 重建完成：$DEST/cmp8"
