@@ -16,8 +16,12 @@ if [ -f "$DEST/README.md" ]; then cp "$DEST/README.md" cmp8/README.md; fi
 for d in METHOD.md AGENT_RUNBOOK.md HANDOVER-cmp8-2026-10-20.md cmp8_fetch.py; do
   if [ -f "$DEST/$d" ]; then cp "$DEST/$d" cmp8/$d; fi
 done
-# 执行手册的两处补丁（唯一真相源，幂等）
+# 执行手册的补丁（唯一真相源，幂等）
 python3 rebuild/patch_runbook.py cmp8/AGENT_RUNBOOK.md
+# 方法学文档的补丁（唯一真相源，幂等）
+if [ -f cmp8/METHOD.md ]; then
+  python3 rebuild/patch_method.py cmp8/METHOD.md
+fi
 # 交接文件的两处补丁（唯一真相源，幂等）
 if [ -f cmp8/HANDOVER-cmp8-2026-10-20.md ]; then
   python3 rebuild/patch_handover.py cmp8/HANDOVER-cmp8-2026-10-20.md
