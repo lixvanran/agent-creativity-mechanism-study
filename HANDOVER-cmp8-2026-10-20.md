@@ -31,6 +31,39 @@
 
 ---
 
+## 0.5 接手前 10 分钟（照这个顺序做）
+
+**第 1 步 · 拿到代码**
+```bash
+git clone https://github.com/lixvanran/agent-creativity-mechanism-study.git
+cd agent-creativity-mechanism-study
+git fetch origin cmp8-handover-2026-10-20 && git checkout cmp8-handover-2026-10-20
+```
+⚠️ **必须切到 `cmp8-handover-2026-10-20` 分支** —— `main` 上还没有这些文件。
+（若本机 git CA 有问题，用 `gh api` / `https://github.com/.../archive/refs/heads/<branch>.tar.gz` 下载。）
+
+**第 2 步 · 读这三份（别跳）**
+1. `HANDOVER-cmp8-2026-10-20.md`（本文件）
+2. `docs/cmp8/AGENT_RUNBOOK.md`（执行手册：有闸门、有硬约束）
+3. `docs/cmp8/METHOD.md`（方法学：判据口径、指标定义、已知局限）
+
+**第 3 步 · 确认你要的是哪一类活**
+- **只要结果** → 数据在 `cmp8/runs/cmp8/analysis.json`，判读页 `cmp8/compare5_report.html`。**不要重跑 800 次调用。**
+- **要复现/重跑** → `cd cmp8 && bash rebuild/rebuild.sh`（会跑补丁脚本）→ `python3 smoke_or.py`（**闸门**）→ `python3 run_compare5.py ...`
+- **要接着做研究** → 读 §9 的 P0/P1/P2
+
+**第 4 步 · 拿凭据**
+- `MINIMAX_SUBSCRIPTION_KEY`（被测侧）、`OPENROUTER_API_KEY`（判官+embedding）
+- 在 Mavis 里用 `mavis secret list` 看有哪些 secret；**没有就让用户给，别硬编码**
+- ⚠️ **判官必须是跨厂商**：`OR_PRIMARY=deepseek/deepseek-chat`（`grok-3-mini` 已 404 下架）
+
+**第 5 步 · 开工前先确认三件事**
+1. 判官自检过没过（真 ≥3/4 且 假 ≥3/4）
+2. 你的臂间比较**用的哪个指标**（`n_raw` 还是 `width`）——`width` 依赖 embedding 通道
+3. 你要下结论的话，**⑤b vs ⑤c 的差异 vs 种子噪声地板**比过了没
+
+---
+
 ## 1. 项目在问什么
 
 **命题**：一个 Agent 的"洞察力"到底来自哪里？
@@ -142,7 +175,14 @@
 | **`cmp8_交付包_v3.zip`** | **`454382563336916`** | **168,677** | **40 个真实文件 ← 接手方拿这个**：完整 cmp8/ 树 + METHOD.md + AGENT_RUNBOOK.md（**含「判官解析失败率」处置规则**）+ cmp8_fetch.py + rebuild/（p0/p1/p2 + patch_or.py + patch_runbook.py + rebuild.sh） |
 | `cmp8_交付包.zip` | `454375285564150` | 166,303 | 39 个文件：同 v3，但**执行手册缺「解析失败率」那一节**（其余一致） |
 | `cmp8_交付包.zip` | `454380578374669` | 165,267 | 旧版（无解析解析失败率统计）——**别用这版** |
-| `cmp8_交接包.zip` | （新文件名 ⇒ 新 node，用 `mavis drive files search --keyword=交接` 查） | — | = v3 + 本交接文件 + 交接说明 |
+| **`cmp8_交接包.zip`** | **`454384890003597`** | **203,976** | **45 个真实文件 ← 接手方的完整工作集**：本交接文件 ×2 + METHOD ×2 + RUNBOOK ×2 + cmp8_fetch ×2 + 完整 cmp8/ 树 + rebuild/（p0/p1/p2 + patch_or.py + patch_runbook.py + patch_handover.py + rebuild.sh） |
+| `HANDOVER-cmp8-2026-10-20.zip` | 见发包方消息（drive 节点随抽取延迟出现） | ~13.4 KB | **只含本文件一个 md**（`-j` 压平、无目录层级）⇒ **要转手给下一个 Agent 时的最小单文件** |
+
+> ⚠️ **为什么本文件里不写「最新那个 zip」的 node_id**：
+> 一个包含自己地址的文件**无法自洽** —— 填进 node_id 会改文件、改文件会改 zip、改 zip 就换了 node_id ⇒ 无限回环。
+> ⇒ **本文件只引用地址稳定的包**（`454382563336916` / `454384890003597`）；
+> 「只含本文件的单文件 zip」的地址**写在发包方的消息里**，不写进文件内部。
+> 这不是遗漏，是**故意的**。
 
 **拉取方法**（沙箱里 bash 可用时）：
 ```bash
@@ -177,13 +217,43 @@ cmp8pkg/
 > **⚠️ `rebuild.sh` 最后一步会跑 `patch_or.py` + `patch_runbook.py`，不许跳过** ——
 > 不跑的话重建出来是**旧版默认模型**（`grok-3-mini` 已 404、`text-embedding-3-small` 已 403）⇒ **不能跑**。
 
-### 4.2 GitHub
+### 4.2 GitHub（**代码与数据的主战场**）
 
 - 公开仓：`https://github.com/lixvanran/agent-creativity-mechanism-study`
-- 本项目相关文件：`creativity_lab/{ops,verify,client,metrics}.py`（+ 本次新增的 `orclient.py` / `learnarch.py` / `adhd_repro.py` / `data/user4_q*`）、
-  报告 `TRAINING-METHOD-REPORT.md`、`docs/CORRECTION-2026-10-18-breadth.md`、`POSTMORTEM.md`、`FINDINGS.md`
-- 近期 HEAD `e012f1e`（**含 v3 架构学习的 `ops.py` / `train_policy.py` / `REPORT-ARCHLEARN-2026-10-19.md`**）
-- **接手者入口（本次新增）**：`HANDOVER-cmp8-2026-10-20.md`（仓库根）＋ `docs/cmp8/{HANDOVER,METHOD,AGENT_RUNBOOK}.md`
+- **接手分支：`cmp8-handover-2026-10-20`**（`main` 上还没有这些文件，**必须切分支**）
+
+```bash
+git clone https://github.com/lixvanran/agent-creativity-mechanism-study.git
+cd agent-creativity-mechanism-study
+git fetch origin cmp8-handover-2026-10-20
+git checkout cmp8-handover-2026-10-20
+```
+
+**仓库里现在有什么**：
+
+| 路径 | 内容 |
+|---|---|
+| `HANDOVER-cmp8-2026-10-20.md` | **本文件（接手入口）** |
+| `docs/cmp8/{METHOD,AGENT_RUNBOOK,EXPERIMENT-v2-DESIGN,_CMP8_RECOVERY}.md` | 方法学 / 执行手册 / 设计 / 重建记录 |
+| `cmp8/` | **完整可跑执行树**：7 臂驱动、判官分析器、冒烟、判读页、`creativity_lab/`（核心库 7 件 + **4 份依据包**）、`armdeps/`、`runs/arch_learn/result.json`（14 维权重）、`rebuild/`（一键重建） |
+| `cmp8/runs/cmp8/` | **跑批产出**：84 份答案、`runlog.jsonl`、**`analysis.json`**、`judge_selfcheck.json` |
+| `cmp8/runs/cmp8_mmemb/` | 第二遍分析（MiniMax `embo-01` 通道） |
+| `cmp8/compare5_report.html` | **判读页**（每臂每题每重复的原始答案 + 指标） |
+| `creativity_lab/`（**仓库根，不是 `cmp8/` 下**） | **训练侧**：`train_policy.py`（产出那 14 维权重）、`arch_v2.py`、`train_agent.py`、`train_selector.py`、`measure_breadth.py`、`measure_paradox2.py`、`check_breadth_validity.py`、`test_verifier.py`、`workflow.py`、`scipy_free.py`、`calibration.py`、`contrasts.py`、`leakage.py`、`prompts.py`、`arms/`、`gates/`、`drill*.py`、`pilot_v2*.py`、`train_pipeline*.py` |
+| `creativity_lab/data/` | **题库与回归集**：`legal_topics.json`、`legal_topics_v2.json`（**核验器回归集，18 题**）、`policy_topics.json`（**8 道政策域训练题**）、`train_topics.json`、`topics.json` |
+| `TRAINING-METHOD-REPORT.md` / `REPORT-ARCHLEARN-2026-10-19.md` / `docs/CORRECTION-2026-10-18-breadth.md` / `POSTMORTEM.md` / `FINDINGS.md` | 历史报告与复盘 |
+
+> **训练侧不需要重搬**：上表 `creativity_lab/` 那一行的文件**仓库里已经有了**（HEAD `e012f1e`，共 204 个文件，已逐个核对存在）。
+> 缺的只有 `creativity_lab/measure_disagreement.py`（本地也没有，不是漏搬）。
+> ⇒ **要重训权重或复核训练结论，直接用仓库根的 `creativity_lab/`**，不要去 `cmp8/creativity_lab/` 找。
+> ⚠️ 注意别混：仓库根的 `creativity_lab/` = **训练侧**；`cmp8/creativity_lab/` = **执行侧**（含 orclient / adhd_repro / 依据包）。
+> 两边**同名文件可能不同版本**（`verify.py` / `client.py` / `metrics.py` 都有），执行侧以 `cmp8/` 为准。
+
+**⚠️ 拉不到 git 时**（本机 CA 可能有问题）：
+```bash
+curl -sL -o cmp8.tar.gz https://github.com/lixvanran/agent-creativity-mechanism-study/archive/refs/heads/cmp8-handover-2026-10-20.tar.gz
+tar xzf cmp8.tar.gz
+```
 
 ### 4.3 依据包（4 份，各 16 条原子事实）
 
