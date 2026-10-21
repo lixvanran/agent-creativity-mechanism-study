@@ -57,11 +57,14 @@ class StubLLM:
       ⇒ 工作流应当据此**演化出新动作**。
     """
 
-    def __init__(self, empty_slots=(), n_calls=None):
+    def __init__(self, empty_slots=(), n_calls=None, slot_content=None):
         self.empty_slots = set(empty_slots)
         self.calls = []
         self.n_calls = 0
         self.seen_slots = set()
+        # 每个槽位**各自**的内容（用于制造跨槽位矛盾）
+        self.slot_content = dict(slot_content or {})
+        self._last = ""
 
     def chat(self, prompt, *, model=None, temp=None, max_tokens=None,
              budgets=None, min_ok=None, purpose=None):
@@ -75,12 +78,17 @@ class StubLLM:
                 #    ⇒ 若只第一次空，重试会把它掩盖掉 ⇒ 失败通道测不到
                 self.seen_slots.add(fid)
                 return ""
-            return ("- 依据 EV-03 写明的条件成立时，顺序读取为 7450 MB/s\n"
-                    "- 若保修条款为五年，则在第 36 个月内仍然有效\n"
-                    "- 当并发写入超过 1000 IOPS 时，延迟会超过 1 毫秒")
+            if fid in self.slot_content:
+                self._last = self.slot_content[fid]
+                return self.slot_content[fid]
+            self._last = ("- 依据 EV-03 写明的条件成立时，顺序读取为 7450 MB/s\n"
+                           "- 若保修条款为五年，则在第 36 个月内仍然有效\n"
+                           "- 当并发写入超过 1000 IOPS 时，延迟会超过 1 毫秒")
+            return self._last
         if p == "W_extract":
-            return ("- 依据 EV-03 写明的条件成立时，顺序读取为 7450 MB/s\n"
-                    "- 若保修条款为五年，则在第 36 个月内仍然有效")
+            # ⚠️ 必须**回显本槽位的产出** ⇒ 否则所有槽位抽出的断言都一样
+            #    ⇒ **跨槽位矛盾被抹平** ⇒ 矛盾检测根本测不到
+            return getattr(self, "_last", "") or "" 
         if p == "W_aggregate":
             return ("- 顺序读取为 7450 MB/s\n- 保修五年在第 36 个月仍有效\n"
                     "- 并发写入超过 1000 IOPS 时延迟超过 1 毫秒")
@@ -319,6 +327,42 @@ def run_checks():
         return True, ("层2：动作 0、失败 %r；层3：动作 %d"
                       % (r2["failures"], r3["archive"]["n_actions"]))
 
+    # ── 12. ★ 矛盾检测：**零判官成本**，且能抓住 D01 的真实观测
+    def c12():
+        # ★ D01 真实案例：层2 写「①③④正确，②错误」，直调写「②正确」
+        real = ["①③④正确，②错误", "②正确"]
+        cf = W.detect_conflicts(real)
+        if not cf:
+            return False, "★ D01 的真实矛盾没被抓住"
+        kinds = {c["kind"] for c in cf}
+        if "option_verdict" not in kinds:
+            return False, "没识别成选项判定冲突：%r" % (kinds,)
+        # 一致的内容不该误报
+        ok = ["①正确：顺序读取 7450 MB/s", "②正确：保修 5 年"]
+        if W.detect_conflicts(ok):
+            return False, "★ 一致的断言被误报成冲突：%r" % (W.detect_conflicts(ok),)
+        return True, "D01 案例抓到（%s），一致内容不误报" % (sorted(kinds),)
+
+    # ── 13. ★ 矛盾能**驱动演化**（层3 的第一个真实学习信号）
+    def c13():
+        frames = W.select_frames(3, seed=5)
+        llm = StubLLM(slot_content={
+            frames[0]: "- ①③④正确，②错误\n- 顺序读取为 7450 MB/s",
+            frames[1]: "- ②正确：随机读 140 万 IOPS",
+        })
+        wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
+                                   judge_model="stub", max_rounds=2)
+        r = wf.run("990 PRO 1TB：①顺序读7450MB/s ②随机读140万IOPS ③保修5年 ④耐久600TBW。哪些正确？")
+        if not r.get("n_conflicts"):
+            return False, "★ 没检测到矛盾（failures=%r）" % (r["failures"],)
+        if "act_conflict" not in (r["archive"].get("names") or []):
+            return False, ("★ 矛盾没驱动出新动作（archive=%r failures=%r）"
+                           % (r["archive"].get("names"), r["failures"]))
+        if "conflict" not in (r["failures"] or {}):
+            return False, "失败通道没记 conflict：%r" % (r["failures"],)
+        return True, "矛盾 %d 处 → 演化出 %s" % (r["n_conflicts"],
+                                                r["archive"].get("names"))
+
     add("frames_seed_reproducible", c1)
     add("frames_vary_by_seed", c2)
     add("dedup_removes_redundant", c3)
@@ -330,6 +374,8 @@ def run_checks():
     add("slots_are_decoupled", c9)
     add("mechanical_aggregate_is_lossless", c10)
     add("layer2_layer3_separated", c11)
+    add("conflict_detected_zero_judge_cost", c12)
+    add("conflict_drives_evolution", c13)
     return checks
 
 
@@ -362,6 +408,14 @@ MUTATIONS = [
      """            if not new_actions:
                 break                       # 没有失败 ⇒ 不演化（★ 不无节制扩动作空间）""",
      "            if not new_actions:\n                new_actions = {fid: 'base' for fid in frames}"),
+
+    ("矛盾检测变成空操作", "workflow.py",
+     "def detect_conflicts(claims: Sequence[str]) -> List[Dict[str, Any]]:",
+     "def detect_conflicts(claims: Sequence[str]) -> List[Dict[str, Any]]:\n    return []\n    # ---"),
+
+    ("矛盾不再优先于其它失败", "workflow.py",
+     "        if has_conflict:\n            return \"conflict\"",
+     "        if False:\n            return \"conflict\""),
 
     ("行为档案总是覆盖（不留最优）", "workflow.py",
      """        cell = self.cells.get(key)
