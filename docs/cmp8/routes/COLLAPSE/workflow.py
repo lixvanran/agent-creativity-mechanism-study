@@ -168,9 +168,102 @@ ACTION_TEMPLATES: Dict[str, str] = {
     "fix_truncated": ("【视角】{frame_prompt}\n"
                       "上一步超长被截断。**先只做一件事**：把内容压到只剩"
                       "**承重的那一句**——如果这句话不成立，答案会变；其余全删。"),
+
+    # ★★ 2026-10-22 新增：**消解矛盾**（由 D01 的真实观测驱动）
+    #   观测：层2 产出「①③④正确，②错误」，而直调是「②正确」
+    #        ⇒ **同一个判断给出两种相反结论** ⇒ 这是发散的代价
+    #   ⇒ 演化出的新动作：**先把自相矛盾的那几条删掉**，只留站得住的
+    "fix_conflict": ("【视角】{frame_prompt}\n"
+                     "★ 上一步的内容里**有互相矛盾的地方**（同一个判断出现了相反的结论）。\n"
+                     "**先只做一件事**：逐条检查你写的每一句，**凡是与别的句子或与依据冲突的，"
+                     "直接删掉**；只保留你能在依据里指到出处的那几条。"
+                     "宁可少写，也不要写出互相打架的结论。"),
 }
 
-FAILURE_KINDS = ("empty", "all_unmentioned", "zero_load_bearing", "fallback", "truncated")
+FAILURE_KINDS = ("empty", "all_unmentioned", "zero_load_bearing", "fallback",
+                 "truncated", "conflict")
+
+# ── 矛盾检测（**零判官成本**，纯文本/结构）
+# ① **选项判定冲突**：题面是选择题时（①②③④ / (1)(2) / A. B.），
+#    同一选项被同时判为「成立」与「不成立」⇒ 冲突。
+#    ★ 这正是我们在 D01 观测到的真实失败。
+# ② **数字冲突**：两条断言共享足够多的内容词，却给出**不同的数字**⇒ 冲突候选。
+_OPT_MARK = re.compile(r"[①②③④⑤⑥⑦⑧⑨⑩]|\(\d{1,2}\)|（\d{1,2}）")
+_OPT_POS = re.compile(r"(成立|正确|对|是|符合|满足|可以通过|可以|有效|无误|不成立|错误|不对|不成立|不符合|不满足|不可以|无效|有误)")
+_NUM_UNIT = re.compile(r"\d+(?:\.\d+)?\s*(?:%|％|元|万|亿|毫秒|秒|分钟|小时|天|年|个月|次|人|台|条|个|米|公里|kg|g|MB|GB|TB|W|V|A|MHz|GHz|℃|度)?")
+_CN_CONTENT = re.compile(r"[一-鿿]{2,}")
+
+
+def _option_verdicts(text: str) -> Dict[str, str]:
+    """从一段文本里抽「选项 → 成立/不成立」的映射（**只认就近的判定词**）。
+
+    ★ 只做**结构性**判定，不做任何语义理解 ⇒ 零成本、零判官、可复算。
+    """
+    out: Dict[str, str] = {}
+    if not text:
+        return out
+    for m in _OPT_MARK.finditer(text):
+        mark = m.group(0)
+        tail = text[m.end():m.end() + 24]
+        # 判定词必须**紧跟**选项标记（允许中间有少量连接词）
+        pos = _OPT_POS.search(tail)
+        if not pos:
+            continue
+        word = pos.group(0)
+        if word in ("成立", "正确", "对", "是", "符合", "满足", "可以通过", "可以", "有效", "无误"):
+            v = "pos"
+        else:
+            v = "neg"
+        out.setdefault(mark, v)          # 同一个选项出现两次 ⇒ 记第一次（冲突在下面检测）
+        out.setdefault(mark + "#dup", v)
+    return out
+
+
+def detect_conflicts(claims: Sequence[str]) -> List[Dict[str, Any]]:
+    """检测**互相矛盾**的断言。返回冲突对（每对含两条原文 + 类型）。
+
+    ★ 动机（2026-10-22 实测）：层2 的发散带来更多维度，**也带来事实性矛盾**
+      （D01：层2 写「①③④正确，②错误」，直调写「②正确」）。
+      ⇒ 层3 必须能**感知**这种矛盾 ⇒ 而感知矛盾**不需要判官**。
+    """
+    conflicts: List[Dict[str, Any]] = []
+    items = [(i, c) for i, c in enumerate(claims or []) if (c or "").strip()]
+
+    # ① 选项判定冲突
+    per_opt: Dict[str, List[Tuple[int, str, str]]] = {}
+    for i, c in items:
+        for m in _OPT_MARK.finditer(c):
+            mark = m.group(0)
+            tail = c[m.end():m.end() + 24]
+            pos = _OPT_POS.search(tail)
+            if not pos:
+                continue
+            word = pos.group(0)
+            v = "pos" if word in ("成立", "正确", "对", "是", "符合", "满足",
+                                  "可以通过", "可以", "有效", "无误") else "neg"
+            per_opt.setdefault(mark, []).append((i, v, c))
+    for mark, lst in per_opt.items():
+        vs = {v for _i, v, _c in lst}
+        if len(vs) > 1:
+            conflicts.append(dict(kind="option_verdict", marker=mark,
+                                  items=[(i, c) for i, _v, c in lst]))
+
+    # ② 数字冲突：共享内容词但数字不同
+    for x in range(len(items)):
+        for y in range(x + 1, len(items)):
+            i1, c1 = items[x]
+            i2, c2 = items[y]
+            w1 = set(_CN_CONTENT.findall(c1))
+            w2 = set(_CN_CONTENT.findall(c2))
+            if len(w1 & w2) < 2:
+                continue
+            n1 = set(_NUM_UNIT.findall(c1))
+            n2 = set(_NUM_UNIT.findall(c2))
+            if n1 and n2 and n1 != n2:
+                conflicts.append(dict(kind="numeric", items=[(i1, c1), (i2, c2)]))
+
+    return conflicts
+
 
 
 class ActionArchive:
@@ -534,14 +627,20 @@ class CollapseFixWorkflow:
                     gen_finish=info.get("finish_reason"))
 
     # ---------------- 失败判定（★ 驱动动作演化）
-    def classify_failure(self, slot: Dict[str, Any], verdicts: Optional[Dict[str, str]]) -> Optional[str]:
-        """**没有独立失败通道 ⇒ 一切照常。** 失败类型决定"要演化出什么新动作"。"""
+    def classify_failure(self, slot: Dict[str, Any], verdicts: Optional[Dict[str, str]],
+                         has_conflict: bool = False) -> Optional[str]:
+        """**没有独立失败通道 ⇒ 一切照常。** 失败类型决定"要演化出什么新动作"。
+
+        ⚠️ **优先级**：`conflict`（矛盾）> 语义失败 > 空/兜底。
+          理由：矛盾是**我们真实观测到**的层2 代价（2026-10-22，D01），
+          而且它是**零判官成本**可测的 ⇒ 优先用它当层3 的学习信号。
+        """
+        if has_conflict:
+            return "conflict"
         claims = slot.get("claims") or []
         if not claims:
             # ★ 区分两种"空"：**生成被预算烧光** vs **生成成功但抽不出断言**
             #   前者是**仪器故障**（必须被计数、且要演化出更省预算的动作）
-            if slot.get("gen_empty"):
-                return "empty"
             return "empty"
         if verdicts:
             sup = sum(1 for c in claims if verdicts.get(c) == "支持")
@@ -578,25 +677,45 @@ class CollapseFixWorkflow:
         n_rounds = max(1, int(C["max_rounds"]))
         slot_claims: List[List[str]] = []
         slot_records: List[Dict[str, Any]] = []
+        slot_ids: List[str] = []
+        n_conflicts_total = 0
 
         for rnd in range(n_rounds):
             drafts: List[str] = []
             slot_claims: List[List[str]] = []
             slot_records: List[Dict[str, Any]] = []
+            slot_ids: List[str] = []
 
             # ── 1) 发散（★ 槽位互不可见：每个槽位只拿题面 + 自己的帧 + 自己的动作）
             for fid in frames:
                 slot = self._run_slot(ask, fid, cur_actions[fid], archive)
+                slot_ids.append(fid)
                 slot_records.append(slot)
                 drafts.append(slot["draft"])
                 slot_claims.append(slot["claims"])
                 ops.append("GEN[%s:%s]" % (fid, cur_actions[fid]))
 
-            # ── 2) 去冗余（跨槽位）
+            # ── 2) 去冗余（跨槽位）+ ★ 矛盾检测（跨槽位，**零判官成本**）
             flat = [c for cs in slot_claims for c in cs]
             kept = dedup(flat)
             kept_set = set(kept)
             rounds.append([c for cs in slot_claims for c in cs])
+
+            # ★ 矛盾检测：把扁平下标映射回槽位
+            conflicts = detect_conflicts(flat)
+            conflict_slots = set()
+            for cf in conflicts:
+                for idx, _c in cf.get("items") or []:
+                    acc = 0
+                    for si, cs in enumerate(slot_claims):
+                        if acc <= idx < acc + len(cs):
+                            if si < len(slot_ids):
+                                conflict_slots.add(slot_ids[si])
+                            break
+                        acc += len(cs)
+            n_conflicts_total += len(conflicts)
+            if conflicts:
+                ops.append("CONFLICT[%d]" % len(conflicts))
 
             # ── 3) 失败判定 → ★ 动作演化
             #    ★★ **层2 / 层3 的分叉点**（2026-10-22）：
@@ -605,7 +724,9 @@ class CollapseFixWorkflow:
             #      ⇒ 层2 天然就是层3 的消融臂（只差这一个自由度）⇒ 干净的嵌套对照。
             new_actions: Dict[str, str] = {}
             for slot in slot_records:
-                fk = self.classify_failure(slot, verdicts_for)
+                fk = self.classify_failure(
+                    slot, verdicts_for,
+                    has_conflict=(slot["frame_id"] in conflict_slots))
                 if fk:
                     failures[fk] = failures.get(fk, 0) + 1
                     if not C.get("evolve", True):
@@ -678,6 +799,7 @@ class CollapseFixWorkflow:
             answer=agg, claims=final_claims, frames=list(frames), ops=list(ops),
             rounds=rounds, archive=archive.stats(), illum=illum.stats(),
             failures=dict(failures),
+            n_conflicts=n_conflicts_total,
             slot_records=[dict(frame_id=s["frame_id"], action=s["action"],
                                n_claims=len(s["claims"]),
                                n_chars=len(s["draft"])) for s in slot_records],
