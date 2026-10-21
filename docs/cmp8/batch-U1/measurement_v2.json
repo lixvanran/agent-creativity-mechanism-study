@@ -1,0 +1,734 @@
+{
+  "measure_version": "U1-measure-v1-2026-10-21",
+  "judge_model": "MiniMax-M3.1-Flash-Preview",
+  "judge_vendor": "minimax",
+  "tested_vendor": "openrouter",
+  "judge_same_vendor": false,
+  "ct_len": 16,
+  "facts": 16,
+  "evidence_hash": "sha256:e12e4df31409dc45",
+  "results": {
+    "B0_direct#rep1": {
+      "answer_id": "B0_direct#rep1",
+      "n_chars": 90,
+      "n_claims_extracted": 2,
+      "card_call_failed": false,
+      "n_cards": 2,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 0,
+      "n_redundant_merged": 0,
+      "n_dimensions": 0,
+      "conclusions_supported": [],
+      "D": 0,
+      "cards_kept": [],
+      "cards_all": [
+        {
+          "claim": "华中科技大学是985高校。",
+          "verdict": "支持",
+          "evidence_ref": "EV-10",
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": [
+            10
+          ]
+        },
+        {
+          "claim": "华中科技大学位于湖北省。",
+          "verdict": "支持",
+          "evidence_ref": "EV-10",
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": [
+            10
+          ]
+        }
+      ],
+      "valid": 1,
+      "arm": "B0_direct",
+      "rep": 1,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep1"
+    },
+    "B0_direct#rep2": {
+      "answer_id": "B0_direct#rep2",
+      "n_chars": 172,
+      "n_claims_extracted": 7,
+      "card_call_failed": false,
+      "n_cards": 7,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 0,
+      "n_redundant_merged": 0,
+      "n_dimensions": 0,
+      "conclusions_supported": [],
+      "D": 0,
+      "cards_kept": [],
+      "cards_all": [
+        {
+          "claim": "华中科技大学在计算机科学（CS）和人工智能（AI）领域属于强校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "武汉大学在计算机科学（CS）和人工智能（AI）领域属于强校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "浙江大学在计算机科学（CS）和人工智能（AI）领域属于强校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "上海交通大学在计算机科学（CS）和人工智能（AI）领域属于强校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "北京航空航天大学在计算机科学（CS）和人工智能（AI）领域属于强校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "哈尔滨工业大学在计算机科学（CS）和人工智能（AI）领域属于强校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "武汉大学在湖北省内具有本地优势。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        }
+      ],
+      "valid": 1,
+      "arm": "B0_direct",
+      "rep": 2,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep2"
+    },
+    "B0_direct#rep3": {
+      "answer_id": "B0_direct#rep3",
+      "n_chars": 63,
+      "n_claims_extracted": 1,
+      "card_call_failed": false,
+      "n_cards": 1,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 0,
+      "n_redundant_merged": 0,
+      "n_dimensions": 0,
+      "conclusions_supported": [],
+      "D": 0,
+      "cards_kept": [],
+      "cards_all": [
+        {
+          "claim": "浙江大学属于“985工程”高校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        }
+      ],
+      "valid": 1,
+      "arm": "B0_direct",
+      "rep": 3,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep3"
+    },
+    "B1_eq_calls#rep1": {
+      "answer_id": "B1_eq_calls#rep1",
+      "n_chars": 152,
+      "n_claims_extracted": 7,
+      "card_call_failed": false,
+      "n_cards": 7,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 0,
+      "n_redundant_merged": 0,
+      "n_dimensions": 0,
+      "conclusions_supported": [],
+      "D": 0,
+      "cards_kept": [],
+      "cards_all": [
+        {
+          "claim": "华中科技大学计算机科学相关学科实力较强。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "华中科技大学人工智能相关学科实力较强。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "武汉大学计算机科学相关学科实力较强。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "武汉大学人工智能相关学科实力较强。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "湖北省物理类高考620分与华中科技大学近年人工智能专业的录取线相匹配。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "推论",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "电子科技大学属于“985工程”建设院校。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "电子科技大学设有包含人工智能方向的专业。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        }
+      ],
+      "valid": 1,
+      "arm": "B1_eq_calls",
+      "rep": 1,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep1"
+    },
+    "B1_eq_calls#rep2": {
+      "answer_id": "B1_eq_calls#rep2",
+      "n_chars": 174,
+      "n_claims_extracted": 6,
+      "card_call_failed": false,
+      "n_cards": 6,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 0,
+      "n_redundant_merged": 0,
+      "n_dimensions": 0,
+      "conclusions_supported": [],
+      "D": 0,
+      "cards_kept": [],
+      "cards_all": [
+        {
+          "claim": "华中科技大学开设计算机专业。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "华中科技大学开设人工智能专业。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "武汉大学设有计算机科学与人工智能交叉方向。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "电子科技大学设有人工智能方向。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "南京理工大学设有人工智能方向。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        },
+        {
+          "claim": "人工智能专业的学习需要较强的数学和物理学基础。",
+          "verdict": "未提及",
+          "evidence_ref": null,
+          "evidence_class": "事实",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": []
+        }
+      ],
+      "valid": 1,
+      "arm": "B1_eq_calls",
+      "rep": 2,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep2"
+    },
+    "B1_eq_calls#rep3": {
+      "answer_id": "B1_eq_calls#rep3",
+      "n_chars": 89,
+      "n_claims_extracted": 2,
+      "card_call_failed": false,
+      "n_cards": 2,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 0,
+      "n_redundant_merged": 0,
+      "n_dimensions": 0,
+      "conclusions_supported": [],
+      "D": 0,
+      "cards_kept": [],
+      "cards_all": [
+        {
+          "claim": "华中科技大学是湖北省内实力较强的大学。",
+          "verdict": "支持",
+          "evidence_ref": "EV-10",
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": [
+            10
+          ]
+        },
+        {
+          "claim": "武汉大学的综合实力较强。",
+          "verdict": "支持",
+          "evidence_ref": "EV-09",
+          "evidence_class": "价值判断",
+          "load_bearing": false,
+          "decision_changed": "",
+          "supports_conclusions": [
+            9
+          ]
+        }
+      ],
+      "valid": 1,
+      "arm": "B1_eq_calls",
+      "rep": 3,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep3"
+    },
+    "A_fixed#rep1": {
+      "answer_id": "A_fixed#rep1",
+      "n_chars": 87,
+      "n_claims_extracted": 1,
+      "card_call_failed": false,
+      "n_cards": 1,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 1,
+      "n_redundant_merged": 0,
+      "n_dimensions": 1,
+      "conclusions_supported": [
+        7
+      ],
+      "D": 1,
+      "cards_kept": [
+        {
+          "claim": "教育部发布的《普通高等学校本科专业目录》对人工智能专业的设置与招生资质作出规范。",
+          "verdict": "支持",
+          "evidence_ref": "EV-07",
+          "evidence_class": "事实",
+          "decision_changed": "结论7：确认人工智能专业的设置与招生资质受教育部本科专业目录及备案审批要求规范，报考时应核验专业的正式资质",
+          "supports_conclusions": [
+            7
+          ]
+        }
+      ],
+      "cards_all": [
+        {
+          "claim": "教育部发布的《普通高等学校本科专业目录》对人工智能专业的设置与招生资质作出规范。",
+          "verdict": "支持",
+          "evidence_ref": "EV-07",
+          "evidence_class": "事实",
+          "load_bearing": true,
+          "decision_changed": "结论7：确认人工智能专业的设置与招生资质受教育部本科专业目录及备案审批要求规范，报考时应核验专业的正式资质",
+          "supports_conclusions": [
+            7
+          ]
+        }
+      ],
+      "valid": 1,
+      "arm": "A_fixed",
+      "rep": 1,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [
+        7
+      ],
+      "lost_conclusions": [],
+      "net_dimension_gain": 1,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep1"
+    },
+    "A_fixed#rep2": {
+      "answer_id": "A_fixed#rep2",
+      "n_chars": 132,
+      "n_claims_extracted": 3,
+      "card_call_failed": false,
+      "n_cards": 3,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 3,
+      "n_redundant_merged": 1,
+      "n_dimensions": 2,
+      "conclusions_supported": [
+        5,
+        6,
+        7,
+        12
+      ],
+      "D": 4,
+      "cards_kept": [
+        {
+          "claim": "部分高校的人工智能专业要求考生选考物理和化学。",
+          "verdict": "支持",
+          "evidence_ref": "EV-06",
+          "evidence_class": "事实",
+          "decision_changed": "结论6及结论12：先确认再选科目包含化学，将不要求“物理+化学”的人工智能专业排除出报考清单。",
+          "supports_conclusions": [
+            5,
+            6,
+            12
+          ]
+        },
+        {
+          "claim": "人工智能专业需通过教育部审批或备案。",
+          "verdict": "支持",
+          "evidence_ref": "EV-07",
+          "evidence_class": "事实",
+          "decision_changed": "结论7：将高校人工智能专业是否已取得教育部审批或备案纳入择校核验。",
+          "supports_conclusions": [
+            7
+          ]
+        }
+      ],
+      "cards_all": [
+        {
+          "claim": "部分高校的人工智能专业要求考生选考物理和化学。",
+          "verdict": "支持",
+          "evidence_ref": "EV-06",
+          "evidence_class": "事实",
+          "load_bearing": true,
+          "decision_changed": "结论6及结论12：先确认再选科目包含化学，将不要求“物理+化学”的人工智能专业排除出报考清单。",
+          "supports_conclusions": [
+            5,
+            6,
+            12
+          ]
+        },
+        {
+          "claim": "人工智能专业需通过教育部审批或备案。",
+          "verdict": "支持",
+          "evidence_ref": "EV-07",
+          "evidence_class": "事实",
+          "load_bearing": true,
+          "decision_changed": "结论7：将高校人工智能专业是否已取得教育部审批或备案纳入择校核验。",
+          "supports_conclusions": [
+            7
+          ]
+        },
+        {
+          "claim": "未通过教育部备案的高校不得招生人工智能专业。",
+          "verdict": "支持",
+          "evidence_ref": "EV-07",
+          "evidence_class": "推论",
+          "load_bearing": true,
+          "decision_changed": "结论7：把未取得教育部审批或备案的高校人工智能专业排除出可报选项。",
+          "supports_conclusions": [
+            7
+          ]
+        }
+      ],
+      "valid": 1,
+      "arm": "A_fixed",
+      "rep": 2,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [
+        5,
+        6,
+        7,
+        12
+      ],
+      "lost_conclusions": [],
+      "net_dimension_gain": 4,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep2"
+    },
+    "A_fixed#rep3": {
+      "answer_id": "A_fixed#rep3",
+      "n_chars": 194,
+      "n_claims_extracted": 0,
+      "valid": 1,
+      "n_cards": 0,
+      "n_load_bearing": 0,
+      "parsefail": 0,
+      "arm": "A_fixed",
+      "rep": 3,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep3"
+    },
+    "C_T2#rep1": {
+      "answer_id": "C_T2#rep1",
+      "n_chars": 30,
+      "n_claims_extracted": 1,
+      "card_call_failed": false,
+      "n_cards": 1,
+      "parsefail": 0,
+      "parsefail_rate": 0.0,
+      "n_load_bearing_cards": 1,
+      "n_redundant_merged": 0,
+      "n_dimensions": 1,
+      "conclusions_supported": [
+        6
+      ],
+      "D": 1,
+      "cards_kept": [
+        {
+          "claim": "选择物理和化学作为高考选科组合的考生，需要符合人工智能专业的选科录取要求。",
+          "verdict": "支持",
+          "evidence_ref": "EV-06",
+          "evidence_class": "事实",
+          "decision_changed": "确认物理加化学选科组合符合武汉大学、武汉理工大学和武汉科技大学人工智能专业的选科门槛，影响可报考院校范围",
+          "supports_conclusions": [
+            6
+          ]
+        }
+      ],
+      "cards_all": [
+        {
+          "claim": "选择物理和化学作为高考选科组合的考生，需要符合人工智能专业的选科录取要求。",
+          "verdict": "支持",
+          "evidence_ref": "EV-06",
+          "evidence_class": "事实",
+          "load_bearing": true,
+          "decision_changed": "确认物理加化学选科组合符合武汉大学、武汉理工大学和武汉科技大学人工智能专业的选科门槛，影响可报考院校范围",
+          "supports_conclusions": [
+            6
+          ]
+        }
+      ],
+      "valid": 1,
+      "arm": "C_T2",
+      "rep": 1,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [
+        6
+      ],
+      "lost_conclusions": [],
+      "net_dimension_gain": 1,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep1"
+    },
+    "C_T2#rep2": {
+      "answer_id": "C_T2#rep2",
+      "n_chars": 32,
+      "n_claims_extracted": 0,
+      "valid": 1,
+      "n_cards": 0,
+      "n_load_bearing": 0,
+      "parsefail": 0,
+      "arm": "C_T2",
+      "rep": 2,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep2"
+    },
+    "C_T2#rep3": {
+      "answer_id": "C_T2#rep3",
+      "n_chars": 60,
+      "n_claims_extracted": 0,
+      "valid": 1,
+      "n_cards": 0,
+      "n_load_bearing": 0,
+      "parsefail": 0,
+      "arm": "C_T2",
+      "rep": 3,
+      "human": {
+        "score": 0.0,
+        "score_pername": 0.0,
+        "generic_mentioned": false,
+        "specific_named": false,
+        "hits": {},
+        "matched": []
+      },
+      "added_conclusions": [],
+      "lost_conclusions": [],
+      "net_dimension_gain": 0,
+      "baseline_conclusions": [],
+      "baseline_key": "B0_direct#rep3"
+    }
+  }
+}
