@@ -22,7 +22,7 @@ import u1_lib as U
 
 BATCH = U.BATCH
 RUNS = os.path.join(BATCH, "runs")
-MEAS_VERSION = "U1-measure-v1-2026-10-21+card8k"  # 2026-10-22：判官阶梯 8k 起、批 8、断言上限 12
+MEAS_VERSION = "U1-measure-v1-2026-10-21+card8k+extract8k"  # 2026-10-22：判官阶梯 8k 起、批 8、断言上限 12、**抽取也 8k 起**
 
 EXTRACT_Q = """从下面这段回答里，逐条列出其中**可判真假的陈述**。
 一行一条，最多 20 条。
@@ -114,8 +114,12 @@ def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
 
     # ── 1. 机械抽断言（MiniMax）
     raw = llm.chat(EXTRACT_Q.format(t=(answer or "")[:3000]),
-                   model=_jm, temp=0.0, max_tokens=3000,
-                   budgets=(4500,), min_ok=10, purpose="extract")
+                   model=_jm, temp=0.0, max_tokens=8000,
+                   budgets=(12000, 16000), min_ok=10, purpose="extract")
+    # ⚠️ 2026-10-22 实测：抽取侧原为 max_tokens=3000 ⇒ **同样在"必然失败"档**
+    #   （MiniMax adaptive thinking 吃光预算 ⇒ 正文空 ⇒ 0 条断言 ⇒ 0 张卡片）
+    #   ⇒ 而 `parsefail_rate` 仍是 0.0 ⇒ **静默** ⇒ 被误读成"这条臂没有承重信息"。
+    #   （D01 实测：W 臂因此报 dims=0，实际答案有 1056 字符、9 条内容）
     claims = []
     for ln in (raw or "").splitlines():
         ln = re.sub(r"^\s*[-*\d.、)）]+\s*", "", ln).strip()

@@ -36,6 +36,11 @@ import sys
 import tempfile
 import traceback
 
+# ⚠️ 2026-10-22：**沙箱里 .pyc 的 mtime 失效判断不可靠**
+#    （实测：源码已改、但 import 拿到的还是旧模块 ⇒ 跑旧代码却以为在跑新代码）
+#    ⇒ 跑之前必须清缓存 + 禁止再写。
+sys.dont_write_bytecode = True
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
@@ -258,6 +263,62 @@ def run_checks():
             return False, "不同槽位拿到了完全相同的提示 ⇒ 认知位置没解耦"
         return True, "%d 个槽位提示互不相同" % len(slot_prompts)
 
+    # ── 10. ★ 机械汇总**不许丢东西**（2026-10-22 实测 bug 的正面防线）
+    #    实测：模型汇总在 adaptive thinking 下预算被吃光 ⇒ 汇总为空
+    #         ⇒ 整条答案承重维度 0（D01：W 臂 dims=0 vs B0 dims=3）
+    def c10():
+        llm = StubLLM()
+        wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
+                                   judge_model="stub", max_rounds=1)
+        r = wf.run("990 PRO 1TB 的哪些参数成立？")
+        if "AGGREGATE(mechanical)" not in r["ops"]:
+            return False, "默认没走机械汇总：ops=%r" % (r["ops"],)
+        if not r["claims"]:
+            return False, "机械汇总后一条断言都没有"
+        # 答案正文里的条目数 == 装配出的断言数（**不多不少**）
+        n_lines = len([l for l in (r["answer"] or "").splitlines() if l.strip()])
+        if n_lines != len(r["claims"]):
+            return False, ("★ 装配 %d 条但答案只有 %d 行 ⇒ 汇总在丢东西"
+                           % (len(r["claims"]), n_lines))
+        # 机械汇总**不该**多花一次"装配后二次抽取"的调用
+        n_extract = sum(1 for p in llm.calls if p == "W_extract")
+        n_slot = sum(1 for p in llm.calls if str(p).startswith("W_slot"))
+        if n_extract != n_slot:
+            return False, ("抽取次数 %d ≠ 槽位数 %d ⇒ 存在多余的二次抽取"
+                           % (n_extract, n_slot))
+        return True, "机械汇总：%d 条断言 / %d 行 / 无二次抽取" % (
+            len(r["claims"]), n_lines)
+
+    # ── 11. ★★ 层2 / 层3 分离：关掉"演化"这一个自由度，其余不变
+    #     层2「用设计的手段」：架构先验设计好、**运行时不自修改**（但**仍记失败**）
+    #     层3「用训练/自迭代的手段」：从失败**构造新动作**
+    def c11():
+        frames = W.select_frames(3, seed=5)
+        # 层2
+        llm2 = StubLLM(empty_slots={frames[0]})
+        wf2 = W.CollapseFixWorkflow(llm2, n_slots=3, seed=5, model="stub",
+                                    judge_model="stub", max_rounds=2,
+                                    evolve=False, layer="L2")
+        r2 = wf2.run("990 PRO 1TB 的哪些参数成立？")
+        # 层3
+        llm3 = StubLLM(empty_slots={frames[0]})
+        wf3 = W.CollapseFixWorkflow(llm3, n_slots=3, seed=5, model="stub",
+                                    judge_model="stub", max_rounds=2,
+                                    evolve=True, layer="L3")
+        r3 = wf3.run("990 PRO 1TB 的哪些参数成立？")
+        if r2["archive"]["n_actions"] != 0:
+            return False, ("★ 层2（evolve=False）却长了 %d 个动作 ⇒ 分离失效"
+                           % r2["archive"]["n_actions"])
+        if r3["archive"]["n_actions"] < 1:
+            return False, ("★ 层3（evolve=True）没长出新动作（failures=%r）"
+                           % (r3["failures"],))
+        if not r2["failures"]:
+            return False, "★ 层2 应当**照样记录失败**（那是层3 的学习信号）"
+        if r2.get("evolve") is not False or r3.get("evolve") is not True:
+            return False, "读数里没有记 evolve 开关 ⇒ 无法归档时区分层"
+        return True, ("层2：动作 0、失败 %r；层3：动作 %d"
+                      % (r2["failures"], r3["archive"]["n_actions"]))
+
     add("frames_seed_reproducible", c1)
     add("frames_vary_by_seed", c2)
     add("dedup_removes_redundant", c3)
@@ -267,6 +328,8 @@ def run_checks():
     add("workflow_evolves_action_on_failure", c7)
     add("no_failure_no_evolution", c8)
     add("slots_are_decoupled", c9)
+    add("mechanical_aggregate_is_lossless", c10)
+    add("layer2_layer3_separated", c11)
     return checks
 
 
