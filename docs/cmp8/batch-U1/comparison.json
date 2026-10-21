@@ -1,0 +1,46 @@
+{
+  "agg": {
+    "B0_direct": {
+      "D": 0,
+      "cards": 2,
+      "lb": 0,
+      "net": 0,
+      "human": 0.0,
+      "human_pername": 0.0,
+      "parsefail": 0.0
+    },
+    "B1_eq_calls": {
+      "D": 0,
+      "cards": 6,
+      "lb": 0,
+      "net": 0,
+      "human": 0.0,
+      "human_pername": 0.0,
+      "parsefail": 0.0
+    },
+    "A_fixed": {
+      "D": 1,
+      "cards": 1,
+      "lb": 1,
+      "net": 1,
+      "human": 0.0,
+      "human_pername": 0.0,
+      "parsefail": 0.0
+    },
+    "C_T2": {
+      "D": 0,
+      "cards": 0,
+      "lb": 0,
+      "net": 0,
+      "human": 0.0,
+      "human_pername": 0.0,
+      "parsefail": 0
+    }
+  },
+  "rho": null,
+  "rho_net": null,
+  "parsefail_max": 0,
+  "valid": 12,
+  "total": 12,
+  "contamination": []
+}
