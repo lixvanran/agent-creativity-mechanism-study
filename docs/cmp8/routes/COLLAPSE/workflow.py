@@ -480,6 +480,19 @@ class CollapseFixWorkflow:
         judge_model="",       # 评价侧模型（判官）
         max_rounds=2,         # ★ 含演化后重跑 ⇒ 最多两轮
         n_slots_v2=None,      # 第二轮槽位数（默认同 n_slots）
+        # ★ 2026-10-22 实测修正：默认**机械汇总**，不用模型汇总
+        #   （模型汇总会丢信息，且在 adaptive thinking 下可能直接返回空
+        #     ⇒ D01 实测 W 臂 dims=0 vs B0 dims=3）
+        #   "model" 档保留当**消融臂**。
+        aggregate_mode="mechanical",   # "mechanical" | "model"
+        # ★★ **层2 / 层3 的分离开关**（2026-10-22 负责人定的四层结构）
+        #   层2「用设计的手段优化」= 架构先验设计好、运行时**不自我修改**
+        #   层3「用训练/自迭代的手段优化」= 系统**根据自身经验修改自己**
+        # ⇒ `evolve=False` ⇒ 层2（固定动作集）；`evolve=True` ⇒ 层3（动作空间会演化）
+        # ⇒ ★ **层2 天然就是层3 的消融臂**（只差"演化"这一个自由度）⇒ 干净的嵌套对照
+        evolve=True,
+        # 层的标签（写进读数，便于归档时区分）
+        layer="L3",
     )
 
     def __init__(self, llm, **cfg):
@@ -586,11 +599,17 @@ class CollapseFixWorkflow:
             rounds.append([c for cs in slot_claims for c in cs])
 
             # ── 3) 失败判定 → ★ 动作演化
+            #    ★★ **层2 / 层3 的分叉点**（2026-10-22）：
+            #      层2（`evolve=False`）：**只记录失败、不据以改动作** ⇒ 架构是先验设计的，
+            #            运行时不自修改。层3（`evolve=True`）：从失败**构造新动作**。
+            #      ⇒ 层2 天然就是层3 的消融臂（只差这一个自由度）⇒ 干净的嵌套对照。
             new_actions: Dict[str, str] = {}
             for slot in slot_records:
                 fk = self.classify_failure(slot, verdicts_for)
                 if fk:
                     failures[fk] = failures.get(fk, 0) + 1
+                    if not C.get("evolve", True):
+                        continue                       # ★ 层2：记失败，但**不改动作**
                     nm = propose_new_action(fk, slot["frame_id"], archive)
                     if nm:
                         new_actions[slot["frame_id"]] = nm
@@ -605,20 +624,46 @@ class CollapseFixWorkflow:
             cur_actions.update(new_actions)
             ops.append("EVOLVE[%s]" % ",".join(sorted(set(new_actions.values()))))
 
-        # ── 5) 汇总（★ 只在这一步让模型看别人的稿）
+        # ── 5) 汇总
+        #    ★★ 2026-10-22 **实测修正**：默认改**机械汇总**，不用模型汇总。
+        #    实测：模型汇总（合并 3 份稿）在 MiniMax adaptive thinking 下
+        #    **预算被吃光 ⇒ 汇总为空 ⇒ 整条答案的承重维度直接变成 0**
+        #    （D01 实测：W 臂 dims=0 vs B0 直调 dims=3；13 次实际调用 vs 8 次逻辑调用
+        #      ⇒ 多出的 5 次全是预算烧光后的重试）。
+        #    ⇒ 机械汇总（各槽位分别抽断言 → 离散去冗余 → 直接装配）
+        #       **又快、不丢、且符合我们既有的「装配必须机械，不由模型重写」纪律**。
+        #    "model" 档保留下来当**消融臂**（单独测「模型汇总 vs 机械汇总」的净损失）。
         final_drafts = [s["draft"] for s in slot_records] if slot_records else []
-        if len(final_drafts) > 1:
-            agg, _ai = _chat(self.llm, self.aggregate_prompt(final_drafts, frames, archive),
-                             purpose="W_aggregate", model=self.C["model"],
-                             temp=0.3, max_tokens=0, min_ok=20, stats=self.chat_stats)
-            ops.append("AGGREGATE")
-        else:
-            agg = (final_drafts[0] if final_drafts else "")
+        all_slot_claims = [c for cs in slot_claims for c in cs]
 
-        # ── 6) 装配（机械：抽取 + 去冗余，**不让模型再总结**）
-        final_claims = dedup(_extract_claims(self.llm, agg, model=self.C["model"])) if agg else []
-        if not final_claims:
-            final_claims = dedup([c for cs in slot_claims for c in cs])
+        if C.get("aggregate_mode") == "model":
+            if len(final_drafts) > 1:
+                agg, _ai = _chat(self.llm,
+                                 self.aggregate_prompt(final_drafts, frames, archive),
+                                 purpose="W_aggregate", model=self.C["model"],
+                                 temp=0.3, max_tokens=0, min_ok=20, stats=self.chat_stats)
+                ops.append("AGGREGATE(model)")
+            else:
+                agg = (final_drafts[0] if final_drafts else "")
+            # 装配（模型汇总档：仍走机械抽取 + 去冗余）
+            final_claims = dedup(_extract_claims(self.llm, agg, model=self.C["model"])) if agg else []
+            if not final_claims:
+                final_claims = dedup(all_slot_claims)
+        else:
+            # ★ 机械汇总：**不丢任何一条**，也不多花一次调用
+            final_claims = dedup(all_slot_claims)
+            ops.append("AGGREGATE(mechanical)")
+            agg = "\n".join("- " + c for c in final_claims)
+
+        # ── 6) 装配（机械汇总档已经装配好了 ⇒ 这里**不再二次抽取**）
+        #    ⚠️ 2026-10-22 实测修正：原实现在机械汇总之后**又抽一次断言**，
+        #    那一次既是**多花的调用**，又会把刚装配好的内容**再丢一遍**。
+        if C.get("aggregate_mode") != "model":
+            pass                       # 已装配，不动
+        else:
+            final_claims = dedup(_extract_claims(self.llm, agg, model=self.C["model"])) if agg else []
+            if not final_claims:
+                final_claims = dedup(all_slot_claims)
 
         # ── 7) 照明归档 + 中庸度记账
         bkey = behavior_key(frames, ops)
@@ -628,6 +673,8 @@ class CollapseFixWorkflow:
 
         return dict(
             chat_stats=self.chat_stats,
+            layer=C.get("layer"),
+            evolve=bool(C.get("evolve", True)),
             answer=agg, claims=final_claims, frames=list(frames), ops=list(ops),
             rounds=rounds, archive=archive.stats(), illum=illum.stats(),
             failures=dict(failures),

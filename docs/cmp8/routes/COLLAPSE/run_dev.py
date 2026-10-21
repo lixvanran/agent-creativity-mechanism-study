@@ -32,8 +32,16 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import sys
 import time
+
+# ⚠️ 2026-10-22：**沙箱里 .pyc 的 mtime 失效判断不可靠**
+#    （实测：源码已改、import 拿到的还是旧模块 ⇒ 跑旧代码却以为在跑新代码）
+#    ⇒ **跑之前必须清缓存**。这直接关系到读数归因。
+sys.dont_write_bytecode = True
+_here = os.path.dirname(os.path.abspath(__file__))
+shutil.rmtree(os.path.join(_here, '__pycache__'), ignore_errors=True)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -125,16 +133,18 @@ def arm_direct(llm, task, model):
                 chat_stats=direct_stats)
 
 
-def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2):
+def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2,
+                 evolve=True, layer="L3"):
     wf = W.CollapseFixWorkflow(llm, n_slots=n_slots, seed=seed,
                                 model=model, judge_model=model,
-                                max_rounds=max_rounds)
-    print("      [W ] 跑工作流…", flush=True)
+                                max_rounds=max_rounds, evolve=evolve, layer=layer)
+    print("      [W ] 跑工作流（%s）…" % layer, flush=True)
     r = wf.run(task["ask"])
     print("      [W ] 演化=%s 失败=%s" % (r["archive"].get("names"), r["failures"]), flush=True)
     return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
                 frames=r["frames"], archive=r["archive"], failures=r["failures"],
-                illum=r["illum"], rounds=r["rounds"])
+                illum=r["illum"], rounds=r["rounds"],
+                layer=r.get("layer"), evolve=r.get("evolve"))
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -161,10 +171,17 @@ def main():
     for ti, task in enumerate(tasks):
         for rep in range(1, args.reps + 1):
             row = dict(task_id=task["task_id"], rep=rep, arms={})
-            for arm_name, fn in (("B0_direct", lambda: arm_direct(llm, task, model)),
-                                 ("W_collapse", lambda: arm_workflow(
-                                     llm, task, model, seed=rep, n_slots=args.slots,
-                                     max_rounds=args.rounds))):
+            for arm_name, fn in (
+                ("B0_direct", lambda: arm_direct(llm, task, model)),
+                # ★ 层2「用设计的手段」：架构先验设计好、**运行时不自修改**
+                ("W_design_L2", lambda: arm_workflow(
+                    llm, task, model, seed=rep, n_slots=args.slots,
+                    max_rounds=args.rounds, evolve=False, layer="L2")),
+                # ★ 层3「用训练/自迭代的手段」：从失败**构造新动作**、档案累积
+                ("W_train_L3", lambda: arm_workflow(
+                    llm, task, model, seed=rep, n_slots=args.slots,
+                    max_rounds=args.rounds, evolve=True, layer="L3")),
+            ):
                 c0 = llm.n_api_calls
                 try:
                     a = fn()
@@ -208,7 +225,7 @@ def main():
         secs=round(time.time() - t0, 1), total_calls=llm.n_api_calls,
         arms={}, rows=all_rows,
     )
-    for arm in ("B0_direct", "W_collapse"):
+    for arm in ("B0_direct", "W_design_L2", "W_train_L3"):
         dims, lbs, pf = [], [], []
         for row in all_rows:
             a = row["arms"].get(arm) or {}
@@ -227,11 +244,12 @@ def main():
     common_rates = []
     for row in all_rows:
         arms = row["arms"]
-        if "error" in arms.get("B0_direct", {}) or "error" in arms.get("W_collapse", {}):
+        if any("error" in arms.get(a, {}) for a in
+               ("B0_direct", "W_design_L2", "W_train_L3")):
             continue
         common_rates.append(W.common_rate([
-            [c.get("claim") or "" for c in arms["B0_direct"]["cards"]],
-            [c.get("claim") or "" for c in arms["W_collapse"]["cards"]],
+            [c.get("claim") or "" for c in arms[a]["cards"]]
+            for a in ("B0_direct", "W_design_L2", "W_train_L3")
         ]))
     summary["medianity"] = dict(
         common_rate_across_arms=common_rates,
@@ -241,7 +259,7 @@ def main():
     # ── 动作演化读数
     evo = []
     for row in all_rows:
-        a = row["arms"].get("W_collapse") or {}
+        a = row["arms"].get("W_train_L3") or {}
         if "error" in a:
             continue
         evo.append(dict(task_id=row["task_id"],
