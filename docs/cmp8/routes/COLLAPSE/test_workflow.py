@@ -65,9 +65,11 @@ class StubLLM:
         p = purpose or ""
         if p.startswith("W_slot"):
             fid = p.replace("W_slot_", "")
-            if fid in self.empty_slots and fid not in self.seen_slots:
+            if fid in self.empty_slots:
+                # ⚠️ 必须**每次都空**：`_chat` 现在会因空输出**抬预算重试**
+                #    ⇒ 若只第一次空，重试会把它掩盖掉 ⇒ 失败通道测不到
                 self.seen_slots.add(fid)
-                return ""                                   # ★ 第一次失败
+                return ""
             return ("- 依据 EV-03 写明的条件成立时，顺序读取为 7450 MB/s\n"
                     "- 若保修条款为五年，则在第 36 个月内仍然有效\n"
                     "- 当并发写入超过 1000 IOPS 时，延迟会超过 1 毫秒")

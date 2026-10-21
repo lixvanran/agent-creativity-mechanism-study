@@ -22,7 +22,7 @@ import u1_lib as U
 
 BATCH = U.BATCH
 RUNS = os.path.join(BATCH, "runs")
-MEAS_VERSION = "U1-measure-v1-2026-10-21"
+MEAS_VERSION = "U1-measure-v1-2026-10-21+card8k"  # 2026-10-22：判官阶梯 8k 起、批 8、断言上限 12
 
 EXTRACT_Q = """从下面这段回答里，逐条列出其中**可判真假的陈述**。
 一行一条，最多 20 条。
@@ -95,23 +95,33 @@ def parse_cards(raw, n):
     return out
 
 
-def measure_answer(llm, ask, ev_items, ct, answer, answer_id):
-    """对**一份**最终答案跑完整条测量流水线。返回该份的测量结果。"""
-    res = dict(answer_id=answer_id, n_chars=len(answer or ""))
+def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
+                   judge_model=None, card_q=None):
+    """对**一份**最终答案跑完整条测量流水线。返回该份的测量结果。
+
+    ⚠️ 2026-10-22 新增两个**向后兼容**参数（默认值 ⇒ 行为完全不变）：
+      * `judge_model` —— 换判官**模型**。用于测 **δ_judge_version**（跨判官版本/模型）。
+      * `card_q`    —— 换判官**提示词版本**。同上。
+    ⇒ 这两个参数是「判官侧漂移不可见」这个缺陷的补救入口（见 routes/C/noise_floor.py）。
+    """
+    _jm = judge_model or U.MM_MODEL
+    _cq = card_q or CARD_Q
+    res = dict(answer_id=answer_id, n_chars=len(answer or ""),
+               judge_model=_jm, card_prompt_version=("custom" if card_q else "v1"))
     if not (answer or "").strip():
         res.update(valid=0, reason="empty_answer")
         return res
 
     # ── 1. 机械抽断言（MiniMax）
     raw = llm.chat(EXTRACT_Q.format(t=(answer or "")[:3000]),
-                   model=U.MM_MODEL, temp=0.0, max_tokens=3000,
+                   model=_jm, temp=0.0, max_tokens=3000,
                    budgets=(4500,), min_ok=10, purpose="extract")
     claims = []
     for ln in (raw or "").splitlines():
         ln = re.sub(r"^\s*[-*\d.、)）]+\s*", "", ln).strip()
         if 8 <= len(ln) <= 120:
             claims.append(ln)
-    claims = list(dict.fromkeys(claims))[:20]
+    claims = list(dict.fromkeys(claims))[:12]   # ⚠️ 2026-10-22：20→12（判官成本线性于条数）
     res["n_claims_extracted"] = len(claims)
     if not claims:
         res.update(valid=1, n_cards=0, n_load_bearing=0, parsefail=0)
@@ -123,14 +133,18 @@ def measure_answer(llm, ask, ev_items, ct, answer, answer_id):
     evs = "\n".join("%d. %s" % (i + 1, e["text"]) for i, e in enumerate(ev_items))
     cards, n_parsefail = [], 0
     card_call_failed = False
-    B = 4
+    B = 8          # ⚠️ 2026-10-22：4→8 ⇒ 批次数减半 ⇒ 判官调用数减半
     for i in range(0, len(claims), B):
         b = claims[i:i + B]
         lst = "\n".join("%d. %s" % (n + 1, b[n]) for n in range(len(b)))
         got = []
-        for mt, buds in ((4000, (8000, 12000)), (8000, (12000, 16000))):
-            r = llm.chat(CARD_Q.format(ask=ask, ev=evs, claims=lst),
-                         model=U.MM_MODEL, temp=0.0, max_tokens=mt,
+        # ⚠️ 2026-10-22 实测：max_tokens=4000 时 MiniMax 的 adaptive thinking 会
+        #    **把预算吃光、正文长度 0**（finish_reason=length, content_len=0）
+        #    ⇒ 4000 这一档**必然失败并重试** ⇒ 每次判官调用成本翻倍（实测 106.5s/次）。
+        #    ⇒ 阶梯直接从 8000 起。
+        for mt, buds in ((8000, (12000, 16000)),):
+            r = llm.chat(_cq.format(ask=ask, ev=evs, claims=lst),
+                         model=_jm, temp=0.0, max_tokens=mt,
                          budgets=buds, min_ok=len(b) * 15, purpose="card")
             got = parse_cards(r, len(b))
             if len(got) >= len(b):
