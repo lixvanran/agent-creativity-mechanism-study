@@ -394,21 +394,63 @@ _OUT_SPEC = ("【输出规格】\n"
              "- 不超过 400 字")
 
 
+# ⚠️ 2026-10-22 实测（MiniMax-M3.1-Flash-Preview，adaptive thinking）：
+#    `max_tokens=2000` ⇒ **两次尝试都被思考块吃光预算**（finish_reason=length,
+#    content_len=0）⇒ 返回**空串**。8000 才出正文（309 字符 / 109 秒）。
+#    ⇒ 预算阶梯必须**从 8000 起**；2000 这档**不是"可能失败"，是"必然失败"**。
+MIN_BUDGET = 8000
+
+
 def _chat(llm, prompt: str, *, purpose: str, model: str, temp: float = 0.7,
-          max_tokens: int = 2000, min_ok: int = 20):
-    """**宽容**的调用包装：不同客户端支持的 kwargs 不一样 ⇒ 逐级退化，但**不许静默失败**。"""
-    kwargs = dict(model=model, temp=temp, max_tokens=max_tokens,
-                  budgets=(max_tokens * 3,), min_ok=min_ok, purpose=purpose)
-    try:
-        return llm.chat(prompt, **kwargs)
-    except TypeError:
-        for drop in (("budgets",), ("min_ok",), ("budgets", "min_ok"), ("purpose",)):
-            kw2 = {k: v for k, v in kwargs.items() if k not in drop}
-            try:
-                return llm.chat(prompt, **kw2)
-            except TypeError:
-                continue
-    raise RuntimeError("llm.chat 不接受任何已知参数组合（purpose=%s）" % purpose)
+          max_tokens: int = 0, min_ok: int = 20, stats: Optional[Dict] = None):
+    """调用包装。**两件事必须同时做到**：
+
+    1. **宽容**：不同客户端支持的 kwargs 不一样 ⇒ 逐级退化，但**不许静默失败**。
+    2. **不许把"预算烧光、正文为空"当成功** ⇒ 逐档抬预算重试，
+       并把「尝试次数 / 最终 finish_reason / 是否为空」**记进 stats**
+       ⇒ **空输出是一条可计数的失败，不是"这条臂没话说"**。
+
+    ⚠️ 这条是从一次真实故障来的：2000 预算 ⇒ 两次 length/0 ⇒ 静默返回空串
+       ⇒ 在读数上被误读成"这条臂什么都没产出"。
+    """
+    base = max(int(max_tokens or 0), MIN_BUDGET)
+    ladder = [base] + [b for b in (12000, 16000) if b > base]
+    kwargs0 = dict(model=model, temp=temp, max_tokens=base,
+                   budgets=tuple(ladder[1:]), min_ok=min_ok, purpose=purpose)
+
+    def _call(kw):
+        try:
+            return llm.chat(prompt, **kw)
+        except TypeError:
+            for drop in (("budgets",), ("min_ok",), ("budgets", "min_ok"), ("purpose",)):
+                kw2 = {k: v for k, v in kw.items() if k not in drop}
+                try:
+                    return llm.chat(prompt, **kw2)
+                except TypeError:
+                    continue
+        raise RuntimeError("llm.chat 不接受任何已知参数组合（purpose=%s）" % purpose)
+
+    attempts = 0
+    last_fr = ""
+    text = ""
+    for i, mt in enumerate(ladder):
+        kw = dict(kwargs0)
+        kw["max_tokens"] = mt
+        kw["budgets"] = tuple(x for x in ladder[i + 1:])
+        text = _call(kw) or ""
+        attempts += 1
+        rec = getattr(llm, "rec", None)
+        if rec:
+            last_fr = getattr(rec[-1], "finish_reason", "") or ""
+        if text.strip() and last_fr != "length":
+            break
+        # 空 或 预算烧光 ⇒ 抬预算重试（**不静默吞掉**）
+    info = dict(purpose=purpose, attempts=attempts, finish_reason=last_fr,
+                empty=not bool((text or "").strip()),
+                chars=len(text or ""))
+    if stats is not None:
+        stats.setdefault("calls", []).append(info)
+    return text, info
 
 
 def _extract_claims(llm, text: str, *, model: str, cap: int = 12) -> List[str]:
@@ -418,8 +460,8 @@ def _extract_claims(llm, text: str, *, model: str, cap: int = 12) -> List[str]:
     prompt = ("从下面这段内容里逐条抄出其中**独立成立的具体判断**。\n"
               "只抄原文里有的，不要改写、不要补充、不要评价。每条一行，行首用「- 」。"
               "最多 %d 条。\n\n内容：\n%s" % (cap, text[:2500]))
-    raw = _chat(llm, prompt, purpose="W_extract", model=model, temp=0.0,
-                max_tokens=1500, min_ok=10)
+    raw, _info = _chat(llm, prompt, purpose="W_extract", model=model, temp=0.0,
+                       max_tokens=0, min_ok=10)
     out: List[str] = []
     for ln in (raw or "").splitlines():
         ln = re.sub(r"^\s*[-*\d.、)）]+\s*", "", ln).strip()
@@ -444,6 +486,7 @@ class CollapseFixWorkflow:
         self.llm = llm
         self.C = dict(self.DEFAULTS)
         self.C.update(cfg or {})
+        self.chat_stats: Dict[str, Any] = {"calls": []}
 
     # ---------------- 提示词
     def slot_prompt(self, frame_id: str, action: str, archive: ActionArchive) -> str:
@@ -467,17 +510,25 @@ class CollapseFixWorkflow:
                   archive: ActionArchive) -> Dict[str, Any]:
         self._ask = ask
         prompt = self.slot_prompt(frame_id, action, archive)
-        out = _chat(self.llm, prompt, purpose="W_slot_%s" % frame_id,
-                    model=self.C["model"], temp=0.7, max_tokens=2000, min_ok=20)
-        claims = _extract_claims(self.llm, out, model=self.C["model"])
+        out, info = _chat(self.llm, prompt, purpose="W_slot_%s" % frame_id,
+                          model=self.C["model"], temp=0.7, max_tokens=0,
+                          min_ok=20, stats=self.chat_stats)
+        claims = _extract_claims(self.llm, out, model=self.C["model"]) if out else []
         return dict(frame_id=frame_id, action=action, draft=out or "",
-                    claims=claims, n_calls=2)
+                    claims=claims, n_calls=2,
+                    gen_empty=bool(info.get("empty")),
+                    gen_attempts=info.get("attempts"),
+                    gen_finish=info.get("finish_reason"))
 
     # ---------------- 失败判定（★ 驱动动作演化）
     def classify_failure(self, slot: Dict[str, Any], verdicts: Optional[Dict[str, str]]) -> Optional[str]:
         """**没有独立失败通道 ⇒ 一切照常。** 失败类型决定"要演化出什么新动作"。"""
         claims = slot.get("claims") or []
         if not claims:
+            # ★ 区分两种"空"：**生成被预算烧光** vs **生成成功但抽不出断言**
+            #   前者是**仪器故障**（必须被计数、且要演化出更省预算的动作）
+            if slot.get("gen_empty"):
+                return "empty"
             return "empty"
         if verdicts:
             sup = sum(1 for c in claims if verdicts.get(c) == "支持")
@@ -557,15 +608,15 @@ class CollapseFixWorkflow:
         # ── 5) 汇总（★ 只在这一步让模型看别人的稿）
         final_drafts = [s["draft"] for s in slot_records] if slot_records else []
         if len(final_drafts) > 1:
-            agg = _chat(self.llm, self.aggregate_prompt(final_drafts, frames, archive),
-                        purpose="W_aggregate", model=self.C["model"],
-                        temp=0.3, max_tokens=2000, min_ok=20)
+            agg, _ai = _chat(self.llm, self.aggregate_prompt(final_drafts, frames, archive),
+                             purpose="W_aggregate", model=self.C["model"],
+                             temp=0.3, max_tokens=0, min_ok=20, stats=self.chat_stats)
             ops.append("AGGREGATE")
         else:
             agg = (final_drafts[0] if final_drafts else "")
 
         # ── 6) 装配（机械：抽取 + 去冗余，**不让模型再总结**）
-        final_claims = dedup(_extract_claims(self.llm, agg, model=self.C["model"]))
+        final_claims = dedup(_extract_claims(self.llm, agg, model=self.C["model"])) if agg else []
         if not final_claims:
             final_claims = dedup([c for cs in slot_claims for c in cs])
 
@@ -576,6 +627,7 @@ class CollapseFixWorkflow:
                               n_actions=len(archive.actions)))
 
         return dict(
+            chat_stats=self.chat_stats,
             answer=agg, claims=final_claims, frames=list(frames), ops=list(ops),
             rounds=rounds, archive=archive.stats(), illum=illum.stats(),
             failures=dict(failures),

@@ -113,17 +113,25 @@ def claims_text(cards):
 def arm_direct(llm, task, model):
     """直调基线：一次调用。**没有帧、没有演化、没有汇总。**"""
     prompt = "问题：%s\n\n%s" % (task["ask"], W._OUT_SPEC)
-    out = W._chat(llm, prompt, purpose="B0_direct", model=model, temp=0.7,
-                  max_tokens=2000, min_ok=20)
-    return dict(answer=out or "", claims=W._extract_claims(llm, out, model=model),
-                ops=["GEN[direct]"], frames=[], archive={}, failures={}, illum={})
+    direct_stats = {"calls": []}
+    print("      [B0] 生成…", flush=True)
+    out, _bi = W._chat(llm, prompt, purpose="B0_direct", model=model, temp=0.7,
+                       max_tokens=0, min_ok=20, stats=direct_stats)
+    print("      [B0] 抽取…", flush=True)
+    _cl = W._extract_claims(llm, out, model=model) if out else []
+    print("      [B0] 抽到 %d 条" % len(_cl), flush=True)
+    return dict(answer=out or "", claims=_cl,
+                ops=["GEN[direct]"], frames=[], archive={}, failures={}, illum={},
+                chat_stats=direct_stats)
 
 
 def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2):
     wf = W.CollapseFixWorkflow(llm, n_slots=n_slots, seed=seed,
                                 model=model, judge_model=model,
                                 max_rounds=max_rounds)
+    print("      [W ] 跑工作流…", flush=True)
     r = wf.run(task["ask"])
+    print("      [W ] 演化=%s 失败=%s" % (r["archive"].get("names"), r["failures"]), flush=True)
     return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
                 frames=r["frames"], archive=r["archive"], failures=r["failures"],
                 illum=r["illum"], rounds=r["rounds"])
@@ -160,6 +168,7 @@ def main():
                 c0 = llm.n_api_calls
                 try:
                     a = fn()
+                    print("      [%s] 测量（判官）…" % arm_name, flush=True)
                     res, cards = measure_one(llm, task, a["answer"],
                                              "%s/%s/rep%d" % (arm_name, task["task_id"], rep))
                     fams = dims_from_cards(cards)
@@ -175,6 +184,7 @@ def main():
                         ops=a.get("ops"), frames=a.get("frames"),
                         archive=a.get("archive"), failures=a.get("failures"),
                         illum=a.get("illum"),
+                        chat_stats=a.get("chat_stats"),
                         rounds=a.get("rounds"),
                         calls=llm.n_api_calls - c0,
                     )
