@@ -6,3 +6,4 @@ dist/
 .env
 runs/
 *.onnx
+routes/LIT/_raw/
