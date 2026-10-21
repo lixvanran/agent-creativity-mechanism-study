@@ -1,0 +1,156 @@
+==============================================================================
+§6 闸门 1：JSON 可解析
+   PASS evidence/D07 解析成功 (17036 bytes)
+   PASS gold/D07 解析成功 (9898 bytes)
+   PASS evidence/D08 解析成功 (15919 bytes)
+   PASS gold/D08 解析成功 (9110 bytes)
+   PASS evidence/D09 解析成功 (14601 bytes)
+   PASS gold/D09 解析成功 (8557 bytes)
+
+§6 闸门 2：每条依据的 source.quote 非空、source.url 以 http 开头
+   PASS D07 全部 12 条依据的 url/quote 合法
+   PASS D08 全部 11 条依据的 url/quote 合法
+   PASS D09 全部 11 条依据的 url/quote 合法
+
+§6 闸门 3：conclusion_space 3–8 条；key_conclusions ⊆ conclusion_space
+   PASS D07 conclusion_space 8 条（3–8）
+   PASS D07 conclusion id 无重复
+   PASS D07 key_conclusions ['C1', 'C4', 'C6'] ⊆ conclusion_space
+   PASS D08 conclusion_space 8 条（3–8）
+   PASS D08 conclusion id 无重复
+   PASS D08 key_conclusions ['C2', 'C3', 'C4'] ⊆ conclusion_space
+   PASS D09 conclusion_space 8 条（3–8）
+   PASS D09 conclusion id 无重复
+   PASS D09 key_conclusions ['C1', 'C2', 'C4'] ⊆ conclusion_space
+
+§6 闸门 4：金标正样本 ≥12、干扰项 ≥3；每张正样本卡 evidence_ref 与 supports_conclusions 非空
+   PASS D07 正样本 14 张（≥12）
+   PASS D07 干扰项 5 条（≥3）
+   PASS D07 每张正样本卡 evidence_ref/supports_conclusions 非空
+   PASS D07 每张正样本卡 decision_changed 非空
+   PASS D07 n_cards 字段与实际卡数一致
+   PASS D07 卡号唯一
+   PASS D08 正样本 15 张（≥12）
+   PASS D08 干扰项 5 条（≥3）
+   PASS D08 每张正样本卡 evidence_ref/supports_conclusions 非空
+   PASS D08 每张正样本卡 decision_changed 非空
+   PASS D08 n_cards 字段与实际卡数一致
+   PASS D08 卡号唯一
+   PASS D09 正样本 15 张（≥12）
+   PASS D09 干扰项 5 条（≥3）
+   PASS D09 每张正样本卡 evidence_ref/supports_conclusions 非空
+   PASS D09 每张正样本卡 decision_changed 非空
+   PASS D09 n_cards 字段与实际卡数一致
+   PASS D09 卡号唯一
+
+§6 闸门 5：金标卡的 evidence_ref 都能在依据包里找到（脚本核对）
+   PASS D07 全部 14 张卡的 evidence_ref 可解析
+   PASS D07 全部卡的 supports_conclusions 未越界
+   PASS D07 依据包每条依据至少被一张卡引用
+   PASS D08 全部 15 张卡的 evidence_ref 可解析
+   PASS D08 全部卡的 supports_conclusions 未越界
+   PASS D08 依据包每条依据至少被一张卡引用
+   PASS D09 全部 15 张卡的 evidence_ref 可解析
+   PASS D09 全部卡的 supports_conclusions 未越界
+   PASS D09 依据包每条依据至少被一张卡引用
+
+§6 闸门 6：题面不含禁用三题关键词
+   PASS D07 题面无禁用关键词
+   PASS D07 题面 60 字（20–60）
+   PASS D08 题面无禁用关键词
+   PASS D08 题面 59 字（20–60）
+   PASS D09 题面无禁用关键词
+   PASS D09 题面 59 字（20–60）
+
+§6 闸门 7：泄漏自检（对全部 6 个 DEV 文件 grep，须 0 命中）
+   PASS grep 禁用题关键词 「自行车」 → 0 命中
+   PASS grep 禁用题关键词 「公路赛」 → 0 命中
+   PASS grep 禁用题关键词 「骑行」 → 0 命中
+   PASS grep 禁用题关键词 「大组赛」 → 0 命中
+   PASS grep 禁用题关键词 「自行车赛」 → 0 命中
+   PASS grep 禁用题关键词 「高考」 → 0 命中
+   PASS grep 禁用题关键词 「报志愿」 → 0 命中
+   PASS grep 禁用题关键词 「志愿填报」 → 0 命中
+   PASS grep 禁用题关键词 「620」 → 0 命中
+   PASS grep 禁用题关键词 「选校」 → 0 命中
+   PASS grep 禁用题关键词 「湖北」 → 0 命中
+   PASS grep 禁用题关键词 「朗诵」 → 0 命中
+   PASS grep 禁用题关键词 「诗歌」 → 0 命中
+   PASS grep 禁用题关键词 「爱国诗」 → 0 命中
+   PASS grep TEST 集泄漏词 「湖北」 → 0 命中
+   PASS grep TEST 集泄漏词 「620」 → 0 命中
+   PASS grep TEST 集泄漏词 「多血质」 → 0 命中
+   PASS grep TEST 集泄漏词 「胆汁质」 → 0 命中
+   PASS grep TEST 集泄漏词 「粘液质」 → 0 命中
+   PASS grep TEST 集泄漏词 「抑郁质」 → 0 命中
+   PASS grep TEST 集泄漏词 「陈会昌」 → 0 命中
+   PASS grep TEST 集泄漏词 「气质量表」 → 0 命中
+   PASS grep TEST 集泄漏词 「1.6km」 → 0 命中
+   PASS grep TEST 集泄漏词 「回头弯」 → 0 命中
+   PASS grep TEST 集泄漏词 「800m」 → 0 命中
+   PASS grep TEST 集泄漏词 「五一小长假」 → 0 命中
+   PASS grep TEST 集泄漏词 「图书馆借阅」 → 0 命中
+   PASS grep TEST 集泄漏词 「假期的作业」 → 0 命中
+   PASS grep TEST 集泄漏词 「作业」 → 0 命中
+   PASS grep 用户补充禁用词 「假」 → 0 命中
+   PASS grep 用户补充禁用词 「AI」 → 0 命中
+   PASS grep 用户补充禁用词 「1.6km」 → 0 命中
+   PASS grep 用户补充禁用词 「气质量表」 → 0 命中
+   PASS grep 用户补充禁用词 「多血质」 → 0 命中
+   PASS grep 用户补充禁用词 「朗诵」 → 0 命中
+   PASS grep 用户补充禁用词 「诗歌」 → 0 命中
+   PASS grep 用户补充禁用词 「作业」 → 0 命中
+   PASS grep 大写「AI」连写 → 0 命中
+   PASS grep 单字「假」 → 0 命中
+
+额外闸门 8：引文逐字回验（重新抓取页面，确认 quote 仍是正文连续子串）
+   PASS D07 EV-01 引文回验命中（www.npc.gov.cn）
+   PASS D07 EV-02 引文回验命中（www.npc.gov.cn）
+   PASS D07 EV-03 引文回验命中（www.npc.gov.cn）
+   PASS D07 EV-04 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-05 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-06 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-07 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-08 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-09 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-10 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-11 引文回验命中（www.gzal.gov.cn）
+   PASS D07 EV-12 引文回验命中（www.court.gov.cn）
+   PASS D08 EV-01 引文回验命中（www.ah.gov.cn）
+   PASS D08 EV-02 引文回验命中（www.ah.gov.cn）
+   PASS D08 EV-03 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-04 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-05 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-06 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-07 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-08 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-09 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-10 引文回验命中（www.linzhouxian.gov.cn）
+   PASS D08 EV-11 引文回验命中（www.ah.gov.cn）
+   PASS D09 EV-01 引文回验命中（www.thepaper.cn）
+   PASS D09 EV-02 引文回验命中（slstnews.xjtvs.com.cn）
+   PASS D09 EV-03 引文回验命中（m.gmw.cn）
+   PASS D09 EV-04 引文回验命中（m.gmw.cn）
+   PASS D09 EV-05 引文回验命中（www.nsy.gov.cn）
+   PASS D09 EV-06 引文回验命中（news.cnr.cn）
+   PASS D09 EV-07 引文回验命中（m.gmw.cn）
+   PASS D09 EV-08 引文回验命中（kyfw.12306.cn）
+   PASS D09 EV-09 引文回验命中（kyfw.12306.cn）
+   PASS D09 EV-10 引文回验命中（kyfw.12306.cn）
+   PASS D09 EV-11 引文回验命中（www.peopleapp.com）
+
+额外闸门 9：第二来源覆盖率 ≥60%
+   PASS D07 每条依据都有第二来源核验记录
+   PASS D07 status 取值合法
+   PASS D07 confirmed 12/12 = 100%（≥60%）
+   PASS D08 每条依据都有第二来源核验记录
+   PASS D08 status 取值合法
+   PASS D08 confirmed 9/11 = 82%（≥60%）
+      ↳ single_source: EV-09,EV-10（已在 notes 写明原因）
+   PASS D09 每条依据都有第二来源核验记录
+   PASS D09 status 取值合法
+   PASS D09 confirmed 10/11 = 91%（≥60%）
+      ↳ single_source: EV-06（已在 notes 写明原因）
+
+==============================================================================
+合计失败项：0
