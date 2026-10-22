@@ -116,8 +116,106 @@ def _chat_ladder(llm, prompt, *, model, temp, budgets, min_ok, purpose):
                        empty=not bool(last.strip()))
 
 
+# ══════════════════════════════════════════════════════════════════════
+# ★ 锚外判官（2026-10-22 新增）：**故意不给结论空间 C_t**
+# ══════════════════════════════════════════════════════════════════════
+# 为什么必须有它：普通判官**拿着 C_t 打分** ⇒ 它只能标"支撑 C_t 第几条"
+# ⇒ ⇒ **锚外维度在普通判据下永远不可见** ⇒ VD_anchor_out 恒为 0
+#    —— 那是**判据设计的必然**，不是"我们没发现"。
+# ⇒ ⇒ 锚外必须**换一个不知道 C_t 的判官**：只给依据，让它自己说
+#    「这句话改变了哪个决策」+「它依赖哪几条依据」；然后**由我们**去比
+#    这个岔口在不在 C_t 里 ⇒ 这就是 Curiosity Search 的 leave-one-out
+#    精神（**不需要事前白名单**）。
+ANCHOR_OUT_Q = """下面是一份「依据条目」清单、一个问题，以及若干条候选陈述。
+请对**每条**候选陈述逐条判断。**注意：这里没有给你任何预定的结论清单**
+——请你自己判断每条陈述**改变了哪个决策**。
+
+问题：
+{ask}
+
+依据条目：
+{ev}
+
+候选陈述：
+{claims}
+
+对每条候选陈述，输出**一行 JSON**，字段如下（不要输出别的任何内容）：
+{{"i": <编号>,
+  "is_claim": true/false,
+  "verdict": "支持"/"矛盾"/"未提及"/"非主张",
+  "evidence_ref": "EV-07",
+  "load_bearing": true/false,
+  "decision_changed": "如果这条信息为假，答案的哪一句/哪一个决策会变？（写具体；写不出就填 null）",
+  "uses_evidence": ["EV-03", "EV-07"]}}
+
+判据：
+- 「支持」= 依据条目明确认可或蕴含该条；「矛盾」= 依据讲了相反的内容；「未提及」= 依据没讲到
+- **load_bearing**：写得出「改变了哪个决策」才为 true；复述、铺陈、寒暄、免责 ⇒ false
+- **uses_evidence**：列出这条陈述**实际依赖**的依据条目编号（可为空数组）
+"""
+
+
+def extract_claims(llm, answer, *, cap=12):
+    """抽断言（**两个判官共用同一批** ⇒ 省一次调用）。"""
+    raw, _i = _chat_ladder(llm, EXTRACT_Q.format(t=(answer or "")[:3000]),
+                           model=U.MM_MODEL, temp=0.0,
+                           budgets=(8000, 12000, 16000), min_ok=10, purpose="extract")
+    claims = []
+    for ln in (raw or "").splitlines():
+        ln = re.sub(r"^\s*[-*\d.、)）]+\s*", "", ln).strip()
+        if 8 <= len(ln) <= 120:
+            claims.append(ln)
+    return list(dict.fromkeys(claims))[:cap]
+
+
+def measure_anchor_out(llm, ask, ev_items, answer, answer_id, claims=None):
+    """锚外测量：**不给 C_t** 的判官 ⇒ 只看「依据 + 陈述」⇒ 它自己说改变了哪个决策。
+
+    返回 dict：cards（带 decision_changed / uses_evidence）+ 统计
+    ⚠️ 与普通判官**分开计数**：锚外的解析失败率必须单独报，不许混进主判据的读数。
+    """
+    res = dict(answer_id=answer_id, mode="anchor_out", n_chars=len(answer or ""))
+    if not (answer or "").strip():
+        res.update(valid=0, reason="empty_answer", n_cards=0, n_parsefail=0)
+        return res
+    if claims is None:
+        claims = extract_claims(llm, answer)
+    res["n_claims_extracted"] = len(claims)
+    if not claims:
+        res.update(valid=1, n_cards=0, n_parsefail=0)
+        return res
+    evs = "\n".join("%d. %s" % (i + 1, e["text"]) for i, e in enumerate(ev_items))
+    cards, n_parsefail = [], 0
+    B = 8
+    batches = [claims[i:i + B] for i in range(0, len(claims), B)]
+    def _one(bb):
+        lst = "\n".join("%d. %s" % (n + 1, bb[n]) for n in range(len(bb)))
+        r, _inf = _chat_ladder(llm, ANCHOR_OUT_Q.format(ask=ask, ev=evs, claims=lst),
+                               model=U.MM_MODEL, temp=0.0, budgets=(8000, 12000, 16000),
+                               min_ok=len(bb) * 15, purpose="anchor_out")
+        got = parse_cards(r, len(bb))
+        for g in got:
+            g["claim"] = bb[g["i"] - 1] if 1 <= g["i"] <= len(bb) else ""
+            g["uses_evidence"] = list(g.get("uses_evidence") or [])
+        return got, max(0, len(bb) - len(got))
+    if len(batches) > 1:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=min(len(batches), 4)) as _ex:
+            rs = list(_ex.map(_one, batches))
+    else:
+        rs = [_one(batches[0])]
+    for got, pf in rs:
+        n_parsefail += pf
+        cards.extend(got)
+    res["n_cards"] = len(cards)
+    res["n_parsefail"] = n_parsefail
+    res["parsefail_rate"] = n_parsefail / max(len(claims), 1)
+    res["cards"] = cards
+    return res
+
+
 def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
-                   judge_model=None, card_q=None):
+                   judge_model=None, card_q=None, claims=None):
     """对**一份**最终答案跑完整条测量流水线。返回该份的测量结果。
 
     ⚠️ 2026-10-22 新增两个**向后兼容**参数（默认值 ⇒ 行为完全不变）：
@@ -134,10 +232,13 @@ def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
         return res
 
     # ── 1. 机械抽断言（MiniMax）
-    raw, _xinfo = _chat_ladder(llm, EXTRACT_Q.format(t=(answer or "")[:3000]),
-                               model=_jm, temp=0.0,
-                               budgets=(8000, 12000, 16000), min_ok=10,
-                               purpose="extract")
+    if claims is None:
+        raw, _xinfo = _chat_ladder(llm, EXTRACT_Q.format(t=(answer or "")[:3000]),
+                                   model=_jm, temp=0.0,
+                                   budgets=(8000, 12000, 16000), min_ok=10,
+                                   purpose="extract")
+    else:
+        raw = "\n".join("- " + c for c in claims)
     # ⚠️ 2026-10-22 实测：抽取侧原为 max_tokens=3000 ⇒ **同样在"必然失败"档**
     #   （MiniMax adaptive thinking 吃光预算 ⇒ 正文空 ⇒ 0 条断言 ⇒ 0 张卡片）
     #   ⇒ 而 `parsefail_rate` 仍是 0.0 ⇒ **静默** ⇒ 被误读成"这条臂没有承重信息"。

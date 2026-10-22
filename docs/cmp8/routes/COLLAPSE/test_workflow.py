@@ -85,6 +85,13 @@ class StubLLM:
                            "- 若保修条款为五年，则在第 36 个月内仍然有效\n"
                            "- 当并发写入超过 1000 IOPS 时，延迟会超过 1 毫秒")
             return self._last
+        if p.startswith("B0_multi"):
+            # ★ 等预算臂的生成 ⇒ 也要回填 `_last`，否则抽取拿到空串
+            #   ⇒ 空抽取会**触发 3 次阶梯重试** ⇒ 调用数虚高 3 倍
+            self._last = ("- 依据 EV-03 写明的条件成立时，顺序读取为 7450 MB/s\n"
+                           "- 若保修条款为五年，则在第 36 个月内仍然有效\n"
+                           "- 当并发写入超过 1000 IOPS 时，延迟会超过 1 毫秒")
+            return self._last
         if p == "W_extract":
             # ⚠️ 必须**回显本槽位的产出** ⇒ 否则所有槽位抽出的断言都一样
             #    ⇒ **跨槽位矛盾被抹平** ⇒ 矛盾检测根本测不到
@@ -419,6 +426,44 @@ def run_checks():
             return False, "读数里没记 action_mode"
         return True, "组合动作 %s（参数 %d 个）" % (names, r.get("policy_param_count"))
 
+    # ── 17. ★ 锚外判定：机械、零 embedding，且**必须**区分锚内/锚外/写不出岔口
+    def c17():
+        import anchor_out as AO
+        ct = [{"id": "C1", "text": "①成立：官方标称顺序读取 7450 MB/s"},
+              {"id": "C2", "text": "②成立：官方标称随机读取 140 万 IOPS"}]
+        cards = [
+            {"claim": "①正确", "verdict": "支持", "load_bearing": True,
+             "decision_changed": "确认①成立，顺序读取为 7450 MB/s"},
+            {"claim": "运维监控", "verdict": "支持", "load_bearing": True,
+             "decision_changed": "建议每 5 分钟采集 SMART，异常即摘盘"},
+            {"claim": "免责", "verdict": "支持", "load_bearing": False,
+             "decision_changed": None},
+            {"claim": "说不清", "verdict": "支持", "load_bearing": True,
+             "decision_changed": None},
+        ]
+        d = AO.decide_anchor_out(cards, ct)
+        if d["n_anchored"] != 1 or d["n_anchor_out"] != 1 or d["n_unknown"] != 1:
+            return False, "判定错：%r" % d
+        if AO.decide_anchor_out(cards[:1], ct)["n_anchor_out"] != 0:
+            return False, "锚内条目被误判成锚外"
+        return True, "锚内1 锚外1 写不出岔口1；锚内不误判"
+
+    # ── 18. ★ 等预算对照臂：调用数与 W 同量（否则"增益"可能只是"多花了钱"）
+    def c18():
+        import anchor_out as AO
+        llm = StubLLM()
+        task = {"ask": "990 PRO 1TB 的哪些参数成立？", "evidence": []}
+        r = AO.best_of_n_direct(llm, task, "stub", n=3)
+        n_gen = sum(1 for p in llm.calls if str(p).startswith("B0_multi"))
+        n_ex = sum(1 for p in llm.calls if p == "W_extract")
+        if n_gen != 3:
+            return False, "生成调用 %d（应 3）" % n_gen
+        if n_ex != 3:
+            return False, "抽取调用 %d（应 3 = 每路一次）" % n_ex
+        if not r["claims"]:
+            return False, "没抽出断言"
+        return True, "3 次生成 + 3 次抽取（与 W 的 6 次同量）"
+
     add("frames_seed_reproducible", c1)
     add("frames_vary_by_seed", c2)
     add("dedup_removes_redundant", c3)
@@ -435,6 +480,8 @@ def run_checks():
     add("action_space_is_composable", c14)
     add("policy_is_learnable", c15)
     add("policy_mode_produces_composed_action", c16)
+    add("anchor_out_decision_is_mechanical", c17)
+    add("equal_budget_control_arm", c18)
     return checks
 
 

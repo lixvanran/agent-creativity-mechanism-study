@@ -53,6 +53,7 @@ sys.path.insert(0, BATCH_U1)
 import u1_lib as U            # noqa: E402
 import measure as M           # noqa: E402
 import workflow as W          # noqa: E402
+import anchor_out as AO       # noqa: E402
 
 DEV = "/workspace/lab/routes/DEV"
 OUT = os.path.join(HERE, "runs")
@@ -80,9 +81,32 @@ def ct_text(task):
 
 
 def measure_one(llm, task, answer, answer_id):
-    """用协议判官把一份答案折成**承重卡片**（沿用 batch-U1 的 `measure_answer`）。"""
+    """两份判官同跑一份答案：
+
+    ① **普通判官**（拿 `C_t`）⇒ 承重维度数、矛盾、净增益
+    ② **锚外判官**（**不给 `C_t`**）⇒ 它自己说"改变了哪个决策"
+       ⇒ 再由我们比这个岔口在不在 `C_t` 里 ⇒ `VD_anchor_out`
+    ★ 两者**共用同一批抽取出的断言** ⇒ 省一次抽取调用
+    ⚠️ 锚外的解析失败率**单独计数**，不许混进主判据的读数。
+    """
+    claims = M.extract_claims(llm, answer)
     res = M.measure_answer(llm, task["ask"], ev_items(task), ct_text(task),
-                           answer, answer_id)
+                           answer, answer_id, claims=claims)
+    # ── 锚外：换一个**不知道 C_t** 的判官
+    anchor = dict(n_anchor_out=0, n_anchored=0, n_unknown=0,
+                   anchor_out_claims=[], anchored_claims=[],
+                   parsefail_rate=None, n_cards=0)
+    try:
+        aor = M.measure_anchor_out(llm, task["ask"], ev_items(task),
+                                    answer, answer_id + "/ao", claims=claims)
+        ao_cards = aor.get("cards") or []
+        dec = AO.decide_anchor_out(ao_cards, task.get("conclusion_space") or [])
+        dec["parsefail_rate"] = aor.get("parsefail_rate")
+        dec["n_cards"] = len(ao_cards)
+        anchor = dec
+    except Exception as e:
+        anchor["error"] = "%s: %s" % (type(e).__name__, e)
+
     cards = []
     for i, c in enumerate(res.get("cards_all") or []):
         v = c.get("verdict")
@@ -131,6 +155,14 @@ def arm_direct(llm, task, model):
     return dict(answer=out or "", claims=_cl,
                 ops=["GEN[direct]"], frames=[], archive={}, failures={}, illum={},
                 chat_stats=direct_stats)
+
+
+def arm_bestof(llm, task, model, n=3, seed=0):
+    """★ 等预算对照臂：N 次独立直调 + 机械去冗余（调用数与 W 相同）。"""
+    print("      [B0bestof%d] N 次独立直调…" % n, flush=True)
+    r = AO.best_of_n_direct(llm, task, model, n=n, seed=seed)
+    print("      [B0bestof%d] 抽到 %d 条" % (n, len(r["claims"])), flush=True)
+    return r
 
 
 def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2,
@@ -189,6 +221,10 @@ def main():
             row = dict(task_id=task["task_id"], rep=rep, arms={})
             _ARMS = {
                 "B0_direct": lambda: arm_direct(llm, task, model),
+                # ★ 等预算对照臂：N 次独立直调 + 机械去冗余 ⇒ **调用数与 W 相同**
+                #   ⇒ 差集恰好是 {认知帧解耦 + 机械汇总 + 动作演化}
+                #   ⇒ 同时实现 ToT 的「同预算 best-of-k」（轴＝调用数，不是节点数）
+                "B0_bestof3": lambda: arm_bestof(llm, task, model, 3, rep),
                 # ★ 层2「用设计的手段」：架构先验设计好、**运行时不自修改**
                 "W_design_L2": lambda: arm_workflow(
                     llm, task, model, seed=rep, n_slots=args.slots,
@@ -205,8 +241,8 @@ def main():
                 try:
                     a = fn()
                     print("      [%s] 测量（判官）…" % arm_name, flush=True)
-                    res, cards = measure_one(llm, task, a["answer"],
-                                             "%s/%s/rep%d" % (arm_name, task["task_id"], rep))
+                    res, cards, anchor = measure_one(llm, task, a["answer"],
+                                                     "%s/%s/rep%d" % (arm_name, task["task_id"], rep))
                     fams = dims_from_cards(cards)
                     row["arms"][arm_name] = dict(
                         answer=a["answer"], n_chars=len(a["answer"]),
@@ -217,6 +253,8 @@ def main():
                         dims=sorted(fams),
                         parsefail_rate=res.get("parsefail_rate"),
                         cards=cards,
+                        anchor_out=anchor,
+                        vd_anchor_out=(anchor or {}).get("n_anchor_out", 0),
                         ops=a.get("ops"), frames=a.get("frames"),
                         archive=a.get("archive"), failures=a.get("failures"),
                         illum=a.get("illum"),
