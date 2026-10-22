@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 import json
 import os
 import shutil
@@ -192,6 +193,8 @@ def main():
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--dry", action="store_true", help="只跑不落盘")
+    ap.add_argument("--resume", action="store_true",
+                    help="★ 断点续跑：跳过 arms.jsonl 里已完成的 (题,臂,rep)")
     ap.add_argument("--action-mode", default="lookup", choices=["lookup", "policy"],
                     help="lookup=6 个手写模板（层2 的设计）；policy=36 个可组合动作+策略（层3）")
     ap.add_argument("--policy-file", default="",
@@ -206,6 +209,17 @@ def main():
 
     tasks = load_tasks(args.tasks)
     model = os.environ.get("MM_MODEL", "MiniMax-M3.1-Flash-Preview")
+    # ★ 断点续跑：沙箱会杀长跑后台进程 ⇒ 每次重启都要能接着跑
+    _done = set()
+    _jl = os.path.join(args.out, "arms.jsonl")
+    if args.resume and os.path.exists(_jl):
+        for _ln in open(_jl, encoding="utf-8"):
+            try:
+                _d = json.loads(_ln)
+                _done.add((_d.get("task_id"), _d.get("arm"), _d.get("rep")))
+            except Exception:
+                pass
+        print("断点续跑：已完成 %d 个臂，跳过它们" % len(_done))
     _pol = None
     if args.policy_file and os.path.exists(args.policy_file):
         with open(args.policy_file, encoding="utf-8") as f:
@@ -255,6 +269,10 @@ def main():
                     action_mode=args.action_mode, policy=_pol),
             }
             for arm_name, fn in ((k, _ARMS[k]) for k in want_arms if k in _ARMS):
+                if (task["task_id"], arm_name, rep) in _done:
+                    print("  %-4s %-13s rep%s ★ 已完成，跳过"
+                          % (task["task_id"], arm_name, rep), flush=True)
+                    continue
                 c0 = llm.n_api_calls
                 try:
                     a = fn()
@@ -299,6 +317,21 @@ def main():
                         **row["arms"][arm_name]), ensure_ascii=False) + "\n")
             all_rows.append(row)
             print("  " + "-" * 70)
+
+    # ★ 从**增量落盘**重建 rows ⇒ 即使进程被杀，已完成的臂也**不会丢**
+    _jl = os.path.join(args.out, "arms.jsonl")
+    if os.path.exists(_jl):
+        _rows = defaultdict(dict)
+        for _ln in open(_jl, encoding="utf-8"):
+            try:
+                _d = json.loads(_ln)
+            except Exception:
+                continue
+            _rows[(_d.get("task_id"), _d.get("rep"))][_d.get("arm")] = _d
+        all_rows = [dict(task_id=k[0], rep=k[1], arms=v)
+                    for k, v in _rows.items()]
+        print("  ★ 从 arms.jsonl 重建 %d 行（%d 个臂）"
+              % (len(all_rows), sum(len(v) for v in _rows.values())))
 
     # ── 汇总读数
     summary = dict(
