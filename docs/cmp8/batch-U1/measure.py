@@ -78,21 +78,92 @@ CARD_Q = """下面是一份「依据条目 / 结论空间」清单（**同一份
 """
 
 
-def parse_cards(raw, n):
+def _json_blocks(text):
+    """从一段文本里**配平括号**地抽出所有顶层 JSON 对象（不管它们前面有没有别的东西）。
+
+    ★ 2026-10-22 实测教训：MiniMax 的卡片输出**不是稳定的"一行一个 JSON"**：
+      实测出现过 ```` ```json ```` 包裹、行内有前导文字、一行多个对象
+      ⇒ 旧解析器（只认"行首是 {"）会 **100% 解析失败** ⇒ 而 `parsefail_rate` 只在
+      "卡片条数不够"时才体现 ⇒ ⇒ **静默变成 dims=0**，看起来像"这条臂没有承重信息"。
+      ⇒ 这就是"失败不许静默变 0"的第四例，且是**我自己早就踩过**的坑（U1 的 R2）。
+    """
+    out, i, n = [], 0, len(text or "")
+    while i < n:
+        if text[i] != "{":
+            i += 1
+            continue
+        depth, j, in_str, esc = 0, i, False, False
+        while j < n:
+            ch = text[j]
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+            else:
+                if ch == '"':
+                    in_str = True
+                elif ch == "{":
+                    depth += 1
+                elif ch == "}":
+                    depth -= 1
+                    if depth == 0:
+                        out.append(text[i:j + 1])
+                        i = j + 1
+                        break
+            j += 1
+        else:
+            break
+    return out
+
+
+def parse_cards(raw, n, loose=True):
+    """解析判官返回的卡片 JSON。
+
+    ★ 两级：
+      ① **strict**：行首就是 `{` 的行（快、严）
+      ② **loose**：配平括号抽块 + 剥 code fence + 容忍尾逗号（慢、宽）
+    ⇒ 返回 (cards, mode)；mode ∈ {"strict","loose","none"} ⇒ **解析路径本身可诊断**
+    """
+    def _norm(block):
+        b = block.strip()
+        b = re.sub(r"^```(?:json)?\s*", "", b)
+        b = re.sub(r"\s*```$", "", b)
+        b = re.sub(r",\s*([}\]])", r"\1", b)          # 容忍尾逗号
+        return b
+
+    def _mk(block, idx):
+        try:
+            d = json.loads(_norm(block))
+        except Exception:
+            return None
+        if not isinstance(d, dict):
+            return None
+        d["i"] = int(d.get("i", idx + 1))
+        d["supports_conclusions"] = [int(x) for x in (d.get("supports_conclusions") or [])
+                                    if str(x).strip().isdigit()]
+        return d
+
+    raw = raw or ""
     out = []
-    for i, ln in enumerate((raw or "").splitlines()):
+    for i, ln in enumerate(raw.splitlines()):
         ln = ln.strip()
         if not ln.startswith("{"):
             continue
-        try:
-            d = json.loads(ln)
-        except Exception:
-            continue
-        d["i"] = int(d.get("i", i + 1))
-        d["supports_conclusions"] = [int(x) for x in (d.get("supports_conclusions") or [])
-                                    if str(x).strip().isdigit()]
-        out.append(d)
-    return out
+        d = _mk(ln, i)
+        if d is not None:
+            out.append(d)
+    if out or not loose:
+        return out, ("strict" if out else "none")
+    # ── loose
+    out = []
+    for k, blk in enumerate(_json_blocks(raw)):
+        d = _mk(blk, k)
+        if d is not None:
+            out.append(d)
+    return out, ("loose" if out else "none")
 
 
 def _chat_ladder(llm, prompt, *, model, temp, budgets, min_ok, purpose):
@@ -189,24 +260,40 @@ def measure_anchor_out(llm, ask, ev_items, answer, answer_id, claims=None):
     B = 8
     batches = [claims[i:i + B] for i in range(0, len(claims), B)]
     def _one(bb):
-        lst = "\n".join("%d. %s" % (n + 1, bb[n]) for n in range(len(bb)))
-        r, _inf = _chat_ladder(llm, ANCHOR_OUT_Q.format(ask=ask, ev=evs, claims=lst),
-                               model=U.MM_MODEL, temp=0.0, budgets=(8000, 12000, 16000),
-                               min_ok=len(bb) * 15, purpose="anchor_out")
-        got = parse_cards(r, len(bb))
+        def _call(chunk):
+            lst = "\n".join("%d. %s" % (k + 1, chunk[k]) for k in range(len(chunk)))
+            r, _inf = _chat_ladder(llm, ANCHOR_OUT_Q.format(ask=ask, ev=evs, claims=lst),
+                                   model=U.MM_MODEL, temp=0.0,
+                                   budgets=(8000, 12000, 16000),
+                                   min_ok=len(chunk) * 15, purpose="anchor_out")
+            return parse_cards(r, len(chunk))
+        got, mode = _call(bb)
+        if len(got) < len(bb) and len(bb) > 1:
+            half = len(bb) // 2
+            got, mode = [], mode
+            for part in (bb[:half], bb[half:]):
+                if not part:
+                    continue
+                g2, m2 = _call(part)
+                got.extend(g2)
+                if m2 != "none":
+                    mode = m2
         for g in got:
             g["claim"] = bb[g["i"] - 1] if 1 <= g["i"] <= len(bb) else ""
             g["uses_evidence"] = list(g.get("uses_evidence") or [])
-        return got, max(0, len(bb) - len(got))
+        return got, max(0, len(bb) - len(got)), mode
     if len(batches) > 1:
         from concurrent.futures import ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=min(len(batches), 4)) as _ex:
             rs = list(_ex.map(_one, batches))
     else:
         rs = [_one(batches[0])]
-    for got, pf in rs:
+    parse_modes = {}
+    for got, pf, _mode in rs:
         n_parsefail += pf
+        parse_modes[_mode] = parse_modes.get(_mode, 0) + 1
         cards.extend(got)
+    res["parse_modes"] = parse_modes
     res["n_cards"] = len(cards)
     res["n_parsefail"] = n_parsefail
     res["parsefail_rate"] = n_parsefail / max(len(claims), 1)
@@ -264,17 +351,37 @@ def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
 
     def _one_batch(bb):
         """判一批。★ 阶梯**由本函数独占控制**（每档只试一次），
-        且**批次之间并行** ⇒ 2 批 ⇒ 1× 等待而不是 2×。"""
-        lst = "\n".join("%d. %s" % (n + 1, bb[n]) for n in range(len(bb)))
-        got = []
-        for mt, buds in ((8000, (12000, 16000)),):
+        且**批次之间并行** ⇒ 2 批 ⇒ 1× 等待而不是 2×。
+
+        ★ 2026-10-22：解析不足 ⇒ **降批重试**（把这一批再对半分）
+          ⇒ 实测 MiniMax 的卡片输出偶发不合规 ⇒ 旧做法直接 100% 解析失败
+          ⇒ **静默变成 dims=0**（看起来像"这条臂没有承重信息"）
+        ⇒ 解析路径（strict/loose）**单独记录**，不许混进读数。
+        """
+        def _call(chunk):
+            lst = "\n".join("%d. %s" % (k + 1, chunk[k]) for k in range(len(chunk)))
             r, _info = _chat_ladder(llm, _cq.format(ask=ask, ev=evs, claims=lst),
-                                     model=_jm, temp=0.0, budgets=buds,
-                                     min_ok=len(bb) * 15, purpose="card")
-            got = parse_cards(r, len(bb))
+                                     model=_jm, temp=0.0, budgets=(8000, 12000, 16000),
+                                     min_ok=len(chunk) * 15, purpose="card")
+            return parse_cards(r, len(chunk))
+
+        got, mode = [], "none"
+        for mt in (8000,):
+            got, mode = _call(bb)
             if len(got) >= len(bb):
                 break
-        return got, max(0, len(bb) - len(got)), (len(got) < len(bb))
+        if len(got) < len(bb) and len(bb) > 1:
+            # ★ 降批重试：对半分，各自再判一次
+            half = len(bb) // 2
+            got, mode = [], mode
+            for part in (bb[:half], bb[half:]):
+                if not part:
+                    continue
+                g2, m2 = _call(part)
+                got.extend(g2)
+                if m2 != "none":
+                    mode = m2
+        return got, max(0, len(bb) - len(got)), (len(got) < len(bb)), mode
 
     _batches = [claims[i:i + B] for i in range(0, len(claims), B)]
     if len(_batches) > 1:
@@ -283,13 +390,16 @@ def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
             _results = list(_ex.map(_one_batch, _batches))
     else:
         _results = [_one_batch(_batches[0])]
-    for got, _pf, _failed in _results:
+    parse_modes = {}
+    for got, _pf, _failed, _mode in _results:
         n_parsefail += _pf
+        parse_modes[_mode] = parse_modes.get(_mode, 0) + 1
         if _failed:
             card_call_failed = True
         for g in got:
             g["claim"] = claims[g["i"] - 1] if 1 <= g["i"] <= len(claims) else ""
             cards.append(g)
+    res["parse_modes"] = parse_modes
     res["card_call_failed"] = card_call_failed
     res["n_cards"] = len(cards)
     res["parsefail"] = n_parsefail

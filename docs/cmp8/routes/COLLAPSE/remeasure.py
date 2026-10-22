@@ -59,8 +59,23 @@ def main():
     if args.compare:
         return compare(args.compare[0], args.compare[1])
 
-    with open(args.run, encoding="utf-8") as f:
-        run = json.load(f)
+    # ★ 支持两种输入：完整 JSON（w_dev_run.json）**或**增量落盘的 arms.jsonl
+    #   （批次未跑完时只有后者 ⇒ 但已完成的臂不该丢）
+    if args.run.endswith(".jsonl"):
+        run = dict(rows=[])
+        _by = {}
+        for _ln in open(args.run, encoding="utf-8"):
+            try:
+                _d = json.loads(_ln)
+            except Exception:
+                continue
+            _k = (_d.get("task_id"), _d.get("rep"))
+            _by.setdefault(_k, {})[_d.get("arm")] = _d
+        run["rows"] = [dict(task_id=k[0], rep=k[1], arms=v) for k, v in _by.items()]
+        run["judge_model"] = "minimax"
+    else:
+        with open(args.run, encoding="utf-8") as f:
+            run = json.load(f)
 
     if args.judge == "openrouter":
         jm = args.judge_model or U.OR_MODEL
