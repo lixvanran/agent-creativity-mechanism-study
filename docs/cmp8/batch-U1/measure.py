@@ -22,7 +22,7 @@ import u1_lib as U
 
 BATCH = U.BATCH
 RUNS = os.path.join(BATCH, "runs")
-MEAS_VERSION = "U1-measure-v1-2026-10-21+card8k+extract8k"  # 2026-10-22：判官阶梯 8k 起、批 8、断言上限 12、**抽取也 8k 起**
+MEAS_VERSION = "U1-measure-v2-2026-10-22+singleattempt+par"  # ★ 阶梯不嵌套（每档一次）+ 卡片批次并行 + 8k 起 + 批 8 + 断言上限 12
 
 EXTRACT_Q = """从下面这段回答里，逐条列出其中**可判真假的陈述**。
 一行一条，最多 20 条。
@@ -95,6 +95,27 @@ def parse_cards(raw, n):
     return out
 
 
+def _chat_ladder(llm, prompt, *, model, temp, budgets, min_ok, purpose):
+    """★ 2026-10-22：**一次尝试 = 一次调用**（不把阶梯交给客户端再套一层）。
+
+    旧写法 `llm.chat(..., max_tokens=8000, budgets=(12000,16000))`
+    ⇒ 客户端内部按 (8000, 12000, 16000) 试 **3 次**；再叠加外层阶梯
+    ⇒ 一次逻辑调用最多 6 次尝试 ⇒ 实测把一个批次拖成 40 分钟。
+    ⇒ 现在阶梯由本函数独占控制，**每档只试一次**。
+    """
+    last = ""
+    fr = ""
+    for mt in budgets:
+        last = llm.chat(prompt, model=model, temp=temp, max_tokens=mt,
+                        budgets=(), min_ok=min_ok, purpose=purpose) or ""
+        rec = getattr(llm, "rec", None)
+        fr = getattr(rec[-1], "finish_reason", "") if rec else ""
+        if last.strip() and fr != "length":
+            break
+    return last, dict(attempts=len(budgets), finish_reason=fr,
+                       empty=not bool(last.strip()))
+
+
 def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
                    judge_model=None, card_q=None):
     """对**一份**最终答案跑完整条测量流水线。返回该份的测量结果。
@@ -113,9 +134,10 @@ def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
         return res
 
     # ── 1. 机械抽断言（MiniMax）
-    raw = llm.chat(EXTRACT_Q.format(t=(answer or "")[:3000]),
-                   model=_jm, temp=0.0, max_tokens=8000,
-                   budgets=(12000, 16000), min_ok=10, purpose="extract")
+    raw, _xinfo = _chat_ladder(llm, EXTRACT_Q.format(t=(answer or "")[:3000]),
+                               model=_jm, temp=0.0,
+                               budgets=(8000, 12000, 16000), min_ok=10,
+                               purpose="extract")
     # ⚠️ 2026-10-22 实测：抽取侧原为 max_tokens=3000 ⇒ **同样在"必然失败"档**
     #   （MiniMax adaptive thinking 吃光预算 ⇒ 正文空 ⇒ 0 条断言 ⇒ 0 张卡片）
     #   ⇒ 而 `parsefail_rate` 仍是 0.0 ⇒ **静默** ⇒ 被误读成"这条臂没有承重信息"。
@@ -138,26 +160,34 @@ def measure_answer(llm, ask, ev_items, ct, answer, answer_id,
     cards, n_parsefail = [], 0
     card_call_failed = False
     B = 8          # ⚠️ 2026-10-22：4→8 ⇒ 批次数减半 ⇒ 判官调用数减半
-    for i in range(0, len(claims), B):
-        b = claims[i:i + B]
-        lst = "\n".join("%d. %s" % (n + 1, b[n]) for n in range(len(b)))
+
+    def _one_batch(bb):
+        """判一批。★ 阶梯**由本函数独占控制**（每档只试一次），
+        且**批次之间并行** ⇒ 2 批 ⇒ 1× 等待而不是 2×。"""
+        lst = "\n".join("%d. %s" % (n + 1, bb[n]) for n in range(len(bb)))
         got = []
-        # ⚠️ 2026-10-22 实测：max_tokens=4000 时 MiniMax 的 adaptive thinking 会
-        #    **把预算吃光、正文长度 0**（finish_reason=length, content_len=0）
-        #    ⇒ 4000 这一档**必然失败并重试** ⇒ 每次判官调用成本翻倍（实测 106.5s/次）。
-        #    ⇒ 阶梯直接从 8000 起。
         for mt, buds in ((8000, (12000, 16000)),):
-            r = llm.chat(_cq.format(ask=ask, ev=evs, claims=lst),
-                         model=_jm, temp=0.0, max_tokens=mt,
-                         budgets=buds, min_ok=len(b) * 15, purpose="card")
-            got = parse_cards(r, len(b))
-            if len(got) >= len(b):
+            r, _info = _chat_ladder(llm, _cq.format(ask=ask, ev=evs, claims=lst),
+                                     model=_jm, temp=0.0, budgets=buds,
+                                     min_ok=len(bb) * 15, purpose="card")
+            got = parse_cards(r, len(bb))
+            if len(got) >= len(bb):
                 break
-        n_parsefail += max(0, len(b) - len(got))
-        if len(got) < len(b):
+        return got, max(0, len(bb) - len(got)), (len(got) < len(bb))
+
+    _batches = [claims[i:i + B] for i in range(0, len(claims), B)]
+    if len(_batches) > 1:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=min(len(_batches), 4)) as _ex:
+            _results = list(_ex.map(_one_batch, _batches))
+    else:
+        _results = [_one_batch(_batches[0])]
+    for got, _pf, _failed in _results:
+        n_parsefail += _pf
+        if _failed:
             card_call_failed = True
         for g in got:
-            g["claim"] = b[g["i"] - 1] if 1 <= g["i"] <= len(b) else ""
+            g["claim"] = claims[g["i"] - 1] if 1 <= g["i"] <= len(claims) else ""
             cards.append(g)
     res["card_call_failed"] = card_call_failed
     res["n_cards"] = len(cards)
