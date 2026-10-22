@@ -226,10 +226,15 @@ ANCHOR_OUT_Q = """下面是一份「依据条目」清单、一个问题，以�
 """
 
 
-def extract_claims(llm, answer, *, cap=12):
-    """抽断言（**两个判官共用同一批** ⇒ 省一次调用）。"""
+def extract_claims(llm, answer, *, cap=12, model=None):
+    """抽断言（**两个判官共用同一批** ⇒ 省一次调用）。
+
+    ★ `model` 必须**跟着判官走** —— 否则换厂商时抽取会拿着上一个厂商的模型名去打
+      ⇒ 400（"X is not a valid model ID"）⇒ **静默返回空串** ⇒ 读数变 0
+      ⇒ 而那会被误读成"这条臂没有承重信息"。2026-10-23 实测踩到。
+    """
     raw, _i = _chat_ladder(llm, EXTRACT_Q.format(t=(answer or "")[:3000]),
-                           model=U.MM_MODEL, temp=0.0,
+                           model=model or U.MM_MODEL, temp=0.0,
                            budgets=(8000, 12000, 16000), min_ok=10, purpose="extract")
     claims = []
     for ln in (raw or "").splitlines():
@@ -250,7 +255,7 @@ def measure_anchor_out(llm, ask, ev_items, answer, answer_id, claims=None):
         res.update(valid=0, reason="empty_answer", n_cards=0, n_parsefail=0)
         return res
     if claims is None:
-        claims = extract_claims(llm, answer)
+        claims = extract_claims(llm, answer, model=_jm)
     res["n_claims_extracted"] = len(claims)
     if not claims:
         res.update(valid=1, n_cards=0, n_parsefail=0)
