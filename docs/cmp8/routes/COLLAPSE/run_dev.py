@@ -80,7 +80,7 @@ def ct_text(task):
                      for i, c in enumerate(cs))
 
 
-def measure_one(llm, task, answer, answer_id):
+def measure_one(llm, task, answer, answer_id, judge_model=None):
     """两份判官同跑一份答案：
 
     ① **普通判官**（拿 `C_t`）⇒ 承重维度数、矛盾、净增益
@@ -91,7 +91,8 @@ def measure_one(llm, task, answer, answer_id):
     """
     claims = M.extract_claims(llm, answer)
     res = M.measure_answer(llm, task["ask"], ev_items(task), ct_text(task),
-                           answer, answer_id, claims=claims)
+                           answer, answer_id, claims=claims,
+                           judge_model=judge_model)
     # ── 锚外：换一个**不知道 C_t** 的判官
     anchor = dict(n_anchor_out=0, n_anchored=0, n_unknown=0,
                    anchor_out_claims=[], anchored_claims=[],
@@ -122,7 +123,7 @@ def measure_one(llm, task, answer, answer_id):
             supports_conclusions=["C%d" % int(x) for x in (c.get("supports_conclusions") or [])],
             stage="final",
         ))
-    return res, cards
+    return res, cards, anchor
 
 
 def dims_from_cards(cards):
@@ -197,6 +198,10 @@ def main():
                     help="学出来的策略 JSON（runs/policy_train/policy.json）")
     ap.add_argument("--arms", default="B0,W_design_L2,W_train_L3",
                     help="逗号分隔的臂名")
+    ap.add_argument("--judge", default="minimax", choices=["minimax", "openrouter"],
+                    help="判官厂商（★ 跨厂商交叉用 openrouter ⇒ judge_same_vendor=false）")
+    ap.add_argument("--judge-model", default="",
+                    help="判官模型（openrouter 时默认 u1_lib.OR_MODEL）")
     args = ap.parse_args()
 
     tasks = load_tasks(args.tasks)
@@ -210,6 +215,19 @@ def main():
         _pol = W.ActionPolicy()          # w=0 ⇒ 均匀 ⇒ **未训练基线**
         print("★ 未载入策略 ⇒ 用 w=0 均匀策略（未训练基线）")
     want_arms = [a.strip() for a in args.arms.split(",") if a.strip()]
+    # ★ 判官客户端：**生成侧始终 MiniMax**，只有**测量侧**可换厂商
+    #   ⇒ 跨厂商交叉 = 同一批答案、**同一份判官提示词**、只换判官模型（ToT 的做法）
+    #   ⇒ 生成侧不动 ⇒ 唯一变化就是"谁在判" ⇒ 读数差异就归因到判官
+    if args.judge == "openrouter":
+        jm = args.judge_model or U.OR_MODEL
+        judge_llm = U.OpenRouterLLM()
+        judge_same_vendor = False
+        print("判官：%s（★ 跨厂商 ⇒ judge_same_vendor=false）" % jm)
+    else:
+        jm = args.judge_model or U.MM_MODEL
+        judge_llm = U.MiniMaxLLM()
+        judge_same_vendor = True
+        print("判官：%s" % jm)
     llm = U.MiniMaxLLM()
     print("模型：%s ｜ 题数：%d ｜ rep：%d" % (model, len(tasks), args.reps))
     print("=" * 74)
@@ -241,8 +259,9 @@ def main():
                 try:
                     a = fn()
                     print("      [%s] 测量（判官）…" % arm_name, flush=True)
-                    res, cards, anchor = measure_one(llm, task, a["answer"],
-                                                     "%s/%s/rep%d" % (arm_name, task["task_id"], rep))
+                    res, cards, anchor = measure_one(judge_llm, task, a["answer"],
+                                                     "%s/%s/rep%d" % (arm_name, task["task_id"], rep),
+                                                     judge_model=jm)
                     fams = dims_from_cards(cards)
                     row["arms"][arm_name] = dict(
                         answer=a["answer"], n_chars=len(a["answer"]),
@@ -275,7 +294,8 @@ def main():
 
     # ── 汇总读数
     summary = dict(
-        model=model, judge_same_vendor=True,
+        model=model, judge_model=jm, judge_same_vendor=judge_same_vendor,
+        judge_vendor=args.judge,
         note=("判官与被测**同厂商**（MiniMax）⇒ 内部对照用；"
               "**不能**作为对外结论（协议 §4.3 要求跨厂商判官）"),
         n_tasks=len(tasks), reps=args.reps, slots=args.slots, rounds=args.rounds,
