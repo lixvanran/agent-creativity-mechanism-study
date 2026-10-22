@@ -90,7 +90,8 @@ def measure_one(llm, task, answer, answer_id, judge_model=None, anchor_out=True)
     ★ 两者**共用同一批抽取出的断言** ⇒ 省一次抽取调用
     ⚠️ 锚外的解析失败率**单独计数**，不许混进主判据的读数。
     """
-    claims = M.extract_claims(llm, answer)
+    # ★ 抽取的模型名必须**跟着判官走**（否则换厂商 ⇒ 400 ⇒ 静默空串 ⇒ 读数 0）
+    claims = M.extract_claims(llm, answer, model=judge_model)
     res = M.measure_answer(llm, task["ask"], ev_items(task), ct_text(task),
                            answer, answer_id, claims=claims,
                            judge_model=judge_model)
