@@ -244,7 +244,15 @@ def extract_claims(llm, answer, *, cap=12, model=None):
     return list(dict.fromkeys(claims))[:cap]
 
 
-def measure_anchor_out(llm, ask, ev_items, answer, answer_id, claims=None):
+def measure_anchor_out(llm, ask, ev_items, answer, answer_id, claims=None,
+                        judge_model=None):
+    """锚外测量：**不给 C_t** 的判官 ⇒ 只看「依据 + 陈述」⇒ 它自己说改变了哪个决策。
+
+    ★ `judge_model` 必须**跟着判官走**（抽取与卡片两处都要）——
+      否则换厂商时仍拿着上一个厂商的模型名去打 ⇒ 400 ⇒ 静默空串
+      ⇒ **锚外数恒为 0**，而那会被误读成"主命题不成立"（2026-10-23 实测踩到）。
+    """
+    _jm = judge_model or U.MM_MODEL
     """锚外测量：**不给 C_t** 的判官 ⇒ 只看「依据 + 陈述」⇒ 它自己说改变了哪个决策。
 
     返回 dict：cards（带 decision_changed / uses_evidence）+ 统计
@@ -268,7 +276,7 @@ def measure_anchor_out(llm, ask, ev_items, answer, answer_id, claims=None):
         def _call(chunk):
             lst = "\n".join("%d. %s" % (k + 1, chunk[k]) for k in range(len(chunk)))
             r, _inf = _chat_ladder(llm, ANCHOR_OUT_Q.format(ask=ask, ev=evs, claims=lst),
-                                   model=U.MM_MODEL, temp=0.0,
+                                   model=_jm, temp=0.0,
                                    budgets=(8000, 12000, 16000),
                                    min_ok=len(chunk) * 15, purpose="anchor_out")
             return parse_cards(r, len(chunk))
