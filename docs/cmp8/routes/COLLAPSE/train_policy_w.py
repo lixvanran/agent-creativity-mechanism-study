@@ -73,6 +73,7 @@ shutil.rmtree(os.path.join(HERE, "__pycache__"), ignore_errors=True)
 
 import workflow as W          # noqa: E402
 import u1_lib as U            # noqa: E402
+import metrics_priorart as MP  # noqa: E402
 
 DEV = "/workspace/lab/routes/DEV"
 OUT_DEFAULT = os.path.join(HERE, "runs", "policy_train")
@@ -99,7 +100,13 @@ class ForcedPolicy(W.ActionPolicy):
 # 代理奖励
 # ══════════════════════════════════════════════════════════════════════
 def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
-    """从一次运行的读数里算**代理奖励**（零判官成本）。"""
+    """从一次运行的读数里算**代理奖励**（零判官成本）。
+
+    ★★ 同一个样本同时给出两种形式，**这是受控对照的关键**：
+      · `scalar`  = 加权和（标量）⇒ argmax ⇒ **必然收敛到一点（中庸）**
+      · `(quality, diversity)` = 二元向量 ⇒ 非支配排序 ⇒ **保留不可比的多个解**
+    ⇒ 两者用**同一份代码、同一批样本、同一套更新规则**，**唯一差别是选择规则**。
+    """
     conflicts = int(res.get("n_conflicts") or 0)
     failures = res.get("failures") or {}
     n_empty = int(failures.get("empty") or 0)
@@ -115,18 +122,29 @@ def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
          - LAMBDA["fallback"] * n_fb
          + LAMBDA["cover"] * cover
          - LAMBDA["cost"] * calls)
-    return dict(r=r, conflicts=conflicts, n_empty=n_empty, n_fallback=n_fb,
-                cover=cover, calls=calls)
+    # ★ 二元目标：质量（越高越好）= −(矛盾 + 空 + 兜底 + 成本)；多样性（越高越好）= 覆盖族数
+    quality = -(LAMBDA["conflict"] * conflicts + LAMBDA["empty"] * n_empty
+                + LAMBDA["fallback"] * n_fb + LAMBDA["cost"] * calls)
+    diversity = float(cover)
+    return dict(r=r, quality=quality, diversity=diversity,
+                conflicts=conflicts, n_empty=n_empty, n_fallback=n_fb,
+                cover=cover, calls=calls, claims=claims)
 
 
 # ══════════════════════════════════════════════════════════════════════
 # 更新（因子化 REINFORCE）
 # ══════════════════════════════════════════════════════════════════════
 def reinforce(pol: W.ActionPolicy, spec: W.ActionSpec, failure_kind: str,
-              r: float, baseline: float, lr: float = 0.5) -> Dict[str, Any]:
-    """一次 on-policy 更新。返回本次的梯度分量（便于审计）。"""
+              r: float, baseline: float, lr: float = 0.5,
+              adv_override: Optional[float] = None) -> Dict[str, Any]:
+    """一次 on-policy 更新。返回本次的梯度分量（便于审计）。
+
+    ★ `adv_override`：★ **两种目标共用同一套更新规则**，唯一差别是
+      「这个样本能不能留在档案里」⇒ 留在档案（精英）adv=+1，被淘汰 adv=−1。
+      ⇒ 于是**唯一变量 = 选择规则** ⇒ 干净的受控对照。
+    """
     rt, sc, st = spec
-    adv = (r - baseline)
+    adv = (r - baseline) if adv_override is None else float(adv_override)
     g = dict(u=0.0, v=0.0, t=0.0, m=0.0)
     pol.u[W.REPAIR_IDS.index(rt)] += lr * adv
     g["u"] = lr * adv
@@ -172,6 +190,10 @@ def main():
     ap.add_argument("--out", default=OUT_DEFAULT)
     ap.add_argument("--seed", type=int, default=20261022)
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--objective", default="scalar",
+                    choices=["scalar", "scalar_r", "pareto"],
+                    help="★ 选择规则：scalar=只留最优（档案必然=1 ⇒ 中庸）；"
+                         "pareto=留全部非支配解；scalar_r=最早的标量 REINFORCE（第三臂）")
     ap.add_argument("--stub", action="store_true",
                     help="用本地 stub LLM（零 API 成本）跑冒烟；★ 读数不代表真实效果")
     args = ap.parse_args()
@@ -198,6 +220,9 @@ def main():
         print("  断点续跑：从第 %d 轮开始" % start_round, flush=True)
 
     base = 0.0
+    # ★ 策略档案：两种目标**只差选择规则** ⇒ 档案规模/策略间多样性就是对照读数
+    archive = MP.StrategyArchive(mode=("scalar" if args.objective == "scalar_r"
+                                    else args.objective))
     t_all = time.time()
     for rnd in range(start_round, args.rounds):
         rnd_hist = []
@@ -223,16 +248,27 @@ def main():
                     break
             if fk is None:
                 fk = "conflict"
-            # ④ 更新
+            # ④ 入档案（★ 两种目标唯一的差别就在这里）
+            item = dict(quality=pr["quality"], diversity=pr["diversity"],
+                        scalar=pr["r"], spec=list(spec), failure_kind=fk,
+                        claims=pr.get("claims") or [], task=task.get("task_id"))
+            kept = archive.offer(item)
+            # ⑤ 更新
+            # ★ 优势：**留在档案里 = 精英（adv=+1），被淘汰 = −1**
+            #   ⇒ 两种目标**同一套更新规则** ⇒ 唯一变量是"谁能留在档案里"
             # ⚠️ baseline **跨轮连续**（不能每轮重置 ⇒ 否则每轮第一个样本 adv=0 ⇒ 白学）
             if not hist:
                 base = pr["r"]
             else:
                 base = 0.7 * base + 0.3 * pr["r"]
-            g = reinforce(pol, spec, fk, pr["r"], base)
+            adv_scalar = (pr["r"] - base) if args.objective == "scalar_r" else (1.0 if kept else -1.0)
+            g = reinforce(pol, spec, fk, pr["r"], base, adv_override=adv_scalar)
             rec = dict(round=rnd, sample=si, task=task.get("task_id"),
                        spec=list(spec), failure_kind=fk, r=pr["r"], base=base,
-                       **{k: v for k, v in pr.items() if k != "r"}, grad=g["grad"])
+                       kept=kept, archive_n=len(archive.items),
+                       # ★ 只把标量化的分量进日志（claims 太长，另存档案）
+                       **{k: v for k, v in pr.items() if k not in ("r", "claims")},
+                       grad=g["grad"])
             rnd_hist.append(rec)
             hist.append(rec)
             print("  轮%-2d 样本%-2d %s  动作=%s  失败=%-14s r=%+.2f (base %+.2f) 矛盾=%d 覆盖=%d"
@@ -241,7 +277,9 @@ def main():
         # 每轮落盘（断点续跑）
         with open(ckpt, "w", encoding="utf-8") as f:
             json.dump(dict(policy=pol.export(), round=rnd + 1, hist=hist,
-                           lam=LAMBDA, seed=args.seed), f, ensure_ascii=False, indent=2)
+                           lam=LAMBDA, seed=args.seed,
+                           objective=args.objective,
+                           archive=archive.stats()), f, ensure_ascii=False, indent=2)
         print("  ── 轮 %d 完成（累计 %.1f 分钟）──" % (rnd, (time.time() - t_all) / 60), flush=True)
 
     print("=" * 72)
@@ -249,6 +287,11 @@ def main():
                                           (time.time() - t_all) / 60))
     print("策略：%s" % json.dumps(pol.export(), ensure_ascii=False)[:400])
     print("落盘：%s" % ckpt)
+    st = archive.stats()
+    print("★ 策略档案（%s）：规模=%d  策略间 Self-Sim=%s  #distinct=%s  碰撞C=%s"
+          % (args.objective, st.get("n_items", 0), st.get("self_sim"),
+             st.get("distinct_families"),
+             (st.get("collision") or {}).get("C")))
     print("=" * 72)
     print("★ 提醒：**代理奖励 ≠ 真实判据** ⇒ 必须再用完整判官比一次"
           "（学出来的 vs 查表 vs 均匀），否则不算数。")
