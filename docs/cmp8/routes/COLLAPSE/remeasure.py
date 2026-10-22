@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +53,13 @@ def main():
     ap.add_argument("--judge-model", default="")
     ap.add_argument("--out", default="")
     ap.add_argument("--limit", type=int, default=0, help="最多重测多少份（0=不限）")
+    ap.add_argument("--no-anchor-out", action="store_true",
+                    help="★ 只跑 C_t 判官（省掉锚外判官 ⇒ 判定耗时减半）⇒ δ_judge 测量用")
+    ap.add_argument("--append", action="store_true",
+                    help="★ 逐次判定增量落盘到 <out>.jsonl（沙箱会杀长跑进程 ⇒ 必须能续）")
+    ap.add_argument("--reps", type=int, default=1,
+                    help="★ 每份答案**重复判定**几次（>1 ⇒ 直接测 δ_judge：同答案、同判官、"
+                         "同提示词，多次判定的读数波动）")
     ap.add_argument("--compare", nargs=2, default=None, metavar=("A", "B"),
                     help="比较两份读数（配对）")
     args = ap.parse_args()
@@ -86,6 +94,19 @@ def main():
         jllm = U.MiniMaxLLM()
         same_vendor = True
 
+    # ★ 增量落盘：逐次判定 append ⇒ 被杀也不丢；已判过的跳过
+    _jlf = (args.out or "") + ".jsonl"
+    _seen = set()
+    if args.append and os.path.exists(_jlf):
+        for _ln in open(_jlf, encoding="utf-8"):
+            try:
+                _d = json.loads(_ln)
+                _seen.add((_d.get("task_id"), _d.get("arm"), _d.get("rep"),
+                           _d.get("judge_rep")))
+            except Exception:
+                pass
+        print("增量续跑：已判 %d 次" % len(_seen))
+
     # DEV 题（重测需要题面 + 依据 + 结论空间）
     tasks = RD.load_tasks(20)
     tmap = {t["task_id"]: t for t in tasks}
@@ -108,23 +129,55 @@ def main():
             n += 1
             print("  [%d] %s / %s / rep%s …" % (n, tid, arm, row.get("rep")), flush=True)
             try:
-                res, cards, anchor = RD.measure_one(
-                    jllm, task, ans, "re/%s/%s/rep%s" % (tid, arm, row.get("rep")),
-                    judge_model=jm)
-                fams = RD.dims_from_cards(cards)
+                # ★ 重复判定：每份答案判 reps 次 ⇒ **直接读出 δ_judge**
+                reps = []
+                for rr in range(max(1, args.reps)):
+                    if args.append and (tid, arm, row.get("rep"), rr) in _seen:
+                        # 已判过 ⇒ 从落盘里取回（不重判）
+                        for _ln in open(_jlf, encoding="utf-8"):
+                            try:
+                                _d = json.loads(_ln)
+                            except Exception:
+                                continue
+                            if (_d.get("task_id"), _d.get("arm"), _d.get("rep"),
+                                    _d.get("judge_rep")) == (tid, arm, row.get("rep"), rr):
+                                reps.append(_d.get("meas") or {})
+                                break
+                        continue
+                    res, cards, anchor = RD.measure_one(
+                        jllm, task, ans,
+                        "re/%s/%s/rep%s/%d" % (tid, arm, row.get("rep"), rr),
+                        judge_model=jm, anchor_out=not args.no_anchor_out)
+                    fams = RD.dims_from_cards(cards)
+                    _meas = dict(
+                        n_dims=len(fams),
+                        n_load_bearing=sum(1 for c in cards if c["load_bearing"]),
+                        n_cards=len(cards),
+                        parsefail_rate=res.get("parsefail_rate"),
+                        vd_anchor_out=(anchor or {}).get("n_anchor_out", 0),
+                        anchor_out_claims=(anchor or {}).get("anchor_out_claims", []),
+                        dims=sorted(fams),
+                    )
+                    reps.append(_meas)
+                    if args.append:
+                        with open(_jlf, "a", encoding="utf-8") as _f:
+                            _f.write(json.dumps(dict(
+                                task_id=tid, arm=arm, rep=row.get("rep"), judge_rep=rr,
+                                judge_model=jm, judge_same_vendor=same_vendor,
+                                meas=_meas), ensure_ascii=False) + "\n")
+                _ds = [r["n_dims"] for r in reps]
+                _spread = (max(_ds) - min(_ds)) if _ds else 0
                 out_rows.append(dict(
                     task_id=tid, arm=arm, rep=row.get("rep"),
-                    n_dims=len(fams), n_load_bearing=sum(1 for c in cards if c["load_bearing"]),
-                    n_cards=len(cards), parsefail_rate=res.get("parsefail_rate"),
-                    vd_anchor_out=(anchor or {}).get("n_anchor_out", 0),
-                    n_anchor_out=(anchor or {}).get("n_anchor_out", 0),
-                    anchor_out_claims=(anchor or {}).get("anchor_out_claims", []),
-                    dims=sorted(fams),
+                    reps=reps,
+                    n_dims=_ds[0], n_dims_all=_ds,
+                    n_dims_median=statistics.median(_ds) if _ds else 0,
+                    n_dims_spread=_spread,
                     judge_model=jm, judge_same_vendor=same_vendor,
                 ))
-                print("      dims=%s lb=%s 锚外=%s"
-                      % (len(fams), sum(1 for c in cards if c["load_bearing"]),
-                         (anchor or {}).get("n_anchor_out", 0)), flush=True)
+                print("      dims=%s  逐次=%s  波动=%d  锚外=%s"
+                      % (reps[0]["n_dims"], _ds, _spread,
+                         reps[0]["vd_anchor_out"]), flush=True)
             except Exception as e:
                 print("      ⚠️ 失败（计入，不重跑）：%s: %s" % (type(e).__name__, e), flush=True)
                 out_rows.append(dict(task_id=tid, arm=arm, rep=row.get("rep"),
