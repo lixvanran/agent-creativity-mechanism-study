@@ -289,6 +289,14 @@ def main():
                          row["arms"][arm_name].get("n_load_bearing", "-"),
                          row["arms"][arm_name].get("calls", "-"),
                          row["arms"][arm_name].get("error", "")))
+                # ★★ **逐臂增量落盘**（2026-10-22 实测教训：批次**静默**死掉时，
+                #   只在末尾汇总的 JSON 会**全丢** ⇒ 日志里的数字救不回来）
+                os.makedirs(args.out, exist_ok=True)
+                with open(os.path.join(args.out, "arms.jsonl"), "a", encoding="utf-8") as _f:
+                    _f.write(json.dumps(dict(
+                        task_id=task["task_id"], rep=rep, arm=arm_name,
+                        judge_model=jm, judge_same_vendor=judge_same_vendor,
+                        **row["arms"][arm_name]), ensure_ascii=False) + "\n")
             all_rows.append(row)
             print("  " + "-" * 70)
 

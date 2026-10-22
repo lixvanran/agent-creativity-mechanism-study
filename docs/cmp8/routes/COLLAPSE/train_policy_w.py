@@ -99,6 +99,24 @@ class ForcedPolicy(W.ActionPolicy):
 # ══════════════════════════════════════════════════════════════════════
 # 代理奖励
 # ══════════════════════════════════════════════════════════════════════
+def population_diversity(claims: Sequence[str], history: Sequence[Sequence[str]]) -> float:
+    """★ **种群级**多样性：与"历史中其它样本"的平均差异度 = 1 − 平均 Self-Sim。
+
+    ★★ 为什么必须改成种群级（2026-10-22 实测教训）：
+      先前用**样本内**的"去冗余覆盖量"当多样性分量，而它与质量分量里的
+      **矛盾数强负相关**（矛盾多 ⇒ 内容被削减 ⇒ 覆盖少）⇒ **两个分量共线**
+      ⇒ **二元目标退化成标量** ⇒ Pareto 前沿只剩 1 个点（实测 9 样本仍是 1）。
+      ⇒ ⇒ 而 EoT / MOAE 的多样性是**种群层面**的（候选集之间的差异），
+      不是单个候选的属性 ⇒ 这里改成"与历史的差异"。
+    """
+    if not history:
+        return 0.0
+    sims = [MP.self_sim([list(claims), list(h)], mode="decision") for h in history]
+    if not sims:
+        return 0.0
+    return 1.0 - (sum(sims) / len(sims))
+
+
 def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
     """从一次运行的读数里算**代理奖励**（零判官成本）。
 
@@ -223,6 +241,8 @@ def main():
     # ★ 策略档案：两种目标**只差选择规则** ⇒ 档案规模/策略间多样性就是对照读数
     archive = MP.StrategyArchive(mode=("scalar" if args.objective == "scalar_r"
                                     else args.objective))
+    # ★ 全部样本历史（用于种群级多样性）；**与档案不同** ⇒ 档案会淘汰，history 不淘汰
+    all_items: List[Dict[str, Any]] = []
     t_all = time.time()
     for rnd in range(start_round, args.rounds):
         rnd_hist = []
@@ -249,10 +269,18 @@ def main():
             if fk is None:
                 fk = "conflict"
             # ④ 入档案（★ 两种目标唯一的差别就在这里）
-            item = dict(quality=pr["quality"], diversity=pr["diversity"],
+            # ★ 多样性用**种群级**（与历史的差异），不是样本内覆盖量
+            _pop_div = population_diversity(pr.get("claims") or [],
+                                            [it.get("claims") or [] for it in all_items])
+            pr["diversity_population"] = _pop_div
+            item = dict(quality=pr["quality"], diversity=_pop_div,
                         scalar=pr["r"], spec=list(spec), failure_kind=fk,
                         claims=pr.get("claims") or [], task=task.get("task_id"))
             kept = archive.offer(item)
+            all_items.append(dict(quality=pr["quality"], diversity=_pop_div,
+                                  scalar=pr["r"], spec=list(spec),
+                                  claims=pr.get("claims") or [],
+                                  task=task.get("task_id")))
             # ⑤ 更新
             # ★ 优势：**留在档案里 = 精英（adv=+1），被淘汰 = −1**
             #   ⇒ 两种目标**同一套更新规则** ⇒ 唯一变量是"谁能留在档案里"
@@ -279,7 +307,10 @@ def main():
             json.dump(dict(policy=pol.export(), round=rnd + 1, hist=hist,
                            lam=LAMBDA, seed=args.seed,
                            objective=args.objective,
-                           archive=archive.stats()), f, ensure_ascii=False, indent=2)
+                           archive=archive.stats(),
+                           history_n=len(all_items),
+                           history_specs=[it.get("spec") for it in all_items]),
+                      f, ensure_ascii=False, indent=2)
         print("  ── 轮 %d 完成（累计 %.1f 分钟）──" % (rnd, (time.time() - t_all) / 60), flush=True)
 
     print("=" * 72)
