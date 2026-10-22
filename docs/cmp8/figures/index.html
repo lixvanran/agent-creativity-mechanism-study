@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<title>论文图 · 治塌缩工作流</title>
+<style>
+ body{font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;
+      background:#fbfbfa;color:#1a1a1a;margin:0;padding:26px 30px}
+ h1{font-size:20px;margin:0 0 4px}
+ .sub{color:#666;font-size:13px;margin-bottom:22px}
+ .fig{background:#fff;border:1px solid #e2e2df;border-radius:6px;
+      padding:14px 16px;margin:0 0 22px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+ .cap{font-size:12px;color:#555;margin-top:8px;font-family:ui-monospace,Menlo,monospace}
+ .figsvg{display:block;min-width:720px;width:100%;height:auto}
+ text{font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;fill:#1a1a1a}
+ .lbl{font-size:13px;font-weight:600}
+ .mono{font-size:11px;fill:#555}
+ .key{font-size:12px;fill:#9a3412;font-weight:600}
+ rect.st{fill:#f6f7f9;stroke:#c9cdd4;stroke-width:1.2}
+ rect.io{fill:#eef4fb;stroke:#9db8d6;stroke-width:1.2}
+ rect.ours{fill:#eefaf2;stroke:#4a9a6a;stroke-width:1.6}
+ rect.todo{fill:#f7f4f0;stroke:#c8bdae;stroke-width:1.2;stroke-dasharray:5 3}
+ rect.key{fill:#fff6ec;stroke:#d98a3a;stroke-width:1.6}
+ rect.eval{fill:#f2f0fb;stroke:#8f86c9;stroke-width:1.4}
+ rect.warn{fill:#fdf0f0;stroke:#c97070;stroke-width:1.5}
+ path.ln{fill:none;stroke:#7a8290;stroke-width:1.5}
+ path.evo{fill:none;stroke:#d98a3a;stroke-width:2;stroke-dasharray:6 4}
+ marker#ah markerWidth=9 markerHeight=9 refX=8 refY=3 orient=auto
+   markerUnits=strokeWidth{path d="M0,0 L0,6 L9,3 z" fill="#7a8290"}
+</style></head><body>
+<h1>治塌缩工作流 · 论文图（投稿 2026-10-25）</h1>
+<div class="sub">图与代码同源：每个框都对应 workflow.py / measure_answer() 里的真实机制或读数</div>
+
+<div class="fig"><div id="f1"></div>
+<div class="cap">图 1 · 四层定位。层 2 与层 3 由同一个 evolve 开关实现 ⇒ 层 2 天然是层 3 的消融臂。
+层 1（注意力机制层面的原因）由第二组交付；层 4（状态驱动）未做。</div></div>
+
+<div class="fig"><div id="f2"></div>
+<div class="cap">图 2 · W 工作流。★ 槽位互不可见；矛盾检测零判官成本；机械装配不丢信息；
+层 3 的回环＝用新动作重跑 ⇒ 搜索空间在运行中变大。</div></div>
+
+<div class="fig"><div id="f3"></div>
+<div class="cap">图 3 · 度量链。★ C3「锚外一律不算维度」是主命题的结构性障碍 ⇒ 因此需要
+VD_anchor_out 这个会让我们自己失败的量。</div></div>
+
+<script>
+const F1 = `<svg viewBox="0 0 980 500" class="figsvg"><rect x="30.0" y="30.0" width="300.0" height="78.0" rx="2" class="todo"/><text x="180.0" y="60.0" text-anchor="middle" class="lbl" font-size="14px">层 1 · 问题描述 &amp; 原因</text><text x="180.0" y="79.0" text-anchor="middle" class="mono">transformer 的注意力机制</text><rect x="30.0" y="130.0" width="300.0" height="78.0" rx="2" class="ours"/><text x="180.0" y="160.0" text-anchor="middle" class="lbl" font-size="14px">层 2 · 用「设计的手段」优化</text><text x="180.0" y="179.0" text-anchor="middle" class="mono">架构先验设计，运行时不自修改</text><rect x="30.0" y="230.0" width="300.0" height="78.0" rx="2" class="ours"/><text x="180.0" y="260.0" text-anchor="middle" class="lbl" font-size="14px">层 3 · 用「训练/自迭代」优化</text><text x="180.0" y="279.0" text-anchor="middle" class="mono">系统根据自身经验修改自己</text><rect x="30.0" y="330.0" width="300.0" height="78.0" rx="2" class="todo"/><text x="180.0" y="360.0" text-anchor="middle" class="lbl" font-size="14px">层 4 · Agent 的状态驱动</text><text x="180.0" y="379.0" text-anchor="middle" class="mono">由内部状态决定当下动作</text><rect x="470.0" y="30.0" width="480.0" height="76.0" rx="2" class="todo"/><text x="710.0" y="59.0" text-anchor="middle" class="lbl" font-size="13px">层 1 · 原因（注意力机制）</text><text x="710.0" y="78.0" text-anchor="middle" class="mono">★ 第二组交付；本稿 §2 预留未并入</text><path d="M 332 69 C 400 69 400 68 466 68" class="ln" marker-end="url(#ah)"/><rect x="470.0" y="200.0" width="480.0" height="76.0" rx="2" class="ours"/><text x="710.0" y="229.0" text-anchor="middle" class="lbl" font-size="13px">★ 本稿交付：层 2 + 层 3</text><text x="710.0" y="248.0" text-anchor="middle" class="mono">层 2 = W_design_L2（evolve=False）
+层 3 = W_train_L3（evolve=True）</text><path d="M 332 169 C 400 169 400 238 466 238" class="ln" marker-end="url(#ah)"/><rect x="470.0" y="290.0" width="480.0" height="76.0" rx="2" class="todo"/><text x="710.0" y="319.0" text-anchor="middle" class="lbl" font-size="13px">层 4 · 状态驱动</text><text x="710.0" y="338.0" text-anchor="middle" class="mono">未做（层 3 是跨轮累积；层 4 是状态决定当下动作）</text><path d="M 332 369 C 400 369 400 328 466 328" class="ln" marker-end="url(#ah)"/><rect x="470.0" y="392.0" width="480.0" height="96.0" rx="2" class="key"/><text x="710.0" y="431.0" text-anchor="middle" class="lbl" font-size="13px">层 2 ⇄ 层 3 的关系</text><text x="710.0" y="450.0" text-anchor="middle" class="mono">★ 同一个 evolve 开关 ⇒ 层 2 天然是层 3 的消融臂
+⇒ 不是两个平行系统；消融对照不被代码分叉破坏</text><text x="710.0" y="466.0" text-anchor="middle" class="key">层 2 = 层 3 − 「演化」这一个自由度</text></svg>`, F2 = `<svg viewBox="0 0 1080 560" class="figsvg"><rect x="20.0" y="26.0" width="210.0" height="58.0" rx="2" class="io"/><text x="125.0" y="46.0" text-anchor="middle" class="lbl" font-size="13px">题面 + 依据包</text><text x="125.0" y="65.0" text-anchor="middle" class="mono">依据只进核验侧</text><rect x="20.0" y="112.0" width="250.0" height="96.0" rx="2" class="st"/><text x="145.0" y="151.0" text-anchor="middle" class="lbl" font-size="12px">① 认知帧解耦</text><text x="145.0" y="170.0" text-anchor="middle" class="mono">Fisher-Yates + PRNG
+必含 1 wild 帧
+★ 槽位互不可见</text><path d="M 125 84 L 125 108" class="ln" marker-end="url(#ah)"/><rect x="280.0" y="96.0" width="215.0" height="54.0" rx="2" class="st"/><text x="387.5" y="114.0" text-anchor="middle" class="lbl" font-size="11px">槽位 1 · hardware-eyes</text><text x="387.5" y="133.0" text-anchor="middle" class="mono">各写各的（看不见别人）</text><path d="M 270 160 C 276 160 276 123 278 123" class="ln" marker-end="url(#ah)"/><rect x="280.0" y="162.0" width="215.0" height="54.0" rx="2" class="st"/><text x="387.5" y="180.0" text-anchor="middle" class="lbl" font-size="11px">槽位 2 · ten-year-old</text><text x="387.5" y="199.0" text-anchor="middle" class="mono">各写各的（看不见别人）</text><path d="M 270 160 C 276 160 276 189 278 189" class="ln" marker-end="url(#ah)"/><rect x="280.0" y="228.0" width="215.0" height="54.0" rx="2" class="st"/><text x="387.5" y="246.0" text-anchor="middle" class="lbl" font-size="11px">槽位 3 · ops-3am</text><text x="387.5" y="265.0" text-anchor="middle" class="mono">各写各的（看不见别人）</text><path d="M 270 160 C 276 160 276 255 278 255" class="ln" marker-end="url(#ah)"/><rect x="280.0" y="300.0" width="215.0" height="58.0" rx="2" class="st"/><text x="387.5" y="320.0" text-anchor="middle" class="lbl" font-size="12px">② 逐槽位抽断言</text><text x="387.5" y="339.0" text-anchor="middle" class="mono">只抄原文里有的</text><rect x="530.0" y="96.0" width="215.0" height="78.0" rx="2" class="st"/><text x="637.5" y="126.0" text-anchor="middle" class="lbl" font-size="12px">③ 离散去冗余</text><text x="637.5" y="145.0" text-anchor="middle" class="mono">数字指纹 + 4-gram
+★ 零 embedding</text><rect x="530.0" y="200.0" width="215.0" height="78.0" rx="2" class="key"/><text x="637.5" y="230.0" text-anchor="middle" class="lbl" font-size="12px">④ 矛盾检测</text><text x="637.5" y="249.0" text-anchor="middle" class="mono">选项判定 / 数字冲突
+★ 零判官成本</text><rect x="530.0" y="304.0" width="215.0" height="78.0" rx="2" class="key"/><text x="637.5" y="334.0" text-anchor="middle" class="lbl" font-size="12px">⑤ 机械装配</text><text x="637.5" y="353.0" text-anchor="middle" class="mono">去冗余后直接装配
+★ 不让模型再总结</text><path d="M 495 123 L 526 135" class="ln" marker-end="url(#ah)"/><path d="M 495 189 L 526 135" class="ln" marker-end="url(#ah)"/><path d="M 495 255 L 526 135" class="ln" marker-end="url(#ah)"/><path d="M 637 174 L 637 196" class="ln" marker-end="url(#ah)"/><path d="M 637 278 L 637 300" class="ln" marker-end="url(#ah)"/><rect x="800.0" y="200.0" width="250.0" height="78.0" rx="2" class="ours"/><text x="925.0" y="230.0" text-anchor="middle" class="lbl" font-size="12px">⑥ 动作演化（层 3）</text><text x="925.0" y="249.0" text-anchor="middle" class="mono">36 个可组合动作
+47 参数因子化 softmax</text><path d="M 745 239 L 796 239" class="ln" marker-end="url(#ah)"/><path d="M 925 200 C 1000 200 1000 60 300 60 L 300 92" class="ln evo" marker-end="url(#ah)"/><text x="560.0" y="36.0" text-anchor="middle" class="key">下一轮用新动作重跑 ⇒ 搜索空间在运行中变大</text><rect x="800.0" y="40.0" width="250.0" height="66.0" rx="2" class="ours"/><text x="925.0" y="64.0" text-anchor="middle" class="lbl" font-size="12px">层 2 / 层 3 开关</text><text x="925.0" y="83.0" text-anchor="middle" class="mono">evolve = False / True</text><path d="M 800 73 C 700 73 700 130 745 135" class="ln" marker-end="url(#ah)"/><rect x="280.0" y="420.0" width="465.0" height="82.0" rx="2" class="eval"/><text x="512.5" y="452.0" text-anchor="middle" class="lbl" font-size="13px">判官读数（承重检验 C1/C2/C3）</text><text x="512.5" y="471.0" text-anchor="middle" class="mono">承重维度数 · 净维度增益（双边）· 锚外新增 VD_anchor_out</text><path d="M 637 382 L 637 416" class="ln" marker-end="url(#ah)"/><rect x="800.0" y="420.0" width="250.0" height="82.0" rx="2" class="eval"/><text x="925.0" y="452.0" text-anchor="middle" class="lbl" font-size="11px">中庸度四指标</text><text x="925.0" y="471.0" text-anchor="middle" class="mono">交集率 / 边际利用率
+中庸距离 / 覆盖饱和度</text><path d="M 745 460 L 796 460" class="ln" marker-end="url(#ah)"/><path d="M 1050 460 C 1072 460 1072 528 520 528 L 520 386" class="ln evo" marker-end="url(#ah)"/></svg>`, F3 = `<svg viewBox="0 0 900 400" class="figsvg"><rect x="30.0" y="30.0" width="220.0" height="62.0" rx="2" class="io"/><text x="140.0" y="52.0" text-anchor="middle" class="lbl" font-size="13px">一条陈述 c</text><text x="140.0" y="71.0" text-anchor="middle" class="mono">答案里抽出的一条具体判断</text><rect x="300.0" y="20.0" width="250.0" height="82.0" rx="2" class="st"/><text x="425.0" y="52.0" text-anchor="middle" class="lbl" font-size="12px">C1 决策岔口可指名</text><text x="425.0" y="71.0" text-anchor="middle" class="mono">写得出一个具体决策
+（属于预注册 C_t 或其子集）</text><rect x="600.0" y="20.0" width="285.0" height="82.0" rx="2" class="st"/><text x="742.5" y="52.0" text-anchor="middle" class="lbl" font-size="12px">C2 删除反事实成立</text><text x="742.5" y="71.0" text-anchor="middle" class="mono">删掉 c ⇒ C_t 里至少一条结论
+从「可支持」变「不可支持」</text><rect x="300.0" y="122.0" width="250.0" height="82.0" rx="2" class="warn"/><text x="425.0" y="154.0" text-anchor="middle" class="lbl" font-size="12px">C3 在结论空间内</text><text x="425.0" y="173.0" text-anchor="middle" class="mono">⚠️ 锚外一律不算维度
+★ 这是主命题的结构性障碍</text><rect x="600.0" y="122.0" width="270.0" height="82.0" rx="2" class="key"/><text x="735.0" y="154.0" text-anchor="middle" class="lbl" font-size="12px">承重族（family_key）</text><text x="735.0" y="173.0" text-anchor="middle" class="mono">该卡支撑的结论集合
+⇒ 维度数 = 去冗余后的族数</text><path d="M 250 61 L 296 61" class="ln" marker-end="url(#ah)"/><path d="M 550 61 L 596 61" class="ln" marker-end="url(#ah)"/><path d="M 425 102 L 425 118" class="ln" marker-end="url(#ah)"/><path d="M 550 163 L 596 163" class="ln" marker-end="url(#ah)"/><rect x="20.0" y="240.0" width="270.0" height="76.0" rx="2" class="key"/><text x="155.0" y="269.0" text-anchor="middle" class="lbl" font-size="12px">净维度增益（双边）</text><text x="155.0" y="288.0" text-anchor="middle" class="mono">新增 − 丢失
+★ 只报净值会掩盖「丢光基线」</text><rect x="320.0" y="240.0" width="250.0" height="76.0" rx="2" class="ours"/><text x="445.0" y="269.0" text-anchor="middle" class="lbl" font-size="12px">锚外新增 VD_anchor_out</text><text x="445.0" y="288.0" text-anchor="middle" class="mono">支撑的结论 ⊄ C_t 的新族数
+★ 恒为 0 ⇒ 主命题不成立</text><rect x="610.0" y="240.0" width="260.0" height="76.0" rx="2" class="eval"/><text x="740.0" y="269.0" text-anchor="middle" class="lbl" font-size="12px">中庸度四指标</text><text x="740.0" y="288.0" text-anchor="middle" class="mono">交集率 / 边际利用率
+中庸距离 / 覆盖饱和度</text><path d="M 735 204 L 735 236" class="ln" marker-end="url(#ah)"/><path d="M 610 278 L 574 278" class="ln" marker-end="url(#ah)"/><path d="M 320 278 L 294 278" class="ln" marker-end="url(#ah)"/><text x="450.0" y="348.0" text-anchor="middle" class="key">★ 全部离散结构量：不依赖 embedding、不依赖措辞相似度</text></svg>`;
+document.getElementById('f1').innerHTML = F1;
+document.getElementById('f2').innerHTML = F2;
+document.getElementById('f3').innerHTML = F3;
+</script>
+</body></html>
