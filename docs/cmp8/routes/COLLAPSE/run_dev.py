@@ -81,7 +81,7 @@ def ct_text(task):
                      for i, c in enumerate(cs))
 
 
-def measure_one(llm, task, answer, answer_id, judge_model=None):
+def measure_one(llm, task, answer, answer_id, judge_model=None, anchor_out=True):
     """两份判官同跑一份答案：
 
     ① **普通判官**（拿 `C_t`）⇒ 承重维度数、矛盾、净增益
@@ -98,16 +98,17 @@ def measure_one(llm, task, answer, answer_id, judge_model=None):
     anchor = dict(n_anchor_out=0, n_anchored=0, n_unknown=0,
                    anchor_out_claims=[], anchored_claims=[],
                    parsefail_rate=None, n_cards=0)
-    try:
-        aor = M.measure_anchor_out(llm, task["ask"], ev_items(task),
-                                    answer, answer_id + "/ao", claims=claims)
-        ao_cards = aor.get("cards") or []
-        dec = AO.decide_anchor_out(ao_cards, task.get("conclusion_space") or [])
-        dec["parsefail_rate"] = aor.get("parsefail_rate")
-        dec["n_cards"] = len(ao_cards)
-        anchor = dec
-    except Exception as e:
-        anchor["error"] = "%s: %s" % (type(e).__name__, e)
+    if anchor_out:
+        try:
+            aor = M.measure_anchor_out(llm, task["ask"], ev_items(task),
+                                        answer, answer_id + "/ao", claims=claims)
+            ao_cards = aor.get("cards") or []
+            dec = AO.decide_anchor_out(ao_cards, task.get("conclusion_space") or [])
+            dec["parsefail_rate"] = aor.get("parsefail_rate")
+            dec["n_cards"] = len(ao_cards)
+            anchor = dec
+        except Exception as e:
+            anchor["error"] = "%s: %s" % (type(e).__name__, e)
 
     cards = []
     for i, c in enumerate(res.get("cards_all") or []):
