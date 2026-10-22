@@ -102,7 +102,8 @@ def measure_one(llm, task, answer, answer_id, judge_model=None, anchor_out=True)
     if anchor_out:
         try:
             aor = M.measure_anchor_out(llm, task["ask"], ev_items(task),
-                                        answer, answer_id + "/ao", claims=claims)
+                                        answer, answer_id + "/ao", claims=claims,
+                                        judge_model=judge_model)
             ao_cards = aor.get("cards") or []
             dec = AO.decide_anchor_out(ao_cards, task.get("conclusion_space") or [])
             dec["parsefail_rate"] = aor.get("parsefail_rate")

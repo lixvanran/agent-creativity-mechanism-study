@@ -41,6 +41,17 @@ P1_REF_SEC = "B0_direct"     # 次对照（"多花的钱买到了什么"）
 
 
 def load(run_path):
+    """★ 支持 w_dev_run.json **或** 增量落盘的 arms.jsonl（批次被杀时只有后者）"""
+    if run_path.endswith(".jsonl"):
+        rows = {}
+        for ln in open(run_path, encoding="utf-8"):
+            try:
+                d = json.loads(ln)
+            except Exception:
+                continue
+            rows.setdefault((d.get("task_id"), d.get("rep")), {})[d.get("arm")] = d
+        return dict(rows=[dict(task_id=k[0], rep=k[1], arms=v) for k, v in rows.items()],
+                    judge_model="(见各行)", judge_same_vendor=None)
     with open(run_path, encoding="utf-8") as f:
         return json.load(f)
 
@@ -52,8 +63,10 @@ def per_row(run):
         for arm, a in (row.get("arms") or {}).items():
             if not isinstance(a, dict):
                 continue
-            out.append(dict(task_id=row.get("task_id"), arm=arm, rep=row.get("rep"),
-                            err=a.get("error"), **a))
+            _d = dict(a)
+            _d["arm"] = arm
+            _d["err"] = a.get("error")
+            out.append(_d)
     return out
 
 
@@ -143,19 +156,25 @@ def main():
     # ── 0. 有效性与绝对分母
     P()
     P("【0】有效性与绝对分母（先例纪律：比率必须配分母）")
-    P("  %-4s %-13s %-5s %7s %7s %7s %8s %8s %7s"
-      % ("题", "臂", "rep", "承重卡", "维度数", "锚外数", "矛盾数", "调用数", "解析失败"))
+    P("  %-4s %-13s %-5s %7s %7s %7s %8s %8s %7s  %s"
+      % ("题", "臂", "rep", "承重卡", "维度数", "锚外数", "矛盾数", "调用数", "解析失败", "0 的类型"))
     for r in sorted(rows, key=lambda x: (x.get("task_id") or "", x.get("rep") or 0, x.get("arm") or "")):
         if r.get("err"):
             P("  %-4s %-13s %-5s  ★ 失败：%s" % (r.get("task_id"), r.get("arm"), r.get("rep"), r["err"][:60]))
             continue
         cards = r.get("cards") or []
         n_con = sum(1 for c in cards if c.get("verdict") == "矛盾")
-        P("  %-4s %-13s %-5s %7s %7s %7s %8s %8s %7s"
+        # ★ 区分**两种 0**：仪器层（卡片没出来）vs 内容层（卡片在、判定翻转）
+        if (r.get("n_dims") or 0) == 0:
+            zero_kind = ("★仪器层(卡片没出来)" if (r.get("n_cards") or 0) == 0
+                         else "★内容层(卡片在,承重判定翻转)")
+        else:
+            zero_kind = ""
+        P("  %-4s %-13s %-5s %7s %7s %7s %8s %8s %7s  %s"
           % (r.get("task_id"), r.get("arm"), r.get("rep"),
              r.get("n_load_bearing"), r.get("n_dims"),
              r.get("vd_anchor_out", (r.get("anchor_out") or {}).get("n_anchor_out", 0)),
-             n_con, r.get("calls"), fmt(r.get("parsefail_rate"))))
+             n_con, r.get("calls"), fmt(r.get("parsefail_rate")), zero_kind))
 
     # ── 逐臂汇总（题为单位，中位数）
     P()

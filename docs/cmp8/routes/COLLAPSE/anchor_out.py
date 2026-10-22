@@ -46,26 +46,60 @@ _CN_CONTENT = W._CN_CONTENT
 
 
 def decision_fingerprint(text: str) -> Tuple[frozenset, frozenset, frozenset]:
-    """把一段"决策描述"压成指纹：(选项标记, 数值集合, 内容词集合)。"""
+    """把一段"决策描述"压成指纹：(选项标记, 数值集合, **字符 2-gram 集合**)。
+
+    ★ 2026-10-23 修正：内容部分**不能用"连续中文片段"**——
+      `_CN_CONTENT` 匹配的是 `[一-鿿]{2,}` 的**整段连续中文** ⇒
+      「顺序读取标称峰值为」被当成**一个**"词" ⇒ 两个指纹的交集几乎永不为空
+      ⇒ 判定器要么全松、要么全紧 ⇒ **两种都错**。
+      ⇒ 改用 **字符 2-gram 集合**（Self-Sim 的口径，Lake et al. NAACL'25）
+      ⇒ 交集比例可算、粒度合适、**有出处**。
+    """
     if not text:
         return frozenset(), frozenset(), frozenset()
     opts = frozenset(m.group(0) for m in _OPT_MARK.finditer(text))
     nums = frozenset(m.group(0).strip() for m in _NUM_UNIT.finditer(text))
-    words = frozenset(_CN_CONTENT.findall(text))
-    return opts, nums, words
+    t = re.sub(r"[\s，。；：、！？,.;:!?（）()【】《》“”‘’\-—/]", "", text or "")
+    grams = frozenset(t[i:i + 2] for i in range(max(0, len(t) - 1)))
+    return opts, nums, grams
 
 
 def _fingerprint_match(a, b) -> bool:
-    """两个指纹是否**指向同一个决策**。"""
+    """两个指纹是否**指向同一个决策**（★ 收紧版，2026-10-23）。
+
+    ★ 为什么必须收紧（实测假阳性）：
+      旧版只要"共享一个数字"或"共享 ≥2 个内容词"就算命中 ⇒
+      「顺序读取标称峰值为7450 MB/s」被当成与 C_t 的「①成立：顺序读取 7450 MB/s」不同
+      ⇒ **C_t 内的内容被判成锚外** ⇒ ⇒ 主命题的读数被污染。
+    ⇒ 收紧为三条**同时**满足才算同一个决策：
+      ① **选项标记一致**（两边都有 ⇒ 必须集合相同；只有一边有 ⇒ 不算）
+      ② **数值集合完全相同**（不是有交集！交集太松）
+      ③ **内容词交集 ≥ 3**
+    ⇒ 且至少命中①或②之一（否则"只是词similar"太弱）。
+    """
     a_opts, a_nums, a_words = a
     b_opts, b_nums, b_words = b
-    if a_opts and b_opts and (a_opts & b_opts):
-        return True
-    if a_nums and b_nums and (a_nums & b_nums):
-        return True
-    if a_words and b_words and len(a_words & b_words) >= 2:
-        return True
-    return False
+    # ① 选项标记
+    if a_opts and b_opts:
+        if a_opts != b_opts:
+            return False
+        opt_ok = True
+    else:
+        opt_ok = False
+    # ② 数值：**完全相同**
+    if a_nums and b_nums:
+        if a_nums != b_nums:
+            return False
+        num_ok = True
+    else:
+        num_ok = False
+    # ③ 内容：字符 2-gram 交集**比例**（取较短一方的覆盖率）
+    if a_words and b_words:
+        inter = len(a_words & b_words)
+        word_ok = inter / float(min(len(a_words), len(b_words))) >= 0.35
+    else:
+        word_ok = False
+    return (opt_ok or num_ok) and word_ok
 
 
 def decide_anchor_out(cards: Sequence[Dict[str, Any]],

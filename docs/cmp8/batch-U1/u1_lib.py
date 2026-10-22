@@ -112,6 +112,12 @@ class _BaseLLM:
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": temp, "max_tokens": mt,
                 })
+                if "choices" not in d:
+                    # ★ 供应商可能用 **HTTP 200 + 错误体** 返回（无 choices）
+                    #   ⇒ 旧代码在这里抛 KeyError ⇒ 错误体被吞 ⇒ 只剩 "KeyError: choices"
+                    #   ⇒ 无法诊断（2026-10-23 实测：锚外判官恒 0 就是这么来的）
+                    raise RuntimeError("响应无 choices：%s"
+                                       % json.dumps(d, ensure_ascii=False)[:300])
                 ch = d["choices"][0]
                 raw = ch["message"].get("content") or ""
                 last = self._strip(raw)
