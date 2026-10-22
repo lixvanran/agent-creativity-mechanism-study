@@ -363,6 +363,62 @@ def run_checks():
         return True, "矛盾 %d 处 → 演化出 %s" % (r["n_conflicts"],
                                                 r["archive"].get("names"))
 
+    # ── 14. ★ 动作空间是**可组合的一族**（不是 6 个查表模板）
+    def c14():
+        specs = W.all_action_specs()
+        if len(specs) != 36:
+            return False, "动作数 %d（应 36 = 6 修复型 × 2 范围 × 3 强度）" % len(specs)
+        if len(set(specs)) != len(specs):
+            return False, "有重复动作"
+        # 不同 spec ⇒ 不同提示词（否则"可组合"是假的）
+        ps = {W.action_prompt(sp, "F") for sp in specs}
+        if len(ps) != len(specs):
+            return False, "不同动作生成了相同提示词（%d/%d）" % (len(ps), len(specs))
+        # 每个 spec 都必须真的改变提示词的某一部分
+        a = W.action_prompt(("none", "slot", 0), "F")
+        b = W.action_prompt(("drop_conflicting", "cross_slot", 2), "F")
+        if a == b:
+            return False, "两端动作生成相同提示"
+        return True, "%d 个可组合动作，提示词全不同" % len(specs)
+
+    # ── 15. ★ 策略：可学、且查表策略是它的特例
+    def c15():
+        p0 = W.ActionPolicy()
+        if p0.param_count() != 47:
+            return False, "参数量 %d（应 47 = 6+2+3+6×6）" % p0.param_count()
+        probs = p0.probs("conflict")
+        if abs(sum(probs) - 1.0) > 1e-6:
+            return False, "概率没归一：%r" % sum(probs)
+        if max(probs) - min(probs) > 1e-9:
+            return False, "w=0 时应当均匀（未训练基线）"
+        # 查表策略 ⇒ 每个失败类型都指向映射的修复型
+        pl = W.ActionPolicy.from_lookup()
+        import random as _r
+        for fk, want in (("conflict", "drop_conflicting"),
+                         ("empty", "ground_in_evidence"),
+                         ("truncated", "compress")):
+            sp = pl.choose(fk, _r.Random(0))
+            if sp[0] != want:
+                return False, "查表策略在 %s 上选了 %s（应 %s）" % (fk, sp[0], want)
+        return True, "47 参数；w=0 均匀；查表策略命中映射"
+
+    # ── 16. ★ policy 模式真能产出**组合动作**
+    def c16():
+        frames = W.select_frames(3, seed=5)
+        llm = StubLLM(empty_slots={frames[0]})
+        wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
+                                   judge_model="stub", max_rounds=2,
+                                   action_mode="policy")
+        r = wf.run("990 PRO 1TB 的哪些参数成立？")
+        names = r["archive"].get("names") or []
+        # 合法组合动作名 = "act_<rt>_<sc>_<st>"（因子名本身可能含下划线 ⇒ 不用 count 判断）
+        legal = {"act_%s_%s_%d" % sp for sp in W.ACTION_SPECS}
+        if not (set(names) & legal):
+            return False, "policy 模式没产出组合动作名：%r（合法集合大小 %d）" % (names, len(legal))
+        if r.get("action_mode") != "policy":
+            return False, "读数里没记 action_mode"
+        return True, "组合动作 %s（参数 %d 个）" % (names, r.get("policy_param_count"))
+
     add("frames_seed_reproducible", c1)
     add("frames_vary_by_seed", c2)
     add("dedup_removes_redundant", c3)
@@ -376,6 +432,9 @@ def run_checks():
     add("layer2_layer3_separated", c11)
     add("conflict_detected_zero_judge_cost", c12)
     add("conflict_drives_evolution", c13)
+    add("action_space_is_composable", c14)
+    add("policy_is_learnable", c15)
+    add("policy_mode_produces_composed_action", c16)
     return checks
 
 
@@ -416,6 +475,20 @@ MUTATIONS = [
     ("矛盾不再优先于其它失败", "workflow.py",
      "        if has_conflict:\n            return \"conflict\"",
      "        if False:\n            return \"conflict\""),
+
+    ("交互项被去掉（失败类型不再影响选择）", "workflow.py",
+     """        if failure_kind and failure_kind in FAILURE_IDS:
+            fi = FAILURE_IDS.index(failure_kind)
+            s += self.m[fi][REPAIR_IDS.index(rt)]""",
+     "        pass"),
+
+    ("动作空间塌成 6 个（丢掉组合维度）", "workflow.py",
+     """    for rt in REPAIR_TYPES:
+        for sc in SCOPES:
+            for st in (0, 1, 2):
+                out.append((rt, sc, st))""",
+     """    for rt in REPAIR_TYPES:
+        out.append((rt, "slot", 0))"""),
 
     ("行为档案总是覆盖（不留最优）", "workflow.py",
      """        cell = self.cells.get(key)
