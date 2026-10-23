@@ -139,6 +139,58 @@ def decide_anchor_out(cards: Sequence[Dict[str, Any]],
 # ══════════════════════════════════════════════════════════════════════
 # 等预算对照臂：N 次独立直调 + 机械去冗余
 # ══════════════════════════════════════════════════════════════════════
+def frames_vote_baseline(llm, task: Dict[str, Any], model: str, frames: Sequence[str],
+                         *, seed: int = 0, temp: float = 0.7):
+    """★ 对照臂 `B0_frames_vote`：**每个认知帧各跑一遍独立答案**，再投票。
+
+    ★ 为什么必须有（Self-Discover, arXiv:2402.03620 逐字）：
+      "superior performance against … CoT + Self-Consistency and **majority voting of
+       every module** while requiring 10-40x fewer inference compute"
+    ⇒ ⇒ **"多帧 ⇒ 多维度"必须与"每帧各跑一遍再投票"比**，否则结论不成立
+    ⇒ ⇒ 且它正好是**路径间多样性**指标的**最强基线**：
+      若我们的**组合结构**（各帧各写各的 + 机械汇总）比"每帧各跑一遍再投票"**更分散**，
+      ⇒ ⇒ **Self-Discover 的结论在我们这里复现了**（组合 > 逐模块投票）
+    ⇒ ★ 投票口径：**plurality（最高票）**，不用概率加权
+      （Self-Consistency 原文：概率加权**不如** plurality，因概率未校准）
+    """
+    fr = list(frames or [])
+    if not fr:
+        return dict(answer="", claims=[], ops=[], paths=[], frames=[])
+    outs, clss, pops = [], [], []
+    def _one(i, fid):
+        wf_fr = W._FRAME_BY_ID.get(fid, {})
+        prompt = ("问题：%s\n\n【视角】%s\n\n%s"
+                  % (task.get("ask", ""), wf_fr.get("prompt", ""), W._OUT_SPEC))
+        o, _i2 = W._chat(llm, prompt, purpose="FV_%s" % fid, model=model,
+                          temp=temp, max_tokens=0, min_ok=20)
+        cl = W._extract_claims(llm, o, model=model) if o else []
+        return o, cl, ["GEN[%s:vote]" % fid]
+    with ThreadPoolExecutor(max_workers=min(len(fr), 4)) as ex:
+        rs = list(ex.map(lambda t: _one(*t), [(i, f) for i, f in enumerate(fr)]))
+    for o, cl, op in rs:
+        outs.append(o); clss.append(cl); pops.append(op)
+    # ★ 投票：按**族**投票（与维度数同口径），plurality
+    from collections import Counter
+    fam_votes = Counter()
+    for cl in clss:
+        for f in {"|".join(sorted(c)) for c in cl}:
+            fam_votes[f] += 1
+    top = max(fam_votes.values()) if fam_votes else 0
+    winners = {f for f, v in fam_votes.items() if v == top}
+    kept, seen = [], set()
+    for cl in clss:
+        for c in cl:
+            f = "|".join(sorted([c]))
+            if f in winners and f not in seen:
+                seen.add(f); kept.append(c)
+    answer = "\n".join("- " + c for c in kept)
+    return dict(answer=answer, claims=kept,
+                ops=["FRAMES_VOTE[%d]" % len(fr)] + [o for p in pops for o in p],
+                paths=[dict(kind="frame_vote", frame=fr[i], ops=pops[i], claims=clss[i])
+                       for i in range(len(fr))],
+                frames=fr, archive={}, failures={}, illum={}, rounds=[])
+
+
 def best_of_n_direct(llm, task: Dict[str, Any], model: str, n: int = 3,
                       *, seed: int = 0, temp: float = 0.7) -> Dict[str, Any]:
     """**N 次独立直调**（可并行）+ 机械去冗余 ⇒ **调用数与 W 相同**。
