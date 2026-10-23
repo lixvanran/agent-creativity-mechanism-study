@@ -328,6 +328,9 @@ def main():
                         chat_stats=a.get("chat_stats"),
                         rounds=a.get("rounds"),
                         paths=a.get("paths"),
+                        # ★ **代码版本标记**：⇒ 任何时候都能一眼看出"这批读数是哪份代码产的"
+                        #   （我们已经栽过好几次"跑的是旧代码却以为在跑新代码"）
+                        code_version="paths+arb+framesvote@2026-10-24",
                         calls=llm.n_api_calls - c0,
                     )
                 except Exception as e:
@@ -393,11 +396,17 @@ def main():
     common_rates = []
     for row in all_rows:
         arms = row["arms"]
-        if any("error" in arms.get(a, {}) for a in want_arms):
+        # ★ 按**实际存在且无错误**的臂动态计算
+        #   （原先硬编码 ("B0_direct","W_design_L2","W_train_L3") ⇒ 臂集合一变就 KeyError
+        #     ⇒ **整批静默崩掉** ⇒ 这就是之前那几次"进程莫名消失"的真凶）
+        _have = [a for a in arms
+                 if isinstance(arms.get(a), dict) and "error" not in arms[a]
+                 and arms[a].get("cards") is not None]
+        if len(_have) < 2:
             continue
         common_rates.append(W.common_rate([
-            [c.get("claim") or "" for c in arms[a]["cards"]]
-            for a in ("B0_direct", "W_design_L2", "W_train_L3")
+            [c.get("claim") or "" for c in (arms[a].get("cards") or [])]
+            for a in _have
         ]))
     summary["medianity"] = dict(
         common_rate_across_arms=common_rates,
