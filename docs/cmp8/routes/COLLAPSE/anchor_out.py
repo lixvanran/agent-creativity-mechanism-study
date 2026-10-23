@@ -153,7 +153,10 @@ def best_of_n_direct(llm, task: Dict[str, Any], model: str, n: int = 3,
         out, _i2 = W._chat(llm, prompt, purpose="B0_multi_%d" % i,
                             model=model, temp=temp, max_tokens=0, min_ok=20)
         cl = W._extract_claims(llm, out, model=model) if out else []
-        return out, cl
+        # ★ 记录**每条路径**（ops + claims）⇒ 才能算"路径间多样性"（＝搜索空间）
+        #   2026-10-23：等预算臂原先只记 ['BESTOF3[direct]'] ⇒ 路径信息全丢
+        #   ⇒ 无法与 W 的"多认知位置路径"公平比较。
+        return out, cl, ["GEN[direct#%d]" % i]
 
     if n > 1:
         with ThreadPoolExecutor(max_workers=min(n, 4)) as ex:
@@ -161,9 +164,13 @@ def best_of_n_direct(llm, task: Dict[str, Any], model: str, n: int = 3,
     else:
         rs = [_one(0)]
     drafts = [r[0] for r in rs]
-    all_claims = [c for _o, cl in rs for c in cl]
+    all_claims = [c for _o, cl, _p in rs for c in cl]
     kept = W.dedup(all_claims)                 # ★ 机械去冗余（与 W 同一口径）
     answer = "\n".join("- " + c for c in kept)
+    # ★ ops 展开成**每条路径一条**（⇒ 与 W 的 ops 序列同一形状，可直接比熵/路径间多样性）
+    path_ops = [r[2] for r in rs]
     return dict(answer=answer, claims=kept, drafts=drafts,
-                ops=["BESTOF%d[direct]" % n], frames=[], archive={},
+                ops=["BESTOF%d[direct]" % n] + path_ops,
+                paths=[dict(kind="direct", ops=r[2], claims=r[1]) for r in rs],
+                frames=[], archive={},
                 failures={}, illum={}, rounds=[all_claims])

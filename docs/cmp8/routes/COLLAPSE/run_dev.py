@@ -167,7 +167,11 @@ def arm_bestof(llm, task, model, n=3, seed=0):
     print("      [B0bestof%d] N 次独立直调…" % n, flush=True)
     r = AO.best_of_n_direct(llm, task, model, n=n, seed=seed)
     print("      [B0bestof%d] 抽到 %d 条" % (n, len(r["claims"])), flush=True)
-    return r
+    # ★ paths 必须透传（否则等预算臂的"路径间多样性"算不出来 ⇒ 与 W 不可比）
+    return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
+                paths=r.get("paths"), frames=r.get("frames") or [],
+                archive=r.get("archive") or {}, failures=r.get("failures") or {},
+                illum=r.get("illum") or {}, rounds=r.get("rounds") or [])
 
 
 def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2,
@@ -182,6 +186,7 @@ def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2,
     return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
                 frames=r["frames"], archive=r["archive"], failures=r["failures"],
                 illum=r["illum"], rounds=r["rounds"],
+                paths=r.get("paths"),          # ★ 供"路径间多样性/思维跳跃"用
                 layer=r.get("layer"), evolve=r.get("evolve"))
 
 
@@ -300,6 +305,7 @@ def main():
                         illum=a.get("illum"),
                         chat_stats=a.get("chat_stats"),
                         rounds=a.get("rounds"),
+                        paths=a.get("paths"),
                         calls=llm.n_api_calls - c0,
                     )
                 except Exception as e:

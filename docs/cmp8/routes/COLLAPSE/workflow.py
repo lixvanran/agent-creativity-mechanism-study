@@ -1042,7 +1042,14 @@ class CollapseFixWorkflow:
                     meta=dict(frames=list(frames), ops=list(ops),
                               n_actions=len(archive.actions)))
 
+        # ★ 记录**每条分支**（每槽位一条）⇒ 供"路径间多样性 / 思维跳跃"用
+        _paths = []
+        for _i, _fr in enumerate(frames):
+            _ops = [o for o in ops if o.startswith("GEN[%s:" % _fr)]
+            _claims = slot_claims[_i] if _i < len(slot_claims) else []
+            _paths.append(dict(kind="frame", frame=_fr, ops=_ops, claims=_claims))
         return dict(
+            paths=_paths,
             chat_stats=self.chat_stats,
             layer=C.get("layer"),
             evolve=bool(C.get("evolve", True)),
