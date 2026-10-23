@@ -169,20 +169,20 @@ def frames_vote_baseline(llm, task: Dict[str, Any], model: str, frames: Sequence
         rs = list(ex.map(lambda t: _one(*t), [(i, f) for i, f in enumerate(fr)]))
     for o, cl, op in rs:
         outs.append(o); clss.append(cl); pops.append(op)
-    # ★ 投票：按**族**投票（与维度数同口径），plurality
+    # ★ 投票：按**单条断言**投票（plurality），★ 计数与匹配必须**同一个键口径**
+    #   （2026-10-22 实测 bug：计数用"整份 claims 排序连接"、匹配用"单条" ⇒ 键对不上 ⇒ 恒空）
     from collections import Counter
     fam_votes = Counter()
     for cl in clss:
-        for f in {"|".join(sorted(c)) for c in cl}:
-            fam_votes[f] += 1
+        for c in cl:
+            fam_votes[c] += 1
     top = max(fam_votes.values()) if fam_votes else 0
     winners = {f for f, v in fam_votes.items() if v == top}
     kept, seen = [], set()
     for cl in clss:
         for c in cl:
-            f = "|".join(sorted([c]))
-            if f in winners and f not in seen:
-                seen.add(f); kept.append(c)
+            if c in winners and c not in seen:
+                seen.add(c); kept.append(c)
     answer = "\n".join("- " + c for c in kept)
     return dict(answer=answer, claims=kept,
                 ops=["FRAMES_VOTE[%d]" % len(fr)] + [o for p in pops for o in p],
