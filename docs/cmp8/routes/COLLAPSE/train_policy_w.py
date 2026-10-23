@@ -79,7 +79,8 @@ DEV = "/workspace/lab/routes/DEV"
 OUT_DEFAULT = os.path.join(HERE, "runs", "policy_train")
 
 # 代理奖励权重（**事前写死**，不调）
-LAMBDA = dict(conflict=1.0, empty=0.5, fallback=0.5, cover=0.30, cost=0.02)
+LAMBDA = dict(conflict=1.0, empty=0.5, fallback=0.5, cover=0.30, cost=0.02,
+              conflict_pairs=0.8)
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -88,12 +89,24 @@ LAMBDA = dict(conflict=1.0, empty=0.5, fallback=0.5, cover=0.30, cost=0.02)
 class ForcedPolicy(W.ActionPolicy):
     """始终返回指定动作（其余参数照常打分，只是不参与选择）。"""
 
-    def __init__(self, spec, base: Optional[W.ActionPolicy] = None):
+    def __init__(self, spec, base: Optional[W.ActionPolicy] = None,
+                 forced_arb: Optional[int] = None):
         super().__init__(base.export() if base else None)
         self._forced = spec
+        # ★ 固定仲裁选择（层3 的第二件事：训练时试某个仲裁档，看收益）
+        self._forced_arb = forced_arb
+        self.used_arb = None
 
     def choose(self, failure_kind, rng):        # noqa: D102
         return self._forced
+
+    def choose_arbitration(self, failure_kind, rng):
+        if self._forced_arb is not None:
+            self.used_arb = self._forced_arb
+            return self._forced_arb
+        v = super().choose_arbitration(failure_kind, rng)
+        self.used_arb = v
+        return v
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -141,11 +154,16 @@ def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
          + LAMBDA["cover"] * cover
          - LAMBDA["cost"] * calls)
     # ★ 二元目标：质量（越高越好）= −(矛盾 + 空 + 兜底 + 成本)；多样性（越高越好）= 覆盖族数
+    # ★★ 冲突项（**本地检测 ⇒ 零判官成本**）：跨槽位矛盾的对数
+    #   ⇒ 层3 的目标函数里**必须有"闭合的代价"**，否则策略只会一味发散
+    n_conf = len(W.detect_opposite_pairs(res.get("claims") or []))
     quality = -(LAMBDA["conflict"] * conflicts + LAMBDA["empty"] * n_empty
-                + LAMBDA["fallback"] * n_fb + LAMBDA["cost"] * calls)
+                + LAMBDA["fallback"] * n_fb + LAMBDA["cost"] * calls
+                + LAMBDA["conflict_pairs"] * n_conf)
     diversity = float(cover)
     return dict(r=r, quality=quality, diversity=diversity,
                 conflicts=conflicts, n_empty=n_empty, n_fallback=n_fb,
+                n_conflict_pairs=n_conf,
                 cover=cover, calls=calls, claims=claims)
 
 
@@ -187,15 +205,17 @@ def load_tasks(n=None):
     return tasks[:n] if n else tasks
 
 
-def run_one(llm, task, spec, seed, slots=3, rounds=2):
-    """用**指定动作**跑一遍，返回读数（★ 不做判官评估 ⇒ 便宜）。"""
-    pol = ForcedPolicy(spec)
+def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None):
+    """用**指定动作 + 指定仲裁档**跑一遍，返回读数（★ 不做判官评估 ⇒ 便宜）。"""
+    pol = ForcedPolicy(spec, forced_arb=forced_arb)
     wf = W.CollapseFixWorkflow(
         llm, n_slots=slots, seed=seed, model=os.environ.get("MM_MODEL",
                                                             "MiniMax-M3.1-Flash-Preview"),
         judge_model="", max_rounds=rounds, evolve=True, action_mode="policy",
-        policy=pol, policy_seed=seed)
-    return wf.run(task["ask"])
+        policy=pol, policy_seed=seed, arbitrate_mode="learned")
+    r = wf.run(task["ask"])
+    r["_arb_used"] = pol.used_arb
+    return r
 
 
 def main():
@@ -252,9 +272,12 @@ def main():
             rng = random.Random(seed)
             # ① 采样一个动作（从当前策略）
             spec = pol.choose("conflict", rng)
+            # ★ 同时抽一个**仲裁档**（mark / keep_pos / keep_neg）⇒ 一起学
+            _arb = pol.choose_arbitration("conflict", rng)
             # ② 用它跑一遍（观测实际失败类型）
             try:
-                res = run_one(llm, task, spec, seed, args.slots, args.rounds_per_run)
+                res = run_one(llm, task, spec, seed, args.slots, args.rounds_per_run,
+                              forced_arb=_arb)
             except Exception as e:
                 print("  ⚠️ 样本失败（计入，不重试）：%s: %s" % (type(e).__name__, e), flush=True)
                 continue
@@ -291,9 +314,13 @@ def main():
                 base = 0.7 * base + 0.3 * pr["r"]
             adv_scalar = (pr["r"] - base) if args.objective == "scalar_r" else (1.0 if kept else -1.0)
             g = reinforce(pol, spec, fk, pr["r"], base, adv_override=adv_scalar)
+            # ★ 更新**仲裁权重**（层3 的第二件事）
+            if _arb is not None:
+                pol.arb[_arb] += 0.5 * adv_scalar
             rec = dict(round=rnd, sample=si, task=task.get("task_id"),
                        spec=list(spec), failure_kind=fk, r=pr["r"], base=base,
                        kept=kept, archive_n=len(archive.items),
+                       arb=_arb, n_conflict_pairs=pr.get("n_conflict_pairs", 0),
                        # ★ 只把标量化的分量进日志（claims 太长，另存档案）
                        **{k: v for k, v in pr.items() if k not in ("r", "claims")},
                        grad=g["grad"])

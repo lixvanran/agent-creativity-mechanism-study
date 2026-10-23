@@ -391,8 +391,9 @@ def run_checks():
     # ── 15. ★ 策略：可学、且查表策略是它的特例
     def c15():
         p0 = W.ActionPolicy()
-        if p0.param_count() != 47:
-            return False, "参数量 %d（应 47 = 6+2+3+6×6）" % p0.param_count()
+        # 6 修复型 + 2 范围 + 3 强度 + 36 交互 + **3 仲裁** = 50
+        if p0.param_count() != 50:
+            return False, "参数量 %d（应 50 = 6+2+3+36+3仲裁）" % p0.param_count()
         probs = p0.probs("conflict")
         if abs(sum(probs) - 1.0) > 1e-6:
             return False, "概率没归一：%r" % sum(probs)
