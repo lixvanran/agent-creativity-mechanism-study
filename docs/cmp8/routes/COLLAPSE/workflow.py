@@ -554,6 +554,82 @@ def dedup(items: Sequence[str], **kw) -> List[str]:
 
 
 # ══════════════════════════════════════════════════════════════════════
+# §3b ★ 跨槽位冲突的检测与仲裁（**纯文本结构 ⇒ 零判官成本**）
+# ══════════════════════════════════════════════════════════════════════
+# ★ 为什么必须有它（2026-10-22 实测）：
+#   W 臂的矛盾是**跨槽位**的（一个槽位说"①正确"、另一个说"①错误"）
+#   ⇒ ⇒ **槽内的"删掉与依据冲突的"根本不可能生效**（一个槽位删不掉另一个槽位的说法）
+#   ⇒ ⇒ 这解释了为什么 act_conflict 两次都没让矛盾下降 —— **它在架构上就不可能生效**。
+#
+# ★ 仲裁三档（**闭合必须是显式、可控、只在必要时**）：
+#   "none"     —— **冲突容忍**：双方都保留、只标注 ⇒ **不收窄搜索空间**
+#                  （层2 默认：我们的目标是**拓展**思维面，不是消解冲突）
+#   "drop_one" —— 冲突对里丢一个（丢哪个由上游策略决定 ⇒ 层3 可学）
+#   "resolve"  —— 有依据支持的一方胜（需判官 ⇒ 贵）
+_POL_POS = ("正确", "成立", "符合", "满足", "可以", "有效", "无误")
+_POL_NEG = ("错误", "不成立", "不符合", "不满足", "不可以", "无效", "有误", "不对")
+
+
+def _polarity(text):
+    """返回 (极性, 命中词)。极性 ∈ {1, 0, -1}（1 正 / 0 无 / -1 负）。"""
+    t = text or ""
+    best = (0, None)
+    for w in _POL_POS:
+        if w in t and (best[0] == 0 or len(w) > len(best[1] or "")):
+            best = (1, w)
+    for w in _POL_NEG:
+        if w in t and (best[0] == 0 or len(w) > len(best[1] or "")):
+            best = (-1, w)
+    return best
+
+
+def detect_opposite_pairs(claims):
+    """找出**互相矛盾**的断言对：同一决策标记 + 相反极性。"""
+    items = []
+    for i, c in enumerate(claims or []):
+        if not (c or "").strip():
+            continue
+        marks = set(m.group(0) for m in _OPT_MARK.finditer(c))
+        pol, w = _polarity(c)
+        if not marks or pol == 0:
+            continue
+        items.append((i, marks, pol, w, c))
+    pairs = []
+    for x in range(len(items)):
+        for y in range(x + 1, len(items)):
+            i1, m1, p1, w1, c1 = items[x]
+            i2, m2, p2, w2, c2 = items[y]
+            if p1 * p2 < 0 and (m1 & m2):
+                pairs.append(dict(i=i1, j=i2, marks=sorted(m1 & m2),
+                                  pos=c1 if p1 > 0 else c2,
+                                  neg=c2 if p1 > 0 else c1))
+    return pairs
+
+
+def arbitrate(claims, mode="none", drop_choice=None):
+    """仲裁。返回 (保留的断言, 仲裁日志)。
+
+    ★ "none"（层2 默认）⇒ **冲突容忍**：**全部保留**，只把冲突对记进日志
+      ⇒ **不收窄搜索空间**（与"拓展思维面"的目标一致）
+    ★ "drop_one" ⇒ 每对丢一个；`drop_choice` 决定丢"正"还是"负"极性那条
+      ⇒ ★ **层3 可以学这个选择**（什么情况下更该保留哪一侧）
+    """
+    pairs = detect_opposite_pairs(claims)
+    log = dict(mode=mode, n_pairs=len(pairs),
+               pairs=[dict(marks=p["marks"], pos=p["pos"][:60], neg=p["neg"][:60])
+                      for p in pairs])
+    if mode == "none" or not pairs:
+        return list(claims), log
+    keep_pos = (drop_choice == "keep_pos")
+    drop = set()
+    for p in pairs:
+        # keep_pos=True ⇒ 保留"正"极性那条 ⇒ 丢"负"那条
+        drop.add(p["i"] if not keep_pos else p["j"])
+    kept = [c for i, c in enumerate(claims) if i not in drop]
+    return kept, log
+
+
+# ══════════════════════════════════════════════════════════════════════
 # §4 行为空间照明（MAP-Elites：行为格，每格留最优）
 # ══════════════════════════════════════════════════════════════════════
 def behavior_key(frame_ids: Sequence[str], ops: Sequence[str]) -> str:
@@ -772,6 +848,11 @@ class CollapseFixWorkflow:
         #     ⇒ D01 实测 W 臂 dims=0 vs B0 dims=3）
         #   "model" 档保留当**消融臂**。
         aggregate_mode="mechanical",   # "mechanical" | "model"
+        # ★ 冲突仲裁档（**闭合必须是显式、可控、只在必要时**）
+        #   "none"     —— 冲突**容忍**：双方保留只标注 ⇒ **不收窄搜索空间**（层2 默认）
+        #   "drop_one" —— 冲突对丢一个（丢哪边由策略决定 ⇒ 层3 可学）
+        #   "resolve"  —— 有依据支持的一方胜（需判官 ⇒ 贵）
+        arbitrate_mode="none",
         # ★★ **层2 / 层3 的分离开关**（2026-10-22 负责人定的四层结构）
         #   层2「用设计的手段优化」= 架构先验设计好、运行时**不自我修改**
         #   层3「用训练/自迭代的手段优化」= 系统**根据自身经验修改自己**
@@ -1024,6 +1105,15 @@ class CollapseFixWorkflow:
             # ★ 机械汇总：**不丢任何一条**，也不多花一次调用
             final_claims = dedup(all_slot_claims)
             ops.append("AGGREGATE(mechanical)")
+            # ★★ 跨槽位冲突仲裁（层2 默认"容忍"⇒ 不收窄搜索空间）
+            _am = C.get("arbitrate_mode", "none")
+            _before = len(final_claims)
+            final_claims, _alog = arbitrate(final_claims, _am,
+                                            drop_choice=C.get("arbitrate_keep"))
+            if _alog["n_pairs"]:
+                ops.append("ARBITRATE[%s:%d对]" % (_am, _alog["n_pairs"]))
+                meta_extra["arbitration"] = _alog
+                meta_extra["arbitration_dropped"] = _before - len(final_claims)
             agg = "\n".join("- " + c for c in final_claims)
 
         # ── 6) 装配（机械汇总档已经装配好了 ⇒ 这里**不再二次抽取**）

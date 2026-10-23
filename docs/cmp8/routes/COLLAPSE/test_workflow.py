@@ -464,6 +464,33 @@ def run_checks():
             return False, "没抽出断言"
         return True, "3 次生成 + 3 次抽取（与 W 的 6 次同量）"
 
+    # ── 19. ★ 跨槽位冲突的**检测 + 仲裁三档**（架构侧，不是度量侧）
+    def c19():
+        claims = ["①正确：顺序读取 7450 MB/s", "②正确：保修 5 年",
+                  "①错误：顺序读取不是 7450", "③正确：耐久 600 TBW"]
+        ps = W.detect_opposite_pairs(claims)
+        if len(ps) != 1:
+            return False, "应检出 1 对冲突，实得 %d" % len(ps)
+        if ps[0]["marks"] != ["①"]:
+            return False, "标记应含 ①，实得 %r" % ps[0]["marks"]
+        # ★ "none" = 冲突容忍 ⇒ **一条都不许丢**（不收窄搜索空间）
+        kept, log = W.arbitrate(claims, "none")
+        if len(kept) != len(claims):
+            return False, "★ 'none' 丢了断言（%d→%d）⇒ 收窄了搜索空间" % (len(claims), len(kept))
+        if log["n_pairs"] != 1:
+            return False, "日志没记冲突对数"
+        # ★ "drop_one" = 收窄 ⇒ 恰好丢一条，且丢的是被指定的那一侧
+        kept2, _ = W.arbitrate(claims, "drop_one", drop_choice="keep_pos")
+        if len(kept2) != len(claims) - 1:
+            return False, "'drop_one' 应丢 1 条，实丢 %d" % (len(claims) - len(kept2))
+        kept3, _ = W.arbitrate(claims, "drop_one", drop_choice="keep_neg")
+        if kept2 == kept3:
+            return False, "★ keep_pos 与 keep_neg 结果相同 ⇒ 仲裁没起作用"
+        # 一致的内容不该误报
+        if W.detect_opposite_pairs(["①正确：7450 MB/s", "②正确：保修 5 年"]):
+            return False, "一致内容被误报成冲突"
+        return True, "检出 1 对；none 容忍(丢0) drop_one 丢1 且两向不同"
+
     add("frames_seed_reproducible", c1)
     add("frames_vary_by_seed", c2)
     add("dedup_removes_redundant", c3)
@@ -482,6 +509,7 @@ def run_checks():
     add("policy_mode_produces_composed_action", c16)
     add("anchor_out_decision_is_mechanical", c17)
     add("equal_budget_control_arm", c18)
+    add("conflict_arbitration_modes", c19)
     return checks
 
 
