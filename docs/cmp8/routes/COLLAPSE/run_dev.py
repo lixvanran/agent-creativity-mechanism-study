@@ -162,6 +162,25 @@ def arm_direct(llm, task, model):
                 chat_stats=direct_stats)
 
 
+def arm_frames_vote(llm, task, model, slots=3, seed=0):
+    """★ 对照臂 `B0_frames_vote`：**每个认知帧各跑一遍独立答案，再投票**。
+
+    ★ 为什么必须有（Self-Discover arXiv:2402.03620 逐字）：
+      "superior performance against … CoT + Self-Consistency and **majority voting of
+       every module** while requiring 10-40x fewer inference compute"
+    ⇒ ⇒ 没有这个臂，"多帧 ⇒ 多维度"站不住。
+    ⇒ ⇒ **用与 W 臂完全相同的帧**（同 seed ⇒ 同帧集合）⇒ 公平比较。
+    """
+    frames = W.select_frames(slots, seed=seed)
+    print("      [B0fv] %d 帧各跑一遍 + plurality 投票：%s"
+          % (len(frames), frames), flush=True)
+    r = AO.frames_vote_baseline(llm, task, model, frames, seed=seed)
+    print("      [B0fv] 抽到 %d 条" % len(r["claims"]), flush=True)
+    return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
+                paths=r.get("paths"), frames=r.get("frames") or [],
+                archive={}, failures={}, illum={}, rounds=[])
+
+
 def arm_bestof(llm, task, model, n=3, seed=0):
     """★ 等预算对照臂：N 次独立直调 + 机械去冗余（调用数与 W 相同）。"""
     print("      [B0bestof%d] N 次独立直调…" % n, flush=True)
@@ -265,6 +284,9 @@ def main():
                 #   ⇒ 差集恰好是 {认知帧解耦 + 机械汇总 + 动作演化}
                 #   ⇒ 同时实现 ToT 的「同预算 best-of-k」（轴＝调用数，不是节点数）
                 "B0_bestof3": lambda: arm_bestof(llm, task, model, 3, rep),
+                # ★ Self-Discover 的对照：每帧各跑一遍 + 投票（plurality）
+                "B0_frames_vote": lambda: arm_frames_vote(llm, task, model,
+                                                          args.slots, rep),
                 # ★ 层2「用设计的手段」：架构先验设计好、**运行时不自修改**
                 "W_design_L2": lambda: arm_workflow(
                     llm, task, model, seed=rep, n_slots=args.slots,
