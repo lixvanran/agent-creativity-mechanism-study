@@ -1,0 +1,1424 @@
+{
+  "n_records": 27,
+  "batches": {
+    "G01": "arch4-G01-20261023-232438",
+    "T07": "arch4-T07-20261023-232850",
+    "T10": "arch4-T10-20261023-233248"
+  },
+  "topics": {},
+  "per_sample": [
+    {
+      "topic": "G01",
+      "tag": 3,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "真实思考",
+        "提出主张",
+        "论据",
+        "修改"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "H1_cand_set_success_rate": 1.0,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 3,
+      "same_choice": false,
+      "align_state": 1.0,
+      "align_generic": 1.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 1.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.0973,
+      "cand_len": [
+        1200,
+        1233,
+        1048
+      ]
+    },
+    {
+      "topic": "G01",
+      "tag": 2,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "作出判断",
+        "便利"
+      ],
+      "forbidden": [
+        "中心立场",
+        "连贯"
+      ],
+      "aligns_all": [
+        0.5,
+        0.25,
+        0.75
+      ],
+      "H1_cand_set_success_rate": 0.3333333333333333,
+      "chosen_state_idx": 3,
+      "chosen_generic_idx": 2,
+      "same_choice": false,
+      "align_state": 0.75,
+      "align_generic": 0.25,
+      "H3_gap_same_pool": 0.5,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": 0.5,
+      "deep_hit_generic_choice": 0.5,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": 0.0,
+        "struct_match": 0.0,
+        "align": 0.0
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": 0.0,
+        "struct_match": 0.0,
+        "align": 0.0
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1236,
+      "cand_len": [
+        1269,
+        1144,
+        1294
+      ]
+    },
+    {
+      "topic": "G01",
+      "tag": 1,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "每周",
+        "检查",
+        "教师批改",
+        "基本错误"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        1.0,
+        0.75,
+        1.0
+      ],
+      "H1_cand_set_success_rate": 1.0,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 2,
+      "same_choice": false,
+      "align_state": 1.0,
+      "align_generic": 0.75,
+      "H3_gap_same_pool": 0.25,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.75,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 1,
+      "R_takeoff_indep_sents": [
+        "至于“受题目约束的内容、可见的逻辑、准确的表达”如何分别影响各评分档次，本文不再展开"
+      ],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1026,
+      "cand_len": [
+        945,
+        1148,
+        938
+      ]
+    },
+    {
+      "topic": "G01",
+      "tag": 1,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 2,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "统一校服",
+        "个人经历",
+        "具体事例",
+        "修改机会"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.0,
+        0.0
+      ],
+      "H1_cand_set_success_rate": 0.0,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 2,
+      "same_choice": true,
+      "align_state": 0.0,
+      "align_generic": 0.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.0732,
+      "cand_len": [
+        1014,
+        916,
+        1196
+      ]
+    },
+    {
+      "topic": "G01",
+      "tag": 3,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "抓住重点",
+        "组织逻辑",
+        "主谓一致",
+        "指代"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.25,
+        0.5,
+        0.0
+      ],
+      "H1_cand_set_success_rate": 0.0,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 2,
+      "same_choice": true,
+      "align_state": 0.5,
+      "align_generic": 0.5,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.5,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.5,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1096,
+      "cand_len": [
+        872,
+        1336,
+        1281
+      ]
+    },
+    {
+      "topic": "G01",
+      "tag": 2,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "句式展览",
+        "必须填满的模具",
+        "判断的依据",
+        "对判断负责"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "H1_cand_set_success_rate": 0.0,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 3,
+      "same_choice": false,
+      "align_state": 0.0,
+      "align_generic": 0.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 1,
+      "R_takeoff_indep_sents": [
+        "本文也不铺开课堂流程、评分权重和所有文体，只保留一个尺度：学生是否清楚自己要说什么、凭什么这样说，以及在什么范围内才敢这样说"
+      ],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.0757,
+      "cand_len": [
+        963,
+        980,
+        1146
+      ]
+    },
+    {
+      "topic": "T07",
+      "tag": 2,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "需求有歧义",
+        "安全相关改动"
+      ],
+      "forbidden": [
+        "诚实义务",
+        "修复期限"
+      ],
+      "aligns_all": [
+        0.5,
+        0.75,
+        0.5
+      ],
+      "H1_cand_set_success_rate": 0.3333333333333333,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 2,
+      "same_choice": true,
+      "align_state": 0.75,
+      "align_generic": 0.75,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": 0.5,
+      "deep_hit_generic_choice": 1.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": 0.0,
+        "struct_match": 0.0,
+        "align": 0.0
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": 0.0,
+        "struct_match": 0.0,
+        "align": 0.0
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1349,
+      "cand_len": [
+        1134,
+        1113,
+        1528
+      ]
+    },
+    {
+      "topic": "T07",
+      "tag": 1,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "AI参与程度",
+        "使用范围",
+        "灰度发布",
+        "回滚方案"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        1.0,
+        1.0,
+        0.25
+      ],
+      "H1_cand_set_success_rate": 0.6666666666666666,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 1,
+      "same_choice": true,
+      "align_state": 1.0,
+      "align_generic": 1.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 1.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1108,
+      "cand_len": [
+        1109,
+        1188,
+        946
+      ]
+    },
+    {
+      "topic": "T07",
+      "tag": 1,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "实际风险",
+        "注意义务",
+        "回滚",
+        "供应商"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.25,
+        0.75,
+        0.5
+      ],
+      "H1_cand_set_success_rate": 0.3333333333333333,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 2,
+      "same_choice": true,
+      "align_state": 0.75,
+      "align_generic": 0.75,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.75,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.75,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.087,
+      "cand_len": [
+        1184,
+        1039,
+        920
+      ]
+    },
+    {
+      "topic": "T07",
+      "tag": 2,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "评审",
+        "测试",
+        "审计",
+        "判断"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.5,
+        0.5,
+        0.75
+      ],
+      "H1_cand_set_success_rate": 0.3333333333333333,
+      "chosen_state_idx": 3,
+      "chosen_generic_idx": 3,
+      "same_choice": true,
+      "align_state": 0.75,
+      "align_generic": 0.75,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.75,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.75,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.0893,
+      "cand_len": [
+        1054,
+        1146,
+        1152
+      ]
+    },
+    {
+      "topic": "T07",
+      "tag": 3,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "异常处理",
+        "可维护性",
+        "提交记录",
+        "可追溯"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.5,
+        1.0,
+        0.5
+      ],
+      "H1_cand_set_success_rate": 0.3333333333333333,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 2,
+      "same_choice": true,
+      "align_state": 1.0,
+      "align_generic": 1.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 1.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 1,
+      "R_takeoff_indep_sents": [
+        "灰度发布的细节暂不展开，以免把文章写成发布手册；但必须明确：灰度不能替代测试与评审，可靠回滚也不能成为“先上线再观察”的借口"
+      ],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1019,
+      "cand_len": [
+        840,
+        1199,
+        982
+      ]
+    },
+    {
+      "topic": "T07",
+      "tag": 3,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "权限分级",
+        "个人法律责任",
+        "安全扫描",
+        "审查记录"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "H1_cand_set_success_rate": 0.0,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 3,
+      "same_choice": false,
+      "align_state": 0.0,
+      "align_generic": 0.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.0983,
+      "cand_len": [
+        1474,
+        1321,
+        1239
+      ]
+    },
+    {
+      "topic": "T10",
+      "tag": 1,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "裁员",
+        "岗位中断",
+        "核对信息",
+        "协助现场秩序"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "H1_cand_set_success_rate": 1.0,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 3,
+      "same_choice": false,
+      "align_state": 1.0,
+      "align_generic": 1.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 1.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.111,
+      "cand_len": [
+        960,
+        1046,
+        1084
+      ]
+    },
+    {
+      "topic": "T10",
+      "tag": 2,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "交接",
+        "补位",
+        "办理边界",
+        "临时变更"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        1.0,
+        1.0,
+        0.75
+      ],
+      "H1_cand_set_success_rate": 1.0,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 1,
+      "same_choice": true,
+      "align_state": 1.0,
+      "align_generic": 1.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 1.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.0998,
+      "cand_len": [
+        1184,
+        990,
+        1266
+      ]
+    },
+    {
+      "topic": "T10",
+      "tag": 3,
+      "arm": "WF-v4",
+      "blind": false,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "一年半",
+        "稳定履约"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.5,
+        1.0,
+        0.5
+      ],
+      "H1_cand_set_success_rate": 0.3333333333333333,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 3,
+      "same_choice": false,
+      "align_state": 1.0,
+      "align_generic": 0.5,
+      "H3_gap_same_pool": 0.5,
+      "H2_deep_hit_rate": 1.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.5,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1028,
+      "cand_len": [
+        948,
+        1147,
+        1144
+      ]
+    },
+    {
+      "topic": "T10",
+      "tag": 2,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "现场出现分歧",
+        "可行方案",
+        "长期带队的经验",
+        "信息汇总"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "H1_cand_set_success_rate": 0.0,
+      "chosen_state_idx": 1,
+      "chosen_generic_idx": 1,
+      "same_choice": true,
+      "align_state": 0.0,
+      "align_generic": 0.0,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.0,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.0,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1008,
+      "cand_len": [
+        1037,
+        714,
+        1174
+      ]
+    },
+    {
+      "topic": "T10",
+      "tag": 1,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "班组协作意识",
+        "人员衔接",
+        "家属",
+        "突发变化"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.25,
+        0.5,
+        0.5
+      ],
+      "H1_cand_set_success_rate": 0.0,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 3,
+      "same_choice": false,
+      "align_state": 0.5,
+      "align_generic": 0.5,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.5,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.5,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.1232,
+      "cand_len": [
+        965,
+        905,
+        1133
+      ]
+    },
+    {
+      "topic": "T10",
+      "tag": 3,
+      "arm": "WF-v4-blind",
+      "blind": true,
+      "n_cand": 3,
+      "n_cand_ok": 3,
+      "n_gaps": 3,
+      "n_decisions": 3,
+      "must_include": [
+        "主动转向",
+        "5人小组",
+        "突发协调"
+      ],
+      "forbidden": [],
+      "aligns_all": [
+        0.0,
+        0.3333,
+        0.0
+      ],
+      "H1_cand_set_success_rate": 0.0,
+      "chosen_state_idx": 2,
+      "chosen_generic_idx": 2,
+      "same_choice": true,
+      "align_state": 0.3333,
+      "align_generic": 0.3333,
+      "H3_gap_same_pool": 0.0,
+      "H2_deep_hit_rate": 0.3333333333333333,
+      "H4_forb_hit_rate": null,
+      "deep_hit_generic_choice": 0.3333333333333333,
+      "R_takeoff_final": [],
+      "R_takeoff_indep_n": 0,
+      "R_takeoff_indep_sents": [],
+      "takeoff_state": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "takeoff_generic": {
+        "cand_avoid": [],
+        "inter_rate": null,
+        "struct_match": null,
+        "align": null
+      },
+      "R_takeoff_cands": {
+        "1": [],
+        "2": [],
+        "3": []
+      },
+      "cand_sim_mean": 0.0968,
+      "cand_len": [
+        941,
+        1236,
+        955
+      ]
+    }
+  ],
+  "summary": {
+    "H1_cand_set_success_rate": {
+      "n": 18,
+      "mean": 0.3704,
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.3333
+    },
+    "H2_deep_hit_rate_selected": {
+      "n": 18,
+      "mean": 0.6574,
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.875
+    },
+    "H4_forb_hit_rate_selected": {
+      "n": 2,
+      "mean": 0.5,
+      "min": 0.5,
+      "max": 0.5,
+      "median": 0.5
+    },
+    "align_state_selected": {
+      "n": 18,
+      "mean": 0.6296,
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.75
+    },
+    "align_generic_selected": {
+      "n": 18,
+      "mean": 0.5602,
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.625
+    },
+    "H3_gap_same_pool": {
+      "n": 18,
+      "mean": 0.0694,
+      "min": 0.0,
+      "max": 0.5,
+      "median": 0.0
+    },
+    "same_choice_rate": 0.5556,
+    "cand_sim_mean": {
+      "n": 18,
+      "mean": 0.1021,
+      "min": 0.0732,
+      "max": 0.1349,
+      "median": 0.1013
+    },
+    "R_takeoff_final_rate": 0.0,
+    "★H3p_takeoff_align_state": {
+      "n": 2,
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0
+    },
+    "★H3p_takeoff_align_generic": {
+      "n": 2,
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0
+    },
+    "★H3p_takeoff_gap": {
+      "n": 18,
+      "mean": 0.0,
+      "min": 0,
+      "max": 0,
+      "median": 0.0
+    },
+    "★takeoff_inter_rate_state": {
+      "n": 2,
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0
+    },
+    "n_errors": 0,
+    "H3_wins": {
+      "state": 3,
+      "generic": 0,
+      "tie": 15
+    }
+  },
+  "per_arm_H3": {
+    "WF-v4": {
+      "n": 9,
+      "gap_mean": 0.1389,
+      "wins": {
+        "state": 3,
+        "generic": 0,
+        "tie": 6
+      },
+      "non_tie_rate": 1.0,
+      "align_state": {
+        "n": 9,
+        "mean": 0.9444,
+        "min": 0.75,
+        "max": 1.0,
+        "median": 1.0
+      },
+      "align_generic": {
+        "n": 9,
+        "mean": 0.8056,
+        "min": 0.25,
+        "max": 1.0,
+        "median": 1.0
+      },
+      "H1": {
+        "n": 9,
+        "mean": 0.6667,
+        "min": 0.3333,
+        "max": 1.0,
+        "median": 0.6667
+      },
+      "H4_forb": {
+        "n": 2,
+        "mean": 0.5,
+        "min": 0.5,
+        "max": 0.5,
+        "median": 0.5
+      }
+    },
+    "WF-v4-blind": {
+      "n": 9,
+      "gap_mean": 0.0,
+      "wins": {
+        "state": 0,
+        "generic": 0,
+        "tie": 9
+      },
+      "non_tie_rate": null,
+      "align_state": {
+        "n": 9,
+        "mean": 0.3148,
+        "min": 0.0,
+        "max": 0.75,
+        "median": 0.3333
+      },
+      "align_generic": {
+        "n": 9,
+        "mean": 0.3148,
+        "min": 0.0,
+        "max": 0.75,
+        "median": 0.3333
+      },
+      "H1": {
+        "n": 9,
+        "mean": 0.0741,
+        "min": 0.0,
+        "max": 0.3333,
+        "median": 0.0
+      },
+      "H4_forb": {
+        "n": 0
+      }
+    }
+  },
+  "per_topic": {
+    "G01": {
+      "n": 6,
+      "H1": {
+        "n": 6,
+        "mean": 0.3889,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.1667
+      },
+      "align_state": {
+        "n": 6,
+        "mean": 0.5417,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.625
+      },
+      "align_generic": {
+        "n": 6,
+        "mean": 0.4167,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.375
+      },
+      "H3_gap": {
+        "n": 6,
+        "mean": 0.125,
+        "min": 0.0,
+        "max": 0.5,
+        "median": 0.0
+      },
+      "same_choice": 2,
+      "R_takeoff_rate": 0.0,
+      "cand_sim_mean": {
+        "n": 6,
+        "mean": 0.097,
+        "min": 0.0732,
+        "max": 0.1236,
+        "median": 0.0999
+      }
+    },
+    "T07": {
+      "n": 6,
+      "H1": {
+        "n": 6,
+        "mean": 0.3333,
+        "min": 0.0,
+        "max": 0.6667,
+        "median": 0.3333
+      },
+      "align_state": {
+        "n": 6,
+        "mean": 0.7083,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.75
+      },
+      "align_generic": {
+        "n": 6,
+        "mean": 0.7083,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.75
+      },
+      "H3_gap": {
+        "n": 6,
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "median": 0.0
+      },
+      "same_choice": 5,
+      "R_takeoff_rate": 0.0,
+      "cand_sim_mean": {
+        "n": 6,
+        "mean": 0.1037,
+        "min": 0.087,
+        "max": 0.1349,
+        "median": 0.1001
+      }
+    },
+    "T10": {
+      "n": 6,
+      "H1": {
+        "n": 6,
+        "mean": 0.3889,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.1667
+      },
+      "align_state": {
+        "n": 6,
+        "mean": 0.6389,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.75
+      },
+      "align_generic": {
+        "n": 6,
+        "mean": 0.5555,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.5
+      },
+      "H3_gap": {
+        "n": 6,
+        "mean": 0.0833,
+        "min": 0.0,
+        "max": 0.5,
+        "median": 0.0
+      },
+      "same_choice": 3,
+      "R_takeoff_rate": 0.0,
+      "cand_sim_mean": {
+        "n": 6,
+        "mean": 0.1057,
+        "min": 0.0968,
+        "max": 0.1232,
+        "median": 0.1018
+      }
+    }
+  },
+  "other_arms": {
+    "A": {
+      "n": 9,
+      "n_err": 0,
+      "len_mean": 1871.8
+    }
+  },
+  "arm_len": {
+    "A": {
+      "n": 9,
+      "mean": 1871.8
+    },
+    "WF-v4": {
+      "n": 9,
+      "mean": 1127.9
+    },
+    "WF-v4-blind": {
+      "n": 9,
+      "mean": 1117.6
+    }
+  },
+  "arm_takeoff_indep": {
+    "A": {
+      "n": 9,
+      "sum": 0,
+      "mean": 0.0,
+      "n_with_any": 0,
+      "rate_any": 0.0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "WF-v4": {
+      "n": 9,
+      "sum": 2,
+      "mean": 0.2222,
+      "n_with_any": 2,
+      "rate_any": 0.2222,
+      "values": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "WF-v4-blind": {
+      "n": 9,
+      "sum": 1,
+      "mean": 0.1111,
+      "n_with_any": 1,
+      "rate_any": 0.1111,
+      "values": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "fisher_takeoff": {
+    "WF-v4": 0.4706,
+    "WF-v4-blind": 1.0
+  },
+  "errors": []
+}

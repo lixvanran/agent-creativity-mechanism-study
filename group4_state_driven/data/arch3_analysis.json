@@ -1,0 +1,713 @@
+{
+  "meta": {
+    "n_rows_raw": 21,
+    "batch_ids": [
+      "arch3-20261021-221648",
+      "arch3-20261021-221648-minimax"
+    ],
+    "model": "MiniMax-M3",
+    "n_questions": 1,
+    "reps": 3,
+    "判据": "PREREG_v3.md §3.6：分离 = 逐例更低比例≥2/3 且 均值比≤0.70"
+  },
+  "Q1_封闭率": {
+    "v1_驱动相关": 0.25,
+    "v1_全部": 0.5,
+    "v2_全部": 0.7,
+    "v2_驱动核心3项": 0.0,
+    "v3_全部": 0.7,
+    "v3_决策点": [
+      {
+        "name": "取舍陈述（措辞）",
+        "who": "模型",
+        "closed": false,
+        "why": "取舍的**措辞**仍由模型生成（认知活动）"
+      },
+      {
+        "name": "缺口描述（措辞）",
+        "who": "模型",
+        "closed": false,
+        "why": "gaps 的措辞仍由模型生成"
+      },
+      {
+        "name": "新约束（措辞）",
+        "who": "模型",
+        "closed": false,
+        "why": "模型改写，代码只校验 gap_index 指向"
+      },
+      {
+        "name": "★缺口相关实体",
+        "who": "代码",
+        "closed": true,
+        "why": "逐字校验 ⊆ 初稿"
+      },
+      {
+        "name": "★取舍表态 depth（走/略/弃）",
+        "who": "模型·封闭枚举",
+        "closed": true,
+        "why": "取值 ∈ {深入展开, 点到为止, 放弃}；越界丢弃并标记"
+      },
+      {
+        "name": "★优先级",
+        "who": "模型·封闭枚举",
+        "closed": true,
+        "why": "取值 ∈ {1,2,3}；越界丢弃并标记"
+      },
+      {
+        "name": "★必含实体（由 decisions 推导）",
+        "who": "代码",
+        "closed": true,
+        "why": "深度=深入展开的缺口 ⇒ 其实体"
+      },
+      {
+        "name": "★禁含实体（由 decisions 推导）",
+        "who": "代码",
+        "closed": true,
+        "why": "深度=放弃的缺口 ⇒ 其实体"
+      },
+      {
+        "name": "★已排除措辞（观测）",
+        "who": "代码",
+        "closed": true,
+        "why": "从观测抽 + 逐字校验 + 长度上限"
+      },
+      {
+        "name": "★输出语言与长度",
+        "who": "代码",
+        "closed": true,
+        "why": "产出闸门；不合格 ⇒ 代码重试/硬闸"
+      }
+    ]
+  },
+  "Q2_语言闸门": {
+    "A": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 0.6688,
+          "draft": null,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 1265
+        },
+        {
+          "tag": 2,
+          "final": 1.0,
+          "draft": null,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1170
+        },
+        {
+          "tag": 3,
+          "final": 0.9818,
+          "draft": null,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1013
+        }
+      ],
+      "n_drifted_final": 1,
+      "n_drifted_draft": 0,
+      "n": 3,
+      "★硬闸失败样本（单列，不进汇总）": [],
+      "n_hard_gate_failed": 0
+    },
+    "WF-p": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 1.0,
+          "draft": 0.9906,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2385
+        },
+        {
+          "tag": 2,
+          "final": 1.0,
+          "draft": 0.9902,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1689
+        },
+        {
+          "tag": 3,
+          "final": 0.8891,
+          "draft": 1.0,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 2866
+        }
+      ],
+      "n_drifted_final": 1,
+      "n_drifted_draft": 0,
+      "n": 3,
+      "★硬闸失败样本（单列，不进汇总）": [],
+      "n_hard_gate_failed": 0
+    },
+    "S-self": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 0.9806,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1281
+        },
+        {
+          "tag": 2,
+          "final": 0.9502,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 3803
+        },
+        {
+          "tag": 3,
+          "final": 0.9597,
+          "draft": 0.9751,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2197
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3,
+      "★硬闸失败样本（单列，不进汇总）": [],
+      "n_hard_gate_failed": 0
+    },
+    "WF-a3": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 0.9954,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2208
+        },
+        {
+          "tag": 2,
+          "final": 0.9717,
+          "draft": 0.9412,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2703
+        },
+        {
+          "tag": 3,
+          "final": 0.9707,
+          "draft": 0.96,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1910
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3,
+      "★硬闸失败样本（单列，不进汇总）": [],
+      "n_hard_gate_failed": 0
+    },
+    "WF-a3-NO": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 1.0,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1653
+        },
+        {
+          "tag": 2,
+          "final": 1.0,
+          "draft": 0.9855,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1135
+        },
+        {
+          "tag": 3,
+          "final": 1.0,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1466
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3,
+      "★硬闸失败样本（单列，不进汇总）": [],
+      "n_hard_gate_failed": 0
+    },
+    "WF-a3-NL": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 0.9811,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2911
+        },
+        {
+          "tag": 2,
+          "final": 0.9638,
+          "draft": 0.9962,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2469
+        },
+        {
+          "tag": 3,
+          "final": 0.9691,
+          "draft": 0.9961,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 4574
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3,
+      "★硬闸失败样本（单列，不进汇总）": [],
+      "n_hard_gate_failed": 0
+    }
+  },
+  "Q3_取舍执行": {
+    "WF-a3": {
+      "rows": [
+        {
+          "tag": 1,
+          "n_decisions": 3,
+          "depths": [
+            "深入展开",
+            "点到为止",
+            "放弃"
+          ],
+          "n_must": 2,
+          "must": [
+            "讨论",
+            "修改"
+          ],
+          "must_hit": 1.0,
+          "must_n": 2,
+          "n_forb": 2,
+          "forb": [
+            "基本准确",
+            "语言错误"
+          ],
+          "forb_hits": [],
+          "n_exc": 3,
+          "exc": [
+            "标准答案",
+            "以英语为媒介的思维与表达训练",
+            "模板至上"
+          ],
+          "exc_hits": [],
+          "len": 2208,
+          "lang": 0.9954
+        },
+        {
+          "tag": 2,
+          "n_decisions": 3,
+          "depths": [
+            "深入展开",
+            "点到为止",
+            "深入展开"
+          ],
+          "n_must": 3,
+          "must": [
+            "万能句式",
+            "必要的句型",
+            "审题"
+          ],
+          "must_hit": 1.0,
+          "must_n": 3,
+          "n_forb": 0,
+          "forb": [],
+          "forb_hits": [],
+          "n_exc": 3,
+          "exc": [
+            "高级词汇和万能句式",
+            "nowadays",
+            "因此"
+          ],
+          "exc_hits": [],
+          "len": 2703,
+          "lang": 0.9717
+        },
+        {
+          "tag": 3,
+          "n_decisions": 3,
+          "depths": [
+            "深入展开",
+            "点到为止",
+            "深入展开"
+          ],
+          "n_must": 4,
+          "must": [
+            "思想",
+            "语言",
+            "范文",
+            "修改"
+          ],
+          "must_hit": 1.0,
+          "must_n": 4,
+          "n_forb": 0,
+          "forb": [],
+          "forb_hits": [],
+          "n_exc": 3,
+          "exc": [
+            "英语能力的装饰",
+            "脚手架",
+            "批量生产的空话"
+          ],
+          "exc_hits": [],
+          "len": 1910,
+          "lang": 0.9707
+        }
+      ],
+      "must_summary": {
+        "n_must": 9,
+        "n_hit": 9,
+        "rate": 1.0
+      },
+      "forb_summary": {
+        "n_forbidden": 2,
+        "n_hit": 0,
+        "rate": 0.0
+      },
+      "exc_summary": {
+        "n_excluded": 9,
+        "n_hit": 0,
+        "rate": 0.0
+      }
+    },
+    "WF-a3-NO": {
+      "rows": [
+        {
+          "tag": 1,
+          "n_decisions": 0,
+          "depths": [],
+          "n_must": 0,
+          "must": [],
+          "must_hit": null,
+          "must_n": 0,
+          "n_forb": 0,
+          "forb": [],
+          "forb_hits": [],
+          "n_exc": 0,
+          "exc": [],
+          "exc_hits": [],
+          "len": 1653,
+          "lang": 1.0
+        },
+        {
+          "tag": 2,
+          "n_decisions": 0,
+          "depths": [],
+          "n_must": 0,
+          "must": [],
+          "must_hit": null,
+          "must_n": 0,
+          "n_forb": 0,
+          "forb": [],
+          "forb_hits": [],
+          "n_exc": 0,
+          "exc": [],
+          "exc_hits": [],
+          "len": 1135,
+          "lang": 1.0
+        },
+        {
+          "tag": 3,
+          "n_decisions": 0,
+          "depths": [],
+          "n_must": 0,
+          "must": [],
+          "must_hit": null,
+          "must_n": 0,
+          "n_forb": 0,
+          "forb": [],
+          "forb_hits": [],
+          "n_exc": 0,
+          "exc": [],
+          "exc_hits": [],
+          "len": 1466,
+          "lang": 1.0
+        }
+      ],
+      "must_summary": {
+        "n_must": 0,
+        "n_hit": 0,
+        "rate": null
+      },
+      "forb_summary": {
+        "n_forbidden": 0,
+        "n_hit": 0,
+        "rate": null
+      },
+      "exc_summary": {
+        "n_excluded": 0,
+        "n_hit": 0,
+        "rate": null
+      }
+    }
+  },
+  "Q4_探针": {
+    "rows": [
+      {
+        "tag": 1,
+        "variant": "D3off_NL",
+        "J": 0.1032,
+        "lang": 1.0,
+        "valid": true,
+        "topic": 3.335,
+        "must": [],
+        "must_hit": null
+      },
+      {
+        "tag": 1,
+        "variant": "D2flip_NL",
+        "J": 0.148,
+        "lang": 0.981,
+        "valid": true,
+        "topic": 1.882,
+        "must": [],
+        "must_hit": null
+      },
+      {
+        "tag": 1,
+        "variant": "D0_rerun",
+        "J": 0.0972,
+        "lang": 1.0,
+        "valid": true,
+        "topic": 1.121,
+        "must": [
+          "独立组织语言",
+          "发现逻辑问题",
+          "范文",
+          "真正回答问题"
+        ],
+        "must_hit": 1.0
+      },
+      {
+        "tag": 2,
+        "variant": "D3off_NL",
+        "J": 0.1008,
+        "lang": 1.0,
+        "valid": true,
+        "topic": 3.288,
+        "must": [],
+        "must_hit": null
+      },
+      {
+        "tag": 2,
+        "variant": "D2flip_NL",
+        "J": 0.0973,
+        "lang": 0.9936,
+        "valid": true,
+        "topic": 2.759,
+        "must": [],
+        "must_hit": null
+      },
+      {
+        "tag": 3,
+        "variant": "D0_rerun",
+        "J": 0.0613,
+        "lang": 0.9689,
+        "valid": true,
+        "topic": 2.783,
+        "must": [
+          "内容是否准确",
+          "逻辑是否连贯",
+          "模板",
+          "真实的思考"
+        ],
+        "must_hit": 0.5
+      },
+      {
+        "tag": 3,
+        "variant": "D3off_NL",
+        "J": 0.0762,
+        "lang": 1.0,
+        "valid": true,
+        "topic": 3.863,
+        "must": [],
+        "must_hit": null
+      },
+      {
+        "tag": 3,
+        "variant": "D2flip_NL",
+        "J": 0.0777,
+        "lang": 0.9598,
+        "valid": true,
+        "topic": 2.282,
+        "must": [
+          "记录短句",
+          "仿写段落"
+        ],
+        "must_hit": 1.0
+      },
+      {
+        "tag": 2,
+        "variant": "D0_rerun",
+        "J": 0.0574,
+        "lang": 0.9692,
+        "valid": true,
+        "topic": 1.213,
+        "must": [
+          "轻微失误",
+          "妨碍理解",
+          "限制学生使用手机",
+          "学生自主管理"
+        ],
+        "must_hit": 1.0
+      }
+    ],
+    "R_NL_驱动力": [
+      {
+        "tag": 1,
+        "base_深入实体": [
+          "提纲",
+          "段落衔接",
+          "规范化",
+          "考试时间"
+        ],
+        "flip_深入实体": [],
+        "base_放弃实体": [],
+        "flip_放弃实体": [],
+        "base_深入命中率": 1.0,
+        "flip_深入命中率": null,
+        "base_放弃实体出现率": null,
+        "flip_放弃实体出现率": null,
+        "flip新增实体": []
+      },
+      {
+        "tag": 2,
+        "base_深入实体": [
+          "亲身经历",
+          "具体例子",
+          "匿名评分",
+          "分数抽查"
+        ],
+        "flip_深入实体": [],
+        "base_放弃实体": [],
+        "flip_放弃实体": [],
+        "base_深入命中率": 0.75,
+        "flip_深入命中率": null,
+        "base_放弃实体出现率": null,
+        "flip_放弃实体出现率": null,
+        "flip新增实体": []
+      },
+      {
+        "tag": 3,
+        "base_深入实体": [
+          "评分",
+          "阅卷",
+          "十几分钟",
+          "真实"
+        ],
+        "flip_深入实体": [],
+        "base_放弃实体": [
+          "记录短句",
+          "仿写段落"
+        ],
+        "flip_放弃实体": [],
+        "base_深入命中率": 1.0,
+        "flip_深入命中率": null,
+        "base_放弃实体出现率": 1.0,
+        "flip_放弃实体出现率": null,
+        "flip新增实体": []
+      }
+    ],
+    "D0": {
+      "vals": [
+        0.0972,
+        0.0574,
+        0.0613
+      ],
+      "mean": 0.072
+    },
+    "D2'": {
+      "vals": [
+        0.148,
+        0.0973,
+        0.0777
+      ],
+      "mean": 0.1077
+    },
+    "D3": {
+      "vals": [
+        0.1032,
+        0.1008,
+        0.0762
+      ],
+      "mean": 0.0934
+    },
+    "判据_D2_vs_D0": {
+      "separated": false,
+      "n_pair": 3,
+      "n_lower": 0,
+      "lower_ratio": 0.0,
+      "mean_variant": 0.1077,
+      "mean_d0": 0.072,
+      "ratio": 1.4958,
+      "threshold_ratio": 0.7
+    },
+    "判据_D3_vs_D0": {
+      "separated": false,
+      "n_pair": 3,
+      "n_lower": 0,
+      "lower_ratio": 0.0,
+      "mean_variant": 0.0934,
+      "mean_d0": 0.072,
+      "ratio": 1.2972,
+      "threshold_ratio": 0.7
+    },
+    "判据_D2_vs_D3": {
+      "separated": false,
+      "n_pair": 3,
+      "n_lower": 1,
+      "lower_ratio": 0.3333,
+      "mean_variant": 0.1077,
+      "mean_d0": 0.0934,
+      "ratio": 1.1531,
+      "threshold_ratio": 0.7
+    },
+    "R_tradeoff": []
+  },
+  "Q5_S_self对照": {
+    "rows": [
+      {
+        "tag": 1,
+        "J": 0.0541,
+        "len_a3": 2208,
+        "len_self": 1281,
+        "valid": true
+      },
+      {
+        "tag": 2,
+        "J": 0.0619,
+        "len_a3": 2703,
+        "len_self": 3803,
+        "valid": true
+      },
+      {
+        "tag": 3,
+        "J": 0.0613,
+        "len_a3": 1910,
+        "len_self": 2197,
+        "valid": true
+      }
+    ],
+    "J_mean": 0.0591,
+    "★判据：若 WF-a3 ≈ S-self ⇒ 状态机相对自我说明无增量": true
+  }
+}
