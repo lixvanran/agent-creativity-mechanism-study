@@ -294,6 +294,9 @@ FAILURE_IDS = list(FAILURE_KINDS)
 class ActionPolicy:
     """因子化 softmax 策略。**权重可学** ⇒ 这才是层3。"""
 
+    # ★ 仲裁的三个选项（**与修复动作正交**）：0=mark（标注不删）1=keep_pos 2=keep_neg
+    ARB_IDS = ("mark", "keep_pos", "keep_neg")
+
     def __init__(self, w: Optional[Dict[str, Any]] = None):
         w = w or {}
         self.u = list(w.get("u") or [0.0] * len(REPAIR_IDS))     # 修复类型
@@ -302,6 +305,8 @@ class ActionPolicy:
         # m[失败类型][修复类型]
         self.m = [list(row) for row in
                    (w.get("m") or [[0.0] * len(REPAIR_IDS) for _ in FAILURE_IDS])]
+        # ★ 仲裁权重（层3 要学的第二件事：冲突时保留哪一侧 / 收不收窄）
+        self.arb = list(w.get("arb") or [0.0] * len(self.ARB_IDS))
 
     # ---- 打分
     def score_spec(self, spec: ActionSpec, failure_kind: Optional[str]) -> float:
@@ -334,11 +339,32 @@ class ActionPolicy:
                 return sp
         return ACTION_SPECS[-1]
 
+    def choose_arbitration(self, failure_kind, rng):
+        """★ 仲裁选择（层3 的第二件事）：0=mark（标注不删）1=keep_pos 2=keep_neg。
+
+        ⇒ **与修复动作正交** ⇒ 两个决策可以分开学
+        ⇒ ★ 层3 学的不是"怎么修"，而是"**冲突时收不收窄搜索空间、留哪一侧**"
+          ⇒ 这正是"优化搜索空间过早闭合"的自修改形态
+        """
+        sc = [self.arb[i] for i in range(len(self.ARB_IDS))]
+        mx = max(sc)
+        ex = [pow(2.718281828459045, x - mx) for x in sc]
+        tot = sum(ex) or 1.0
+        p = [e / tot for e in ex]
+        r = rng.random()
+        acc = 0.0
+        for i, pi in enumerate(p):
+            acc += pi
+            if r <= acc:
+                return i
+        return len(self.ARB_IDS) - 1
+
     def param_count(self) -> int:
-        return len(self.u) + len(self.v) + len(self.t) + len(self.m) * len(self.m[0])
+        return (len(self.u) + len(self.v) + len(self.t)
+                + len(self.m) * len(self.m[0]) + len(self.arb))
 
     def export(self) -> Dict[str, Any]:
-        return dict(u=self.u, v=self.v, t=self.t, m=self.m)
+        return dict(u=self.u, v=self.v, t=self.t, m=self.m, arb=self.arb)
 
     @staticmethod
     def load(d: Dict[str, Any]) -> "ActionPolicy":
@@ -971,6 +997,7 @@ class CollapseFixWorkflow:
         _base_action = ("none", "slot", 0) if C.get("action_mode") == "policy" else "base"
         cur_actions = {fid: _base_action for fid in frames}
         slot_notes: Dict[str, str] = {}
+        _arb_meta = None
         # ★ 策略：lookup 模式 ⇒ **手写映射**（层2 的"设计的手段"）
         #         policy 模式 ⇒ 传入的权重（w=0 ⇒ 均匀 ⇒ 未训练基线）
         _pol_src = C.get("policy")
@@ -1107,13 +1134,20 @@ class CollapseFixWorkflow:
             ops.append("AGGREGATE(mechanical)")
             # ★★ 跨槽位冲突仲裁（层2 默认"容忍"⇒ 不收窄搜索空间）
             _am = C.get("arbitrate_mode", "none")
+            _arb_pick = None
+            if _am == "learned" and policy is not None:
+                # ★ 层3：**仲裁的选择也由策略给出**（mark / keep_pos / keep_neg）
+                _arb_pick = policy.choose_arbitration("conflict", _rng)
+                _am = ("none" if _arb_pick == 0 else "drop_one")
             _before = len(final_claims)
-            final_claims, _alog = arbitrate(final_claims, _am,
-                                            drop_choice=C.get("arbitrate_keep"))
+            final_claims, _alog = arbitrate(
+                final_claims, _am,
+                drop_choice=("keep_pos" if _arb_pick == 1 else "keep_neg"))
             if _alog["n_pairs"]:
                 ops.append("ARBITRATE[%s:%d对]" % (_am, _alog["n_pairs"]))
-                meta_extra["arbitration"] = _alog
-                meta_extra["arbitration_dropped"] = _before - len(final_claims)
+                _arb_meta = dict(log=_alog, pick=_arb_pick,
+                                 dropped=_before - len(final_claims),
+                                 mode=_am)
             agg = "\n".join("- " + c for c in final_claims)
 
         # ── 6) 装配（机械汇总档已经装配好了 ⇒ 这里**不再二次抽取**）
@@ -1140,6 +1174,9 @@ class CollapseFixWorkflow:
             _paths.append(dict(kind="frame", frame=_fr, ops=_ops, claims=_claims))
         return dict(
             paths=_paths,
+            arbitration=(_arb_meta if "_arb_meta" in dir() else None),
+            arbitration_pick=(_arb_meta or {}).get("pick"),
+            n_conflicts_final=len(detect_opposite_pairs(final_claims)),
             chat_stats=self.chat_stats,
             layer=C.get("layer"),
             evolve=bool(C.get("evolve", True)),
