@@ -40,29 +40,33 @@ import metrics_priorart as MP
 # 1. 路径间多样性（搜索空间拓展）
 # ══════════════════════════════════════════════════════════════════════
 def path_diversity(paths: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
-    """N 条并行分支**彼此**的 Self-Sim（**越低越分散**）。
+    """N 条并行分支**彼此**的重叠度（**越低越分散**）。
 
-    `paths` 每项须含 `claims`（该分支抽出的断言）。
-    ⇒ 用 `family_key` 语义等价类（我们的）而不是字符集合 ⇒ 中文更稳。
+    ★ 2026-10-22 修正（口径错了 ⇒ 指标不区分）：
+      先前把"每个分支的 claims 列表"当成**一个族**来比 ⇒ ⇒ 三条不同分支必然完全不同
+      ⇒ ⇒ **所有臂都是 0** ⇒ 指标零分辨力。
+      ⇒ ⇒ **正确粒度 = 字符 2-gram 集合**（**Self-Sim 的原口径**，Lake et al. NAACL'25）：
+      "把每个响应转成唯一词干集合，对所有响应两两算 Jaccard 并取平均"
+      ⇒ ⇒ claim 级**精确匹配**太严（三条分支一个字都不重合 ⇒ 恒 0 ⇒ 零分辨力）
+      ⇒ ⇒ 2-gram 粒度才有分辨率，且**有出处**。
     """
     cl = [list(p.get("claims") or []) for p in (paths or [])]
     cl = [c for c in cl if c]
     if len(cl) < 2:
-        return dict(n_paths=len(cl), self_sim=None, distinct=None,
-                    note="分支数 < 2 ⇒ 无法算路径间多样性")
-    # 用"族"当比较单元（与维度数同口径）
-    fams = ["|".join(sorted(c)) for c in cl]
-    ss = MP.self_sim([[f] for f in fams], mode="decision")
-    # 逐对（更直接）
-    pairs = []
-    for i in range(len(fams)):
-        for j in range(i + 1, len(fams)):
-            a, b = {fams[i]}, {fams[j]}
-            pairs.append(len(a & b) / float(len(a | b)))
-    return dict(n_paths=len(cl), self_sim=ss,
-                pair_self_sim=(sum(pairs) / len(pairs)) if pairs else None,
-                distinct=len(set(fams)),
-                note="越低 ⇒ 分支彼此越分散 ⇒ 搜索空间越宽")
+        return dict(n_paths=len(cl), self_sim=None, pair_self_sim=None,
+                    distinct=None, note="分支数 < 2 ⇒ 无法算路径间多样性")
+    ss = MP.self_sim(cl, mode="bigram")          # ★ Self-Sim 原口径（2-gram 集合）
+    sets = [set(c) for c in cl]
+    exact = []
+    for i in range(len(sets)):
+        for j in range(i + 1, len(sets)):
+            a, b = sets[i], sets[j]
+            uni = len(a | b)
+            exact.append((len(a & b) / float(uni)) if uni else 0.0)
+    return dict(n_paths=len(cl), self_sim=ss, pair_self_sim=ss,
+                exact_match_jaccard=(sum(exact) / len(exact)) if exact else None,
+                distinct=len(set().union(*sets)),
+                note="Self-Sim 原口径（2-gram 集合两两 Jaccard）；越低 ⇒ 分支越分散 ⇒ 搜索空间越宽")
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -75,7 +79,14 @@ def ops_entropy(ops: Sequence[str], n: int = 2) -> Dict[str, Any]:
       熵低 = 一直在同一条轨道上 ⇒ ⇒ **没跳**（哪怕总步数一样）。
     ★ 归一化：H / log(不同 n-gram 数) ⇒ 跨不同长度的序列可比。
     """
-    seq = [o for o in (ops or []) if o]
+    # ★ 扁平化：某些臂的 ops 里会嵌一层 list（每条路径一个子列表）
+    _flat = []
+    for o in (ops or []):
+        if isinstance(o, (list, tuple)):
+            _flat.extend([x for x in o if isinstance(x, str)])
+        elif isinstance(o, str):
+            _flat.append(o)
+    seq = [o for o in _flat if o]
     if len(seq) < n:
         return dict(n_ops=len(seq), entropy=None, distinct_ngrams=0,
                     note="操作数 < n ⇒ 无法算 n-gram 熵")
