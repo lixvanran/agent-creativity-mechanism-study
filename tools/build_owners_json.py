@@ -108,6 +108,12 @@ def main():
             local_sha, local_msg = cand[0]
         matched = "tree_sha" if cand else "none"
         level = "weak(prefix反推)"
+        # ★ 硬级：body 里的 owner 行（★ 优先于一切反推；★ 必须在此处赋值，
+        #   否则会被下面的 fallback 分支覆盖 —— 2026-10-25 踩过）
+        if _owner_line:
+            g = _owner_line
+            level = "hard(owner行)"
+            matched = "owner_line"
         if _owner_line:
             # ★ 硬级：body 里的 owner 行优先于一切反推
             g = _owner_line
