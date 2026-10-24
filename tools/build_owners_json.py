@@ -9,11 +9,17 @@ def api(path):
     return json.load(urllib.request.urlopen(r, timeout=30))
 
 # 我自己推的层：远端 sha -> (组, 本地 commit, 一句话)
+MINE_LOCAL_PREFIX=("三组","","")
 MINE={
  "8934cb193cc220fd622d332f252c0b3351a31766":("三组","e483f4a","分维度偏好表 + 负对照分母真因"),
  "2055e086ad98ff444da85edfd58e55f1b2f3387e":("三组","6a48f8a","解耦帧组合seed + 论文更正nf偏好 + 留出集续跑脚本"),
  "895f7258b923731607abce1aba36feb274065e0d":("三组","548fcdc","法律域结论空间v3 + 合并反馈循环bug修复 + avg_m改2D"),
  "f101f4a94c84":("三组","8e86de5","C1 跨组对齐实验"),
+ "f0d8004fa6ba2039ce170f491b32a40aeec40403":("三组","797190b","KNOWN_ISSUES重写+摘要加两判官反号+§2.3措辞+§6.4.4e"),
+ "7ab16b40101edc3ea5434681ae7a1ef24bc5e642":("三组","223efd1","[三组] commit message 格式改为[组名]前缀"),
+ "41009794b3d486f4133a59a2655fa8f051d3800a":("三组","d4ef317","分维度表按精确口径+贡献三条加定位句+OWNERS生成器"),
+ "24e3ebb95cdd6f6837add5d863f183751b7aadcc":("三组","356ecaa","OWNERS.json生成器(含User-Agent与API兜底)"),
+ "a6208aec1c2090ebe464a9e6bbba7eded1ce255f":("三组","14dddc5","OWNERS.json生成+打包改先验后换"),
 }
 KNOWN_OTHER={"4654245ac709":("第二组",None,"交付 2026-10-25"),"5b7fb4670320":("第二组",None,"交付 2026-10-25")}
 
@@ -21,9 +27,9 @@ KNOWN_OTHER={"4654245ac709":("第二组",None,"交付 2026-10-25"),"5b7fb4670320
 chain=[]; sha=api("/repos/%s/git/ref/heads/%s"%(REPO,BRANCH))["object"]["sha"]
 for _ in range(12):
     c=api("/repos/%s/git/commits/%s"%(REPO,sha))
-    if "commit" not in c:
-        chain.append((sha,"★ API 未返回 commit 字段: %s"%str(c)[:80])); break
-    msg=c["commit"]["message"].split("\n")[0]
+    # ★ API 建的 commit：message 在顶层；GitHub 原生 commit：在 commit.message ⇒ 两种都读
+    _c=c.get("commit") or {}
+    msg=(c.get("message") or _c.get("message") or "").split("\n")[0]
     chain.append((sha,msg))
     if len(c["parents"])==0: break
     sha=c["parents"][0]["sha"]
