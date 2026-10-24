@@ -7,3 +7,6 @@ dist/
 runs/
 *.onnx
 routes/LIT/_raw/
+
+# 临时工作目录
+.tmp/
