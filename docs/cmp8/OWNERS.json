@@ -2,13 +2,61 @@
   "schema": "remote-ref-ownership/v2",
   "repo": "lixvanran/agent-creativity-mechanism-study",
   "branch": "cmp8-handover-2026-10-20",
-  "generated_at": "2026-10-24T08:30:02Z",
+  "generated_at": "2026-10-24T08:45:11Z",
   "generator": "tools/build_owners_json.py（v3：owner 行=硬级 / 前缀反推=弱级 / 皆无=待确认）",
-  "remote_ref_snapshot": "ccccfea02a81d28557482c146469705282f72dba",
+  "remote_ref_snapshot": "ee7949edd5d69b1efd2423139ce29f3fb490fa2c",
   "note": "★ 归属由【远端层的 tree sha】匹配【本地 commit】得到 ⇒ 再从本地 message 前缀反推组名 ⇒ ⇒ 不需要维护任何硬编码表 ⇒ ⇒ 未知一律 needs_confirmation=true，不猜。",
   "layers": [
     {
       "layer": 20,
+      "sha": "ee7949edd5d69b1efd2423139ce29f3fb490fa2c",
+      "group": "三组",
+      "local_commit": null,
+      "remote_message": "[三组] 门2分维度表脚本化 + 推送守卫(防覆盖别人改动) + 执行记录EXEC-LOG",
+      "summary": "[三组] 门2分维度表脚本化 + 推送守卫(防覆盖别人改动) + 执行记录EXEC-LOG",
+      "needs_confirmation": false,
+      "matched_by": "none",
+      "evidence_level": "weak(prefix反推)",
+      "note": ""
+    },
+    {
+      "layer": 19,
+      "sha": "5fd4da535d0116036ec5e21ce1101a33fb12f82c",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "docs(group2): KNOWN_ISSUES 加 KI-04（overlay 推送覆盖他人工作的事故与修法）",
+      "summary": "docs(group2): KNOWN_ISSUES 加 KI-04（overlay 推送覆盖他人工作的事故与修法）",
+      "needs_confirmation": true,
+      "matched_by": "none",
+      "evidence_level": "weak(prefix反推)",
+      "note": ""
+    },
+    {
+      "layer": 18,
+      "sha": "9cf79f67091762414c1e360777d01bff1cf14bb8",
+      "group": "三组",
+      "local_commit": null,
+      "remote_message": "fix(group2): 恢复被 overlay 覆盖的三组 31 个文件 + 修 push_overlay 覆盖语义",
+      "summary": "fix(group2): 恢复被 overlay 覆盖的三组 31 个文件 + 修 push_overlay 覆盖语义",
+      "needs_confirmation": false,
+      "matched_by": "none",
+      "evidence_level": "weak(prefix反推)",
+      "note": ""
+    },
+    {
+      "layer": 17,
+      "sha": "c9ccdd7dbb8b67eda905276033762763bfa52553",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "docs(group2): A 篇 2x2 饱和度判死门 · 可执行规格",
+      "summary": "docs(group2): A 篇 2x2 饱和度判死门 · 可执行规格",
+      "needs_confirmation": true,
+      "matched_by": "none",
+      "evidence_level": "weak(prefix反推)",
+      "note": ""
+    },
+    {
+      "layer": 16,
       "sha": "ccccfea02a81d28557482c146469705282f72dba",
       "group": "三组",
       "local_commit": null,
@@ -20,7 +68,7 @@
       "note": ""
     },
     {
-      "layer": 19,
+      "layer": 15,
       "sha": "a0d539ff59e1c768203a9a03813777bc2edd1c53",
       "group": null,
       "local_commit": null,
@@ -32,7 +80,7 @@
       "note": ""
     },
     {
-      "layer": 18,
+      "layer": 14,
       "sha": "57aa717184dd5fd96e2d3acb912d4eb40fe760e3",
       "group": null,
       "local_commit": null,
@@ -44,7 +92,7 @@
       "note": ""
     },
     {
-      "layer": 17,
+      "layer": 13,
       "sha": "406d083fe41605bd5d3f21f7b5af8df57c8db136",
       "group": null,
       "local_commit": null,
@@ -56,7 +104,7 @@
       "note": ""
     },
     {
-      "layer": 16,
+      "layer": 12,
       "sha": "7006338ecc6a6ff16f425469e12819fbac6a2cfc",
       "group": null,
       "local_commit": null,
@@ -68,7 +116,7 @@
       "note": ""
     },
     {
-      "layer": 15,
+      "layer": 11,
       "sha": "be7857dd198eb1a94049b7dd0ffcf86c56847de9",
       "group": "三组",
       "local_commit": null,
@@ -80,7 +128,7 @@
       "note": ""
     },
     {
-      "layer": 14,
+      "layer": 10,
       "sha": "7ca2497cfbc079f82b04fc7e669809b78b9407f1",
       "group": "三组",
       "local_commit": null,
@@ -92,7 +140,7 @@
       "note": ""
     },
     {
-      "layer": 13,
+      "layer": 9,
       "sha": "4a82a26adae16351e7d23b3647d7d9e15167f90b",
       "group": "三组",
       "local_commit": null,
@@ -104,7 +152,7 @@
       "note": ""
     },
     {
-      "layer": 12,
+      "layer": 8,
       "sha": "ef8eefa2d414ba18d47fc25d2a4b57a7cd32c21e",
       "group": "第二组",
       "local_commit": null,
@@ -116,7 +164,7 @@
       "note": ""
     },
     {
-      "layer": 11,
+      "layer": 7,
       "sha": "e8e84bf0ec807471bc73aa728a3a58cfb50c2b32",
       "group": "三组",
       "local_commit": null,
@@ -128,7 +176,7 @@
       "note": ""
     },
     {
-      "layer": 10,
+      "layer": 6,
       "sha": "98d0c304dfb953b6efab12f53de01bbf0a2f944d",
       "group": "三组",
       "local_commit": null,
@@ -140,7 +188,7 @@
       "note": ""
     },
     {
-      "layer": 9,
+      "layer": 5,
       "sha": "e30dd8e6db763544c210380616532c3c61c184b5",
       "group": "三组",
       "local_commit": null,
@@ -152,7 +200,7 @@
       "note": ""
     },
     {
-      "layer": 8,
+      "layer": 4,
       "sha": "27c12dd3ec507a5027e6e1df07187c8446f81b31",
       "group": "三组",
       "local_commit": null,
@@ -164,7 +212,7 @@
       "note": ""
     },
     {
-      "layer": 7,
+      "layer": 3,
       "sha": "78ab8b49bdb8e798940409e64bfdd0b013e6bf8a",
       "group": "第二组",
       "local_commit": null,
@@ -176,7 +224,7 @@
       "note": ""
     },
     {
-      "layer": 6,
+      "layer": 2,
       "sha": "d9b0286f9f77cdaced02fc137abcf099b42c07c6",
       "group": "第二组",
       "local_commit": null,
@@ -188,7 +236,7 @@
       "note": ""
     },
     {
-      "layer": 5,
+      "layer": 1,
       "sha": "e09492d3050a002e34bc1a7427f54e6f1bade083",
       "group": "三组",
       "local_commit": null,
@@ -198,54 +246,6 @@
       "matched_by": "none",
       "evidence_level": "weak(prefix反推)",
       "note": ""
-    },
-    {
-      "layer": 4,
-      "sha": "6ce6251b2f71cfb0f63feb16130ae927ba2d893e",
-      "group": "三组",
-      "local_commit": null,
-      "remote_message": "[三组] OWNERS.json 归属查找改前缀匹配；本层远端 commit 首次带真实 message（此前默认 update）",
-      "summary": "[三组] OWNERS.json 归属查找改前缀匹配；本层远端 commit 首次带真实 message（此前默认 update）",
-      "needs_confirmation": false,
-      "matched_by": "none",
-      "evidence_level": "weak(prefix反推)",
-      "note": ""
-    },
-    {
-      "layer": 3,
-      "sha": "44f41f4a3492a4bd808f7b95ab3f0847b30d29fa",
-      "group": "三组",
-      "local_commit": null,
-      "remote_message": "[三组] 修 push_via_api 缺 message 报错并禁止 update；新增机器可读 OWNERS.json 归属表生成器（兼容两种 message 结构、前缀匹配归属）",
-      "summary": "[三组] 修 push_via_api 缺 message 报错并禁止 update；新增机器可读 OWNERS.json 归属表生成器（兼容两种 message 结构、前缀匹配归属）",
-      "needs_confirmation": false,
-      "matched_by": "none",
-      "evidence_level": "weak(prefix反推)",
-      "note": ""
-    },
-    {
-      "layer": 2,
-      "sha": "a6208aec1c2090ebe464a9e6bbba7eded1ce255f",
-      "group": "三组",
-      "local_commit": "14dddc5",
-      "remote_message": "update",
-      "summary": "OWNERS.json 生成 + 打包改先验后换",
-      "needs_confirmation": false,
-      "matched_by": "fallback(历史update层)",
-      "evidence_level": "weak(prefix反推)",
-      "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
-    },
-    {
-      "layer": 1,
-      "sha": "24e3ebb95cdd6f6837add5d863f183751b7aadcc",
-      "group": "三组",
-      "local_commit": "356ecaa",
-      "remote_message": "update",
-      "summary": "OWNERS.json 生成器（含 User-Agent 与 API 兜底）",
-      "needs_confirmation": false,
-      "matched_by": "fallback(历史update层)",
-      "evidence_level": "weak(prefix反推)",
-      "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
     }
   ]
 }
