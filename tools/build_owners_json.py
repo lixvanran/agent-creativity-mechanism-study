@@ -94,83 +94,137 @@ def main():
                 _owner_line = _ln.split(":", 1)[1].strip()
                 break
         tree = (c.get("tree") or {}).get("sha")
-        chain.append((sha, msg, tree))
+        # ★★ BUGFIX-2026-10-25-B：★ _owner_line 必须【存进 chain tuple】⇒
+        #   原实现把它算在链循环里却没带出来 ⇒ 层次循环读到的是【最后一层泄漏的值】
+        #   ⇒ ⇒ owner 行证据永远对不上层（实测 20 层全被判 weak）
+        chain.append((sha, msg, tree, _owner_line))
         parents = c.get("parents") or []
         if not parents:
             break
         sha = parents[0]["sha"]
 
     layers = []
-    for i, (sha, msg, tree) in enumerate(chain):
+    for i, (sha, msg, tree, owner_line) in enumerate(chain):
         cand = by_tree.get(tree) or []
         local_sha = local_msg = None
         if cand:
             local_sha, local_msg = cand[0]
         matched = "tree_sha" if cand else "none"
-        level = "weak(prefix反推)"
-        # ★ 硬级：body 里的 owner 行（★ 优先于一切反推；★ 必须在此处赋值，
-        #   否则会被下面的 fallback 分支覆盖 —— 2026-10-25 踩过）
-        if _owner_line:
-            g = _owner_line
-            level = "hard(owner行)"
-            matched = "owner_line"
-        if _owner_line:
-            # ★ 硬级：body 里的 owner 行优先于一切反推
-            g = _owner_line
-            level = "hard(owner行)"
-            matched = "owner_line"
-        g = owner_of(local_msg or msg)
         summary = (local_msg or msg)
-        # 规则 2：★ 远端 message 命中本仓某个 commit 的 subject ⇒ ★ 归属即本仓（三组）
-        if g is None and msg in by_subject:
+
+        # ★★ 归属解析：【单一、严格有序的优先级链】★★
+        #   ★ 修 BUGFIX-A：原实现先设 g=owner_line，随后又被 g=owner_of(local_msg or msg)
+        #     【无条件覆盖】⇒ owner 行（硬级）的组名会被前缀反推顶掉。
+        #   ★ 修 BUGFIX-C：原实现有两个 fallback 块，第一个已把 g 置非 None
+        #     ⇒ 第二个（唯一给 level 赋 "medium(历史fallback)" 的那个）是【死代码】。
+        #   ⇒ 现在：每条证据【只走一次】、且【只由它自己】决定 level 与 group。
+        g = None
+        level = None
+        prefix_guess = owner_of(local_msg or msg)
+
+        if owner_line:
+            # 硬级：commit body 的 owner 行（唯一硬证据）
+            g = owner_line
+            level = "hard(owner行)"
+            matched = "owner_line"
+            if prefix_guess and prefix_guess != owner_line:
+                # ★ owner 行与前缀反推不一致 ⇒ 如实记录（不静默取其一）
+                note_extra = "★ owner行(%s) 与前缀反推(%s) 不一致 ⇒ 以 owner行为准" % (owner_line, prefix_guess)
+            else:
+                note_extra = ""
+        elif prefix_guess:
+            # 弱级：从本地 commit message 前缀反推（author 名【不作】证据）
+            g = prefix_guess
+            level = "weak(prefix反推)"
+            note_extra = ""
+        elif msg in by_subject:
+            # 弱级：远端 message 命中本仓某个 commit 的 subject ⇒ 归属即本仓
             local_sha, local_msg = by_subject[msg]
             g = owner_of(local_msg) or "三组"
+            level = "weak(prefix反推)"
             summary = local_msg
             matched = "subject(本仓)"
-        if g is None:
+            note_extra = ""
+        else:
+            fb = None
             for k, v in FALLBACK.items():
                 if sha.startswith(k):
-                    g, fb_local, fb_sum = v
-                    local_sha = local_sha or fb_local
-                    summary = fb_sum
-                    matched = "fallback(历史update层)"
+                    fb = v
                     break
-        if g is None:
-            for k, v in FALLBACK.items():
-                if sha.startswith(k):
-                    g, fb_local, fb_sum = v
-                    local_sha = local_sha or fb_local
-                    summary = fb_sum
-                    matched = "fallback(历史update层)"
-                    level = "medium(历史fallback)"
-                    break
+            if fb:
+                g, fb_local, fb_sum = fb
+                local_sha = local_sha or fb_local
+                summary = fb_sum
+                matched = "fallback(历史update层)"
+                level = "medium(历史fallback)"
+                note_extra = ""
+            else:
+                g = None
+                level = "unconfirmed(无任何证据)"
+                note_extra = ""
+
         conf = (g is None)
-        if g is not None and level == "weak(prefix反推)":
-            level = "weak(prefix反推)"
+        note = ("远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
+                if msg.strip().lower() in ("update", "update.", "wip", "tmp", "commit", "fix")
+                else "")
+        if note_extra:
+            note = (note + " ｜ " + note_extra) if note else note_extra
         layers.append(dict(
             layer=len(chain) - i, sha=sha, group=g,
             local_commit=local_sha, remote_message=msg,
             summary=summary, needs_confirmation=conf,
             matched_by=matched,
             evidence_level=level,
-            note=("远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
-                  if msg.strip().lower() in ("update", "update.", "wip", "tmp", "commit", "fix")
-                  else "")))
+            owner_line=owner_line or "",
+            note=note))
 
     out = dict(schema="remote-ref-ownership/v2",
                repo=REPO, branch=BRANCH,
                generated_at=subprocess.check_output(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"]).decode().strip(),
-               generator="tools/build_owners_json.py（v3：owner 行=硬级 / 前缀反推=弱级 / 皆无=待确认）",
+               generator="tools/build_owners_json.py（v4：owner行=硬级 / 前缀反推=弱级 / 历史fallback=中级 / 皆无=未确认）",
                remote_ref_snapshot=chain[0][0] if chain else None,
                note=("★ 归属由【远端层的 tree sha】匹配【本地 commit】得到 ⇒ 再从本地 message 前缀反推组名 "
-                     "⇒ ⇒ 不需要维护任何硬编码表 ⇒ ⇒ 未知一律 needs_confirmation=true，不猜。"),
+                     "⇒ ⇒ 不需要维护任何硬编码表 ⇒ ⇒ 未知一律 needs_confirmation=true，不猜。"
+                     "★ v4 修复：owner 行曾因未存入 chain tuple 而跨层泄漏 ⇒ 20 层全被误判 weak；"
+                     "owner 行的组名曾被前缀反推无条件覆盖；medium(历史fallback) 曾落在死代码分支。"),
                layers=layers)
     p = os.path.join(REPO_ROOT, "docs", "cmp8", "OWNERS.json")
     json.dump(out, io.open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-    print("✔ OWNERS.json(v2) 已写：%d 层 ｜待确认 %d 层" % (len(layers), sum(1 for l in layers if l["needs_confirmation"])))
+    nconf = sum(1 for l in layers if l["needs_confirmation"])
+    print("✔ OWNERS.json(v4) 已写：%d 层 ｜待确认 %d 层" % (len(layers), nconf))
     for l in layers:
-        print("   L%-2d %s  %-8s %-6s %s" % (l["layer"], l["sha"][:12], l["group"] or "★待确认",
-                                             l["matched_by"], (l["summary"] or "")[:52]))
+        print("   L%-2d %s  %-8s %-22s %-22s %s" % (l["layer"], l["sha"][:12], l["group"] or "★待确认",
+                                                    l["evidence_level"], l["matched_by"], (l["summary"] or "")[:46]))
+    # ★ 三档 × 按组分列（★ 门3 要求的输出形态）
+    TIER = {"hard": "硬级(owner行)", "weak": "弱级(前缀反推)", "medium": "中级(历史fallback)",
+            "unconfirmed": "未确认(无证据)"}
+
+    def tier_of(lv):
+        if lv.startswith("hard"):
+            return "hard"
+        if lv.startswith("weak"):
+            return "weak"
+        if lv.startswith("medium"):
+            return "medium"
+        return "unconfirmed"
+    groups = sorted({(l["group"] or "★待确认") for l in layers})
+    print("\n★ 归属分档 × 按组分列（层数）")
+    hdr = "  %-10s" % "档位" + "".join("%-12s" % g for g in groups) + "合计"
+    print(hdr)
+    tbl = {}
+    for t in ("hard", "weak", "medium", "unconfirmed"):
+        row = []
+        tot = 0
+        for g in groups:
+            c = sum(1 for l in layers if (l["group"] or "★待确认") == g and tier_of(l["evidence_level"]) == t)
+            row.append(c)
+            tot += c
+        tbl[t] = row
+        print("  %-10s" % TIER[t] + "".join("%-12d" % c for c in row) + str(tot))
+    print("  %-10s" % "合计" + "".join("%-12d" % sum(tbl[t][i] for t in tbl) for i in range(len(groups))) + str(len(layers)))
+    out["tier_by_group"] = {TIER[t]: dict(zip(groups, tbl[t])) for t in tbl}
+    json.dump(out, io.open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    print("\n✔ tier_by_group 已并入 OWNERS.json")
 
 
 if __name__ == "__main__":
