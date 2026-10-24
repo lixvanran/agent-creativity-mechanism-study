@@ -152,15 +152,28 @@ def main():
     d = a.holdout_dir
     data = build(d, a.expect)
     tot = {st: data[st]["total"] for st in STRATEGIES}
-    full = all(v >= a.expect for v in tot.values())
-    partial = [st for st in STRATEGIES if tot[st] < a.expect]
+    # ★★ "跑满"必须按【有效读数】判，不能按【文件行数】判 ——
+    #   否则一个死单元会被行数掩盖 ⇒ 表头写"全量"而实际缺份。
+    valid = {}
+    for st in STRATEGIES:
+        valid[st] = sum(1 for v in data[st]["by"].values() for r in v
+                         if r.get("n_cards") is not None)
+    nfail_all = {st: tot[st] - valid[st] for st in STRATEGIES}
+    full = all(valid[st] >= a.expect for st in STRATEGIES)
+    partial = [st for st in STRATEGIES if valid[st] < a.expect]
 
     if a.strict and not full:
         die("读数未到齐（%s）且 --strict ⇒ 停止" %
-            ", ".join("%s=%d/%d" % (st, tot[st], a.expect) for st in STRATEGIES))
+            ", ".join("%s=%d/%d" % (st, valid[st], a.expect) for st in STRATEGIES))
 
-    tag = ("【已跑批·全量 n=%d/%d】" % (a.expect, a.expect)) if full else \
-          ("【已跑批·部分 n=%s】" % " / ".join("%s=%d/%d" % (st, tot[st], a.expect) for st in STRATEGIES))
+    if full:
+        tag = "【已跑批·全量 n=%d/%d（有效读数）】" % (a.expect, a.expect)
+    else:
+        tag = "【已跑批·部分 n=%s（有效读数）】" % " / ".join(
+            "%s=%d/%d" % (st, valid[st], a.expect) for st in STRATEGIES)
+    if any(nfail_all.values()):
+        tag += "　★ 失败单元（判官/生成整段无输出，**不记 0、不进统计分母**）：%s" % " / ".join(
+            "%s=%d" % (st, nfail_all[st]) for st in STRATEGIES if nfail_all[st])
     if partial:
         tag += "　★ 未跑满 ⇒ 缺份是【单元尚未生成】，不是解析失败（分母不等时只报读数 + 噪声地板）"
 
@@ -175,25 +188,36 @@ def main():
     # ── ① 分母 ──────────────────────────────────────────────
     P("**① 分母（绝对分母，先相等才继续）**")
     P("")
-    P("| 策略 | 文件 | 总份数 | A02: B0_direct / B0_bestof3 / W_train_L3 | A05: B0_direct / B0_bestof3 / W_train_L3 | 分母齐? |")
+    P("| 策略 | 文件 | 总行数 | A02: B0_direct / B0_bestof3 / W_train_L3 | A05: B0_direct / B0_bestof3 / W_train_L3 | **有效读数相等?** |")
     P("|---|---|--:|---|---|:--:|")
     denoms = {}
     for st in STRATEGIES:
         by = data[st]["by"]
         cells = []
         per = []
+        per_valid = []
         for t in TASKS:
             row = []
+            row_valid = []
             for arm in ARMS:
-                k = (t, arm)
-                row.append(len(by.get(k, [])))
+                rs = by.get((t, arm), [])
+                row.append(len(rs))
+                row_valid.append(sum(1 for r in rs if r.get("n_cards") is not None))
             per.append(row)
-            cells.append(" / ".join(str(x) for x in row))
-        denoms[st] = per
-        # 齐 = 每题三臂 rep 数相等 且 三臂之间相等
-        ok = all(len(set(r)) == 1 for r in per) and all(r[0] == r[1] == r[2] for r in per)
+            per_valid.append(row_valid)
+            cells.append(" / ".join("%d(%d)" % (v, raw) for v, raw in zip(row_valid, row)))
+        denoms[st] = per_valid
+        # ★★ 「分母齐」必须按【有效读数】判，不能按【原始行数】判 ——
+        #   否则一个死单元（n_cards=None）会被行数掩盖 ⇒ 伪装成"分母齐"。
+        ok = all(len(set(r)) == 1 for r in per_valid) and all(r[0] == r[1] == r[2] for r in per_valid)
+        nfail = sum(1 for v in by.values() for r in v if r.get("n_cards") is None)
         P("| %s | `%s` | %d | %s | %s | %s |" %
-          (st, os.path.relpath(data[st]["path"], HERE), tot[st], cells[0], cells[1], "✔" if ok else "✘"))
+          (st, os.path.relpath(data[st]["path"], HERE), tot[st], cells[0], cells[1],
+             "✔" if ok else "✘"))
+        if nfail:
+            P("")
+            P("> ⚠ **%s 有 %d 份【失败单元】**（`n_cards=None`）⇒ ⇒ 上表每格写作「有效(原始)」⇒ ⇒ "
+              "**该臂的真实统计分母 = 有效读数，不是行数** ⇒ ⇒ 行数相等 ≠ 有效分母相等。" % (st, nfail))
     P("")
     P("> ★ 判官状态：%s" % judge_status(data))
     P("")
@@ -328,7 +352,7 @@ def main():
     P("")
 
     # ── 结论（脚本生成，标【产出方自算】）────────────────────
-    concl = build_conclusion(data, tot, a.expect, full, diffs)
+    concl = build_conclusion(data, tot, a.expect, full, diffs, valid)
     P("**结论【产出方自算】**")
     P("")
     P(concl)
@@ -338,7 +362,7 @@ def main():
     outp = a.out or os.path.join(d, "holdout_table.md")
     io.open(outp, "w", encoding="utf-8").write(text)
     print("✔ 留出集表已写：%s" % outp)
-    print("   分母：%s" % (" / ".join("%s=%d" % (s, tot[s]) for s in STRATEGIES)))
+    print("   分母（有效读数 / 文件行数）：%s" % (" / ".join("%s=%d/%d" % (s, valid[s], tot[s]) for s in STRATEGIES)))
     print("   状态：%s" % tag)
     print(text)
 
@@ -360,11 +384,15 @@ def judge_status(data):
     return "　｜　".join(parts)
 
 
-def build_conclusion(data, tot, expect, full, diffs):
+def build_conclusion(data, tot, expect, full, diffs, valid=None):
     lines = []
     if not full:
-        lines.append("★ 读数【未跑满】（%s）⇒ 本节结论只覆盖已生成单元，**不构成全量判决**。"
-                     % " / ".join("%s=%d/%d" % (s, tot[s], expect) for s in STRATEGIES))
+        lines.append("★ 读数【未跑满】（有效读数 %s）⇒ 本节结论只覆盖已生成单元，**不构成全量判决**。"
+                     % " / ".join("%s=%d/%d" % (s, valid[s], expect) for s in STRATEGIES))
+    nf = {s: tot[s] - valid[s] for s in STRATEGIES}
+    if any(nf.values()):
+        lines.append("★ **失败单元（不计 0、不进统计分母）**：%s ⇒ ⇒ 对应臂的真实统计分母 = 有效读数，**不是文件行数**。"
+                     % " / ".join("%s=%d" % (s, nf[s]) for s in STRATEGIES if nf[s]))
     # 负对照是否平：同一题、同一策略下 两个负对照臂的 Δ 承重维度
     neg_flat = []
     for st in STRATEGIES:

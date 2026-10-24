@@ -1,15 +1,17 @@
-### 留出集出表（【已跑批·部分 n=merged13=48/48 / lookup=48/48 / uniform=46/48】　★ 未跑满 ⇒ 缺份是【单元尚未生成】，不是解析失败（分母不等时只报读数 + 噪声地板））
+### 留出集出表（【已跑批·部分 n=merged13=48/48 / lookup=48/48 / uniform=47/48（有效读数）】　★ 失败单元（判官/生成整段无输出，**不记 0、不进统计分母**）：uniform=1　★ 未跑满 ⇒ 缺份是【单元尚未生成】，不是解析失败（分母不等时只报读数 + 噪声地板））
 
 > 来源目录：`/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/COLLAPSE/runs/holdout13`　｜　★ 判读顺序：分母 → 负对照 → 差值 → 题内 rep σ → W 臂 → A05 题级 → 判官状态
 > ★ 全部数字由 `routes/COLLAPSE/fill_holdout_table.py` 从 `arms.jsonl` 直接计算，**无手写、无占位符**。
 
 **① 分母（绝对分母，先相等才继续）**
 
-| 策略 | 文件 | 总份数 | A02: B0_direct / B0_bestof3 / W_train_L3 | A05: B0_direct / B0_bestof3 / W_train_L3 | 分母齐? |
+| 策略 | 文件 | 总行数 | A02: B0_direct / B0_bestof3 / W_train_L3 | A05: B0_direct / B0_bestof3 / W_train_L3 | **有效读数相等?** |
 |---|---|--:|---|---|:--:|
-| merged13 | `runs/holdout13/valid_merged13/arms.jsonl` | 48 | 8 / 8 / 8 | 8 / 8 / 8 | ✔ |
-| lookup | `runs/holdout13/valid_lookup/arms.jsonl` | 48 | 8 / 8 / 8 | 8 / 8 / 8 | ✔ |
-| uniform | `runs/holdout13/valid_uniform/arms.jsonl` | 46 | 8 / 8 / 8 | 8 / 7 / 7 | ✘ |
+| merged13 | `runs/holdout13/valid_merged13/arms.jsonl` | 48 | 8(8) / 8(8) / 8(8) | 8(8) / 8(8) / 8(8) | ✔ |
+| lookup | `runs/holdout13/valid_lookup/arms.jsonl` | 48 | 8(8) / 8(8) / 8(8) | 8(8) / 8(8) / 8(8) | ✔ |
+| uniform | `runs/holdout13/valid_uniform/arms.jsonl` | 48 | 8(8) / 8(8) / 8(8) | 8(8) / 8(8) / 7(8) | ✘ |
+
+> ⚠ **uniform 有 1 份【失败单元】**（`n_cards=None`）⇒ ⇒ 上表每格写作「有效(原始)」⇒ ⇒ **该臂的真实统计分母 = 有效读数，不是行数** ⇒ ⇒ 行数相等 ≠ 有效分母相等。
 
 > ★ 判官状态：merged13: MiniMax-M2.5 / 同厂商=True　｜　lookup: MiniMax-M2.5 / 同厂商=True　｜　uniform: MiniMax-M2.5 / 同厂商=True
 
@@ -28,7 +30,7 @@
 | uniform | B0_direct | A02 | 8 | 0 | 1.50 | 1.06 | 4.00 | 2/8 | — |
 | uniform | B0_direct | A05 | 8 | 0 | 1.00 | 0.64 | 2.50 | 3/8 | — |
 | uniform | B0_bestof3 | A02 | 8 | 0 | 2.00 | 0.52 | 6.00 | 5/8 | 0.457 |
-| uniform | B0_bestof3 | A05 | 7 | 0 | 2.00 | 0.58 | 4.00 | 4/7 | 0.180 |
+| uniform | B0_bestof3 | A05 | 8 | 0 | 2.00 | 0.53 | 4.50 | 5/8 | 0.180 |
 
 > ★ **主读数 = `n_dims`（有效信息维度数）**：负责人 2026-10-24 裁定「思维面」= 有效信息维度数。
 > ★ `n_load_bearing`（承重卡片数）为**辅助**读数；⚠ 既有《三策略表.txt》标「承重维度中位」的那列实际取的是 `n_dims` ⇒ 两表不可混引。
@@ -47,8 +49,8 @@
 | lookup | A05 | B0_bestof3 | +1.00 | +0.12 | 0.64 | 0.92 | 2.53 | 分离（≥2.0 σ） |
 | uniform | A02 | B0_direct | +0.50 | +0.00 | 1.06 | 0.99 | 0.97 | 不可分辨（|Δ/合并σ|<1.0） |
 | uniform | A02 | B0_bestof3 | +0.00 | -0.38 | 0.52 | 0.99 | 0.00 | 不可分辨（|Δ/合并σ|<1.0） |
-| uniform | A05 | B0_direct | +1.00 | +0.29 | 0.64 | 0.52 | 3.23 | 分离（≥2.0 σ） |
-| uniform | A05 | B0_bestof3 | +0.00 | +0.10 | 0.58 | 0.52 | 0.00 | 不可分辨（|Δ/合并σ|<1.0） |
+| uniform | A05 | B0_direct | +1.00 | +0.20 | 0.64 | 0.49 | 3.42 | 分离（≥2.0 σ） |
+| uniform | A05 | B0_bestof3 | +0.00 | -0.05 | 0.53 | 0.49 | 0.00 | 不可分辨（|Δ/合并σ|<1.0） |
 
 **⑤ W 臂总览（承重维度中位 / 钻牛角尖 / 路径 Self-Sim）**
 
@@ -59,7 +61,7 @@
 | lookup | A02 | 8 | 0 | 2.50 | 8.00 | 3/8 | 0.188 | 91 |
 | lookup | A05 | 8 | 0 | 2.00 | 2.50 | 6/8 | 0.148 | 54 |
 | uniform | A02 | 8 | 0 | 2.00 | 7.00 | 2/8 | 0.213 | 90 |
-| uniform | A05 | 6 | 1 | 2.00 | 4.00 | 4/6 | 0.137 | 42 |
+| uniform | A05 | 7 | 1 | 2.00 | 3.00 | 4/7 | 0.136 | 54 |
 
 **⑥ A05 题级明细（逐 rep）**
 
@@ -128,6 +130,7 @@
 | uniform | B0_bestof3 | 5 | 3 | 12 | ✔ | 0.0 | 6 | 有效 |
 | uniform | B0_bestof3 | 6 | 7 | 12 | ✔ | 0.0 | 6 | 有效 |
 | uniform | B0_bestof3 | 7 | 1 | 12 | ✔ | 0.0 | 6 | 有效 |
+| uniform | B0_bestof3 | 8 | 5 | 12 | ✔ | 0.0 | 6 | 有效 |
 | uniform | W_train_L3 | 1 | **失败** | **失败** | — | — | — | ★失败单元（判官/生成无输出，**不记 0**） |
 | uniform | W_train_L3 | 2 | 2 | 12 | ✔ | 0.0 | 6 | 有效 |
 | uniform | W_train_L3 | 3 | 7 | 12 | · | 0.0 | 6 | 有效 |
@@ -135,6 +138,7 @@
 | uniform | W_train_L3 | 5 | 5 | 12 | ✔ | 0.0 | 6 | 有效 |
 | uniform | W_train_L3 | 6 | 1 | 12 | ✔ | 0.0 | 12 | 有效 |
 | uniform | W_train_L3 | 7 | 7 | 12 | · | 0.0 | 6 | 有效 |
+| uniform | W_train_L3 | 8 | 2 | 12 | · | 0.0 | 12 | 有效 |
 
 **⑦ 判官状态**
 
@@ -142,13 +146,14 @@
 |---|---|:--:|--:|--:|--:|--:|--:|
 | merged13 | MiniMax-M2.5 | True | 48 | 0 | 0 | 0 | 48 |
 | lookup | MiniMax-M2.5 | True | 48 | 0 | 0 | 0 | 48 |
-| uniform | MiniMax-M2.5 | True | 45 | 1 | 0 | 0 | 46 |
+| uniform | MiniMax-M2.5 | True | 47 | 1 | 0 | 0 | 48 |
 
 > ★ `卡片0(仪器层)` = 判官解析不出卡片（仪器坏了）；`n_load_bearing=0 但 n_cards>0` 才是内容层空。两者必须分开看。
 
 **结论【产出方自算】**
 
-- ★ 读数【未跑满】（merged13=48/48 / lookup=48/48 / uniform=46/48）⇒ 本节结论只覆盖已生成单元，**不构成全量判决**。
+- ★ 读数【未跑满】（有效读数 merged13=48/48 / lookup=48/48 / uniform=47/48）⇒ 本节结论只覆盖已生成单元，**不构成全量判决**。
+- ★ **失败单元（不计 0、不进统计分母）**：uniform=1 ⇒ ⇒ 对应臂的真实统计分母 = 有效读数，**不是文件行数**。
 - 负对照（direct vs bestof3）有效信息维度数中位最大差 = 1.00（merged13/A02）⇒ ★ 负对照不平 ⇒ 按预注册只报读数 + 噪声地板，不报架构优劣
 - W 臂 vs 负对照：12 个(策略×题×对照)对比中，|Δ/合并σ|≥1.0 的 7 个、<1.0 的 5 个
 - ★ 读满后必须【重跑本脚本】再据以改稿；当前表不得作为最终判决引用。
