@@ -92,7 +92,7 @@ def main():
         n = {x: sum(1 for y in v.values() if y == x) for x in ("支持", "矛盾", "未提及", "解析失败")}
         print("  %s 断言 %2d → 支持 %2d / 矛盾 %2d / 未提及 %2d / 失败 %d"
               % (tid, len(pool), n["支持"], n["矛盾"], n["未提及"], n["解析失败"]), flush=True)
-    json.dump(verd, open("%s/verdicts_v3.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(verd, open("%s/verdicts_v3.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
 
     print("\n== 每候选奖励 ==", flush=True)
     recs = []
@@ -114,7 +114,7 @@ def main():
             key=k, tid=tid, arm=arm, length=len(txt), n_claims=len(cs),
             n_sup=len(sup), n_con=len(con), n_unment=len(un), n_new=len(new),
             reward=round(len(new) / max(len(txt), 1) * 100, 4), dead=False))
-    json.dump(recs, open("%s/records_v3.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(recs, open("%s/records_v3.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
 
     print("\n%-22s %5s %5s %5s %5s %5s %7s" % ("key", "clm", "sup", "con", "unm", "new", "reward"))
     for r in sorted(recs, key=lambda x: -x["reward"]):
