@@ -60,11 +60,19 @@ def read_set(arts: List[str], vecs: List[List[float]]) -> Dict[str, Any]:
             "distinct_2": round(distinct_n(arts, 2), 4)}
 
 
-def load_groups(unit_dir: str) -> Dict[tuple, List[str]]:
-    """(tid, rep, arm) → 该组已落盘的 run 的 `post` 文本（按 run 序）"""
+def load_groups(unit_dir: str, allowed=None) -> Dict[tuple, List[str]]:
+    """(tid, rep, arm) → 该组已落盘的 run 的 `post` 文本（按 run 序）
+
+    ★ `allowed`：★ 可选的「basename 集合」（★ 不含 .json ★）⇒ ★ 只读清单里的单元 ★
+      ★ 用途：★ 批在跑时，★ 多个分析脚本若各自 glob，★ 就会读到【不同时刻】的单元集
+      ★ ⇒ ★ 两个脚本的 n 可能差 1–2 ⇒ ★ 派生读数对不上 ⇒ ★
+      ★ ⇒ ★ 做法：★ 冻结一份单元清单，★ 所有分析脚本都读它 ⇒ ★ n 结构性一致 ★
+    """
     g: Dict[tuple, List[tuple]] = defaultdict(list)
     for f in sorted(glob.glob(os.path.join(unit_dir, "*.json"))):
         b = os.path.basename(f)[:-5]
+        if allowed is not None and b not in allowed:
+            continue
         m = re.match(r"(\S+)_r(\d+)_(\S+)_u(\d+)$", b)
         if not m:
             continue
@@ -156,10 +164,19 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=20261025)
     ap.add_argument("--boot", type=int, default=10000)
     ap.add_argument("--json-out", default=None)
+    ap.add_argument("--unit-list", default=None,
+                    help="★ 冻结的单元清单文件（★ 每行一个 basename，★ 不含 .json ★）⇒ ★ 与其它分析脚本同源 ★")
     a = ap.parse_args()
 
     unit_dir = os.path.join(a.out, "units")
-    groups = load_groups(unit_dir)
+    allowed = None
+    if a.unit_list:
+        if not os.path.isfile(a.unit_list):
+            print("✘ unit-list 不存在：%s" % a.unit_list)
+            return 2
+        allowed = set(x.strip() for x in open(a.unit_list, encoding="utf-8") if x.strip())
+        print("   ★ 单元清单：%s（★ %d 个 ★）" % (a.unit_list, len(allowed)))
+    groups = load_groups(unit_dir, allowed)
     full = {k: v for k, v in groups.items() if len(v) >= a.runs_per_arm}
     n_units = sum(len(v) for v in groups.values())
     print("== 0. 覆盖 ==")

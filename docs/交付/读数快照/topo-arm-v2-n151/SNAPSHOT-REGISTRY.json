@@ -1,0 +1,111 @@
+{
+ "bytes": 7971,
+ "clock_note": "★ frozen_at = 机器 UTC 时钟；★ label_date = 叙事日期（★ 二者可能不同 ★）★",
+ "companions": [
+  {
+   "bytes": 15052,
+   "sha256": "26c4e349628ba576626c483b928b27d9ffd8d7bfb5fca8ef428af653b78f0716",
+   "snapshot": "SNAPSHOT-h0_theta0_multicalib-n151-2026-10-26.json",
+   "src": "h0_theta0_multicalib.json"
+  },
+  {
+   "bytes": 3374,
+   "sha256": "a3f19d3550d902575ce913db0f644554411037bae40958d3520514c2a80fc1ee",
+   "snapshot": "SNAPSHOT-n151-2026-10-26.json",
+   "src": "UNITS-n151.txt"
+  }
+ ],
+ "entries": [
+  {
+   "bytes": 7971,
+   "frozen_at": "2026-10-24T10:09Z",
+   "sha256": "a412f4ac0416a441e7a9df9fc21f6de8648e7ce2550b7ed26e4d04560baae61a",
+   "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-26.json",
+   "src": "partial_verdict.json"
+  },
+  {
+   "bytes": 15052,
+   "frozen_at": "2026-10-24T10:09Z",
+   "sha256": "26c4e349628ba576626c483b928b27d9ffd8d7bfb5fca8ef428af653b78f0716",
+   "snapshot": "SNAPSHOT-h0_theta0_multicalib-n151-2026-10-26.json",
+   "src": "h0_theta0_multicalib.json"
+  },
+  {
+   "bytes": 3374,
+   "frozen_at": "2026-10-24T10:09Z",
+   "sha256": "a3f19d3550d902575ce913db0f644554411037bae40958d3520514c2a80fc1ee",
+   "snapshot": "SNAPSHOT-n151-2026-10-26.json",
+   "src": "UNITS-n151.txt"
+  }
+ ],
+ "frozen_at": "2026-10-24T10:09Z",
+ "history": [
+  {
+   "bytes": 7696,
+   "frozen_at": "2026-10-26T09:55Z",
+   "n_units": 140,
+   "note": "★ 本批仍在跑；★ 交稿文献引用的部分预判决以本快照为准（★ 副本+sha256+条数 ★）★",
+   "sha256": "b5544864d173ef3e0853cf2a8cc6aa63492abf35f8956c55b7a1a76e94839110",
+   "snapshot": "SNAPSHOT-partial_verdict-n140-2026-10-26.json",
+   "theta0": 1.339,
+   "tids": [
+    "S4",
+    "S5",
+    "S6"
+   ]
+  },
+  {
+   "bytes": 7696,
+   "clock_note": "★ frozen_at = 机器 UTC 时钟；★ label_date = 叙事日期（★ 二者可能不同 ★）★",
+   "companions": [
+    {
+     "bytes": 14885,
+     "sha256": "051b7f3d9dacea4372c4d711f492e232e24f883d83b648d313716425d5b3604a",
+     "snapshot": "SNAPSHOT-h0_theta0_multicalib-n148-2026-10-26.json",
+     "src": "h0_theta0_multicalib.json"
+    }
+   ],
+   "entries": [
+    {
+     "bytes": 7696,
+     "frozen_at": "2026-10-24T10:06Z",
+     "sha256": "90d1bb3c450c98cff0e34c7ad35cb6057bb8f958cee140388132930e303b48b7",
+     "snapshot": "SNAPSHOT-partial_verdict-n148-2026-10-26.json",
+     "src": "partial_verdict.json"
+    },
+    {
+     "bytes": 14885,
+     "frozen_at": "2026-10-24T10:06Z",
+     "sha256": "051b7f3d9dacea4372c4d711f492e232e24f883d83b648d313716425d5b3604a",
+     "snapshot": "SNAPSHOT-h0_theta0_multicalib-n148-2026-10-26.json",
+     "src": "h0_theta0_multicalib.json"
+    }
+   ],
+   "frozen_at": "2026-10-24T10:06Z",
+   "label_date": "2026-10-26",
+   "n_units": 148,
+   "note": "★ 本批仍在跑；★ 交稿文献引用的部分预判决以本快照为准（★ 副本+sha256+条数 ★）★",
+   "sha256": "90d1bb3c450c98cff0e34c7ad35cb6057bb8f958cee140388132930e303b48b7",
+   "snapshot": "SNAPSHOT-partial_verdict-n148-2026-10-26.json",
+   "src": "partial_verdict.json",
+   "theta0": 1.339,
+   "tids": [
+    "S4",
+    "S5",
+    "S6"
+   ]
+  }
+ ],
+ "label_date": "2026-10-26",
+ "n_units": 151,
+ "note": "★ 本批仍在跑；★ 交稿文献引用的部分预判决以本快照为准（★ 副本+sha256+条数 ★）★",
+ "sha256": "a412f4ac0416a441e7a9df9fc21f6de8648e7ce2550b7ed26e4d04560baae61a",
+ "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-26.json",
+ "src": "partial_verdict.json",
+ "theta0": 1.339,
+ "tids": [
+  "S4",
+  "S5",
+  "S6"
+ ]
+}

@@ -1,0 +1,57 @@
+{
+ "chat": {
+  "http": 429,
+  "limited": true,
+  "msg": "已达到 Token Plan 用量上限：请升级 Token Plan 套餐或购买积分补充用量。 (2056)",
+  "ok": false
+ },
+ "checked_at_utc": "2026-10-24T10:23:42Z",
+ "embed": {
+  "http": 200,
+  "n_vectors": 0,
+  "ok": false,
+  "status_code": 1008,
+  "status_msg": "insufficient balance"
+ },
+ "quota": {
+  "base_resp": {
+   "status_code": 0,
+   "status_msg": "success"
+  },
+  "models": [
+   {
+    "interval_end_utc": "2026-10-24T12:00:00Z",
+    "interval_remaining_percent": 0,
+    "interval_remains_min": 96.3,
+    "interval_start_utc": "2026-10-24T07:00:00Z",
+    "interval_status": 2,
+    "model_name": "general",
+    "weekly_remaining_percent": 80,
+    "weekly_remains_hours": 29.6
+   },
+   {
+    "interval_end_utc": "2026-10-24T16:00:00Z",
+    "interval_remaining_percent": 100,
+    "interval_remains_min": 336.3,
+    "interval_start_utc": "2026-10-23T16:00:00Z",
+    "interval_status": 1,
+    "model_name": "video",
+    "weekly_remaining_percent": 100,
+    "weekly_remains_hours": 29.6
+   }
+  ],
+  "ok": true
+ },
+ "units": {
+  "double_count_note": "★ 公式 1-(nf+ne)/n 把「既失败又空内容」的调用计两次 ⇒ ★ 报低、★ 早停会被提前触发 ★",
+  "health_as_formula": 0.9392,
+  "health_dedup": 0.9696,
+  "len_mismatch_units": 0,
+  "n_calls": 1547,
+  "n_empty": 47,
+  "n_failed": 47,
+  "n_failed_and_empty": 47,
+  "n_units": 159,
+  "ok": true
+ }
+}

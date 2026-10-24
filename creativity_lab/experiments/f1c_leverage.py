@@ -60,11 +60,16 @@ def die(msg):
     sys.exit(1)
 
 
-def load_groups(unit_dir):
-    """★ (tid, rep, arm) → [(run_idx, post_text), ...] ★"""
+def load_groups(unit_dir, allowed=None):
+    """★ (tid, rep, arm) → [(run_idx, post_text), ...] ★
+
+    ★ `allowed`：★ 可选的 basename 集合（★ 冻结单元清单 ★）⇒ ★ 与其它脚本同源 ★
+    """
     g = defaultdict(list)
     for f in sorted(glob.glob(os.path.join(unit_dir, "*.json"))):
         b = os.path.basename(f)[:-5]
+        if allowed is not None and b not in allowed:
+            continue
         m = re.match(r"(\S+)_r(\d+)_(\S+)_u(\d+)$", b)
         if not m:
             continue
@@ -85,10 +90,18 @@ def main():
     ap.add_argument("--seed", type=int, default=20261025)
     ap.add_argument("--min-content-len", type=int, default=200)
     ap.add_argument("--json-out", default=None)
+    ap.add_argument("--unit-list", default=None,
+                    help="★ 冻结的单元清单（★ 每行一个 basename ★）⇒ ★ 与其它脚本同源 ★")
     a = ap.parse_args()
 
     unit_dir = os.path.join(a.out, "units")
-    groups = load_groups(unit_dir)
+    allowed = None
+    if a.unit_list:
+        if not os.path.isfile(a.unit_list):
+            die("unit-list 不存在：%s" % a.unit_list)
+        allowed = set(x.strip() for x in open(a.unit_list, encoding="utf-8") if x.strip())
+        print("★ 单元清单：%s（★ %d 个 ★）" % (a.unit_list, len(allowed)))
+    groups = load_groups(unit_dir, allowed)
     full = {k: v for k, v in groups.items() if len(v) >= a.runs_per_arm}
     if not full:
         die("没有满组（>= %d 份）" % a.runs_per_arm)

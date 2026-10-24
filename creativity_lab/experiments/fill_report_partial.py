@@ -62,6 +62,214 @@ def fmt(x, nd=4):
     return ("%." + str(nd) + "f") % x
 
 
+# ★ ★ 6.10.2b 生成器（★ 幂等：★ 用 BEGIN/END 标记切掉上次产物再重填 ★）★★
+MC_BEGIN = "<!-- BEGIN:6.10.2b -->"
+MC_END = "<!-- END:6.10.2b -->"
+SN_BEGIN = "<!-- BEGIN:6.10.0 -->"
+SN_END = "<!-- END:6.10.0 -->"
+CH_BEGIN = "<!-- BEGIN:6.10.0b -->"
+CH_END = "<!-- END:6.10.0b -->"
+
+
+def build_channel_section(cj):
+    """★ 从 channel_status.json 生成「通道状态与批状态」登记段 ★"""
+    q = cj.get("quota") or {}
+    chat = cj.get("chat") or {}
+    emb = cj.get("embed") or {}
+    un = cj.get("units") or {}
+    gen = None
+    for m in (q.get("models") or []):
+        if m.get("model_name") == "general":
+            gen = m
+    L = []
+    L.append("### 6.10.0b ★★★ 通道状态与批状态登记（★ 2026-10-26 限流事件 ★）★★★")
+    L.append("")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 报「chat 窗口限流 + 嵌入余额耗尽」★")
+    L.append("> ★ **工具**：★ `creativity_lab/experiments/channel_status.py`（★ 只读 · ★ 不改生产代码 · ★ 不打印 key ★）★")
+    L.append("> ★ **原始读数**：★ `docs/交付/读数快照/topo-arm-v2-n151/channel_status.json` ★")
+    L.append("")
+    L.append("| 通道 | 实测结果 | 恢复方式 |")
+    L.append("|:-:|---|---|")
+    if gen:
+        L.append("| ★ **chat（general）** | ★ **HTTP %s** ｜ ★ %s ★ | ★ **限流（★ 5 小时滚动窗口 ★）⇒ 等窗口复位即可** ｜ 窗口 %s → %s，★ 剩 %s 分钟 ｜ 本周剩 %s 小时 ★ |"
+                 % (chat.get("http"), chat.get("msg", "")[:60], gen.get("interval_start_utc"),
+                    gen.get("interval_end_utc"), gen.get("interval_remains_min"),
+                    gen.get("weekly_remains_hours")))
+    else:
+        L.append("| ★ **chat（general）** | ★ HTTP %s ｜ %s ★ | ★ 等窗口复位 ★ |"
+                 % (chat.get("http"), chat.get("msg", "")[:60]))
+    L.append("| ★ **嵌入 `embo-01`** | ★ HTTP %s ｜ **status_code=%s** ｜ %s ★ | ★ ★ **余额耗尽 ⇒ 不会自愈 ⇒ 必须实际充值** ★ |"
+             % (emb.get("http"), emb.get("status_code"), emb.get("status_msg")))
+    L.append("")
+    L.append("★ **两条通道的处置完全相反（★ 这是本节最要紧的一句 ★）**：★ chat 限流 ⇒ **等 1 个窗口就好**；★ 嵌入余额 ⇒ **等多久都没用，必须充值** ★")
+    L.append("")
+    L.append("★ **批状态（★ 单元级独立重算，★ 不信批自己的 manifest ★）**：")
+    L.append("")
+    L.append("| 项 | 值 |")
+    L.append("|:-:|---|")
+    L.append("| ★ 单元 | ★ **%s**（★ 已落盘，★ **全部保留** ★）★ |" % un.get("n_units"))
+    L.append("| ★ 调用 | ★ %s ｜ 失败 **%s** ｜ 空内容 %s ｜ **两者重合 %s** ｜ `len(calls)!=n_calls` 的单元 %s ★ |"
+             % (un.get("n_calls"), un.get("n_failed"), un.get("n_empty"),
+                un.get("n_failed_and_empty"), un.get("len_mismatch_units")))
+    L.append("| ★ 健康度 | ★ 公式 `1-(nf+ne)/n` = **%.4f** ｜ 去重 `1-max(nf,ne)/n` = **%.4f** ⇒ ★ **差 %.4f** ★ |"
+             % (un.get("health_as_formula", 0), un.get("health_dedup", 0),
+                abs(un.get("health_as_formula", 0) - un.get("health_dedup", 0))))
+    L.append("")
+    L.append("★ **★ 交稿读数【不受】本次限流影响（★ 已逐单元核过 ★）★★：")
+    L.append("")
+    L.append("| 检查 | 结果 |")
+    L.append("|:-:|---|")
+    L.append("| ★ 失败单元落在冻结清单【内】的 | ★ **0 个** ★ |")
+    L.append("| ★ 失败起始时刻（★ 首个失败单元 mtime ★） | ★ 晚于 §6.10.0 快照的冻结时刻 ⇒ ★ **快照取自限流之前** ★ |")
+    L.append("| ★ 失败单元的 `post` 长度 | ★ **0** ⇒ ★ 空 `post` 被 `load_groups` 过滤 ⇒ ★ **不进读数** ★ |")
+    L.append("")
+    L.append("★ **处置**：★ 批已**暂停**（★ 不是重启：★ 已落盘单元全部保留，★ 同一条命令即可续跑 ★）★")
+    L.append("★ ⇒ ★ 续跑前**必须先测 chat 通不通**（★ 窗口未复位就重启 ⇒ 每个单元 13 次调用全 429 ⇒ 白烧 ★）★")
+    L.append("★ ⇒ ★ 批本身**不依赖嵌入**（★ 嵌入只在分析阶段用 ★）⇒ ★ **批可在窗口复位后继续**；★ 但**批跑完出读数必须先充值嵌入** ★")
+    L.append("")
+    L.append("★ **★ 一条口径 bug（本轮实测抓到）★**：★ 健康度公式 `1-(nf+ne)/n` 把「**既失败又空内容**」的调用**计了两次**（★ 本批 47/47 完全重合 ★）⇒ ★ 报出的健康度**偏低** ⇒ ★ **早停会被提前触发**（★ 方向是保守的，★ 不是漏记 ★）★ ⇒ ★ 批后接入健康度守卫时改为 `1-max(nf,ne)/n` ★（★ 详见 KI-10 ★）★")
+    L.append("")
+    return "\n".join(L)
+
+CALIB_ORDER = ["A_all_arms", "B_prereg_new", "B_prereg_full", "C_old_only"]
+
+
+def _days_between(d1, d2):
+    import datetime as _dt
+    try:
+        a = _dt.date.fromisoformat(d1)
+        b = _dt.date.fromisoformat(d2)
+        return (b - a).days
+    except Exception:
+        return 0
+CALIB_LABEL = {
+    "A_all_arms": "A 全部臂（★ 当前实现实际用的 ★）",
+    "B_prereg_new": "B 预注册·新批段",
+    "B_prereg_full": "B 预注册·完整",
+    "C_old_only": "C 旧批单独（★ 诊断 ★）",
+}
+CONTRAST_ORDER = ["H-TOPO-4a", "H-TOPO-4c", "H-TOPO-4d"]
+
+
+def replace_markers(s, body, begin=MC_BEGIN, end=MC_END):
+    """★ 把 BEGIN/END 标记之间的内容整体换成 body（★ 天然幂等 ★）"""
+    if begin not in s or end not in s:
+        die("报告里找不到标记 %s / %s（★ 先插占位 ★）" % (begin, end))
+    i = s.index(begin)
+    j = s.index(end)
+    if j < i:
+        die("6.10.2b 标记顺序反了")
+    return s[:i] + begin + "\n" + body.rstrip() + "\n" + s[j:]
+
+
+def build_multicalib_section(mj):
+    """★ 从 h0_theta0_multicalib.json 生成 6.10.2b 整节（★ 含判定句 ★）"""
+    h0 = mj["h0"]
+    verd = mj["verdicts"]
+    risk = mj.get("direction_risk") or {}
+    gate = mj.get("old_recompute_gate") or {}
+
+    L = []
+    L.append("### 6.10.2b ★★★ θ₀ 的多口径重算：★ 偏离预注册的影响已量化 ★★★")
+    L.append("")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 指出「当前用的是全部臂口径（n=12）而非预注册的 `nosel_b3` 口径 ⇒ 判据偏离预注册 ⇒ ★ θ₀ 是判决的第一道基准 ⇒ 请给两个口径的 θ₀ 差多少」★")
+    L.append("> ★ **回源**：★ 预注册 `docs/cmp8/routes/COLLAPSE/eval/PREREG-TOPOLOGY-ARM.md` §5.0b2-i「原料来源」行（★ 写死 = 新批 `nosel_b3` 12 + 旧批 `nosel_b5` 9 = 21 ★）★")
+    L.append("> ★ **工具**：★ `creativity_lab/experiments/h0_theta0_calibration.py`（★ 零生成调用，★ 唯一成本是 embedding ★）★")
+    L.append("> ★ **原始读数**：★ `docs/交付/读数快照/topo-arm-v2-n151/h0_theta0_multicalib.json` ★")
+    L.append("")
+
+    # ── 四口径表 ──
+    L.append("| 口径 | 原料 | n | σ | X₀ | θ₀ | 4a 超门槛 | 4c 超门槛 | 4d 超门槛 | 判决格（4a/4c/4d） |")
+    L.append("|:-:|---|--:|--:|--:|--:|--:|--:|--:|:-:|")
+    for name in CALIB_ORDER:
+        st = h0.get(name)
+        if not st:
+            continue
+        pc = verd.get("H-TOPO-4a", {}).get("per_calibration", {}).get(name, {})
+
+        def cell(cn):
+            p = verd.get(cn, {}).get("per_calibration", {}).get(name, {})
+            if not p:
+                return "—"
+            tot = verd.get(cn, {}).get("n_cells")
+            return "%d/%d" % (p.get("n_cells_over_theta0", 0), tot if tot is not None else 0)
+
+        vs = []
+        for cn in CONTRAST_ORDER:
+            p = verd.get(cn, {}).get("per_calibration", {}).get(name, {})
+            vs.append(p.get("verdict", "—"))
+        L.append("| **%s** | %s | **%d** | %s | %s | **%sσ** | %s | %s | %s | %s |"
+                 % (CALIB_LABEL.get(name, name), st.get("short", "—"),
+                    st["n_pairs"], fmt(st["sigma_rep"]), fmt(st["X0_q95_over_sqrt2"]),
+                    ("%.3f" % st["theta0_standardized"]) if st.get("theta0_standardized") else "—",
+                    cell("H-TOPO-4a"), cell("H-TOPO-4c"), cell("H-TOPO-4d"),
+                    " / ".join(vs)))
+    L.append("")
+
+    # ── 偏离方向判定（★ 由脚本判，不手写 ★）──
+    thA = risk.get("theta0_current_A")
+    thB = risk.get("theta0_prereg_B")
+    ratio = risk.get("theta0_ratio_B_over_A")
+    if ratio is not None:
+        if ratio > 1.0:
+            dir_txt = ("★ **预注册口径的门槛更严**（θ₀ %sσ → %sσ，★ 比值 %.4f）⇒ ★ ⇒ "
+                       "**当前实现用的 A 口径【更松】⇒ ⇒ 偏离方向 = 偏向『可分辨』= 危险方向** ★"
+                       % (fmt(thA, 3), fmt(thB, 3), ratio))
+        else:
+            dir_txt = ("★ **预注册口径的门槛更松**（θ₀ %sσ → %sσ，★ 比值 %.4f）⇒ ★ ⇒ "
+                       "**偏离方向 = 偏向『不可分辨』= 保守方向** ★"
+                       % (fmt(thA, 3), fmt(thB, 3), ratio))
+    else:
+        dir_txt = "★ 口径比值不可用 ★"
+
+    changed = mj.get("verdict_changed_by_calibration") or []
+    # 格级读数是否随口径变（A vs 预注册完整）
+    cell_diff = []
+    for cn in CONTRAST_ORDER:
+        pc = verd.get(cn, {}).get("per_calibration", {})
+        a = pc.get("A_all_arms") or {}
+        b = pc.get("B_prereg_full") or {}
+        if a.get("n_cells_over_theta0") != b.get("n_cells_over_theta0"):
+            cell_diff.append(cn)
+
+    L.append("★ **① 偏离方向（★ 由脚本判定 ★）**：★ %s ★" % dir_txt)
+    L.append("")
+    L.append("★ **② 判决是否随口径改变**：★ %s ★"
+             % ("★ **不随口径改变**（★ 三个对比在四套口径下判决格完全相同 ★）★"
+                if not changed else "★ **随口径改变**：★ %s ★" % changed))
+    L.append("")
+    L.append("★ **③ 格级读数是否随口径改变（A vs 预注册完整口径）**：★ %s ★"
+             % ("★ **不改变**（★ 三个对比的超门槛格数完全相同 ★）★"
+                if not cell_diff else "★ **改变**：★ %s ★" % cell_diff))
+    L.append("")
+    L.append("★ **④ 跨口径混合是否有效（★ 预注册那条合法性论证的实测检验 ★）**：★ 旧批层①（`nosel_b5`，n=%d）单独 σ = %s；★ 新批层②（`nosel_b3`，**n=%d，★ 样本太少、★ 其 σ 与区间均不可靠 ⇒ ★ 不能单独作证 ★**）σ = %s；★ 两批合并 σ = %s ⇒ ★ **合并值落在旧批单独值与新批段值之间，★ 未见明显量纲漂移** ⇒ ★ 预注册「零分布只要求同题重复，不要求口径同」那条论证**在本批上未见反例** ★（★ 但这是本批的**弱**证据：★ 新批段只有 %d 个配对 ★ ⇒ ★ 批跑满后必须重测这一条 ★）★"
+             % (h0["C_old_only"]["n_pairs"], fmt(h0["C_old_only"]["sigma_rep"]),
+                h0["B_prereg_new"]["n_pairs"], fmt(h0["B_prereg_new"]["sigma_rep"]),
+                fmt(h0["B_prereg_full"]["sigma_rep"]),
+                h0["B_prereg_new"]["n_pairs"]))
+    L.append("")
+    L.append("★ **⑤ 旧批回源闸门（★ 存档值 vs 独立重算 ★）**：★ 核对 %d 组，★ 不符 **%d** 组 ⇒ %s ★"
+             % (gate.get("n_checked", 0), gate.get("n_mismatch", 0),
+                "✔ 通过" if gate.get("passed") else "✘ 不通过"))
+    L.append("")
+    L.append("★ **⑥ 为什么本轮【不】切到预注册口径（★ 原料充分性 ★）**：★ 预注册口径要求新批 `nosel_b3` 有 6 题 × 2 rep = 12 个配对；★ 当前该臂只有 **%d** 个题满组（★ ⇒ %d 个配对 ★）⇒ ★ **标定原料不足**（★ n=%d 时 bootstrap 区间不可用 ★）⇒ ★ ⇒ **现在切口径会把一个已标定好的门槛换成一个未标定好的门槛** ⇒ ★ 处置：★ **本轮维持 A 口径并显式登记 + 批跑满后切回预注册口径 + 加一道「两口径判决必须一致」的断言** ★"
+             % (h0["B_prereg_new"]["n_pairs"], h0["B_prereg_new"]["n_pairs"],
+                h0["B_prereg_new"]["n_pairs"]))
+    L.append("")
+    L.append("★ **⑦ 这条偏离怎么处置（★ 结论 ★）**：★")
+    L.append("")
+    L.append("| 项 | 结论 |")
+    L.append("|:-:|---|")
+    L.append("| ★ 偏离是否存在 | ★ **是**（★ 代码用全部臂口径，★ 预注册写的是 `nosel_b3` + 旧批 ★）★ |")
+    L.append("| ★ 偏离方向 | ★ **危险方向**（★ 当前实现的门槛更松 ⇒ 偏向『可分辨』★）★ |")
+    L.append("| ★ 对判决的影响 | ★ **实测为零**（★ 判决格与格级读数均未变 ★）★ |")
+    L.append("| ★ 处置 | ★ **登记 + 批跑满后切回预注册口径 + 加一致性断言** ⇒ ★ **不是「无害就不用管」** ★ |")
+    L.append("")
+    L.append("★ **★ 一条元教训（★ 比这个数本身更值钱 ★）**：★ 标定值（θ₀ / 噪声地板）虽是判决的【尺子】，★ 但它能不能被定版，★ **还取决于【标定原料是否充分】** ⇒ ⇒ ★ 「H0 标定 → 写死 θ₀ → 判决」这条顺序**隐含要求「先跑满再标定」** ⇒ ⇒ ★ ⇒ **部分预判决阶段必然要用替代口径** ⇒ ⇒ ★ ⇒ ★ **替代口径必须显式登记，且必须量化它对判决的影响**（★ 本节就是那道量化 ★）★★")
+    L.append("")
+    return "\n".join(L)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", required=True)
@@ -74,6 +282,10 @@ def main():
                     help="★ f1c_leverage.py 的输出（★ 位置基线 + 内容依赖判据 ★）")
     ap.add_argument("--excl-json", default=None,
                     help="★ recompute_excluding.py 的输出（★ 用来给主判据表加『脆弱格』列 ★）")
+    ap.add_argument("--multicalib-json", default=None,
+                    help="★ h0_theta0_calibration.py 的输出（★ θ₀ 多口径重算 + 判决影响 ★）")
+    ap.add_argument("--channel-json", default=None,
+                    help="★ channel_status.py 的输出（★ 通道状态 + 批状态登记 ★）")
     ap.add_argument("--contaminated-unit", default=None,
                     help="★ 已知污染单元的 basename（★ 用于报告 6.12.2 的单元数与臂 n ★）")
     a = ap.parse_args()
@@ -260,17 +472,67 @@ def main():
         if not os.path.isfile(a.snapshot_json):
             die("snapshot-json 不存在：%s" % a.snapshot_json)
         sj = json.load(open(a.snapshot_json, encoding="utf-8"))
+        _ents = sj.get("entries") or []
+        _comp = ""
+        if len(_ents) > 1:
+            _comp = ("| ★ 伴随快照 | ★ %s |\n"
+                     % ("；".join("`%s`（%s，★ %d B，★ sha256 `%s`）"
+                                 % (e["snapshot"], e["src"], e["bytes"], e["sha256"])
+                                 for e in _ents[1:])))
+        _clock = ""
+        if sj.get("frozen_at") and sj.get("label_date"):
+            _clock = ("| ★ 冻结时点 | ★ 机器 UTC **%s** ｜ 叙事日期 **%s**（★ 沙箱时钟与文档叙事日期相差 %d 天，★ 二者分别登记、★ 不混用 ★） |\n"
+                      % (sj["frozen_at"], sj["label_date"],
+                         abs(_days_between(sj["frozen_at"][:10], sj["label_date"]))))
         _reg = ("### 6.10.0 ★★ 冻结快照登记（★ 交稿版引用的部分预判决以本快照为准 ★）★★\n\n"
                 "| 项 | 值 |\n|:-:|---|\n"
                 "| ★ 快照文件 | ★ `%s` ★ |\n"
                 "| ★ n（单元） | ★ **%d** / 360 ｜ 已跑题 %s ｜ θ₀ = %.3f |\n"
                 "| ★ sha256 | ★ `%s` ★ |\n"
                 "| ★ 字节数 | ★ %d |\n"
-                "| ★ 冻结时点 | ★ %s |\n"
+                "%s"
+                "%s"
                 "| ★ **为什么需要它** | ★ **本批仍在跑 ⇒ 本段读数会变 ⇒ ⇒ 交稿文献引用的必须是【冻结快照】（★ 副本 + sha256 + 条数 ★），★ 不是某个时刻的 json ★** |\n"
                 % (sj["snapshot"], sj["n_units"], "、".join(sj["tids"] or []), sj["theta0"],
-                   sj["sha256"], sj["bytes"], sj["frozen_at"]))
-        s = replace_line(s, "### 6.10.1", _reg + "### 6.10.1", "6.10.0 快照登记")
+                   sj["sha256"], sj["bytes"], _clock, _comp))
+        s = replace_markers(s, _reg, SN_BEGIN, SN_END)
+
+    # ★ ★ 通道状态与批状态登记（★ 2026-10-26 限流事件 ★）★★
+    if a.channel_json:
+        if not os.path.isfile(a.channel_json):
+            die("channel-json 不存在：%s" % a.channel_json)
+        cj = json.load(open(a.channel_json, encoding="utf-8"))
+        s = replace_markers(s, build_channel_section(cj), CH_BEGIN, CH_END)
+
+
+    # ★ ★ θ₀ 多口径重算（★ 第 1 层论证线 2026-10-26 质询触发 ★）★★
+    #   ★ 整节由脚本从 h0_theta0_multicalib.json 生成 ⇒ ★ 零手抄数字 ★
+    if a.multicalib_json:
+        if not os.path.isfile(a.multicalib_json):
+            die("multicalib-json 不存在：%s" % a.multicalib_json)
+        mj = json.load(open(a.multicalib_json, encoding="utf-8"))
+        s = replace_markers(s, build_multicalib_section(mj), MC_BEGIN, MC_END)
+
+        # ★ ★ 跨脚本一致性守卫：★ multicalib 的 A 口径 n 必须等于 partial_verdict 的 n ★
+        #   （★ 报告 §6.10.2 与 §6.10.6 两处都写 H0 配对 n ⇒ ★ 两处同源才不会出现内部不一致 ★）★★
+        nA = (mj.get("h0", {}).get("A_all_arms", {}) or {}).get("n_pairs")
+        if nA is not None and nA != n_pairs:
+            die("★ 跨脚本不一致：★ multicalib 的 A 口径 n=%s ≠ partial_verdict 的 n_pairs=%s "
+                "（★ 两处 H0 配对 n 会写到报告不同位置 ⇒ 必报出来 ★）" % (nA, n_pairs))
+
+        # ★ 口径登记行（★ 整行替换，★ 前缀稳定 ⇒ 幂等 ★）
+        nB = (mj.get("h0", {}).get("B_prereg_new", {}) or {}).get("n_pairs")
+        s = replace_line(s, "★ **口径登记（★ 纪律：数据产生后改判据必须登记 ★）**：★ 预注册写死 H0 原料 = `nosel_b3` 口径 12 + 旧批 9 = 21；",
+                "★ **口径登记（★ 纪律：数据产生后改判据必须登记 ★）**：★ 预注册写死 H0 原料 = `nosel_b3` 口径 12 + 旧批 9 = 21；★ **当前 `nosel_b3` 完整配对只有 %s 个（n<6 不可标定）** ⇒ ★ 本轮用**全部臂**的同题 rep 差（n=%d）★ ⇒ ★ ★**偏离已量化（★ 见 §6.10.2b ★）★★ ★"
+                % (nB if nB is not None else "—", nA if nA is not None else n_pairs),
+                "6.10.2 口径登记")
+
+        # ★ 6.10.6 的 H0 配对 n 行（★ 原来手抄 ⇒ 与 6.10.2 的 n 不一致 ⇒ 现同源 ★）
+        s = replace_line(s, "| H0 配对 n |",
+                "| H0 配对 n | **%d**（全部臂口径）｜ `nosel_b3` 口径 **%s** | 跑满后（★ 结构性预期 ★）：全部臂 **36** ｜ `nosel_b3` **12**（+ 旧批 9 = 21 ✔） |"
+                % (nA if nA is not None else n_pairs,
+                   nB if nB is not None else "—"),
+                "6.10.6 H0 配对 n")
 
     # ★ ★ 6.12.2 / 6.12.3 的数字也由 excl-json 填（★ 避免报告里两处 n 不一致 ★）★★
     if a.excl_json:

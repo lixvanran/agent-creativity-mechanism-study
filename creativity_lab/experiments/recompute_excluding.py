@@ -49,12 +49,14 @@ def die(msg):
     sys.exit(1)
 
 
-def find_contaminated(unit_dir, max_len):
+def find_contaminated(unit_dir, max_len, allowed=None):
     out = []
     if not os.path.isdir(unit_dir):
         die("units 目录不存在：%s" % unit_dir)
     for fn in sorted(os.listdir(unit_dir)):
         if not fn.endswith(".json"):
+            continue
+        if allowed is not None and fn[:-5] not in allowed:
             continue
         p = os.path.join(unit_dir, fn)
         try:
@@ -68,10 +70,12 @@ def find_contaminated(unit_dir, max_len):
     return out
 
 
-def run_pv(out_dir, runs_per_arm, target_units, seed, boot, json_out):
+def run_pv(out_dir, runs_per_arm, target_units, seed, boot, json_out, unit_list=None):
     cmd = [sys.executable, "-B", PV, "--out", out_dir,
            "--runs-per-arm", str(runs_per_arm), "--target-units", str(target_units),
            "--seed", str(seed), "--boot", str(boot), "--json-out", json_out]
+    if unit_list:
+        cmd += ["--unit-list", unit_list]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         die("partial_verdict.py 失败（exit %d）：\n%s\n%s" % (r.returncode, r.stdout[-2000:], r.stderr[-2000:]))
@@ -92,10 +96,18 @@ def main():
     ap.add_argument("--max-content-len", type=int, default=200,
                     help="★ 污染判定阈值（★ 默认 200 = 本批 min_ok ★）")
     ap.add_argument("--json-out", default=None)
+    ap.add_argument("--unit-list", default=None,
+                    help="★ 冻结的单元清单（★ 每行一个 basename ★）⇒ ★ 与其它脚本同源 ★")
     a = ap.parse_args()
 
     unit_dir = os.path.join(a.out, "units")
-    contaminated = find_contaminated(unit_dir, a.max_content_len)
+    allowed = None
+    if a.unit_list:
+        if not os.path.isfile(a.unit_list):
+            die("unit-list 不存在：%s" % a.unit_list)
+        allowed = set(x.strip() for x in open(a.unit_list, encoding="utf-8") if x.strip())
+        print("★ 单元清单：%s（★ %d 个 ★）" % (a.unit_list, len(allowed)))
+    contaminated = find_contaminated(unit_dir, a.max_content_len, allowed)
     print("== ① 污染单元（★ 最终输出长度 < %d ★）==" % a.max_content_len)
     if not contaminated:
         print("   （无）★ ⇒ ⇒ ★ 本批没有长度型污染，★ 下面的对比【不需要】做剔除重算 ★")
@@ -118,7 +130,7 @@ def main():
 
     arm_counts = {}
     for fn in os.listdir(unit_dir):
-        if fn.endswith(".json"):
+        if fn.endswith(".json") and (allowed is None or fn[:-5] in allowed):
             arm = arm_of(fn[:-5])
             arm_counts[arm] = arm_counts.get(arm, 0) + 1
     for c in contaminated:
@@ -131,7 +143,8 @@ def main():
         print("   %-28s 臂=%-22s 长度=%d ｜ 该臂已落盘 %d 单元 ⇒ 臂级污染率 %.2f%%"
               % (c["file"], c["arm"], c["content_len"], c["arm_units"],
                  100.0 * c["arm_pollution_rate"]))
-    n_all = len([f for f in os.listdir(unit_dir) if f.endswith(".json")])
+    n_all = len([f for f in os.listdir(unit_dir) if f.endswith(".json")
+                 and (allowed is None or f[:-5] in allowed)])
     print("   ★ 总体污染率：%d / %d = %.2f%%" % (len(contaminated), n_all,
                                         100.0 * len(contaminated) / n_all))
 
@@ -145,8 +158,8 @@ def main():
             os.remove(os.path.join(sdir, c["file"]))
         jA = os.path.join(tmp, "A.json")
         jB = os.path.join(tmp, "B.json")
-        A = run_pv(a.out, a.runs_per_arm, a.target_units, a.seed, a.boot, jA)
-        B = run_pv(staged, a.runs_per_arm, a.target_units, a.seed, a.boot, jB)
+        A = run_pv(a.out, a.runs_per_arm, a.target_units, a.seed, a.boot, jA, a.unit_list)
+        B = run_pv(staged, a.runs_per_arm, a.target_units, a.seed, a.boot, jB, a.unit_list)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

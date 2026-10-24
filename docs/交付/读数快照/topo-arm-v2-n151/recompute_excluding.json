@@ -1,0 +1,199 @@
+{
+ "A": {
+  "h0_n_pairs": 12,
+  "n_units_actual": 151,
+  "theta0": 1.339
+ },
+ "B": {
+  "h0_n_pairs": 11,
+  "n_units_actual": 150,
+  "theta0": 1.329
+ },
+ "contaminated_units": [
+  {
+   "arm": "nosel_b3",
+   "arm_pollution_rate": 0.04,
+   "arm_units": 25,
+   "content_len": 198,
+   "file": "S5_r1_nosel_b3_u1.json",
+   "post_source": "★ 3 份独立输出中的第 1 份（按 agent 索引，★ 确定性）",
+   "rep": "r1",
+   "tid": "S5"
+  }
+ ],
+ "fragile_cells": [
+  {
+   "contrast": "H-TOPO-4c",
+   "rep": 1,
+   "tid": "S5",
+   "vendi_diff": 0.6045,
+   "vendi_std": 2.689,
+   "vendi_std_B": null
+  }
+ ],
+ "max_content_len": 200,
+ "n_units_total": 151,
+ "overall_pollution_rate": 0.0066,
+ "stable_cells": [
+  {
+   "contrast": "H-TOPO-4a",
+   "rep": 1,
+   "tid": "S4",
+   "vendi_diff": -0.0113,
+   "vendi_std": -0.05
+  },
+  {
+   "contrast": "H-TOPO-4a",
+   "rep": 2,
+   "tid": "S4",
+   "vendi_diff": 0.0281,
+   "vendi_std": 0.125
+  },
+  {
+   "contrast": "H-TOPO-4a",
+   "rep": 1,
+   "tid": "S5",
+   "vendi_diff": -0.4108,
+   "vendi_std": -1.827
+  },
+  {
+   "contrast": "H-TOPO-4a",
+   "rep": 2,
+   "tid": "S5",
+   "vendi_diff": 0.1817,
+   "vendi_std": 0.808
+  },
+  {
+   "contrast": "H-TOPO-4a",
+   "rep": 1,
+   "tid": "S6",
+   "vendi_diff": 0.0274,
+   "vendi_std": 0.122
+  },
+  {
+   "contrast": "H-TOPO-4c",
+   "rep": 1,
+   "tid": "S4",
+   "vendi_diff": -0.2325,
+   "vendi_std": -1.034
+  },
+  {
+   "contrast": "H-TOPO-4c",
+   "rep": 2,
+   "tid": "S4",
+   "vendi_diff": -0.4852,
+   "vendi_std": -2.158
+  },
+  {
+   "contrast": "H-TOPO-4c",
+   "rep": 2,
+   "tid": "S5",
+   "vendi_diff": 0.0435,
+   "vendi_std": 0.194
+  },
+  {
+   "contrast": "H-TOPO-4c",
+   "rep": 1,
+   "tid": "S6",
+   "vendi_diff": 0.3461,
+   "vendi_std": 1.54
+  },
+  {
+   "contrast": "H-TOPO-4d",
+   "rep": 1,
+   "tid": "S4",
+   "vendi_diff": -0.1734,
+   "vendi_std": -0.771
+  },
+  {
+   "contrast": "H-TOPO-4d",
+   "rep": 2,
+   "tid": "S4",
+   "vendi_diff": -0.0332,
+   "vendi_std": -0.148
+  },
+  {
+   "contrast": "H-TOPO-4d",
+   "rep": 1,
+   "tid": "S5",
+   "vendi_diff": 0.1365,
+   "vendi_std": 0.607
+  },
+  {
+   "contrast": "H-TOPO-4d",
+   "rep": 2,
+   "tid": "S5",
+   "vendi_diff": -0.157,
+   "vendi_std": -0.698
+  },
+  {
+   "contrast": "H-TOPO-4d",
+   "rep": 1,
+   "tid": "S6",
+   "vendi_diff": 0.0645,
+   "vendi_std": 0.287
+  }
+ ],
+ "verdict_impact": {
+  "H-TOPO-4a": {
+   "S4": {
+    "A": 0.008400000000000001,
+    "B": 0.008400000000000001,
+    "delta": 0.0,
+    "rel_change": 0.0
+   },
+   "S5": {
+    "A": -0.11455,
+    "B": -0.11455,
+    "delta": 0.0,
+    "rel_change": -0.0
+   },
+   "S6": {
+    "A": 0.0274,
+    "B": 0.0274,
+    "delta": 0.0,
+    "rel_change": 0.0
+   }
+  },
+  "H-TOPO-4c": {
+   "S4": {
+    "A": -0.35885,
+    "B": -0.35885,
+    "delta": 0.0,
+    "rel_change": -0.0
+   },
+   "S5": {
+    "A": 0.324,
+    "B": 0.0435,
+    "delta": -0.2805,
+    "rel_change": -0.8657407407407408
+   },
+   "S6": {
+    "A": 0.3461,
+    "B": 0.3461,
+    "delta": 0.0,
+    "rel_change": 0.0
+   }
+  },
+  "H-TOPO-4d": {
+   "S4": {
+    "A": -0.1033,
+    "B": -0.1033,
+    "delta": 0.0,
+    "rel_change": -0.0
+   },
+   "S5": {
+    "A": -0.010249999999999995,
+    "B": -0.010249999999999995,
+    "delta": 0.0,
+    "rel_change": -0.0
+   },
+   "S6": {
+    "A": 0.0645,
+    "B": 0.0645,
+    "delta": 0.0,
+    "rel_change": 0.0
+   }
+  }
+ }
+}
