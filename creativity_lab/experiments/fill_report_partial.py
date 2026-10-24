@@ -66,6 +66,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", required=True)
     ap.add_argument("--json", required=True)
+    ap.add_argument("--morph-json", default=None,
+                    help="★ morphology_control.json（★ 形态受控性表 ★）")
+    ap.add_argument("--snapshot-json", default=None,
+                    help="★ SNAPSHOT-REGISTRY.json（★ 冻结快照登记 ★）")
     ap.add_argument("--f1c-json", default=None,
                     help="★ f1c_leverage.py 的输出（★ 位置基线 + 内容依赖判据 ★）")
     ap.add_argument("--excl-json", default=None,
@@ -233,6 +237,40 @@ def main():
     s = re_sub_once(s, r"只覆盖已跑批的 [0-9]+ 题",
             "只覆盖已跑批的 %d 题" % _ntid, "6.10.5 已跑题数")
 
+
+    # ★ ★ 形态受控性表（★ 从 morphology_control.json 填，★ 不手抄 ★）★★
+    if a.morph_json:
+        if not os.path.isfile(a.morph_json):
+            die("morph-json 不存在：%s" % a.morph_json)
+        mj = json.load(open(a.morph_json, encoding="utf-8"))
+        _L = s.split("\n")
+        _hi = [i for i, ln in enumerate(_L) if ln.startswith("| 臂 | 调用数 | 截断率(length) |")]
+        if len(_hi) != 1:
+            die("6.12.8 形态表头命中 %d 次（★ 期望 1 ★）" % len(_hi))
+        _tbl = mj["table"].split("\n")
+        _end = _hi[0]
+        while _end < len(_L) and _L[_end].startswith("|"):
+            _end += 1
+        _L[_hi[0]:_end] = _tbl
+        s = "\n".join(_L)
+
+    # ★ ★ 冻结快照登记（★ 第 1 层论证线 2026-10-26：★ 正在产生的批次的读数
+    # ★   不得进入定版文献 ⇒ ★ 要么等它跑完，★ 要么引一个冻结的快照 ★）★★
+    if a.snapshot_json:
+        if not os.path.isfile(a.snapshot_json):
+            die("snapshot-json 不存在：%s" % a.snapshot_json)
+        sj = json.load(open(a.snapshot_json, encoding="utf-8"))
+        _reg = ("### 6.10.0 ★★ 冻结快照登记（★ 交稿版引用的部分预判决以本快照为准 ★）★★\n\n"
+                "| 项 | 值 |\n|:-:|---|\n"
+                "| ★ 快照文件 | ★ `%s` ★ |\n"
+                "| ★ n（单元） | ★ **%d** / 360 ｜ 已跑题 %s ｜ θ₀ = %.3f |\n"
+                "| ★ sha256 | ★ `%s` ★ |\n"
+                "| ★ 字节数 | ★ %d |\n"
+                "| ★ 冻结时点 | ★ %s |\n"
+                "| ★ **为什么需要它** | ★ **本批仍在跑 ⇒ 本段读数会变 ⇒ ⇒ 交稿文献引用的必须是【冻结快照】（★ 副本 + sha256 + 条数 ★），★ 不是某个时刻的 json ★** |\n"
+                % (sj["snapshot"], sj["n_units"], "、".join(sj["tids"] or []), sj["theta0"],
+                   sj["sha256"], sj["bytes"], sj["frozen_at"]))
+        s = replace_line(s, "### 6.10.1", _reg + "### 6.10.1", "6.10.0 快照登记")
 
     # ★ ★ 6.12.2 / 6.12.3 的数字也由 excl-json 填（★ 避免报告里两处 n 不一致 ★）★★
     if a.excl_json:
