@@ -48,7 +48,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 # 复用既有的真实客户端与测量流水线（**不重写**）
-BATCH_U1 = "/workspace/lab/batch-U1"
+BATCH_U1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge")
 sys.path.insert(0, BATCH_U1)
 
 import u1_lib as U            # noqa: E402
@@ -57,7 +57,7 @@ import workflow as W          # noqa: E402
 import anchor_out as AO       # noqa: E402
 import premature_closure as PC  # noqa: E402
 
-DEV = "/workspace/lab/routes/DEV"
+DEV = os.environ.get("DEV_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "devset")
 OUT = os.path.join(HERE, "runs")
 
 
