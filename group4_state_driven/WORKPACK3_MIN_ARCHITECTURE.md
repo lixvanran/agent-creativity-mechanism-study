@@ -11,9 +11,10 @@
 > | 项 | 值 |
 > |---|---|
 > | 文件 | `creativity_lab/state_layer.py` |
-> | sha256 | `38795bf6adfdee05d5a2588294399d844c6a99cc14d5ce2fa32c1662a6afa37e` |
-> | 字节数 | 10257 |
-> | 核对 | ✅ **逐字节一致**（★ 第二组首条消息贴的那份在 `record_call` 里手改过一行 ⇒ sha 不符 ⇒ ★ 第二组已补正 ⇒ ★ **本仓这份是补正后的逐字节版本**） |
+> | **现行版本** | ★ **rev1** sha256 = `69a29c506a4e4ab0`（★ 14055 B） |
+> | 上一版 | rev0 sha256 = `38795bf6adfdee05`（★ 10257 B） |
+> | 核对 | ✅ **rev1 逐字节一致**（★ 由第四组 `apply_state_layer_rev1.py` 应用 ⇒ ★ **sha256 双向校验通过**） |
+> | 差异覆盖 | ★ rev0 的 4 条差异（①②③④）**已由第二组修订并被第四组探针机械确认为「已修复」** ⇒ ★ 新增 1 条待裁决（见 §6.3 ⑤） |
 >
 > ⇒ ⇒ ★ **接口归属归第二组；本文件降级为「实现与读数侧」的配套说明，以 `creativity_lab/state_layer.py` 为准。**
 > ⇒ ⇒ ★ **本文件 §1–§5 的自建接口不再作为实现依据** ⇒ ⇒ ★ **仅保留**：
@@ -79,7 +80,14 @@ class State4:
     history: list[dict]           # ★ 来源日志（谁提出、依据什么、何时撤销）
 ```
 
-## 2. 动作接口（8 种；★ **动作类型的变化是"换路"的唯一可机检判据**）
+## 2. 动作接口（★ **动作类型的变化是"换路"的唯一可机检判据**）
+
+> ⚠️ **【以下为第四组自建版本 · ★ 已被第二组接口取代 · ★ 不是实现依据】**
+> ★ **原标题写「8 种」但表里只有 7 个 ⇒ ★ 那是自建版的一处笔误**，★ 现按实际条数修正为 7。
+> ★ 现行动作空间以第二组 `ACTIONS` 为准（★ 7 个）：
+> ★ `explore` / `check_hypothesis` / `connect` / `rollback` / `switch_method` / `deliver` / `stop`
+> ★ ⇒ ★ 与自建版的差别在**命名**（`check`→`check_hypothesis`、`switch`→`switch_method`、
+> ★ `organize`→`deliver`）★ 与**统一决策点**（★ 第二组有 `choose_action(st)` 单点优先级链）。
 
 | 动作 | 含义 | 关键输入 | 关键输出 |
 |---|---|---|---|
@@ -200,6 +208,11 @@ class State4:
 
 > ★ 探针落点：`group4_state_driven/probe_state_layer_spec_gap.py`（★ 零 API · ★ 只读不改）
 > ★ **本探针不改第二组文件** ⇒ ⇒ 差异由第二组裁决 ⇒ ⇒ **第四组不单方面改规则**。
+> ★ ★ **探针已改为【双版本差分】**（★ `--both`）⇒ ⇒ **同时加载 rev0 与 rev1** ⇒ ⇒
+> ★ **对每条差异给出【两版各自判定】** ⇒ ⇒ ★ **「已修复」与「仍存在」一眼分开**
+> ★ ⇒ ⇒ ★ ★ **理由**：★ rev1 修掉了 rev0 的 4 条 ⇒ ⇒ ★ 旧探针会继续报"已修复的 bug"
+> ★ ⇒ ⇒ ★ **★ 那是【过期工具】⇒ ⇒ ★ 比没有更坏**（★ 让人以为还有 bug）⇒ ⇒ ★ **探针必须跟着接口版本走**。
+> ★ **当前实测**：★ rev0 仍存在 **4** 条 ⇒ ★ rev1 仍存在 **1** 条（⑤）⇒ ★ 差 **3** 条（★ 修订覆盖）。
 
 | # | 差异 | 后果 | 裁决方 |
 |:-:|---|---|---|
@@ -207,6 +220,7 @@ class State4:
 | **2** | 死路判定写的是 `at.used >= 3`（★ **累计**），规格表写「★ **连续** 3 次无新信息」 ⇒ ⇒ **且 `at.produced_new` 是每次覆盖而非累积** | ⇒ 实测 `(True,True,False)` ⇒ **判死路** ⇒ `switch_method` 提前触发 ⇒ ⇒ **比规格更激进**（★ 成功过的方法也会被判死路） | 第二组 |
 | **3** | 支持性证据**不写 `progress`**（★ 只有反证写 `refuted:<hid>`） | ⇒ ★ 状态回放时**无法区分支持证据与反证证据** ⇒ ⇒ 与「可回放」红线②有张力 | 第二组（★ 若认为该留痕 ⇒ **属规则变更 ⇒ 须重过预注册**） |
 | **4** | 「★ 并列 ⇒ 自动保留分歧」**在代码里没有机制**；只有显式 `preserve_divergence` | ⇒ ★ 第四组 v6 的 `Select(greedy)` **会吃掉并列** ⇒ ⇒ **接线时必须显式补这一步**，★ 否则分歧语义丢失 | 第二组（接口层）+ ★ **第四组（接线层 ⇒ 归第四组实现与读数侧）** |
+| **5** | ★ **rev1 新增**：`detect_tie` **只查【最大值处】**（`best = max(scores)`）⇒ ⇒ **中位并列漏检** | ⇒ 实测：`detect_tie([0.9,0.5,0.5])` ⇒ **`None`**（★ 两个 0.5 是"第二好方案并列"的真实分歧）⇒ ⇒ **分歧语义又丢** | 第二组（★ 接口层语义）|
 
 ★ **★ 为什么第 2 条不会被离线测试抓到**：★ 规格表说「连续 3 次无新信息」，
 ★ 按规格写测试 ⇒ 通过；★ 按实现写测试（`True,True,False`）⇒ 也通过（★ 因为实现的判据更宽）
@@ -254,14 +268,20 @@ class State4:
 ## 8. 复现（本包的全部可执行部分）
 
 ```bash
-# ★ 现行可执行测试（第二组规格表 · 第四组实现）—— 6/6 ⇒ exit 0
+# ★ 现行可执行测试（第二组规格表 · 第四组实现）—— 8/8 ⇒ exit 0
 python3 -B creativity_lab/experiments/test_state_layer.py
 
-# ★ 变异注入自检（证明每个测试项是活的）—— 6/6 ⇒ exit 0
+# ★ 变异注入自检（证明每个测试项是活的）—— 10/10 ⇒ exit 0
 python3 -B creativity_lab/experiments/test_state_layer.py --self-test
 
-# ★ 规格-实现差异探针（零 API · 只读不改第二组文件）—— 4 条差异
+# ★ 规格-实现差异探针（零 API · 只读不改第二组文件）—— rev1 仍存在 1 条
 python3 -B group4_state_driven/probe_state_layer_spec_gap.py
+
+# ★ 双版本差分（rev0 vs rev1）
+python3 -B group4_state_driven/probe_state_layer_spec_gap.py --both
+
+# ★ rev0 → rev1 应用脚本（★ 三道自保护：锚点唯一命中 / 应用后 sha 校验 / 幂等）
+python3 -B group4_state_driven/apply_state_layer_rev1.py creativity_lab/state_layer.py
 
 # ★ 第四组自建版测试（★ 历史对照，★ 不是实现依据）—— 5/5
 python3 group4_state_driven/workpack3_tests.py
@@ -273,5 +293,9 @@ python3 group4_state_driven/code/workflow_arch6.py
 ★ **sha256 核对命令（★ 唯一可靠的核对手段）**：
 ```bash
 sha256sum creativity_lab/state_layer.py | cut -c1-16
-# ⇒ 必须输出：38795bf6adfdee05
+# ⇒ 必须输出：69a29c506a4e4ab0   （★ rev1 现行版）
 ```
+
+★ **★ 双向校验是这套协作的底层机制**：★ 发送方给 sha、接收方应用后核 sha ⇒ ⇒
+★ **★ 只要两边有一行字不同 ⇒ sha 必不符 ⇒ ⇒ 错误【不可能静默通过】** ⇒ ⇒
+★ ★ **这比"记得别改"可靠得多**（★ 双方都已经各栽一次：★ 发送方手改一行 / 手抄 diff 抄错一段）。

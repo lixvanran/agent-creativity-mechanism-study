@@ -36,6 +36,12 @@ HYP_OPEN = "open"
 HYP_REFUTED = "refuted"
 HYP_SUPPORTED = "supported"
 
+# ★ ★ 两个阈值（★ 第四组 2026-10-25 独立审计后新增 ⇒ ★ 都是【人写死的固定规则】）
+# ★ 死路判定看【连续】无新信息的次数（★ 不是累计）★★
+DEAD_END_THRESHOLD = 3
+# ★ 假设转 `supported` 所需的【支持性证据】条数（★ 一次不算 ⇒ 两次才算）★★
+SUPPORT_THRESHOLD = 2
+
 
 @dataclass
 class Hypothesis:
@@ -63,10 +69,17 @@ class Subgoal:
 
 @dataclass
 class Attempt:
-    """★ 已尝试方法（★ 记录尝试了什么、产生了什么新信息）"""
+    """★ 已尝试方法（★ 记录尝试了什么、产生了什么新信息）
+
+    ★★ `consecutive_no_new` 与 `used` 的区别（★ 第四组 2026-10-25 独立审计发现 ⇒ ★ 真 bug）：
+    ★ **`used` 是【累计】尝试次数；★ `consecutive_no_new` 是【连续无新信息】的次数**
+    ★ ⇒ ⇒ ★ **判死路必须看【连续】而不是【累计】** ⇒ ⇒ ★
+    ★ ★ **否则 `(True, True, False)` 这种"成功过两次、最近一次没进展"的方法会被误判成死路**
+    """
     method: str
     used: int = 0
     produced_new: bool = False
+    consecutive_no_new: int = 0     # ★ ★ 连续无新信息的次数（★ 判死路只看这个）
     dead_end: bool = False
 
 
@@ -147,7 +160,18 @@ def revise_subgoal(st: State, sid: str, statement: str) -> State:
 
 
 def add_evidence(st: State, hid: str, ev: Dict[str, Any], refutes: bool = False) -> State:
-    """★ **检验**：★ 追加证据；★ 若该证据【反证】假设 ⇒ 假设被推翻"""
+    """★ **检验**：★ 追加证据；★ 若该证据【反证】假设 ⇒ 假设被推翻；
+    ★ 若该证据【支持】假设 ⇒ 累积到阈值 ⇒ 假设转 `supported`（★ 第四组 2026-10-25 独立审计发现 ⇒ ★ 真 bug）
+
+    ★★ **为什么必须有 `supported` 这条路径（★ 原实现的后果）**：
+    ★ 原实现里 `add_evidence(refutes=False)` 【不改变 status】⇒ ⇒ 假设永远停在 `open`
+    ⇒ ⇒ ★ 而 `choose_action` 里 `check_hypothesis` 分支【优先于】`connect`
+    ⇒ ⇒ ★ ⇒ **分歧连接被无限期阻塞**（★ 第四组实测：10 次支持性证据 + 1 条合法分歧 ⇒ 仍返回 `check_hypothesis`）
+    ⇒ ⇒ ★★ **⇒ 修法：★ 支持性证据累积到 `SUPPORT_THRESHOLD` 条 ⇒ ⇒ 假设转 `supported` ⇒ ⇒ 不再阻塞 `connect`**
+
+    ★★ **`SUPPORT_THRESHOLD = 2` 的理由**：★ **一次支持不算"被支持"**（★ 一次可能是噪声）★ ★
+    ★ **两次独立支持才算** ⇒ ⇒ ★ ★ **但这是一个【新自由度】⇒ ⇒ 第四组接线时可在 manifest 里显式覆盖**
+    """
     s = st.clone()
     for h in s.hypotheses:
         if h.hid == hid:
@@ -155,6 +179,13 @@ def add_evidence(st: State, hid: str, ev: Dict[str, Any], refutes: bool = False)
             if refutes:
                 h.status = HYP_REFUTED
                 s.progress.append("refuted:%s" % hid)
+            else:
+                # ★ ★ 支持性证据也要留痕（★ 状态回放要能区分支持与反证）
+                n_sup = sum(1 for e in h.evidence if not e.get("refutes"))
+                s.progress.append("evidence:%s:support:%d" % (hid, n_sup))
+                if n_sup >= SUPPORT_THRESHOLD and h.status == HYP_OPEN:
+                    h.status = HYP_SUPPORTED
+                    s.progress.append("supported:%s" % hid)
             return s
     return s
 
@@ -179,8 +210,12 @@ def record_attempt(st: State, method: str, produced_new: bool) -> State:
         s.attempts.append(at)
     at.used += 1
     at.produced_new = produced_new
-    # ★ 死路判定：★ 连续 3 次尝试都没有新信息 ⇒ 标记死路
-    if not produced_new and at.used >= 3:
+    # ★ ★ 死路判定：★ 【连续】3 次无新信息（★ 不是累计 3 次）
+    if produced_new:
+        at.consecutive_no_new = 0          # ★ ★ 有新信息 ⇒ 连续计数【清零】
+    else:
+        at.consecutive_no_new += 1
+    if at.consecutive_no_new >= DEAD_END_THRESHOLD:
         at.dead_end = True
         s.progress.append("dead_end:%s" % method)
     return s
@@ -198,6 +233,28 @@ def record_call(st: State, ok: bool) -> State:
         s.exhausted = True
         s.stop_reason = "budget_exhausted"
     return s
+
+
+def detect_tie(scores: List[float], tol: float = 1e-9) -> Dict[str, Any]:
+    """★ **并列检测**（★ 第四组 2026-10-25 提出 ⇒ ★ 裁决：★ 接口层提供能力，★ 接线由第四组做）
+
+    ★ **为什么放在接口层**：★ 「两个候选评分并列 ⇒ 它们是合法分歧」是【规则的一部分】，
+    ★ ★ **不该靠调用方记得去调 `preserve_divergence`** ⇒ ⇒ ★ 否则接线时一漏，分歧语义就丢了
+    ★ ★（★ 第四组已报告：★ 他们的 `Select(greedy)` 【会吃掉并列】⇒ ⇒ ★ 这正是必须补的一步）
+
+    ★ **返回**：★ 有并列 ⇒ 返回 `{"kind": "tie", "members": [...], "scores": [...]}`；
+    ★ 无并列 ⇒ 返回 `None`
+    ★ ★ **本函数【不修改状态】** ⇒ ⇒ ★ 接线方式由调用方决定（★ 通常是：
+    ★ `if detect_tie(...) is not None: st = preserve_divergence(st, detect_tie(...))`）
+    """
+    if not scores:
+        return None
+    best = max(scores)
+    members = [i for i, v in enumerate(scores) if abs(v - best) <= tol]
+    if len(members) < 2:
+        return None
+    return {"kind": "tie", "members": members,
+            "scores": [scores[i] for i in members]}
 
 
 def preserve_divergence(st: State, d: Dict[str, Any]) -> State:

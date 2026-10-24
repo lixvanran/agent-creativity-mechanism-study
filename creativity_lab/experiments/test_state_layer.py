@@ -13,10 +13,22 @@
 > ★ ③ ★ **失败路径必须显式** —— ★ 断言失败必须响亮（打印 + 非零 exit code），★ 不许静默通过。
 >
 > ★ **★ 与第二组原文的关系（★ 证据等级说明，★ 别当成逐字节一致）**：
-> ★ 第二组直发的 `state_layer.py` 是**逐字节原文**（sha256 = `38795bf6adfdee05…`，★ 已核）。
+> ★ 第二组直发的 `state_layer.py` 是**逐字节原文**（★ **rev1** sha256 = `69a29c506a4e4ab0`，★ 已核）。
 > ★ **本测试文件是第四组按第二组给出的【测试规格表】实现** ⇒ ⇒
 > ★ **它的 sha256 必然与第二组仓内那份不同** ⇒ ⇒ ★ **不能声称"逐字节一致"**，
-> ★ 只能说"**规格覆盖等价**"（★ 五个测试的断言要点与负向断言逐条对齐）。
+> ★ 只能说"**规格覆盖等价 + 变异注入自证**"。
+>
+> ★★★ **【rev1 · 2026-10-25 · 第二组裁决 4 条差异后】★★★**
+> ★ **接口版本**：`creativity_lab/state_layer.py` sha256 = `69a29c506a4e4ab0`（rev1）
+> ★ **rev0** sha256 = `38795bf6adfdee05`（★ 已被 rev1 取代）
+> ★ **本文件 8 项** = ★ 第二组 6 项（★ T1–T5 + 三个 bug 回归）★ + 第四组 2 项
+>   （★ `test6_spec_redlines` 规格三条红线 + ★ `test7_detect_tie` 并列检测）
+> ★ ⇒ ★ **两边互补，不互相替换**。
+> ★ ★ **★ 关键教训（★ 本文件最重要的一条）**：
+> ★ **rev0 的 5 项测试全绿，但 rev0 有 3 个真 bug** ⇒ ⇒ ★ **「离线全绿」≠「语义无歧义」**
+> ★ ⇒ ⇒ ★ **根因**：★ 「连续 vs 累计」两种语义**都能通过 rev0 的同一套测试** ⇒ ⇒
+> ★ ⇒ ★ **⇒ 每修一个 bug，必须补一条【只有新实现才通过】的断言**（★ 现由 `test8_rev1_regressions` 承担）
+> ★ ⇒ ⇒ ★ **⇒ 且每条断言都要有对应的变异注入**（★ 现由 `--self-test` 的 m7/m8/m9/m10 承担）。
 """
 from __future__ import annotations
 
@@ -70,6 +82,25 @@ def test1_dead_end(SL):
     assert action == "switch_method", "死路状态动作应为 switch_method，实际 %r" % (action,)
     assert arg == "m1", "switch_method 应指向死路方法名，实际 %r" % (arg,)
 
+    # ── 负向③：★ 累计 ≠ 连续 ★（★ rev1 守门断言）──
+    st3 = SL.State(budget_remaining=10)
+    for ok in (True, True, False):        # 只有【最后】一次无新信息
+        st3 = SL.record_attempt(st3, "m3", produced_new=ok)
+    at3 = next(a for a in st3.attempts if a.method == "m3")
+    assert at3.dead_end is False, \
+        "★ (True,True,False) 只有 1 次连续无新信息 ⇒ 不得判死路，实际 dead_end=%r" % (at3.dead_end,)
+    assert at3.used == 3, "used 仍应累计为 3，实际 %r" % (at3.used,)
+    consec = getattr(at3, "consecutive_no_new", None)
+    assert consec == 1, "consecutive_no_new 应为 1，实际 %r" % (consec,)
+
+    # ── 负向④：有新信息 ⇒ 连续计数清零 ──
+    st4 = SL.State(budget_remaining=10)
+    for ok in (False, False, True):        # 中间有进展 ⇒ 连续计数应清零
+        st4 = SL.record_attempt(st4, "m4", produced_new=ok)
+    at4 = next(a for a in st4.attempts if a.method == "m4")
+    assert at4.consecutive_no_new == 0, "有新信息后连续计数应清零，实际 %r" % (at4.consecutive_no_new,)
+    assert at4.dead_end is False, "清零后不得判死路，实际 %r" % (at4.dead_end,)
+
 
 def test2_refute_rollback(SL):
     """★ **② 反证触发回退**：★ 反证 ⇒ 假设转 `refuted` ⇒ 动作 `rollback` ⇒ 新增保留点 + 移动 `current_kp`
@@ -115,6 +146,27 @@ def test2_refute_rollback(SL):
     assert len(h.evidence) == 2, "证据列表应保留 2 条，实际 %d" % (len(h.evidence),)
     kinds = sorted(e.get("kind") for e in h.evidence)
     assert kinds == ["counter", "support"], "证据内容应原样保留，实际 %r" % (kinds,)
+
+    # ── ★ rev1 新增：支持性证据累积到阈值 ⇒ 转 supported ⇒ 不再阻塞 connect ──
+    st4 = SL.State(budget_remaining=10,
+                   hypotheses=[SL.Hypothesis(hid="h3", statement="命题 H3")])
+    st4 = SL.add_evidence(st4, "h3", {"kind": "support", "text": "第一次支持"}, refutes=False)
+    assert st4.hypotheses[0].status == SL.HYP_OPEN, \
+        "★ 一次支持后假设应仍为 open（★ 一次可能是噪声），实际 %r" % (st4.hypotheses[0].status,)
+    act4, _ = SL.choose_action(st4)
+    assert act4 == "check_hypothesis", \
+        "★ 一次支持后动作仍应是 check_hypothesis，实际 %r" % (act4,)
+    st4 = SL.add_evidence(st4, "h3", {"kind": "support", "text": "第二次支持"}, refutes=False)
+    assert st4.hypotheses[0].status == SL.HYP_SUPPORTED, \
+        "★ 两次支持后假设应转 supported，实际 %r" % (st4.hypotheses[0].status,)
+    assert "supported:h3" in st4.progress, \
+        "progress 应记录 supported:h3，实际 %r" % (st4.progress,)
+    assert any(p.startswith("evidence:h3:support:") for p in st4.progress), \
+        "★ progress 应留支持性证据的痕，实际 %r" % (st4.progress,)
+    st4 = SL.preserve_divergence(st4, {"id": "d1", "claim": "分歧"})
+    act4b, _ = SL.choose_action(st4)
+    assert act4b == "connect", \
+        "★ 假设已被支持后不应再阻塞 connect，实际 %r" % (act4b,)
 
 
 def test3_divergence(SL):
@@ -247,6 +299,100 @@ def test6_spec_redlines(SL):
         "新旧状态应互不影响：新 %r / 旧 %r" % (st_new.n_calls_total, st_old.n_calls_total)
 
 
+def test7_detect_tie(SL):
+    """★ **⑦ 并列检测（rev1 新增 `detect_tie`）**：★ 无并列 ⇒ `None`；有并列 ⇒ `members`
+
+    ★ 负向：★ **`detect_tie` 不改状态**（★ 纯函数 ⇒ 接线方式由调用方决定）
+    ★ ★ 第二组裁决：「并列 ⇒ 分歧」是【规则的一部分】⇒ ⇒ 接口层提供能力，★ 接线归第四组
+    """
+    # ── 无并列 ⇒ None ──
+    assert SL.detect_tie([0.1, 0.5, 0.9]) is None, "无并列时 detect_tie 应返回 None"
+    assert SL.detect_tie([]) is None, "空列表应返回 None"
+    assert SL.detect_tie([0.5]) is None, "单元素应返回 None（无并列可言）"
+    # ★ 注意：detect_tie 只检测【最大值处】的并列 ⇒ 中位并列不算（★ 见第五条差异）
+    assert SL.detect_tie([0.5, 0.5, 0.9]) is None, \
+        "★ 0.5 并列不是最大值并列 ⇒ 应返回 None（★ 当前语义：只查最大值处）"
+
+    # ── 有并列 ⇒ 返回 members ──
+    tie = SL.detect_tie([0.9, 0.9, 0.2])
+    assert tie is not None, "有两个 0.9 时应检出并列"
+    assert tie.get("kind") == "tie", "kind 应为 tie，实际 %r" % (tie.get("kind"),)
+    assert sorted(tie.get("members") or []) == [0, 1], \
+        "members 应为 [0,1]，实际 %r" % (tie.get("members"),)
+    assert sorted(tie.get("scores") or []) == [0.9, 0.9], \
+        "scores 应为并列两者的分数，实际 %r" % (tie.get("scores"),)
+
+    # ── 三个并列 ──
+    tie3 = SL.detect_tie([0.5, 0.5, 0.5])
+    assert tie3 is not None and len(tie3.get("members") or []) == 3, \
+        "三个并列应检出 3 个成员，实际 %r" % (tie3,)
+
+    # ── 负向：★ 不改状态（★ 纯函数）──
+    st = SL.State(budget_remaining=5)
+    before = json.dumps(st.to_dict(), ensure_ascii=False, sort_keys=True)
+    SL.detect_tie([0.5, 0.5])
+    after = json.dumps(st.to_dict(), ensure_ascii=False, sort_keys=True)
+    assert before == after, "★ detect_tie 是纯函数 ⇒ 不得修改状态"
+
+    # ── ★ 接线语义：检出并列 ⇒ 调用方可写入分歧 ⇒ 动作变 connect ──
+    st2 = SL.State(budget_remaining=5)
+    d = SL.detect_tie([0.9, 0.9, 0.2])
+    assert d is not None
+    st2 = SL.preserve_divergence(st2, d)
+    act, arg = SL.choose_action(st2)
+    assert act == "connect", "写入分歧后动作应为 connect，实际 %r" % (act,)
+
+
+def test8_rev1_regressions(SL):
+    """★ **⑧ rev1 三个真 bug 的回归（★ 第二组出断言规格 / 第四组实现）**
+
+    ★ ★ 这组测试存在的理由 = ★ 「离线全绿 ≠ 语义无歧义」：
+    ★ 旧实现的「累计」语义与规格的「连续」语义**都能通过旧测试** ⇒ ⇒ 旧测试抓不住 bug ②
+    ★ ⇒ ⇒ ★ **每修一个 bug，必须补一条【只有新实现才通过】的断言**
+    """
+    # ── ① HYP_SUPPORTED 可达 + connect 不再被阻塞 ──
+    st = SL.State(budget_remaining=10,
+                  hypotheses=[SL.Hypothesis(hid="h1", statement="命题")])
+    act, _ = SL.choose_action(st)
+    assert act == "check_hypothesis", "★ 支持前动作应为 check_hypothesis，实际 %r" % (act,)
+    st = SL.add_evidence(st, "h1", {"kind": "support"}, refutes=False)
+    assert st.hypotheses[0].status == SL.HYP_OPEN, "★ 一次支持后仍应 open，实际 %r" % (st.hypotheses[0].status,)
+    st = SL.add_evidence(st, "h1", {"kind": "support"}, refutes=False)
+    assert st.hypotheses[0].status == SL.HYP_SUPPORTED, \
+        "★ 两次支持后应转 supported，实际 %r" % (st.hypotheses[0].status,)
+    st = SL.preserve_divergence(st, {"id": "d1", "claim": "c"})
+    act, _ = SL.choose_action(st)
+    assert act == "connect", "★ 支持后不应再阻塞 connect，实际 %r" % (act,)
+
+    # ── ② 死路判定看【连续】不看【累计】──
+    st2 = SL.State(budget_remaining=10)
+    for ok in (True, True, False):
+        st2 = SL.record_attempt(st2, "m", produced_new=ok)
+    a = next(x for x in st2.attempts if x.method == "m")
+    assert a.dead_end is False, "★ (True,True,False) 不得判死路，实际 %r" % (a.dead_end,)
+    assert a.used == 3 and a.consecutive_no_new == 1, \
+        "★ used=3 且 consecutive_no_new=1，实际 used=%r consec=%r" % (a.used, a.consecutive_no_new)
+
+    st3 = SL.State(budget_remaining=10)
+    for _ in range(3):
+        st3 = SL.record_attempt(st3, "m2", produced_new=False)
+    a2 = next(x for x in st3.attempts if x.method == "m2")
+    assert a2.dead_end is True, "★ 连续 3 次无新信息应判死路，实际 %r" % (a2.dead_end,)
+
+    st4 = SL.State(budget_remaining=10)
+    for ok in (False, False, True):
+        st4 = SL.record_attempt(st4, "m3", produced_new=ok)
+    a3 = next(x for x in st4.attempts if x.method == "m3")
+    assert a3.consecutive_no_new == 0, "★ 有新信息应清零连续计数，实际 %r" % (a3.consecutive_no_new,)
+
+    # ── ③ 支持性证据留痕（★ 可回放）──
+    st5 = SL.State(budget_remaining=10,
+                   hypotheses=[SL.Hypothesis(hid="h9", statement="命题")])
+    st5 = SL.add_evidence(st5, "h9", {"kind": "support"}, refutes=False)
+    assert any(p.startswith("evidence:h9:support:") for p in st5.progress), \
+        "★ progress 应留支持证据痕，实际 %r" % (st5.progress,)
+
+
 # ══════════════════════════════════════════════════════════════
 # 测试套件驱动
 # ══════════════════════════════════════════════════════════════
@@ -258,6 +404,8 @@ TESTS = [
     ("test4_subgoal_revocation", test4_subgoal_revocation),
     ("test5_budget_and_failure", test5_budget_and_failure),
     ("test6_spec_redlines", test6_spec_redlines),
+    ("test7_detect_tie", test7_detect_tie),
+    ("test8_rev1_regressions", test8_rev1_regressions),
 ]
 
 
@@ -302,8 +450,11 @@ def _load_mutant(tmpdir, name, old, new):
 
 # ★ 变异清单：★ 每个变异对应【必须抓到它的那一项测试】
 MUTATIONS = [
-    ("m1_deadend_threshold", "at.used >= 3", "at.used >= 99", "test1_dead_end",
-     "死路阈值被改宽（3→99）"),
+    ("m1_deadend_threshold",
+     "    if at.consecutive_no_new >= DEAD_END_THRESHOLD:",
+     "    if at.consecutive_no_new >= 99:",
+     "test1_dead_end",
+     "★ 死路阈值被改宽（3→99）"),
     ("m2_no_budget_charge",
      "s.budget_remaining = max(0, s.budget_remaining - 1)",
      "s.budget_remaining = s.budget_remaining",
@@ -329,6 +480,27 @@ MUTATIONS = [
      "    if False:",
      "test2_refute_rollback",
      "反证不再优先触发回退"),
+    # ── ★ rev1 三条新语义的守门变异（★ 证明新断言是活的）──
+    ("m7_back_to_cumulative",
+     "    if at.consecutive_no_new >= DEAD_END_THRESHOLD:",
+     "    if not produced_new and at.used >= DEAD_END_THRESHOLD:",
+     "test1_dead_end",
+     "★ 死路判定退回【累计】语义（★ 旧 bug 复活）"),
+    ("m8_no_supported_path",
+     "                if n_sup >= SUPPORT_THRESHOLD and h.status == HYP_OPEN:",
+     "                if False:",
+     "test8_rev1_regressions",
+     "★ 支持性证据不再转 supported（★ 旧 bug ① 复活 ⇒ connect 重新被阻塞）"),
+    ("m9_no_support_trace",
+     '                s.progress.append("evidence:%s:support:%d" % (hid, n_sup))',
+     "                pass",
+     "test8_rev1_regressions",
+     "★ 支持性证据不留痕（★ 旧 bug ③ 复活）"),
+    ("m10_detect_tie_always_none",
+     "    if len(members) < 2:",
+     "    if True:",
+     "test7_detect_tie",
+     "★ detect_tie 永远返回 None（★ 并列检测失效）"),
 ]
 
 
