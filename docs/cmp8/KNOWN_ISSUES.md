@@ -102,9 +102,24 @@
 * 后续 commit 的 email 已是 `mavis@local` ✔（`8ca4d776` 起）；`push_via_api.py` **不写 author/committer** ⇒ 走它推的层由 GitHub 用 token 持有者（`lixvanran`）署名 ⇒ ⇒ **真正可逐字核对的只有 message 原文**。
 * 需要的裁决：**Q4** —— 已推历史层改不了（**如实记为已知缺陷**）；另问：`FALLBACK` 表（现已 0 命中，因远端层被 API 重建后 sha 变了）删不删？
 
+### KI-15 ★★★ 推送被守卫拦下：**我的本地树比远端旧**（★ 硬阻塞，不许用 `--allow-conflict` 绕过）
+* 现象：`tools/push_guard.py` 在推本轮成果前**拒绝推送（exit 3）**，报 1543 处冲突。回源分类后拿到决定性事实：
+  · 远端 head `45e7801b56a4`（**在本轮 30 分钟内又变了两次**：`f8c8fa39` → `45e7801b` ⇒ 其他组在活跃推送）
+  · 远端 blob **938** 个 ｜ 本地 HEAD blob **773** 个
+  · **远端独有 171** ｜ **本地独有 6** ｜ ★★ **同路径不同内容 11**
+* ★★ **那 11 处里有 7 处是【我本轮根本没改、且本地比远端旧】的文件** ⇒ ⇒ ⇒ `.gitignore`、`cmp8/creativity_lab/adhd_repro.py`、`creativity_lab/arms/dual.py`、`creativity_lab/client.py`、`creativity_lab/gates/base.py`、`creativity_lab/metrics.py`、`creativity_lab/prompts.py`
+  ⇒ ⇒ ⇒ **推上去会把这些文件回退到我的旧版本** ⇒ ⇒ ⇒ **这正是第二组那次覆盖事故的同型形态** ⇒ ⇒ ⇒ **⇒ 硬阻塞：不得推。**
+* ★ 另 4 处才是我本轮的改动（`docs/cmp8/KNOWN_ISSUES.md`、`docs/cmp8/OWNERS.json`、`docs/cmp8/PAPER-2026-10-25.md`、`tools/build_owners_json.py`）⇒ ⇒ 加上 3 个新文件（`fill_holdout_table.py`、`fill_dim_table.py`、`holdout13-2026-10-25/`）+ 1 份 EXEC-LOG。
+* ★★ **根因（比"冲突"更硬的一条）**：★ **`push_via_api.py` 会推【所有本地 blob 与远端不同的文件】** ⇒ ⇒ ⇒ **它【也会】把那 7 个陈旧文件推上去回退别人** ⇒ ⇒ ⇒ **⇒ 该脚本在"本地树陈旧"的前提下【本身就不安全】**，不是加个守卫就够了。
+* 需要的裁决：**Q6** —— 下轮推送前二选一：
+  ① **刷新本地树**：从远端拉回 171 个远端独有 + 7 个同路径较新版本（`GET /git/trees?recursive=1` + `GET /git/blobs/<sha>`），再推；
+  ② **加白名单模式**：给 `push_via_api.py` 加 `--only <path...>`，**只推白名单路径**，且 tree 仍以**远端 base_tree** 为底 ⇒ ⇒ **远端其他文件在结构上不可能被动**（overlay 语义）。★ 这是更省事的路。
+  ⇒ ⇒ ★ **本轮处置：不推。** 本地 commit `9d54e29fc119` 已落，`main` 未碰。
+
 ---
 
 ## 二、本轮同类错误计数表（6 类各写次数 + 实例）
+
 
 | # | 类别 | 次数 | 实例 |
 |:-:|---|--:|---|
