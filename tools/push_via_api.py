@@ -34,6 +34,8 @@ import time
 import urllib.error
 import urllib.request
 
+# ★ ★ 推后回读远端 commit 时【必须逐字核对】的字段（★ 契约，★ 卫生自检查的就是它）★★
+CHECK_FIELDS = ("message", "author", "date")
 API = "https://api.github.com"
 
 
@@ -207,6 +209,16 @@ def main() -> int:
                  "author": {"name": am, "email": ae, "date": ad},
                  "committer": {"name": cm, "email": ce, "date": cd}}
         nc = gh.post("/git/commits", cbody)
+        # ★ ★ 推后回读远端 commit 对象（★ 主会话要求 ③）：★ 逐字核对三项 ★★
+        rc2 = gh.get("/git/commits/%s" % nc["sha"])
+        r2 = rc2.get("author", {}) or {}
+        bad2 = []
+        if rc2.get("message", "") != cbody["message"]:
+            bad2.append("message")
+        if r2.get("name") != cbody["author"]["name"] or r2.get("date") != cbody["author"]["date"]:
+            bad2.append("author")
+        if bad2:
+            raise SystemExit("✘ 推后回读核对失败（★ %s）：★ %s" % (c[:10], ", ".join(bad2)))
         built.append((c, nc["sha"]))
         if (i + 1) % 5 == 0 or i == len(todo) - 1:
             print("  ✔ %d/%d  %s → %s" % (i + 1, len(todo), c[:10], nc["sha"][:10]))

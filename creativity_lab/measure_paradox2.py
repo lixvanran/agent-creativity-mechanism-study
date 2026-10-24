@@ -59,4 +59,4 @@ n_pos = sum(1 for k in common if hold[k] > 0)
 print("  留出集上得分为正的规格：%d/%d" % (n_pos, len(common)))
 json.dump(dict(drill=drill, hold=hold, rho=rho, regret=hold[t1] - hold[t2],
                rank_drill=rd, rank_hold=rh),
-          open(os.path.join(OUT, "paradox.json"), "w"), ensure_ascii=False, indent=1)
+          open(os.path.join(OUT, "paradox.json"), "w"), ensure_ascii=False, indent=1, sort_keys=True)

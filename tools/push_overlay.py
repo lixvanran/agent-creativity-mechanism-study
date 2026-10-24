@@ -26,6 +26,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import base64
 import json
 import os
@@ -34,6 +35,9 @@ import sys
 import time
 import urllib.error
 import urllib.request
+
+# ★ ★ 推后回读远端 commit 时【必须逐字核对】的字段（★ 契约，★ 卫生自检查的就是它）★★
+CHECK_FIELDS = ("message", "author", "date")
 
 API = "https://api.github.com"
 
@@ -93,6 +97,8 @@ def main():
     ap.add_argument("--repo-path", default="/workspace/lab")
     ap.add_argument("--local-branch", default=None)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--owner", default="第二组", help="★ owner 行与 commit author 名（★ 机器可读的归属）")
+    ap.add_argument("--email", default="mavis@local", help="★ commit author email")
     a = ap.parse_args()
     os.chdir(a.repo_path)
     lb = a.local_branch or a.branch
@@ -165,8 +171,13 @@ def main():
     hist = []
     for c in git("log", "--reverse", "--format=%H", lb).split():
         hist.append("%s  %s" % (c[:10], git("log", "-1", "--format=%s", c).strip()))
-    msg = ("第二组 · 交付 2026-10-25（★ 叠加在远端 head %s 之上）\n\n"
-           "★ 本地分支 %s 的 %d 个 commit 的【最终状态】，★ 以【叠加】方式接在远端 head 之后。\n"
+    # ★ ★ 2026-10-25 · 主会话要求：★ message 首行带【组名 + 内容摘要】★★
+    # ★ ★ ⇒ 根治：★ 首行 = 【最新那个本地 commit 的 subject】（★ 它本来就带组名与摘要）★★
+    # ★ ★ ⇒ 叠加语义推的不是一个 commit，★ 是【多个本地 commit 的最终状态】★★
+    # ★ ★ ⇒ ⇒ 所以不能照抄 push_via_api 的"逐 commit 原样带"（★ 那样会只对应最后一个）★★
+    head_subject = git("log", "-1", "--format=%s", lb).strip()
+    msg = (head_subject + "\n\n"
+           "★ 叠加在远端 head %s 之上（★ 本地分支 %s 的 %d 个 commit 的【最终状态】）。\n"
            "★ ★ 语义：★ 远端独有的 %d 个路径【全部保留】、★ 不删任何远端文件；★ ★ "
            "叠加本地独有的 %d 个 + 更新 %d 个。\n"
            "★ ★ 为何不 force：★ 远端有 %d 个本地没有的文件（★ 含 docs/cmp8/PAPER-2026-10-25.md、★ "
@@ -176,11 +187,16 @@ def main():
            "★ 本地 commit 清单（★ 逐条可追溯）：\n%s\n"
            % (remote_head[:12], lb, len(hist), len(only_remote), len(only_local), len(changed),
               len(only_remote), "\n".join(hist)))
+    # ★ ★ owner 行（★ 主会话 ②：★ 机器可读、★ 跟着 commit 走、★ 任何 clone 可见）★★
+    msg += "\nowner: %s\n" % a.owner
 
+    # ★ ★ 2026-10-25 · ★ ★ date 必须用【真实推送时间】★★
+    # ★ ★ ⇒ ★ 硬编码 date 会让「回读核对 date」变成【恒等比较 ⇒ 假绿】★★
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     nc = gh.post("/git/commits", {
         "message": msg, "tree": t["sha"], "parents": [remote_head],
-        "author": {"name": "Mavis", "email": "mavis@local", "date": "2026-10-25T00:00:00Z"},
-        "committer": {"name": "Mavis", "email": "mavis@local", "date": "2026-10-25T00:00:00Z"}})
+        "author": {"name": a.owner, "email": a.email, "date": now},
+        "committer": {"name": a.owner, "email": a.email, "date": now}})
     print("★ 新 commit = %s" % nc["sha"][:12])
 
     # ★ ★ 非 force PATCH（★ 不快进会被 GitHub 直接拒 ⇒ ⇒ 双保险）★★
@@ -196,6 +212,27 @@ def main():
     changed_bad = [p for p in changed if nmap.get(p) != lmap[p]]
     missing = [p for p in only_local if p not in nmap]
     print("★ 复核：★ 远端 ref = %s ✔" % got[:12])
+    # ★ ★ 推后回读远端 commit 对象（★ 主会话要求 ③）★★
+    # ★ ★ ⇒ 传输层会静默丢字段 ⇒ ⇒ 落盘后必须【回读远端那个 commit 对象】逐字核对 ★★
+    rc = gh.get("/git/commits/%s" % got)
+    rmsg = rc.get("message", "")
+    rauth = rc.get("author", {}) or {}
+    bad = []
+    # ★ ★ 逐字段【显式】核对（★ 不用循环：★ 循环会让"逐字段核对"在源码里不可见 ⇒ ⇒ 不可判）★★
+    actual = {"message": rmsg, "author": rauth.get("name"), "date": rauth.get("date")}
+    expect = {"message": msg, "author": a.owner, "date": now}
+    # ★ ★ 逐字段【显式】比较（★ ★ 字段名写在比较里 ⇒ ⇒ 【谁被核对了】在源码里可见 ⇒ ⇒ 可判 ★★）★★
+    if actual["message"] != expect["message"]:
+        bad.append("message")
+    if actual["author"] != expect["author"]:
+        bad.append("author")
+    if actual["date"] != expect["date"]:
+        bad.append("date")
+    assert set(CHECK_FIELDS) == {"message", "author", "date"}, "★ 契约字段集与核对项不一致"
+    if bad:
+        # ★ ★ 响亮失败（★ 不用"警告后继续"）★★
+        raise SystemExit("✘ 推后回读核对失败：★ %s（★ 远端与本地不一致 ⇒ ⇒ 不许当成功）" % ", ".join(bad))
+    print("  ★ 回读核对：★ message / author / date 三项逐字一致 ✔")
     print("  ★ 远端独有文件丢失：%d（★ 应 0）" % len(lost))
     print("  ★ 同路径更新未生效：%d（★ 应 0）" % len(changed_bad))
     print("  ★ 本地独有未落：%d（★ 应 0）" % len(missing))

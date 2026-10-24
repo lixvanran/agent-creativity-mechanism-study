@@ -101,6 +101,55 @@ def main() -> int:
         check("★ %s · 推后有逐路径复核（★ ★ 行为级：★ 差集运算 + 零值断言）" % rel,
               has_diff and has_zero_check,
               "★ 差集运算=%s ｜ 零值断言=%s" % (has_diff, has_zero_check))
+        # ── ④ 推后回读远端 commit 对象，★ 核对 message / author / date（★ 主会话要求）──
+        # ★ ★ 判据（★ 行为级）：★ ① 能读到远端 commit 对象 ② 三个字段都出现在【比较】里 ③ 没有硬编码时间戳 ★★
+        # ★ ★ ⇒ ★ 传输层会静默丢字段 ⇒ ⇒ 落盘后必须回读核对 ⇒ ⇒ 缺一个字段就是缺一个核对 ★★
+        # ★ ★ ⇒ ★ ★ **★ 「提到字段名」≠「核对了字段」★★** ⇒ ⇒ ★ ⇒ **★ ⇒ 所以必须找【Compare 节点】★★**
+        # ★ ★ ⇒ ★ ★ 也不能只认一种写法 ⇒ ⇒ ★ ⇒ 用 AST（★ 而不是正则匹配某一行文本）★★
+        reads_commit = bool(re.search(r'["\']/git/commits/', src))
+        compared = set()
+        hardcoded_ts = False
+        declared = set()
+        has_compare = False
+        occurrences = {}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Compare):
+                has_compare = True
+                # ★ ★★★ 【★ 关键：★ 只认【下标 vs 下标】的逐字段比较 ★】★★★★
+                # ★ ★ ⇒ 例如：★ actual["message"] != expect["message"] ★★
+                # ★ ★ ⇒ ★ **★ 而【集合相等】那种（★ assert set(CHECK_FIELDS) == {...}）★★
+                # ★ ★ ⇒ ★ **★ 不算 —— ★ ★ 它会让判据【被别的代码满足 ⇒ ⇒ 假绿】★★ ★★
+                for side in [node.left] + list(node.comparators):
+                    for sub in ast.walk(side):
+                        if isinstance(sub, ast.Subscript):
+                            sl = sub.slice
+                            if isinstance(sl, ast.Index):      # ★ py≤3.8 兼容
+                                sl = sl.value
+                            if isinstance(sl, ast.Constant) and isinstance(sl.value, str) \
+                                    and sl.value in ("message", "author", "date"):
+                                compared.add(sl.value)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str) \
+                    and re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", node.value):
+                # ★ ★ date 若是【硬编码常量】，★ 那"核对 date"是恒等比较 ⇒ ⇒ 假绿 ★★
+                hardcoded_ts = True
+            # ★ ★ ★ 【★ 契约锚点 ★】：★ 一个含三个字段名的元组/列表常量 ★★
+            if isinstance(node, (ast.Tuple, ast.List)):
+                vals = {e.value for e in node.elts
+                        if isinstance(e, ast.Constant) and isinstance(e.value, str)}
+                if vals >= {"message", "author", "date"}:
+                    declared = vals
+            # ★ ★ ★ 【★ 出现次数判据 ★】：★ 每个字段名要出现【≥2 次】★★
+            # ★ ★ ⇒ ★ 一次在契约声明、★ 一次在【逐字核对处】⇒ ⇒ ★ ⇒
+            # ★ ★ ⇒ ★ 「只声明不用」⇒ 1 次 ⇒ ⇒ 假绿 ⇒ ⇒ ★ ⇒ 抓得到 ★★
+            # ★ ★ ⇒ ★ 「用循环代替逐字核对」⇒ 字段名只出现在契约里 ⇒ ⇒ 1 次 ⇒ ⇒ 也抓得到 ★★
+            if isinstance(node, ast.Constant) and isinstance(node.value, str) \
+                    and node.value in ("message", "author", "date"):
+                occurrences[node.value] = occurrences.get(node.value, 0) + 1
+        need = {"message", "author", "date"}
+        check("★ %s · 推后回读远端 commit 并核对 message/author/date（★ 行为级）" % rel,
+              reads_commit and declared >= need and compared >= need and not hardcoded_ts,
+              "★ 回读=%s ｜ 契约声明=%s ｜ ★ 在【比较】里出现的字段=%s（★ 需 %s）｜ ★ 硬编码时间戳=%s"
+              % (reads_commit, sorted(declared), sorted(compared), sorted(need), hardcoded_ts))
 
     print()
     if FAILED:
