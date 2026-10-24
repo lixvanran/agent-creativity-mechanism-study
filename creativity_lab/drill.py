@@ -95,7 +95,7 @@ def evaluate(spec, topics, tag):
     json.dump(dict(spec=spec, key=spec_key(spec), desc=describe(spec),
                    agg=agg, per=results),
               open("%s/%s_%s.json" % (OUT, tag, spec_key(spec)), "w"),
-              ensure_ascii=False, indent=1, sort_keys=True)
+              ensure_ascii=False, indent=1)
     return agg
 
 
@@ -141,7 +141,7 @@ def main():
                    holdout=dict(incumbent=ai, best=ab), win=win,
                    drill_tids=[t["tid"] for t in DRILL],
                    hold_tids=[t["tid"] for t in HOLD]),
-              open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+              open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("\n总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
 
 

@@ -48,5 +48,5 @@ for c in lost:
     print("   - %s" % c)
 
 json.dump(dict(pool=pool, gain=gain, lost=lost),
-          open("%s/diff.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+          open("%s/diff.json" % OUT, "w"), ensure_ascii=False, indent=1)
 print("\n下一步：核验上述 %d 条增益点 / %d 条损失点" % (len(gain), len(lost)))

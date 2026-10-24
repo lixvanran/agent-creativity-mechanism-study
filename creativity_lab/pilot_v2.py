@@ -75,11 +75,11 @@ print("== 1. 生成 ==", flush=True)
 texts = {a: [gen(a, i) for i in range(1, REPS + 1)] for a in ("direct", "work")}
 for a in texts:
     print("  %-7s 平均 %dB × %d" % (a, sum(len(t) for t in texts[a]) / REPS, REPS), flush=True)
-json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1)
 
 print("== 2. 切断言 ==", flush=True)
 allc = {a: [claims(llm, t) for t in texts[a]] for a in texts}
-json.dump(allc, open("%s/claims.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+json.dump(allc, open("%s/claims.json" % OUT, "w"), ensure_ascii=False, indent=1)
 for a in allc:
     print("  %-7s 每次 %s 条" % (a, [len(c) for c in allc[a]]), flush=True)
 
@@ -109,5 +109,5 @@ for i, c in enumerate(lost[:6]):
     print("   - %s" % c)
 
 json.dump(dict(topic=TOPIC, texts=texts, claims=allc, gain=gain, lost=lost),
-          open("%s/pilot.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+          open("%s/pilot.json" % OUT, "w"), ensure_ascii=False, indent=1)
 print("\n下一步：对上面 %d 条增益点做外部核验（脚本外进行，结论回填）" % len(gain))
