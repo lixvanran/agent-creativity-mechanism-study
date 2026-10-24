@@ -127,6 +127,27 @@ def sd(xs: List[float]) -> float:
 
 
 # ─────────────────────────────────────────────────────────────
+def consistency_from_dirs(tri_dirs):
+    """★ 从「每把尺子的 (pos, neg) 计数」算一致性判定。★★
+
+    ★ ★ 核心纪律（★ 2026-10-26 修 ★）：★ **零分辨力尺子必须先剔除** ★
+    ★ 恒定尺子（全 0 diff）对【任何】对比都恒为「一致」⇒ 留在里面 ⇒
+    ★ 一致性门变成【恒真】⇒ 「三尺一致 = 是」是空的。
+    ★ ⇒ ⇒ **判据：一把尺子若在所有可比单元上 diff 全为 0 ⇒ 它对本对比零分辨力。★★
+
+    返回 (dead_dirs, info_dirs, n_info, tri_consistent, tri_verdict)。
+    ★ `tri_consistent` 为 None 表示【不可判定】（有信息的尺子不足 2 把）。
+    """
+    dead = {m: v for m, v in tri_dirs.items() if v[0] + v[1] == 0}
+    info = {m: v for m, v in tri_dirs.items() if v[0] + v[1] > 0}
+    n_info = len(info)
+    if n_info < 2:
+        return dead, info, n_info, None, (
+            "★ 不可判定（★ 有信息的尺子只有 %d 把 ⇒ 一致性门无意义 ★）" % n_info)
+    consistent = len({(v[0] > v[1]) for v in info.values()}) == 1
+    return dead, info, n_info, consistent, ("是" if consistent else "否 ⇒ 不可分辨")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True, help="★ 批的输出目录（★ 含 units/ ★）")
@@ -231,13 +252,18 @@ def main() -> int:
         # 三尺一致（H-TOPO-5，仅面宽轴）
         tri_dirs = {m: (sum(1 for r in rows if r[m + "_diff"] > 0),
                         sum(1 for r in rows if r[m + "_diff"] < 0)) for m in TRI_SCALE}
-        tri_consistent = len({(v[0] > v[1]) for v in tri_dirs.values()}) == 1
+        # ★★★ 2026-10-26 修：★ 零分辨力尺子必须【先剔除】再算一致性 ★★★
+        #   恒定尺子（全 0 diff）对【任何】对比都恒为「一致」⇒ 留在里面 ⇒
+        #   一致性门变成恒真 ⇒ 「三尺一致 = 是」是【空的】。
+        #   判据：一把尺子若在所有可比单元上 diff 全为 0 ⇒ 它对本对比零分辨力。
+        dead_dirs, info_dirs, n_info, tri_consistent, tri_verdict = consistency_from_dirs(tri_dirs)
         # 检出力：当前 n_cells 能检出的最小标准化效应（★ 用 H0 的 θ₀ 与单元数 ★）
         n_eff = len(rows)
         mde_std = theta0 * math.sqrt(2.0) if theta0 else None
         verdicts[name] = {"contrast": [A, B], "cells": rows, "n_cells": n_eff,
                            "n_tid": n_tid, "dir_votes": dir_votes, "pos": pos, "neg": neg,
                            "tri_dirs": tri_dirs, "tri_consistent": tri_consistent,
+                           "tri_dead_rulers": dead_dirs, "n_rulers_informative": n_info,
                            "theta0": theta0, "mde_standardized_approx": mde_std}
         print("\n   ── %s：%s − %s（★ 唯一差一个因子 ★）" % (name, A, B))
         print("      可比单元 = %d（题 %s）｜ 题级 n = %d" % (n_eff, tids, n_tid))
@@ -246,8 +272,11 @@ def main() -> int:
                   % (r["tid"], r["rep"], r["vendi_diff"], r["vendi_std"],
                      r["modes_diff"], r["structured_dedup_diff"]))
         print("      题级方向：%s" % ("；".join("%s %+.4f" % (t, m) for t, m, _s in dir_votes) or "—"))
-        print("      三尺方向：%s ｜ ★ 三尺一致 = %s"
-              % (tri_dirs, "是" if tri_consistent else "否 ⇒ 不可分辨"))
+        print("      三尺方向：%s" % (tri_dirs,))
+        if dead_dirs:
+            print("      ★ 零分辨力尺子（★ 全 0 diff ⇒ 对本对比【无信息】★）：%s ⇒ ★ 已剔除，不参与一致性门 ★"
+                  % (list(dead_dirs.keys()),))
+        print("      ★ 三尺一致（★ 只在【有信息的 %d 把】尺子上算 ★）= %s" % (n_info, tri_verdict))
         print("      ★ 方向一致辅助条件：题级 n=%d ⇒ ★ 【≥2/3 题同向】不可判定 ★" % n_tid)
 
     # ── 检出力地板 ──
