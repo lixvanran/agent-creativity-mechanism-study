@@ -90,9 +90,12 @@ class ForcedPolicy(W.ActionPolicy):
     """始终返回指定动作（其余参数照常打分，只是不参与选择）。"""
 
     def __init__(self, spec, base: Optional[W.ActionPolicy] = None,
-                 forced_arb: Optional[int] = None):
+                 forced_arb: Optional[int] = None,
+                 forced_arch: Optional[tuple] = None):
         super().__init__(base.export() if base else None)
         self._forced = spec
+        self._forced_arch = forced_arch
+        self.used_arch = None
         # ★ 固定仲裁选择（层3 的第二件事：训练时试某个仲裁档，看收益）
         self._forced_arb = forced_arb
         self.used_arb = None
@@ -106,6 +109,15 @@ class ForcedPolicy(W.ActionPolicy):
             return self._forced_arb
         v = super().choose_arbitration(failure_kind, rng)
         self.used_arb = v
+        return v
+
+    def choose_architecture(self, failure_kind, rng):
+        """★ 固定架构决策（发散度 + 合并方式）⇒ 训练时能"试某种架构、看收益"。"""
+        if self._forced_arch is not None:
+            self.used_arch = self._forced_arch
+            return self._forced_arch
+        v = super().choose_architecture(failure_kind, rng)
+        self.used_arch = v
         return v
 
 
@@ -205,9 +217,10 @@ def load_tasks(n=None):
     return tasks[:n] if n else tasks
 
 
-def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None):
+def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None,
+            forced_arch=None):
     """用**指定动作 + 指定仲裁档**跑一遍，返回读数（★ 不做判官评估 ⇒ 便宜）。"""
-    pol = ForcedPolicy(spec, forced_arb=forced_arb)
+    pol = ForcedPolicy(spec, forced_arb=forced_arb, forced_arch=forced_arch)
     wf = W.CollapseFixWorkflow(
         llm, n_slots=slots, seed=seed, model=os.environ.get("MM_MODEL",
                                                             "MiniMax-M3.1-Flash-Preview"),
@@ -215,6 +228,7 @@ def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None):
         policy=pol, policy_seed=seed, arbitrate_mode="learned")
     r = wf.run(task["ask"])
     r["_arb_used"] = pol.used_arb
+    r["_arch_used"] = pol.used_arch
     return r
 
 
@@ -274,10 +288,13 @@ def main():
             spec = pol.choose("conflict", rng)
             # ★ 同时抽一个**仲裁档**（mark / keep_pos / keep_neg）⇒ 一起学
             _arb = pol.choose_arbitration("conflict", rng)
+            # ★ 同时抽**架构决策**（发散度 + 合并方式）⇒ 一起学
+            _nf, _mm = pol.choose_architecture("conflict", rng)
+            _arch = (int(_nf), str(_mm))
             # ② 用它跑一遍（观测实际失败类型）
             try:
                 res = run_one(llm, task, spec, seed, args.slots, args.rounds_per_run,
-                              forced_arb=_arb)
+                              forced_arb=_arb, forced_arch=_arch)
             except Exception as e:
                 print("  ⚠️ 样本失败（计入，不重试）：%s: %s" % (type(e).__name__, e), flush=True)
                 continue
@@ -317,10 +334,18 @@ def main():
             # ★ 更新**仲裁权重**（层3 的第二件事）
             if _arb is not None:
                 pol.arb[_arb] += 0.5 * adv_scalar
+            # ★ 更新**架构权重**（发散度 + 合并方式）⇒ 让"该不该发散/怎么合并"被学出来
+            if _arch is not None:
+                _nfi = W.ActionPolicy.NF_IDS.index(_arch[0]) if _arch[0] in W.ActionPolicy.NF_IDS else None
+                _mmi = W.ActionPolicy.MM_IDS.index(_arch[1]) if _arch[1] in W.ActionPolicy.MM_IDS else None
+                if _nfi is not None:
+                    pol.nf[_nfi] += 0.5 * adv_scalar
+                if _mmi is not None:
+                    pol.mm[_mmi] += 0.5 * adv_scalar
             rec = dict(round=rnd, sample=si, task=task.get("task_id"),
                        spec=list(spec), failure_kind=fk, r=pr["r"], base=base,
                        kept=kept, archive_n=len(archive.items),
-                       arb=_arb, n_conflict_pairs=pr.get("n_conflict_pairs", 0),
+                       arb=_arb, arch=_arch,
                        # ★ 只把标量化的分量进日志（claims 太长，另存档案）
                        **{k: v for k, v in pr.items() if k not in ("r", "claims")},
                        grad=g["grad"])

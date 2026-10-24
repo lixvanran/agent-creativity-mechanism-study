@@ -55,6 +55,7 @@ import u1_lib as U            # noqa: E402
 import measure as M           # noqa: E402
 import workflow as W          # noqa: E402
 import anchor_out as AO       # noqa: E402
+import premature_closure as PC  # noqa: E402
 
 DEV = "/workspace/lab/routes/DEV"
 OUT = os.path.join(HERE, "runs")
@@ -63,8 +64,10 @@ OUT = os.path.join(HERE, "runs")
 # ══════════════════════════════════════════════════════════════════════
 # 工具
 # ══════════════════════════════════════════════════════════════════════
-def load_tasks(n=None):
-    with open(os.path.join(DEV, "devset.json"), encoding="utf-8") as f:
+def load_tasks(n=None, devset=None):
+    """devset 可指定题集文件（默认 DEV/devset.json；对抗题集用 DEV-ADV-*.json）。"""
+    path = devset or os.path.join(DEV, "devset.json")
+    with open(path, encoding="utf-8") as f:
         d = json.load(f)
     tasks = d["tasks"] if isinstance(d, dict) and "tasks" in d else d
     return tasks[:n] if n else tasks
@@ -230,11 +233,16 @@ def main():
                     help="逗号分隔的臂名")
     ap.add_argument("--judge", default="minimax", choices=["minimax", "openrouter"],
                     help="判官厂商（★ 跨厂商交叉用 openrouter ⇒ judge_same_vendor=false）")
+    ap.add_argument("--devset", default="",
+                    help="题集 json（默认 DEV/devset.json；对抗题集用 DEV-ADV-*.json）")
     ap.add_argument("--judge-model", default="",
                     help="判官模型（openrouter 时默认 u1_lib.OR_MODEL）")
     args = ap.parse_args()
 
-    tasks = load_tasks(args.tasks)
+    tasks = load_tasks(args.tasks, args.devset)
+    _adv = {t["task_id"]: t for t in tasks if t.get("trap_fingerprints")}
+    if _adv:
+        print("★ 诱导钻牛角尖题集：%d 题（带陷阱指纹，钻牛角尖率可机械判定）" % len(_adv))
     model = os.environ.get("MM_MODEL", "MiniMax-M3.1-Flash-Preview")
     # ★ 断点续跑：沙箱会杀长跑后台进程 ⇒ 每次重启都要能接着跑
     _done = set()
@@ -328,6 +336,9 @@ def main():
                         chat_stats=a.get("chat_stats"),
                         rounds=a.get("rounds"),
                         paths=a.get("paths"),
+                        # ★ 钻牛角尖判定（零判官、纯文本正则）
+                        pc=(PC.premature_closure(_adv[task["task_id"]], a.get("answer") or "")
+                            if task["task_id"] in _adv else None),
                         # ★ **代码版本标记**：⇒ 任何时候都能一眼看出"这批读数是哪份代码产的"
                         #   （我们已经栽过好几次"跑的是旧代码却以为在跑新代码"）
                         code_version="paths+arb+framesvote@2026-10-24",
