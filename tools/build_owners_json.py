@@ -36,7 +36,8 @@ for _ in range(12):
 
 layers=[]
 for i,(sha,msg) in enumerate(chain):
-    if sha in MINE: g,loc,one=MINE[sha]; conf=False
+    _hit=[k for k in MINE if sha.startswith(k) or k.startswith(sha)]
+    if _hit: g,loc,one=MINE[_hit[0]]; conf=False
     elif sha in KNOWN_OTHER: g,loc,one=KNOWN_OTHER[sha]; conf=False
     else: g,loc,one=None,None,None; conf=True
     layers.append(dict(layer=len(chain)-i, sha=sha, group=g, local_commit=loc,
