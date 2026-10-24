@@ -4,7 +4,7 @@
 > 落点：`creativity_lab/experiments/topo_arm.py`
 > 预注册：`docs/cmp8/routes/COLLAPSE/eval/PREREG-TOPOLOGY-ARM.md`（v3，388 行）
 > 物证：`docs/cmp8/routes/COLLAPSE/eval/MAS_Diversity-ACTUAL-CONFIGS.md`
-> 执行记录：`docs/交接/EXEC-LOG-topology-arm-2026-10-25.md`
+> 执行记录：`docs/交接/EXEC-LOG-topology-arm-2026-10-24.md`
 >
 > ## ★★★ A 档 = 结构性不可行（四条原因，EXEC-LOG §1）
 > ① `AgentVerse` 被指向的版本（main, 2024-09-09）里 **`grouped_sequential` / `subgroup_random` 无对应实现**
@@ -124,7 +124,7 @@ TOPOLOGIES = {
 #   homo  = 全部 senior（同资历）
 #   hetero= 2 senior + 1 first-year PhD（★ 资历异构 ⇒ 本批的"异构"轴，不是模型异构）
 ARMS = {
-    # ★ 2026-10-25 新增：第三对照臂（★ 拆"交互"与"综述"两个因子 ⇒ 构成 2×2）
+    # ★ 2026-10-24 新增：第三对照臂（★ 拆"交互"与"综述"两个因子 ⇒ 构成 2×2）
     "nosel_b3_synth": {"topology": None, "mix": "homo", "synth": True},
     "topo_gs_homo":     {"topology": "grouped_sequential", "mix": "homo"},
     "topo_ngt_homo":    {"topology": "ngt", "mix": "homo"},
@@ -281,11 +281,11 @@ def run_topology(llm: LLM, topo: str, personas: List[str], topic: str,
 
 
 def run_nosel_synth(llm: LLM, personas: List[str], topic: str) -> Dict[str, Any]:
-    """★ `nosel_b3_synth`：**无交互 + 有综述**（★ 2026-10-25 新增的第三对照臂）
+    """★ `nosel_b3_synth`：**无交互 + 有综述**（★ 2026-10-24 新增的第三对照臂）
 
     ★★★ **它是为了把"两因子"拆成"单因子"而加的**：
     · 现状 `topo_*` vs `nosel_b3` 差了**两个**因子（★ 有无交互 + 有无综述）
-      ⇒ ⇒ **绝对差值里混着两个 ⇒ ⇒ 只能比方向、不能比绝对值**（★ 负责人 2026-10-25 判据）
+      ⇒ ⇒ **绝对差值里混着两个 ⇒ ⇒ 只能比方向、不能比绝对值**（★ 负责人 2026-10-24 判据）
     · ★ 加这个臂后构成 **2×2**：{交互, 综述}
       - `nosel_b3`        = 无交互 + 无综述
       - `nosel_b3_synth`  = 无交互 + 有综述 ★ 新增
@@ -312,7 +312,7 @@ def run_nosel_synth(llm: LLM, personas: List[str], topic: str) -> Dict[str, Any]
 def run_nosel(llm: LLM, personas: List[str], topic: str) -> Dict[str, Any]:
     """★ `nosel_b3`：**无交互、无综述** ⇒ 3 个 agent 各独立写 1 份。
 
-    ★★ **2026-10-25 修（A 篇必问② 逼出）**：★ **主层此前是空的**（`post_synthesis=""`）
+    ★★ **2026-10-24 修（A 篇必问② 逼出）**：★ **主层此前是空的**（`post_synthesis=""`）
     ⇒ ⇒ **H-TOPO-4a 的核心对比会拿无效读数去比 ⇒ 整批白跑**。
     ⇒ ⇒ ★ **修法：主层 = 3 份里的第 1 份（★ 确定性：按 agent 索引）**
     ⇒ ⇒ ★ **辅助层 = 3 份全量**（★ 拓扑臂的辅助层也是 3 份 ⇒ ★ 两臂辅助层【份数相等】✔）
@@ -346,7 +346,7 @@ def read_set(arts: List[str], vecs: List[List[float]]) -> Dict[str, Any]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=os.path.join(ROOT, "runs", "topo-arm-2026-10-25"))
+    ap.add_argument("--out", default=os.path.join(ROOT, "runs", "topo-arm-2026-10-24"))
     ap.add_argument("--reps", type=int, default=1)
     ap.add_argument("--runs-per-arm", type=int, default=5,
                     help="★ 每臂跑几次（不同 seed）⇒ n 单元数 ⇒ ★ 臂间 n 必须相等 ⇒ 默认 5（与前人同口径）")
@@ -368,7 +368,7 @@ def main() -> int:
 
     os.makedirs(args.out, exist_ok=True)
 
-    # ══════ ★★★ 跑前自检（★ A 篇 2026-10-25 建议：★ n 单元表 + 断言臂间 n 相等）══════
+    # ══════ ★★★ 跑前自检（★ A 篇 2026-10-24 建议：★ n 单元表 + 断言臂间 n 相等）══════
     # ★ 成本一个 assert；★ 挡住的是"几小时采集白跑"（★ 上一轮就栽在这上面）
     print("== ★ 跑前自检：n 单元口径 ==")
     print("   %-16s %6s %10s %12s %10s" % ("臂", "n单元", "主层/单元", "辅助层/单元", "每单元调用"))
@@ -377,7 +377,7 @@ def main() -> int:
         if args.only_arms and _a not in [x.strip() for x in args.only_arms.split(",")]:
             continue
         _per = 13 if _sp["topology"] is not None else (4 if _sp.get("synth") else 3)
-        # ★★★ 关键（★ 2026-10-25 修）：★ 【主层/单元】与【辅层/单元】必须【按臂真算】，不许硬编码
+        # ★★★ 关键（★ 2026-10-24 修）：★ 【主层/单元】与【辅层/单元】必须【按臂真算】，不许硬编码
         # ★ 拓扑臂：主 = 综述后 1 份｜辅 = 轮 5 后 3 份发言
         # ★ nosel ：主 = 3 份独立输出里的第 1 份（★ 确定性）｜辅 = 3 份全量
         _main = 1

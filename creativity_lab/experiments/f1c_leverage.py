@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """★ F-1c 落我方：★ 位置基线归一化 + 【单组降级重算】★
 
-★ ★★ 起因：★ 第 1 层论证线 2026-10-26 的来件（★ §二 ★）★★
+★ ★★ 起因：★ 第 1 层论证线 2026-10-24 的来件（★ §二 ★）★★
 ★ 他们指出：★ 在【K 固定】的批里做 leave-one-out，★ **最后一个单元天然杠杆最大**
 ★ ⇒ ⇒ ★ 不归一化就会把【K 边界位置效应】误报成【单元内容退化】★★
 ★ ⇒ ★ 他们要求我方对那个被剔单元（★ `S5_r1_nosel_b3_u1`，★ 198 字 ★）★ 做同一个检查。
@@ -26,9 +26,9 @@
 
 ★ 用法：
     python3 -B creativity_lab/experiments/f1c_leverage.py \
-        --out /workspace/lab/runs/topo-arm-v2-2026-10-25 \
+        --out /workspace/lab/runs/topo-arm-v2-2026-10-24 \
         --runs-per-arm 5 --seed 20261025 \
-        --json-out runs/topo-arm-v2-2026-10-25/f1c_leverage.json
+        --json-out runs/topo-arm-v2-2026-10-24/f1c_leverage.json
 """
 
 import argparse
@@ -123,7 +123,7 @@ def main():
         return vendi_score([vmap[t] for _i, t in items])
 
     # ★ ★★ 断言：★ 所有重算的【可比单元数】必须与基线一致（★ 无「整组退出」副作用）★★
-    # ★ 来源：★ 第 1 层论证线 2026-10-26（★ P-1/P-2 ★）：★ 「剔除类结论必须用
+    # ★ 来源：★ 第 1 层论证线 2026-10-24（★ P-1/P-2 ★）：★ 「剔除类结论必须用
     # ★ 与主分析同口径的独立路径重算，★ 且必须写清剔除后该组是【退出】还是【降级】」
     # ★ ★ ★ 我方正好踩在「退出」那一侧：★ partial_verdict.py 的 full 只收满
     # ★ 5 份的组 ⇒ ★ 剔一个文件 ⇒ 该组只剩 4 份 ⇒ 整组被排除 ⇒ ★ ⇒ 那不是

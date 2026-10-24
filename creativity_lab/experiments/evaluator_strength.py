@@ -107,7 +107,7 @@ def main() -> int:
         return emb_llm.embed(list(ts))
 
     groups: List[Dict[str, Any]] = []
-    # ★★★ 输入/输出隔离（★ 2026-10-25 统一形态：★ 解析输入的同一处就断言）
+    # ★★★ 输入/输出隔离（★ 2026-10-24 统一形态：★ 解析输入的同一处就断言）
     # ★★★ ★ 特别提醒：★ 本工具【写出的也是 group_*.json】⇒ ⇒ ★ 「文件名过滤」救不了它
     # ★★★ ★ 真正救它的是【输出目录 ≠ 输入目录】⇒ ⇒ ★ ⇒ 所以这里必须做【目录级 realpath 断言】
     guard_io.assert_output_outside_input_dir(SRC, out_dir, "evaluator_strength")

@@ -78,7 +78,7 @@ def main() -> int:
         d = os.path.join(ROOT, "runs", run)
         if not os.path.exists(d):
             continue
-        # ★★★ 防御（★ 2026-10-25 三组「把自己的输出当输入」事故的通用预防）
+        # ★★★ 防御（★ 2026-10-24 三组「把自己的输出当输入」事故的通用预防）
         # ★★★ realpath 级（★ 不是路径字符串相等 ⇒ 挡符号链接 / `../` / 尾斜杠三种绕过）
         try:
             guard_io.assert_output_outside_input_dir(d, OUT_DIR, "nested_calibration")

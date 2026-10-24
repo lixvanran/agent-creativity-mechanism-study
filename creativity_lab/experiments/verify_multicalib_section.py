@@ -5,8 +5,8 @@
 > 落点：`creativity_lab/experiments/verify_multicalib_section.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/verify_multicalib_section.py \
->       --report docs/交付/第二组交付报告_2026-10-25.md \
->       --json runs/topo-arm-v2-2026-10-25/h0_theta0_multicalib.json
+>       --report docs/交付/第二组交付报告_2026-10-24.md \
+>       --json runs/topo-arm-v2-2026-10-24/h0_theta0_multicalib.json
 >   python3 -B creativity_lab/experiments/verify_multicalib_section.py --self-test
 >
 > ★ **为什么不能只靠「字符串在报告里出现过」（★ 一条被实测证伪的检查形态 ★）** ★
@@ -85,7 +85,7 @@ def parse_table(sec: str):
 def norm_num(x):
     """★ 归一化【只去装饰】★：★ 去粗体标记、去 σ、去空格、去全角空格 ★
 
-    ★ ★ 归一化的范围必须最小化（★ 第 1 层论证线 2026-10-26 的教训 ★）★★
+    ★ ★ 归一化的范围必须最小化（★ 第 1 层论证线 2026-10-24 的教训 ★）★★
     ★ 本函数只动【排版装饰】，★ 不动数字本身 ⇒ ★ 差一位小数仍会被抓到 ★
     """
     s = str(x)
@@ -151,8 +151,8 @@ def verify(rep: str, mj: dict):
 
 def self_test():
     """★ 变异注入：★ 证明这个检查真会红（★ 否则它就是个恒真检查 ★）★"""
-    rep_p = os.path.join(ROOT, "docs", "交付", "第二组交付报告_2026-10-25.md")
-    js_p = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-25", "h0_theta0_multicalib.json")
+    rep_p = os.path.join(ROOT, "docs", "交付", "第二组交付报告_2026-10-24.md")
+    js_p = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-24", "h0_theta0_multicalib.json")
     if not (os.path.exists(rep_p) and os.path.exists(js_p)):
         print("★ 自测跳过：★ 找不到报告或 json ★")
         return 1

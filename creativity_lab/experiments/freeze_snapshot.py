@@ -5,7 +5,7 @@
 > 落点：`creativity_lab/experiments/freeze_snapshot.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/freeze_snapshot.py \
->       --run-dir runs/topo-arm-v2-2026-10-25 \
+>       --run-dir runs/topo-arm-v2-2026-10-24 \
 >       --src partial_verdict.json \
 >       --src h0_theta0_multicalib.json \
 >       --tag n144
@@ -52,7 +52,7 @@ def main():
                     help="★ 要冻结的源文件名（可多次）★")
     ap.add_argument("--tag", required=True, help="★ 标签（★ 如 n146 ★）")
     ap.add_argument("--date", default=None,
-                    help="★ 文件名里的日期（★ 叙事日期，★ 如 2026-10-26 ★）")
+                    help="★ 文件名里的日期（★ 叙事日期，★ 如 2026-10-24 ★）")
     ap.add_argument("--label-date", default=None,
                     help="★ 叙事日期（★ 写进 registry 的 label_date 字段 ★）；★ "
                          "frozen_at 一律用【机器 UTC 时钟】⇒ ★ 不与叙事日期混用 ★")

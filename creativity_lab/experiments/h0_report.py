@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-★ 【H0 检出力报告】—— ★ ★ **★ 报三个数（★ 2026-10-25 主会话要求）★★★** ★★
+★ 【H0 检出力报告】—— ★ ★ **★ 报三个数（★ 2026-10-24 主会话要求）★★★** ★★
 ============================================================================
 
 ★ **★ 为什么要这个脚本（★ 主会话 ⑦）★★**
@@ -28,7 +28,7 @@
 ★ **★ 用法 ★★
 ------------------------------------------------------------------------
 ★   python3 -B creativity_lab/experiments/h0_report.py
-★   ⇒ 落盘：★ runs/topo-arm-v2-2026-10-25/h0_report.json
+★   ⇒ 落盘：★ runs/topo-arm-v2-2026-10-24/h0_report.json
 ★   ⇒ 退出码：★ 0 = 已出报告；★ 1 = 原料不足
 """
 
@@ -47,7 +47,7 @@ from creativity_lab.experiments.h0_calibration import (  # noqa: E402
     NEW, OLD, paired_diffs)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-25", "h0_report.json")
+OUT = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-24", "h0_report.json")
 BOOT = 2000
 SEED = 20261025
 

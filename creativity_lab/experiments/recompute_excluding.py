@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """★ 独立可复算件：★ 「剔除污染单元」重算 + 【脆弱格】标色 ★
 
-★ ★★ 为什么需要这个件（★ 2026-10-26 主会话要求：★ 「我要能自己跑一遍」★★）
+★ ★★ 为什么需要这个件（★ 2026-10-24 主会话要求：★ 「我要能自己跑一遍」★★）
 ★ 拓扑臂 v2 的部分预判决里，★ 4c（综述效应）那个 +2.69σ 的正面格
 ★ **由一个 198 字的输出贡献** ⇒ ★ 剔除后该格消失、题级效应 ↓86.6%
 ★ ⇒ ★ **「不可分辨」是稳的、★ 「有个大效应」是脆的** ⇒ ★ 两者的区别必须【可复算】★★
@@ -27,9 +27,9 @@
 
 用法：
     python3 -B creativity_lab/experiments/recompute_excluding.py \
-        --out /workspace/lab/runs/topo-arm-v2-2026-10-25 \
+        --out /workspace/lab/runs/topo-arm-v2-2026-10-24 \
         --runs-per-arm 5 --target-units 360 --seed 20261025 --boot 10000 \
-        --json-out runs/topo-arm-v2-2026-10-25/recompute_excluding.json
+        --json-out runs/topo-arm-v2-2026-10-24/recompute_excluding.json
 """
 
 import argparse
@@ -107,7 +107,7 @@ def main():
             die("unit-list 不存在：%s" % a.unit_list)
         allowed = set(x.strip() for x in open(a.unit_list, encoding="utf-8") if x.strip())
         print("★ 单元清单：%s（★ %d 个 ★）" % (a.unit_list, len(allowed)))
-    # ★★★★ 覆盖度闸门（★ 入口处 · 2026-10-26 补 · 第 1 层论证线自曝同族后我方自查抓出 ★★★★）
+    # ★★★★ 覆盖度闸门（★ 入口处 · 2026-10-24 补 · 第 1 层论证线自曝同族后我方自查抓出 ★★★★）
     #   ★ ★ 事件：★ 空数据下本脚本【exit 0】并【产出一份结构完整的空 json】
     #   ★   ★ （★ 5 个顶层键：★ contaminated_units / fragile_cells / stable_cells /
     #   ★   ★ verdict_impact / note ★）⇒ ★ ⇒ 它【长得像一份正常结果】⇒ ★ ★【比崩溃更危险】★★ ★

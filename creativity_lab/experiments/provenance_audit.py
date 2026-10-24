@@ -5,11 +5,11 @@
 > 落点：`creativity_lab/experiments/provenance_audit.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/provenance_audit.py \
->       --report docs/交付/第二组交付报告_2026-10-25.md \
+>       --report docs/交付/第二组交付报告_2026-10-24.md \
 >       --dump   docs/交付/读数快照/topo-arm-v2-n151/generated \
 >       --coverage docs/交付/读数快照/topo-arm-v2-n151/verify_coverage.json
 >
-> ★ ★★ 为什么要有这个（★ 2026-10-26 · 第 1 层论证线的两条硬发现逼出来的 ★）★★
+> ★ ★★ 为什么要有这个（★ 2026-10-24 · 第 1 层论证线的两条硬发现逼出来的 ★）★★
 ★ ① **「43/43 全绿」的覆盖率只有 54.8%**（★ 125/228 ★）⇒ ★ **「全绿」只证明【被覆盖的那部分对】，
 ★    绝不等于【全文每个数都验过】★★ ⇒ ⇒ ★ 本工具算的是**覆盖率**，★ 不是「全绿」★
 ★ ② ★★ **「靠数值出现去推断某个数来自哪个数据源」不可靠**★★
@@ -145,10 +145,10 @@ def main():
         covered = set(json.load(open(a.coverage, encoding="utf-8")).get("covered") or [])
     errs, counts, total, gap = audit(rep, a.dump, covered)
 
-    print("== ★ 读数出处覆盖率审计（★ 2026-10-26 ★）==")
+    print("== ★ 读数出处覆盖率审计（★ 2026-10-24 ★）==")
     print("   ★★★ 主指标（★ 唯一精确的口径 ★）：★ verify 实际逐位核对的期望值 = ★ %d 个 ★" % len(covered))
     print("   ★ ★ ★ 下面的 A/B/C 计数是【段级 + 值级】的近似：★ A 档按【值】匹配 ⇒ ★ **是上界** ★")
-    print("   ★ ★ ★ 因为【同值 ≠ 同源】（★ 第 1 层论证线 2026-10-26 实证 ★）⇒ ★ 不可当精确覆盖率 ★")
+    print("   ★ ★ ★ 因为【同值 ≠ 同源】（★ 第 1 层论证线 2026-10-24 实证 ★）⇒ ★ 不可当精确覆盖率 ★")
     print("   A 档（★ 逐位核对覆盖·上界 ★）: %5d  (%.1f%%)" % (counts["A"], 100.0 * counts["A"] / max(total, 1)))
     print("   B 档（★ 构造性覆盖·逐字节 ★） : %5d  (%.1f%%)" % (counts["B"], 100.0 * counts["B"] / max(total, 1)))
     print("   C 档（★ ★ 未核对区 ★）        : %5d  (%.1f%%)" % (counts["C"], 100.0 * counts["C"] / max(total, 1)))

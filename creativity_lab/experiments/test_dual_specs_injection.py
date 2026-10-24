@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""★ `Dual` 臂的 `specs` 注入 + 臂级失败记账（★ 2026-10-26）★★
+"""★ `Dual` 臂的 `specs` 注入 + 臂级失败记账（★ 2026-10-24）★★
 
 > 第二组 ｜ 配套 `creativity_lab/arms/dual.py` 的改动
 > 需求来源：论文簇 / 第 1 层论证线《WORKPACK-4 回源核对》§五（★ 补丁由对方写好 · 本组实现并自测 ★）
@@ -31,7 +31,7 @@ sys.path.insert(0, HERE)
 
 from selftest_kit import check, suite          # noqa: E402  ★ 仓内共享的 check()，不另造
 
-DEAD = "MiniMax-M2.1"          # ★ 实测 404（2026-10-25）
+DEAD = "MiniMax-M2.1"          # ★ 实测 404（2026-10-24）
 ALIVE5 = ["MiniMax-M3", "MiniMax-M3.1-Flash-Preview", "MiniMax-M2.7",
           "MiniMax-M2.5", "MiniMax-M2.7-highspeed"]
 

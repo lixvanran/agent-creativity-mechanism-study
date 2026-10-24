@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """★ 交付包一键打包（★ 可复现 ★）—— ★ 底层 zip 委托 `pack_repo.py` ★
 
-★ ★★ 为什么要有这个 wrapper（★ 2026-10-26 实测逼出来的 ★）★★
+★ ★★ 为什么要有这个 wrapper（★ 2026-10-24 实测逼出来的 ★）★★
 ★ `pack_repo.py` 本身是对的（★ UTF-8 标志位、★ 全量清单核对 ★），★ 但它有两个缺口：
 ★ ① **它走的是【文件系统】不是【版本管理的文件集】** ⇒ ★ `.tmp/`、`.mavis/` 这类
 ★    未受管的临时物会混进包（★ 实测：1430 个文件里 266 个是 `.tmp/` 下的 ★）
@@ -25,8 +25,8 @@
 
 用法：
     python3 -B creativity_lab/experiments/make_delivery_zip.py \
-        --repo /workspace/lab --out /workspace/第二组交付包_2026-10-26.zip \
-        --prefix 第二组交付_2026-10-26
+        --repo /workspace/lab --out /workspace/第二组交付包_2026-10-24.zip \
+        --prefix 第二组交付_2026-10-24
 """
 
 import argparse

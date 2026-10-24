@@ -4,7 +4,7 @@
 > 落点：`creativity_lab/experiments/family_key_ruler.py`
 > 输入：`docs/cmp8/batch-U1/measurement_v2.json`（★ **`cards_all` 的 schema 齐备**：
 > `claim` / `verdict` / `evidence_ref` / `evidence_class` / `load_bearing` / `decision_changed` / **`supports_conclusions`**）
-> 输出：`runs/family-key-2026-10-25/family_key.json`
+> 输出：`runs/family-key-2026-10-24/family_key.json`
 >
 > ## ★★★ 为什么这条是"零 API"
 > ★ 三组给的 `family_key` 函数本体只是 3 行字符串操作，★ **归并的语义在判官那一半** ⇒
@@ -39,7 +39,7 @@ from creativity_lab.metrics_ext import (family_key, family_three_calibers,   # n
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC = os.path.join(ROOT, "docs", "cmp8", "batch-U1", "measurement_v2.json")
-OUT = os.path.join(ROOT, "runs", "family-key-2026-10-25", "family_key.json")
+OUT = os.path.join(ROOT, "runs", "family-key-2026-10-24", "family_key.json")
 
 
 def _norm(c: Dict[str, Any]) -> Dict[str, Any]:
@@ -151,14 +151,14 @@ def main() -> int:
     print("   ⇒ 合计：卡 %d ｜ 承重 %d ｜ 未覆盖 %d（%.1f%% of 承重）"
           % (tot["n_cards"], tot["n_load_bearing"], tot["n_uncovered"],
              tot["n_uncovered"] / tot["n_load_bearing"] * 100 if tot["n_load_bearing"] else 0))
-    # ★★ 底本版本 + 命题条数（★ 负责人 2026-10-25 要求：换底本会改未覆盖率 ⇒ 不标就会有人把旧底本的数当现状）
+    # ★★ 底本版本 + 命题条数（★ 负责人 2026-10-24 要求：换底本会改未覆盖率 ⇒ 不标就会有人把旧底本的数当现状）
     d0 = json.load(open(SRC, encoding="utf-8"))
     baseline = {"measure_version": d0.get("measure_version"),
                 "n_propositions": d0.get("facts"),
                 "evidence_hash": str(d0.get("evidence_hash"))[:32],
                 "judge_model": d0.get("judge_model"),
                 "★ caveat": ("★ 本读数的结论空间挂的是【U1-measure-v1-2026-10-21 底本】；"
-                             "★ 三组 2026-10-25 已把底本换成 v2（69 条命题）⇒ ⇒ "
+                             "★ 三组 2026-10-24 已把底本换成 v2（69 条命题）⇒ ⇒ "
                              "★ ⇒ 本表的『未覆盖率』里有相当一部分可能是【底本旧 ⇒ 挂不上编号】，"
                              "而不是『模型说出了结论空间之外的东西』⇒ ⇒ ★ 该数【暂不可对外报】⇒ "
                              "★ 等 v2 底本落地后用 v2 + 69 条命题重算 ⇒ 那次重算会给出"
@@ -182,7 +182,7 @@ def scan_all_pools():
     """★ 扫仓内所有卡池 ⇒ 第五把尺子的读数不止一个来源。"""
     import glob
     pools = []
-    # ★★★ 输入/输出隔离（★ 2026-10-25 统一形态：★ 解析输入的同一处就断言，★ realpath 级）
+    # ★★★ 输入/输出隔离（★ 2026-10-24 统一形态：★ 解析输入的同一处就断言，★ realpath 级）
     guard_io.assert_output_outside_input_dir(ROOT, os.path.dirname(OUT), "family_key_ruler")
     for pat in ("docs/cmp8/routes/COLLAPSE/eval/runs/dev/anchor_calibration*/calibration.json",
                 "docs/cmp8/routes/COLLAPSE/eval/runs/dev/judge_variants/judge_variants.json",

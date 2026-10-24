@@ -66,7 +66,7 @@ def med(v: List[float]):
 def main() -> int:
     P = load_proxies()
     rows: List[Dict[str, Any]] = []
-    # ★★★ 输入/输出隔离（★ 2026-10-25 统一形态：★ 解析输入的同一处就断言，★ realpath 级）
+    # ★★★ 输入/输出隔离（★ 2026-10-24 统一形态：★ 解析输入的同一处就断言，★ realpath 级）
     guard_io.assert_output_outside_input_dir(SRC, OUT, "layer1_bridge")
     for f in sorted(os.listdir(SRC)):
         if not f.startswith("group_"):

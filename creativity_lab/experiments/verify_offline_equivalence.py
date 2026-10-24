@@ -5,12 +5,12 @@
 > 落点：`creativity_lab/experiments/verify_offline_equivalence.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/verify_offline_equivalence.py \
->       --out runs/topo-arm-v2-2026-10-25 \
+>       --out runs/topo-arm-v2-2026-10-24 \
 >       --unit-list docs/交付/读数快照/topo-arm-v2-n151/UNITS-n151.txt \
 >       --vectors-dir docs/交付/读数快照/topo-arm-v2-n151/vectors
 > 退出码：0 = 逐位等值（★ 离线可算已被证明 ★）；1 = 不等；2 = 跑不动
 >
-> ★ ★★ 为什么要有这个（★ 2026-10-26 ★）★★
+> ★ ★★ 为什么要有这个（★ 2026-10-24 ★）★★
 ★ 「有落盘向量就不用再调嵌入」★ 这句话本身**只是设计意图** ★ ⇒ ★ **必须证明【落盘向量算出来的读数】与【通道现算的读数】逐位相同** ★
 ★ ⇒ ★ **否则「离线可算」只是【看起来】能用，★ 而复核者无法判断它是否等价** ★
 ★ ⇒ ★ ★ **⇒ 这就是「我方说能用」与「我方证明能用」的区别 ★★ ★
@@ -75,7 +75,7 @@ def main():
                 _n_units += 1
         except Exception:                                        # noqa: BLE001
             continue
-    print("== ★ 离线 ≡ 在线 等值性验证（★ 2026-10-26 ★）==")
+    print("== ★ 离线 ≡ 在线 等值性验证（★ 2026-10-24 ★）==")
     print("   落盘向量文本数：%d（★ 来自单元文件 %d 个 ★）" % (len(vmap), _n_units))
     if not vmap:
         print("   ✘ 没有落盘向量 ⇒ 退出码 2")

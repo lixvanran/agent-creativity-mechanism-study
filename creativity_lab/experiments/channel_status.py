@@ -7,8 +7,8 @@
 >   python3 -B creativity_lab/experiments/channel_status.py            # ★ 全测 ★
 >   python3 -B creativity_lab/experiments/channel_status.py --json-out path.json
 >
-> ★ **为什么需要它（★ 2026-10-26 实测逼出来的 ★）** ★
-★ 2026-10-26 10:14 UTC 起，★ 本组拓扑臂批的 chat 调用开始【HTTP 429 限流】★
+> ★ **为什么需要它（★ 2026-10-24 实测逼出来的 ★）** ★
+★ 2026-10-24 10:14 UTC 起，★ 本组拓扑臂批的 chat 调用开始【HTTP 429 限流】★
 ★ ⇒ ★ 而限流【不是余额耗尽】⇒ ★ 它会【在 5 小时窗口结束时自动恢复】★
 ★ ⇒ ★ 同时另一条通道（嵌入 `embo-01`）报 `1008 insufficient balance` ⇒ ★ **余额耗尽、不会自愈** ★
 ★ ⇒ ★ ★★ **两者的处置完全相反**：★ chat 限流 ⇒ 【等窗口复位即可】★；★ 嵌入余额 ⇒ 【必须充值】★★
@@ -151,7 +151,7 @@ def recount_units(run_dir):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run-dir", default=os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-25"))
+    ap.add_argument("--run-dir", default=os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-24"))
     ap.add_argument("--json-out", default=None)
     a = ap.parse_args()
 

@@ -209,7 +209,7 @@ class LLM:
         return out
 
 
-# ── 向量落盘缓存（★ 2026-10-26 ★）────────────────────────────────────
+# ── 向量落盘缓存（★ 2026-10-24 ★）────────────────────────────────────
 def _utcnow() -> str:
     import datetime as _dt
     return _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")

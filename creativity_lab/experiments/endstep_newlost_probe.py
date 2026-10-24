@@ -49,7 +49,7 @@ def grams(t: str, n: int = N):
 
 
 def main() -> int:
-    # ★★★ 输入/输出隔离（★ 2026-10-25 统一形态：★ 在【解析输入的同一处】剔除将写出的路径）
+    # ★★★ 输入/输出隔离（★ 2026-10-24 统一形态：★ 在【解析输入的同一处】剔除将写出的路径）
     _OUT = os.path.join(RUN, "newlost_probe.json")
     _cands = [os.path.join(RUN, f) for f in os.listdir(RUN)
               if f.startswith("group_") and f.endswith(".json")]

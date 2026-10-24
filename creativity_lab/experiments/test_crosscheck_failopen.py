@@ -6,7 +6,7 @@
 > 用法：`python3 -B creativity_lab/experiments/test_crosscheck_failopen.py`
 > 退出码：0 = 自测全过（★ 该红的时候红了 ★）；1 = 有问题
 >
-> ★ ★★ 为什么要有这个（★ 2026-10-26 ★）★★
+> ★ ★★ 为什么要有这个（★ 2026-10-24 ★）★★
 ★ 第 1 层论证线报：★ 「挪走 gate_alignment.json ⇒ 12 项整块静默跳过 ⇒ ★ 退出码仍是 0、
 ★ 输出还写着『全部一致』」★ ⇒ ★ 我方自查：★ 本工具【同样有】★
 ★ ★ 6 处 `if os.path.exists(...)` 包着检查块 ⇒ ★ 缺 manifest ⇒ 那组检查【整块消失】★★
@@ -23,7 +23,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SCRIPT = os.path.join(ROOT, "creativity_lab", "experiments", "crosscheck_report.py")
-REPORT = os.path.join(ROOT, "docs", "交付", "第二组交付报告_2026-10-25.md")
+REPORT = os.path.join(ROOT, "docs", "交付", "第二组交付报告_2026-10-24.md")
 
 FAILED = []
 

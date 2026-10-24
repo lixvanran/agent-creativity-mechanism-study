@@ -5,10 +5,10 @@
 > 落点：`creativity_lab/experiments/resume_after_window.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/resume_after_window.py \
->       --run-dir runs/topo-arm-v2-2026-10-25 \
+>       --run-dir runs/topo-arm-v2-2026-10-24 \
 >       --cmd "python3 -u -B creativity_lab/experiments/topo_arm.py --out ... --topics S4,S5,S6,T1,T2,T3 --reps 2 --runs-per-arm 5 --seed 20261025 --health-every 300 --min-health 0.80"
 >
-> ★ **为什么要有这个脚本（★ 2026-10-26 限流事件逼出来的 ★）** ★
+> ★ **为什么要有这个脚本（★ 2026-10-24 限流事件逼出来的 ★）** ★
 ★ chat 通道是【5 小时滚动窗口】限额 ⇒ ★ 窗口未复位就重启 ⇒ ★ 每单元 13 次调用全 429
 ★ ⇒ ★ **白烧配额、还产出一堆空单元** ★ ⇒ ★ 第 1 层论证线的建议是「先别重启」★
 ★ ⇒ ★ 本脚本把这条建议**自动化**：★ 等窗口 → **实测** → 通了才续跑 ★

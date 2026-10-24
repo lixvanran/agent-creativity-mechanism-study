@@ -2,11 +2,11 @@
 """★ **H0 标定**（★ 零分布下「3 题里 ≥2 题同向」的发生率）
 
 > 落点：`creativity_lab/experiments/h0_calibration.py`
-> 数据：★ **两批合并** —— 新批 `runs/topo-arm-v2-2026-10-25`（6 题 × 2 rep = 12 个同题配对）
+> 数据：★ **两批合并** —— 新批 `runs/topo-arm-v2-2026-10-24`（6 题 × 2 rep = 12 个同题配对）
 > 　　　＋ 旧批 `runs/tot-arm-2026-10-24` 的 `nosel_b5`（3 题 × 3 rep = **9 个**同题配对）⇒ **共 21 个**
-> 输出：`runs/topo-arm-v2-2026-10-25/h0_calibration.json`
+> 输出：`runs/topo-arm-v2-2026-10-24/h0_calibration.json`
 >
-> ## ★★ 为什么旧批的 9 个配对可以用（★ 负责人 2026-10-25 裁决）
+> ## ★★ 为什么旧批的 9 个配对可以用（★ 负责人 2026-10-24 裁决）
 > ★ **`nosel_b5` 那 9 个配对差虽然口径是层①（5 支并行），但【同题 rep 之间的差异】永远是纯噪声**
 > ⇒ ⇒ ★ **零分布只要求「同题重复」，不要求口径同** ⇒ ⇒ **用它做 H0 标定是合法的**
 > ⇒ ⇒ ★ **★ 预注册里已写明这条**
@@ -25,8 +25,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-25", "h0_calibration.json")
-NEW = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-25", "manifest.json")
+OUT = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-24", "h0_calibration.json")
+NEW = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-24", "manifest.json")
 OLD = os.path.join(ROOT, "runs", "tot-arm-2026-10-24", "manifest.json")
 
 

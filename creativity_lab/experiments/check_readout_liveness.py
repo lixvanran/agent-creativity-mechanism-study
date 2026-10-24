@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""★ **读数项活性检查**（★ 2026-10-25 负责人要求落地）
+"""★ **读数项活性检查**（★ 2026-10-24 负责人要求落地）
 
 > 落点：`creativity_lab/experiments/check_readout_liveness.py`
 > 用法：`python3 -B creativity_lab/experiments/check_readout_liveness.py <run_dir>`

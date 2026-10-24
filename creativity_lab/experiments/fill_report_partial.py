@@ -14,8 +14,8 @@
 
 用法：
     python3 -B creativity_lab/experiments/fill_report_partial.py \
-        --report docs/交付/第二组交付报告_2026-10-25.md \
-        --json runs/topo-arm-v2-2026-10-25/partial_verdict.json
+        --report docs/交付/第二组交付报告_2026-10-24.md \
+        --json runs/topo-arm-v2-2026-10-24/partial_verdict.json
 """
 
 import argparse
@@ -89,7 +89,7 @@ def build_weakcheck_section(cc):
     L = []
     L.append("### 6.10.0c ★★★ ★★ 一次自我更正：★ 「48/48 全绿」不是数字正确性的证据 ★★★")
     L.append("")
-    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 报「我方 `论文/verify.py` 此前只打印不退出 ⇒ 它是【报告器】不是【闸门】」+「L1 的 43 项检查全是子串包含 ⇒ 6 处结构漏洞（★ 改一处、别处仍命中 ⇒ 抓不到 ★）」★")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-24 报「我方 `论文/verify.py` 此前只打印不退出 ⇒ 它是【报告器】不是【闸门】」+「L1 的 43 项检查全是子串包含 ⇒ 6 处结构漏洞（★ 改一处、别处仍命中 ⇒ 抓不到 ★）」★")
     L.append("> ★ **我方据此自查**：★ `crosscheck_report.py` 的 %d 项检查**全部是子串包含** ⇒ ★ **实测 %d / %d 是弱检查**（★ 期望串在报告里出现 ≥2 次 ⇒ ★ 改一处、别处仍命中 ⇒ ★ 抓不到变异 ★）★" % (checked, weak, checked))
     L.append("> ★ **工具**：`creativity_lab/experiments/crosscheck_report.py`（★ 已加 `--json-out` ★）｜`creativity_lab/experiments/verify_report_numbers.py`（★ **逐位·逐格**强检查，★ 不容差 ★）★")
     L.append("")
@@ -136,7 +136,7 @@ N_PROPOSALS_PER_GROUP = 5  # ★ 每组 5 份综述后 proposal
 
 def build_verdict_sentence(d):
     """★ §6.10.5 结论句【整段脚本生成】★★
-    ★ ★★ 为什么整段生成（★ 2026-10-26 实测 ★）★★
+    ★ ★★ 为什么整段生成（★ 2026-10-24 实测 ★）★★
     ★ 这段曾经是【手写】⇒ ★ ★★ 于是它【静默漂移】了：★★
     ★   ① 4c 的题级方向漏了 S6（★ 写了 2 个、实际 3 个 ★）⇒ ★ 读者读到的方向结构不同 ★
     ★   ② 「明确不能说的」里写「题级 n=2」，★ 而实际 n=3 ★
@@ -184,7 +184,7 @@ def build_verdict_sentence(d):
 
 
 def build_provenance_section(pv):
-    """★ §6.10.0d 读数出处覆盖率（★ 2026-10-26 ★）★★
+    """★ §6.10.0d 读数出处覆盖率（★ 2026-10-24 ★）★★
     ★ ★ 数字全部来自 provenance_audit.json（★ 零手抄 ★）★★
     ★ ★ 这节回答的是：★「48/48 全绿」到底覆盖了全文多少 ★"""
     c = pv.get("counts", {})
@@ -194,7 +194,7 @@ def build_provenance_section(pv):
     L = []
     L.append("### 6.10.0d ★★★ ★★ 读数出处覆盖率：★ 「全绿」覆盖了全文多少 ★★★")
     L.append("")
-    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 报「43/43 全绿的覆盖率只有 54.8%」⇒ ★ **「全绿」只证明【被覆盖的那部分对】，★ 绝不等于【全文每个数都验过】** ★")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-24 报「43/43 全绿的覆盖率只有 54.8%」⇒ ★ **「全绿」只证明【被覆盖的那部分对】，★ 绝不等于【全文每个数都验过】** ★")
     L.append("> ★ **工具**：`creativity_lab/experiments/provenance_audit.py`（★ 覆盖率 + 未核对区清单 ★）｜`verify_report_numbers.py --json-out`（★ 落盘【实际核对过】的期望值集合 ★）")
     L.append("")
     L.append("| 口径 | 值 |")
@@ -231,7 +231,7 @@ def build_minok_section(mk):
     L = []
     L.append("### 6.12.10 ★★★★ ★★ 「★ 统一阈值 200」在【本批历史里已【实际误杀 1 个单元】★★ ★★")
     L.append("")
-    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 指出「★ 统一阈值 200 会把【一批正常输出】判成失败 ★」（★ 因 `SELECT_ASK` 的输出 = 理由 60–120 字 + 原样贴被选篇全文 ⇒ ★ 被选篇短时总长可 < 200 ★）★")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-24 指出「★ 统一阈值 200 会把【一批正常输出】判成失败 ★」（★ 因 `SELECT_ASK` 的输出 = 理由 60–120 字 + 原样贴被选篇全文 ⇒ ★ 被选篇短时总长可 < 200 ★）★")
     L.append("> ★ **工具**：`creativity_lab/experiments/min_ok_audit.py`（★ 读数全部来自真实数据、★ 零硬编码 ★）｜`creativity_lab/arms/dual.py`（★ 四处 `llm.chat` 现已显式传 `min_ok` ★）★")
     L.append("")
     L.append("| 项 | 值 |")
@@ -273,7 +273,7 @@ def build_offline_section(oe, op=None):
     L = []
     L.append("### 6.12.9 ★★★★ ★★ 「离线可算」已被【逐位证明】：★ Vendi 从此不再依赖嵌入通道 ★★★★")
     L.append("")
-    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 的可抄思路 ——★ 「被测量的那个量，★ 在【生成时】就落盘 ⇒ ★ 事后只重算统计量 ⇒ ★ 复核/分析/重算全部不再依赖通道存续」★★")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-24 的可抄思路 ——★ 「被测量的那个量，★ 在【生成时】就落盘 ⇒ ★ 事后只重算统计量 ⇒ ★ 复核/分析/重算全部不再依赖通道存续」★★")
     L.append("> ★ **工具**：`creativity_lab/experiments/backfill_vectors.py`（★ 事后补录 ★）｜`verify_offline_equivalence.py`（★ **等值性证明** ★）｜`client.LLM.embed`（★ **落盘缓存** ★）★")
     L.append("")
     L.append("| 项 | 值 |")
@@ -324,9 +324,9 @@ def build_channel_section(cj):
         if m.get("model_name") == "general":
             gen = m
     L = []
-    L.append("### 6.10.0b ★★★ 通道状态与批状态登记（★ 2026-10-26 限流事件 ★）★★★")
+    L.append("### 6.10.0b ★★★ 通道状态与批状态登记（★ 2026-10-24 限流事件 ★）★★★")
     L.append("")
-    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 报「chat 窗口限流 + 嵌入余额耗尽」★")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-24 报「chat 窗口限流 + 嵌入余额耗尽」★")
     L.append("> ★ **工具**：★ `creativity_lab/experiments/channel_status.py`（★ 只读 · ★ 不改生产代码 · ★ 不打印 key ★）★")
     L.append("> ★ **原始读数**：★ `docs/交付/读数快照/topo-arm-v2-n151/channel_status.json` ★")
     L.append("")
@@ -433,7 +433,7 @@ def build_multicalib_section(mj):
     L = []
     L.append("### 6.10.2b ★★★ θ₀ 的多口径重算：★ 偏离预注册的影响已量化 ★★★")
     L.append("")
-    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 指出「当前用的是全部臂口径（n=12）而非预注册的 `nosel_b3` 口径 ⇒ 判据偏离预注册 ⇒ ★ θ₀ 是判决的第一道基准 ⇒ 请给两个口径的 θ₀ 差多少」★")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-24 指出「当前用的是全部臂口径（n=12）而非预注册的 `nosel_b3` 口径 ⇒ 判据偏离预注册 ⇒ ★ θ₀ 是判决的第一道基准 ⇒ 请给两个口径的 θ₀ 差多少」★")
     L.append("> ★ **回源**：★ 预注册 `docs/cmp8/routes/COLLAPSE/eval/PREREG-TOPOLOGY-ARM.md` §5.0b2-i「原料来源」行（★ 写死 = 新批 `nosel_b3` 12 + 旧批 `nosel_b5` 9 = 21 ★）★")
     L.append("> ★ **工具**：★ `creativity_lab/experiments/h0_theta0_calibration.py`（★ 零生成调用，★ 唯一成本是 embedding ★）★")
     L.append("> ★ **原始读数**：★ `docs/交付/读数快照/topo-arm-v2-n151/h0_theta0_multicalib.json` ★")
@@ -645,7 +645,7 @@ def main():
         # ★ 方向相反 ⇒ 加标注
         pos = c["pos"]; neg = c["neg"]
         if pos > 0 and neg > 0:
-            # ★ ★ 措辞更正（★ 2026-10-26 ★）：★ 「方向相反」是【过强】措辞 ★
+            # ★ ★ 措辞更正（★ 2026-10-24 ★）：★ 「方向相反」是【过强】措辞 ★
             #   2 正 1 负 属「方向不一致」，★ 不是「相反」⇒ ★ 统一改口径 ★
             dir_txt += " ⇒ **方向不一致**"
         # ★ 定位旧行：★ 行前缀式（★ 幂等：★ 不依赖旧行的具体数字 ★）★★
@@ -721,7 +721,7 @@ def main():
         _L[_hi[0]:_end] = _tbl
         s = "\n".join(_L)
 
-    # ★ ★ 冻结快照登记（★ 第 1 层论证线 2026-10-26：★ 正在产生的批次的读数
+    # ★ ★ 冻结快照登记（★ 第 1 层论证线 2026-10-24：★ 正在产生的批次的读数
     # ★   不得进入定版文献 ⇒ ★ 要么等它跑完，★ 要么引一个冻结的快照 ★）★★
     if a.snapshot_json:
         if not os.path.isfile(a.snapshot_json):
@@ -736,9 +736,15 @@ def main():
                                  for e in _ents[1:])))
         _clock = ""
         if sj.get("frozen_at") and sj.get("label_date"):
-            _clock = ("| ★ 冻结时点 | ★ 机器 UTC **%s** ｜ 叙事日期 **%s**（★ 沙箱时钟与文档叙事日期相差 %d 天，★ 二者分别登记、★ 不混用 ★） |\n"
-                      % (sj["frozen_at"], sj["label_date"],
-                         abs(_days_between(sj["frozen_at"][:10], sj["label_date"]))))
+            # ★ ★ 2026-10-24 改：★ 原来写死「★ 沙箱时钟与文档叙事日期相差 N 天 ★」⇒ ★
+            #   ★ ★ 而【叙事日期】当时被我【编成了一个不存在的未来日期】⇒ ★ ★ 「相差 2 天」是【错的】★★ ★
+            #   ★ ⇒ ★ 现在【两者的差必须由数据算、★ 且为 0 时必须显式说「一致」】★★ ★
+            #   ★ ⇒ ★ ★★ 并加一道硬约束：★ 叙事日期【不得】晚于机器日期（★ 晚于 ⇒ 【未来日期】⇒ 错 ★）★★ ★
+            _d = abs(_days_between(sj["frozen_at"][:10], sj["label_date"]))
+            _same = "★ **两者一致**（★ 机器日期 = 叙事日期 = **%s** ★）" % sj["frozen_at"][:10] if _d == 0 \
+                else "★ 两者相差 %d 天（★ 分别登记、★ 不混用 ★）" % _d
+            _clock = ("| ★ 冻结时点 | ★ 机器 UTC **%s** ｜ 叙事日期 **%s**（★ %s ★） |\n"
+                      % (sj["frozen_at"], sj["label_date"], _same))
         _reg = ("### 6.10.0 ★★ 冻结快照登记（★ 交稿版引用的部分预判决以本快照为准 ★）★★\n\n"
                 "| 项 | 值 |\n|:-:|---|\n"
                 "| ★ 快照文件 | ★ `%s` ★ |\n"
@@ -785,7 +791,7 @@ def main():
         cc = json.load(open(a.crosscheck_json, encoding="utf-8"))
         s = replace_markers(s, build_weakcheck_section(cc), CW_BEGIN, CW_END)
 
-    # ★ ★ 通道状态与批状态登记（★ 2026-10-26 限流事件 ★）★★
+    # ★ ★ 通道状态与批状态登记（★ 2026-10-24 限流事件 ★）★★
     if a.channel_json:
         if not os.path.isfile(a.channel_json):
             die("channel-json 不存在：%s" % a.channel_json)
@@ -793,7 +799,7 @@ def main():
         s = replace_markers(s, build_channel_section(cj), CH_BEGIN, CH_END)
 
 
-    # ★ ★ θ₀ 多口径重算（★ 第 1 层论证线 2026-10-26 质询触发 ★）★★
+    # ★ ★ θ₀ 多口径重算（★ 第 1 层论证线 2026-10-24 质询触发 ★）★★
     #   ★ 整节由脚本从 h0_theta0_multicalib.json 生成 ⇒ ★ 零手抄数字 ★
     if a.multicalib_json:
         if not os.path.isfile(a.multicalib_json):

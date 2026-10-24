@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""pack_repo —— 全仓交付包打包器（★ 2026-10-25 新增）
+"""pack_repo —— 全仓交付包打包器（★ 2026-10-24 新增）
 
 ★★★ **★ 为什么自己写而不用 `zip` 命令（★ 这是今天踩出来的硬坑）★★**
 ★ **★ 系统 `zip` 【不设】UTF-8 标志位（★ flag_bits |= 0x800）⇒ ⇒ ★ 中文文件名在解压端变成 mojibake**
@@ -94,7 +94,7 @@ def verify(out_zip: str, repo: str, prefix: str, extra_md: List[str]) -> bool:
             ok = False
         else:
             print("  ✔ 无 .git 混入")
-        # ③ 内容 sha：★ ★★ 【全量】核对清单（★ ★ 2026-10-25 修：★ 原先只抽样 5 个
+        # ③ 内容 sha：★ ★★ 【全量】核对清单（★ ★ 2026-10-24 修：★ 原先只抽样 5 个
         # ★ ★ ⇒ ⇒ 漏抓了"清单过期"（★ state_layer.py 升到 rev3 后 SHA256SUMS.txt 没更新
         # ★ ★ ⇒ ⇒ sha256sum -c 会 FAILED ⇒ ⇒ ★ ★ ⇒ 抽样量不够 ⇒ ⇒ ★ 改全量）
         # ★ ★ 核对方式：★ 以包内 SHA256SUMS.txt 为准（★ 若存在 ⇒ ⇒ 逐条核）

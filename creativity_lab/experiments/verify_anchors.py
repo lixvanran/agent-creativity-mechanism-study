@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""★ **改动回读断言**（★ 2026-10-25 论文簇建议采纳）
+"""★ **改动回读断言**（★ 2026-10-24 论文簇建议采纳）
 
 > 落点：`creativity_lab/experiments/verify_anchors.py`
 > 用法：`python3 -B creativity_lab/experiments/verify_anchors.py`
 > 退出码：0 = 全部锚点命中；1 = 有锚点缺失
 >
-> ## ★★ 为什么要有这个（★ 论文簇 2026-10-25 的建议）
+> ## ★★ 为什么要有这个（★ 论文簇 2026-10-24 的建议）
 > ★ 论文簇原话：★ 「你们那 29 个脚本的语法自检全过，★ 但【**语法对 ≠ 改动落盘了**】」
 > ★★ **我自己的经历**：★ 本轮我写过 7 个 patch 脚本（`patch4`–`patch7`）⇒ ★ **它们全都只打印「✔ 已改」**
 > ★ ★ **⇒ 但【打印成功 ≠ 改动真的落盘】** ⇒ ⇒ ★ **我的 patch 脚本当时【没有任何回读断言】**
@@ -24,13 +24,13 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 PREREG = os.path.join(ROOT, "docs/cmp8/routes/COLLAPSE/eval/PREREG-TOPOLOGY-ARM.md")
-# ★★★ 报告路径（★ 2026-10-25 改：★ 原先硬编码 /workspace 下的路径 ⇒ ⇒ 报告一改名就失效）
+# ★★★ 报告路径（★ 2026-10-24 改：★ 原先硬编码 /workspace 下的路径 ⇒ ⇒ 报告一改名就失效）
 # ★ ⇒ 改为【优先仓内 docs/交付/】，★ 再退回 /workspace，★ 最后可用 --report 覆盖
 def _pick_report() -> str:
     cands = [
         os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                     "docs", "交付", "第二组交付报告_2026-10-25.md"),
-        "/workspace/第二组交付报告_2026-10-25.md",
+                     "docs", "交付", "第二组交付报告_2026-10-24.md"),
+        "/workspace/第二组交付报告_2026-10-24.md",
     ]
     for c in cands:
         if os.path.isfile(c):

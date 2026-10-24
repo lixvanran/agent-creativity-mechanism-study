@@ -6,13 +6,13 @@
 > 用法：
 >   # ① 先干跑（★ 零消耗 · ★ 现在就能跑 ★）
 >   python3 -B creativity_lab/experiments/backfill_vectors.py \
->       --run-dir runs/topo-arm-v2-2026-10-25 \
+>       --run-dir runs/topo-arm-v2-2026-10-24 \
 >       --unit-list docs/交付/读数快照/topo-arm-v2-n151/UNITS-n151.txt \
 >       --out-dir docs/交付/读数快照/topo-arm-v2-n151/vectors --dry-run
 >   # ② 充值后真跑（★ 调嵌入通道 · ★ 落盘原始向量 ★）
 >   python3 -B creativity_lab/experiments/backfill_vectors.py ... （去掉 --dry-run）
 >
-> ★ ★★ 为什么要有这个（★ 2026-10-26 · 第 1 层论证线的可抄思路 ★）★★
+> ★ ★★ 为什么要有这个（★ 2026-10-24 · 第 1 层论证线的可抄思路 ★）★★
 ★ ★ **★ 「被测量的那个量，★ 在【生成时】就已经算好并落盘了」⇒ ★ 事后分析只是重算统计量
 ★ ★ ⇒ ★ 【复核、★ 分析、★ 重算全部不再依赖付费通道的存续】★★ ★
 ★ ⇒ ★ **落到 Vendi**：★ 谱熵需要每条产出的向量 ⇒ ★ 只要把 per-unit 向量落盘 ⇒ ★

@@ -5,11 +5,11 @@
 > 落点：`creativity_lab/experiments/verify_report_numbers.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/verify_report_numbers.py \
->       --report docs/交付/第二组交付报告_2026-10-25.md \
+>       --report docs/交付/第二组交付报告_2026-10-24.md \
 >       --json   docs/交付/读数快照/topo-arm-v2-n151/partial_verdict.json
 >   python3 -B creativity_lab/experiments/verify_report_numbers.py --self-test
 >
-> ★ ★★ 为什么必须有这个（★ 2026-10-26 实测逼出来的 ★）★★
+> ★ ★★ 为什么必须有这个（★ 2026-10-24 实测逼出来的 ★）★★
 ★ `crosscheck_report.py` 的 48 项检查**全是【子串包含】**⇒ ★ 实测：**44 / 48 是弱检查**
 ★ （★ 期望串在报告里出现 ≥2 次 ⇒ ★ 改一处、别处仍命中 ⇒ ★ 抓不到变异 ★）
 ★ ⇒ ⇒ ★ **「48/48 全绿」不是数字正确性的证据** ⇒ ⇒ ★ 必须有一道【逐位·逐格】的强检查 ★
@@ -204,7 +204,7 @@ def verify(rep: str, d: dict, covered=None):
 
 
 def self_test():
-    rep_p = os.path.join(ROOT, "docs", "交付", "第二组交付报告_2026-10-25.md")
+    rep_p = os.path.join(ROOT, "docs", "交付", "第二组交付报告_2026-10-24.md")
     js_p = os.path.join(ROOT, "docs", "交付", "读数快照", "topo-arm-v2-n151", "partial_verdict.json")
     if not (os.path.exists(rep_p) and os.path.exists(js_p)):
         print("★ 自测跳过：★ 找不到报告或 json ★")
@@ -302,7 +302,7 @@ def self_test():
             return 1
     print()
     print("✔ 自测全过：★ 这个检查会红（★ 不是恒真 ★）★")
-    # ★ ★ 计数自检（★ 第 1 层论证线 2026-10-26：★ 【累加本身也会漏加一块】★★）
+    # ★ ★ 计数自检（★ 第 1 层论证线 2026-10-24：★ 【累加本身也会漏加一块】★★）
     #   ★ 「各块之和 == 报告的总数」⇒ ★ 将来加了新块忘插计数器 ⇒ ★ 这里立刻报红 ★
     n_cases = len(cases)
     if n_mut != n_cases + n_inline:

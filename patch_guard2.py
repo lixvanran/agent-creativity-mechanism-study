@@ -22,7 +22,7 @@ for k in range(start, end + 1):
     print('  %d| %s' % (k + 1, lines[k]))
 
 new_block = [
-    '        # ★★★ 防御（★ 2026-10-25 三组「把自己的输出当输入」事故的通用预防）',
+    '        # ★★★ 防御（★ 2026-10-24 三组「把自己的输出当输入」事故的通用预防）',
     '        # ★★★ realpath 级（★ 不是路径字符串相等 ⇒ 挡符号链接 / `../` / 尾斜杠三种绕过）',
     '        try:',
     '            guard_io.assert_output_outside_input_dir(d, OUT_DIR, "nested_calibration")',
@@ -65,10 +65,10 @@ for fn, marker, imp_after in [
             break
     assert m is not None, fn
     if fn == 'audit_history.py':
-        guard = ['    # ★★★ 输入/输出隔离（★ 2026-10-25 统一形态：★ 解析输入的同一处就断言，★ realpath 级）',
+        guard = ['    # ★★★ 输入/输出隔离（★ 2026-10-24 统一形态：★ 解析输入的同一处就断言，★ realpath 级）',
                  '    guard_io.assert_output_outside_input_dir(HIST, OUT_DIR, "audit_history")']
     else:
-        guard = ['    # ★★★ 输入/输出隔离（★ 2026-10-25 统一形态：★ 解析输入的同一处就断言，★ realpath 级）',
+        guard = ['    # ★★★ 输入/输出隔离（★ 2026-10-24 统一形态：★ 解析输入的同一处就断言，★ realpath 级）',
                  '    guard_io.assert_output_outside_input_dir(ROOT, os.path.dirname(OUT), "family_key_ruler")']
     ls[m:m] = guard
     out = '\n'.join(ls)

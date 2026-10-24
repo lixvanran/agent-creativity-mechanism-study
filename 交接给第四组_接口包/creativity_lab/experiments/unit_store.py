@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""unit_store —— 单元级原子落盘 + 续跑只补缺口（★ 通用件 · ★ 2026-10-25 抽自 topo_arm.py）
+"""unit_store —— 单元级原子落盘 + 续跑只补缺口（★ 通用件 · ★ 2026-10-24 抽自 topo_arm.py）
 
 ★ 为什么抽成通用件（★ 第四组 Stage-1 栽过的地方）：
 ★ ① runner 没有「跳过已存在单元」⇒ `--append` 只是开文件模式

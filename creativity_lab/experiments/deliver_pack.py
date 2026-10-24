@@ -8,7 +8,7 @@
 > python3 -B creativity_lab/experiments/deliver_pack.py --self-test
 > ```
 >
-> ## ★★ 为什么要有这个（★ 2026-10-25 PAT 失效后，★ 通道 B/C 是【主通道】不是兜底）
+> ## ★★ 为什么要有这个（★ 2026-10-24 PAT 失效后，★ 通道 B/C 是【主通道】不是兜底）
 > ★ 通道 A（GitHub）因 Classic PAT 吊销而不可用 ⇒ ⇒ **交付责任全在 B/C**
 > ⇒ ⇒ ★ **⇒ 交付必须【一条命令、零手工、零外部依赖】⇒ ⇒ 且必须【自带可核验性】**
 >
@@ -42,7 +42,7 @@ import zipfile
 # ★ 而不是字符串 startswith（★ 因为 /a/bc 以 /a/b 开头但并不在它下面）。
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ROOT = os.path.realpath(_ROOT)
-REPORT = "/workspace/第二组交付报告_2026-10-25.md"
+REPORT = "/workspace/第二组交付报告_2026-10-24.md"
 
 # ★ 随包必带的文件（★ 相对仓库根）
 ALWAYS = [
@@ -328,8 +328,8 @@ def self_test() -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run", default="", help="★ run 目录（★ 如 runs/topo-arm-v2-2026-10-25）")
-    ap.add_argument("--out", default="/workspace/第二组交付_2026-10-26.zip")
+    ap.add_argument("--run", default="", help="★ run 目录（★ 如 runs/topo-arm-v2-2026-10-24）")
+    ap.add_argument("--out", default="/workspace/第二组交付_2026-10-24.zip")
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args()
     if a.self_test:

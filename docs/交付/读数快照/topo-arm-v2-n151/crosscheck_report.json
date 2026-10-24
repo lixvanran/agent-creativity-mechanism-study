@@ -87,12 +87,12 @@
   {
    "expect": "2",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r1",
-   "occurrences": 1116
+   "occurrences": 1117
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r2",
-   "occurrences": 1593
+   "occurrences": 1595
   },
   {
    "expect": "3",
@@ -102,7 +102,7 @@
   {
    "expect": "0",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T2 r1",
-   "occurrences": 1593
+   "occurrences": 1595
   },
   {
    "expect": "1",
@@ -117,7 +117,7 @@
   {
    "expect": "2",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r1",
-   "occurrences": 1116
+   "occurrences": 1117
   },
   {
    "expect": "3",
@@ -127,17 +127,17 @@
   {
    "expect": "0",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r3",
-   "occurrences": 1593
+   "occurrences": 1595
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r1",
-   "occurrences": 1116
+   "occurrences": 1117
   },
   {
    "expect": "4",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r2",
-   "occurrences": 582
+   "occurrences": 621
   },
   {
    "expect": "3",
@@ -147,32 +147,32 @@
   {
    "expect": "0",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r1",
-   "occurrences": 1593
+   "occurrences": 1595
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r2",
-   "occurrences": 1116
+   "occurrences": 1117
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r3",
-   "occurrences": 1593
+   "occurrences": 1595
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r1",
-   "occurrences": 1116
+   "occurrences": 1117
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r2",
-   "occurrences": 1116
+   "occurrences": 1117
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r3",
-   "occurrences": 1593
+   "occurrences": 1595
   },
   {
    "expect": "4.0",

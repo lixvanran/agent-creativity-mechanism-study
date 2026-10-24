@@ -5,7 +5,7 @@
 > 落点：`creativity_lab/experiments/make_unit_list.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/make_unit_list.py \
->       --run-dir runs/topo-arm-v2-2026-10-25 --tag n150
+>       --run-dir runs/topo-arm-v2-2026-10-24 --tag n150
 >
 > ★ **为什么需要它（★ 一条被实测逼出来的纪律 ★）** ★
 ★ 批在跑时，★ 每个分析脚本各自 `glob(units/*.json)` ⇒ ★ 各自看到的单元集是

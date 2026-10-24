@@ -70,7 +70,7 @@ def text_of(path: str) -> str:
 def main() -> int:
     rows: List[Dict[str, Any]] = []
     if os.path.isdir(HIST):
-        # ★★★ 输入/输出隔离（★ 2026-10-25 统一形态：★ 解析输入的同一处就断言，★ realpath 级）
+        # ★★★ 输入/输出隔离（★ 2026-10-24 统一形态：★ 解析输入的同一处就断言，★ realpath 级）
         guard_io.assert_output_outside_input_dir(HIST, OUT_DIR, "audit_history")
         for ds in sorted(os.listdir(HIST)):
             d = os.path.join(HIST, ds)

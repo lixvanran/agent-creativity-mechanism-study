@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""批进度巡检（★ 2026-10-25 新增）
+"""批进度巡检（★ 2026-10-24 新增）
 
 ★ 为什么有这个工具（★ 它的存在理由就是今天栽的两个坑）：
 ★ ① 「日志长时间没新行」≠「进程死了」——★ 单元级日志是【单元跑完才打】⇒ ⇒ 单元中途【必然】无输出
@@ -11,7 +11,7 @@
 ★       - `ps -eo pid,args` + `$4 ~ /topo_arm/` ⇒ ★ $4 是 "-B" 不是脚本名 ⇒ ★ 失效
 
 ★ 用法：
-★   python3 -B creativity_lab/experiments/check_batch_progress.py --run-dir runs/topo-arm-v2-2026-10-25
+★   python3 -B creativity_lab/experiments/check_batch_progress.py --run-dir runs/topo-arm-v2-2026-10-24
 ★   python3 -B ... --run-dir <dir> --expect-units 360 --expect-calls 3540 --script topo_arm.py
 ★
 ★ 退出码（★ 必须有意义，★ 便于外部判断）：
@@ -50,12 +50,12 @@ def probe_process(script_name: str) -> tuple[list[int], bool]:
     ★ 【关键】模式可信 = 命中数 > 0 OR 【能证明脚本确实不在跑】。
     ★ 不能用"空输出"直接断言"没进程"⇒ ★ 那正是今天栽的坑。
     """
-    # ★★ 模式构造（★ 2026-10-25 修：★ 原写法把 ".py" 拼了两次 ⇒ ⇒ pat 变成
+    # ★★ 模式构造（★ 2026-10-24 修：★ 原写法把 ".py" 拼了两次 ⇒ ⇒ pat 变成
     # ★★ `[t]opo_arm.py\.py` ⇒ ⇒ 【永远不匹配】⇒ ⇒ 工具自己假绿了一次）
     # ★⇒⇒ 铁律：★ 模式只用【脚本名主干】+ 方括号技巧，★ 绝不再拼后缀
     stem = script_name[:-3] if script_name.endswith(".py") else script_name
     pat = re.compile(r"[" + stem[0] + r"]" + stem[1:] + r"(\.py)?\b")
-    # ★★★ 【★ 2026-10-25 第二次修 ★】★★
+    # ★★★ 【★ 2026-10-24 第二次修 ★】★★
     # ★ 方括号技巧只挡"正则源码里那个串"，★ ★ 挡不住"命令行里恰好提到脚本名字面量"的其他进程 ★
     # ★ ⇒ 今天的实测：★ 父 shell（comm=bash）的命令行里含 "--script topo_arm.py" ⇒ ⇒ 被误当成批进程
     # ★ ⇒ ★★ 正解 = 加【进程类型约束】：★ 只认 comm == "python3" ⇒ ★ bash/awk/grep 天然排除 ★★

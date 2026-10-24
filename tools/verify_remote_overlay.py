@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-★ 【远端 overlay 独立复核脚本】—— ★ ★ **★ 共享件（★ 2026-10-25 主会话要求共享）★★★** ★★
+★ 【远端 overlay 独立复核脚本】—— ★ ★ **★ 共享件（★ 2026-10-24 主会话要求共享）★★★** ★★
 ============================================================================
 
 ★ **★ 为什么它必须是【共享件】而不是某个组的私产 ★★**
@@ -87,7 +87,7 @@ def main() -> int:
     ref = api("/repos/%s/git/ref/heads/%s" % (a.repo, a.branch), a.token)
     head = ref["object"]["sha"]
     print("★ 远端 %s head = %s" % (a.branch, head[:12]))
-    # ★ ★★ 2026-10-26 修：★ --expect-commit 传的是【本地 commit sha】★★
+    # ★ ★★ 2026-10-24 修：★ --expect-commit 传的是【本地 commit sha】★★
     # ★ overlay 推送是【用 REST API 在远端当前 head 之上新建 commit】⇒ ★ parent
     # ★ 与本地 commit 的 parent 不同 ⇒ ★ ⇒ 【远端 sha 天然 ≠ 本地 sha】★★
     # ★ ⇒ ★ 所以【不能】用 sha 相等做判据（★ 本人已被这条顶过一次 ★）★★

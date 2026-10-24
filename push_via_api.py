@@ -45,7 +45,7 @@ def local_blob_sha(path):
 
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
-    # ★ 2026-10-25：缺 message 直接报错 —— 【禁止 update】由工具强制，不靠自觉
+    # ★ 2026-10-24：缺 message 直接报错 —— 【禁止 update】由工具强制，不靠自觉
     #   （此前默认 "update" ⇒ 远端叠加层全叫 update ⇒ 归属不可查）
     if len(sys.argv) <= 2 or not sys.argv[2].strip():
         raise SystemExit("✘ 必须提供 commit message：python3 push_via_api.py <ref-or-branch> \"<message>\"")

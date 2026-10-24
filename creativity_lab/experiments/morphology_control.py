@@ -5,8 +5,8 @@
 > 落点：`creativity_lab/experiments/morphology_control.py`
 > 用法：
 >   python3 -B creativity_lab/experiments/morphology_control.py \
->       --run-dir runs/topo-arm-v2-2026-10-25 --unit-list runs/.../UNITS-n149.txt \
->       --json-out runs/topo-arm-v2-2026-10-25/morphology_control.json
+>       --run-dir runs/topo-arm-v2-2026-10-24 --unit-list runs/.../UNITS-n149.txt \
+>       --json-out runs/topo-arm-v2-2026-10-24/morphology_control.json
 >
 > ★ **为什么这个脚本以前不在仓里（★ 一条真缺口 ★）** ★
 ★ 报告 §6.12.8 的形态表一直有读数，★ 但仓里【没有生成它的脚本】⇒ ★

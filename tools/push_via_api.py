@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""★ **走 GitHub REST API 的逐 commit 推送器（★ 2026-10-25）**
+"""★ **走 GitHub REST API 的逐 commit 推送器（★ 2026-10-24）**
 
 ★ **为什么需要它（★ 环境事实，★ 不是偏好）**
 ★ · `https://github.com`（★ git smart-HTTP 端点）★ **完全不可达**（★ curl http=000 / TLS 握手失败）
@@ -256,7 +256,7 @@ def main() -> int:
             mism += 1
             print("  ✘ tree 不符：★ %s" % c[:10])
     print("★ 逐 commit 回读 tree：★ %d/%d 一致" % (len(built) - mism, len(built)))
-    # ★ ★ 逐路径复核（★ 2026-10-25 补：★ ★ 卫生自检【真的抓到了这个缺口】★★）
+    # ★ ★ 逐路径复核（★ 2026-10-24 补：★ ★ 卫生自检【真的抓到了这个缺口】★★）
     # ★ ⇒ ⇒ 断言：★ 【本地有远端没有 = 0】+【同路径内容不同 = 0】★★
     final_tree = gh.get("/git/trees/%s?recursive=1" % gh.get("/git/commits/%s" % got)["tree"]["sha"])
     nmap = {e["path"]: e["sha"] for e in final_tree.get("tree", []) if e["type"] == "blob"}

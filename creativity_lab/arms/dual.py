@@ -17,7 +17,7 @@ from creativity_lab.prompts import (FRAMES, PERSONAS, OUT_SPEC, PREMISE_Q,
 
 N_BRANCH = 5
 
-# ★ ★ ★ min_ok 定版表（★ 2026-10-26 · 全部【回源真实 prompt 的输出规格】★★ ★
+# ★ ★ ★ min_ok 定版表（★ 2026-10-24 · 全部【回源真实 prompt 的输出规格】★★ ★
 # ★   ★ 依据：★ client.chat 的 min_ok 是【内容长度下限】★ 默认 200 ⇒ ★
 # ★   ★   ★ 【统一 200 会把【一批正常输出】判成失败】⇒ ★ 阈值必须与规格【一起定版】★★ ★
 # ★   ★ 依据表：★
@@ -37,7 +37,7 @@ MIN_OK_SELECT = 20
 def _branch_specs(alive=None):
     """轴A × 轴B 的联合扇出：框架/模型/persona 三者错位绑定。
 
-    ★ `alive`（2026-10-26）：★ **可注入的型号池** ★
+    ★ `alive`（2026-10-24）：★ **可注入的型号池** ★
     ⇒ 用途：★ **剔掉已下架型号**（★ M2.1 / M2 实测 404 ⇒ 5 支静默变 4 支 ★）★
     ⇒ ★ 形态照抄 `creativity_lab/experiments/cogpos_matrix.py:104` 的
       `build_specs(arm, alive)`（★ 本仓的现成先例 ★）★ ★ 不另发明 ★★
@@ -64,7 +64,7 @@ class Dual:
         用于**剔掉已下架型号**（M2.1 实测 404 ⇒ 5 支静默变 4 支），
         且把"用哪些模型"记进 manifest（可审计）。
 
-        ★★ 2026-10-26：★ **失败必须【显式记账】，不能靠"过滤掉空串"★**
+        ★★ 2026-10-24：★ **失败必须【显式记账】，不能靠"过滤掉空串"★**
         ⇒ ★ 旧实现 `return [o for o in outs if o]` ⇒ ★ 下架型号返空 ⇒ ★ **静默少一支** ★
         ⇒ ★ 现在：★ 循环内判空 ⇒ ★ 记进 `failed` ⇒ ★ 由 `run()` 落进 `ArmResult.notes` ★
         ⇒ ★ **语义等价**（输出集合不变）★，★ **但证据不丢** ★★
@@ -78,7 +78,7 @@ class Dual:
                 persona=persona, spec=OUT_SPEC,
                 extra="\n直接写出**完整的答复本身**，不要写判断片段。" if produce_article
                      else "\n写出这个位置上会看到的**判断与依据**，不要写成文。"))
-            # ★ ★ min_ok 按【本步骤的输出规格】定版（★ 2026-10-26 · 第 1 层论证线那条 ★）★★
+            # ★ ★ min_ok 按【本步骤的输出规格】定版（★ 2026-10-24 · 第 1 层论证线那条 ★）★★
             #   ★ BRANCH_ASK ⇒ OUT_SPEC「控制在 400 字以内」⇒ ★ 正常分布 200–500
             #   ★ ⇒ ★ 不传则吃 client.chat 的默认 200 ⇒ ★ 【误杀正常短输出】★★ ★
             out = llm.chat(prompt, model=model, purpose=f"diverge:{model}",
@@ -114,7 +114,7 @@ class Dual:
             min_ok=MIN_OK_SELECT)
 
     def run(self, llm, topic, rep, specs=None):
-        """★ `specs`（2026-10-26）★ **对外暴露**型号池注入 ★
+        """★ `specs`（2026-10-24）★ **对外暴露**型号池注入 ★
         ⇒ ★ 用途：剔掉已下架型号（★ M2.1 / M2 实测 404 ⇒ 5 支静默变 4 支 ★）
         ⇒ ★ **默认路径行为完全不变**（★ `specs=None` ⇒ 旧版逐位相同 ★）★★
         ★ ★ `notes` 落三个数（★ 臂级失败记账 ★）★★

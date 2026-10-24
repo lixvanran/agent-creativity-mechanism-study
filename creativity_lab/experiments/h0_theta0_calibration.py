@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""★ **θ₀ 的多口径重算 + 判决影响评估**（★ 2026-10-26 第 1 层论证线质询触发）
+"""★ **θ₀ 的多口径重算 + 判决影响评估**（★ 2026-10-24 第 1 层论证线质询触发）
 
 > 落点：`creativity_lab/experiments/h0_theta0_calibration.py`
-> 数据：新批 `runs/topo-arm-v2-2026-10-25`（层②口径）＋ 旧批 `runs/tot-arm-2026-10-24`（层①口径）
-> 输出：`runs/topo-arm-v2-2026-10-25/h0_theta0_multicalib.json`
+> 数据：新批 `runs/topo-arm-v2-2026-10-24`（层②口径）＋ 旧批 `runs/tot-arm-2026-10-24`（层①口径）
+> 输出：`runs/topo-arm-v2-2026-10-24/h0_theta0_multicalib.json`
 
 ★★ **为什么有这个脚本** ★★
 ★ 预注册 `docs/cmp8/routes/COLLAPSE/eval/PREREG-TOPOLOGY-ARM.md` §5.0b2-i 写死的 H0 原料是：
@@ -50,7 +50,7 @@ from creativity_lab.experiments.partial_verdict import (  # noqa: E402
     load_groups, q95_linear, q95_nearest_rank, read_set, sd,
 )
 
-NEW_DIR = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-25")
+NEW_DIR = os.path.join(ROOT, "runs", "topo-arm-v2-2026-10-24")
 OLD_MANIFEST = os.path.join(ROOT, "runs", "tot-arm-2026-10-24", "manifest.json")
 
 

@@ -17,7 +17,7 @@ creativity_lab/receiver.py      接收端测量层（**已证伪**，保留仅�
 creativity_lab/data/legal_topics_v2.json   18 道法律题 + 6 份依据包
 scripts/test_verifier.py        核验器判别力测试（27 条 ground truth）—— 你们的自检模板
 scripts/diagnose_uncertainty.py 题域地板与饱和度对照
-> ★★★ **【已更正 · 2026-10-26】★★★ ★ 该文件【不含饱和度】（★ blob `294991f29a6c` ★）★ ⇒ ★ 饱和度实现见 `creativity_lab/gate_policy.py` 第 117–132 行（★ blob `c57bb00a8916` ★）★★
+> ★★★ **【已更正 · 2026-10-24】★★★ ★ 该文件【不含饱和度】（★ blob `294991f29a6c` ★）★ ⇒ ★ 饱和度实现见 `creativity_lab/gate_policy.py` 第 117–132 行（★ blob `c57bb00a8916` ★）★★
 scripts/drill.py                巡练主循环
 scripts/drill_confirm.py        「欠采样 vs 真无效」判别实验
 scripts/fix_verifier.py         核验器 v4 的修复与回归
@@ -215,7 +215,7 @@ w_ds（原始）      0.802 – 0.977
 > 你们的四道题如果模型其实没把握，原始 w_dd 依然会很高——那正是我踩的坑。
 
 代码在 `scripts/diagnose_uncertainty.py`（含饱和度那一版）。
-> ★★★ **【已更正 · 2026-10-26 · 第 1 层论证线回源核出】★★★** ★
+> ★★★ **【已更正 · 2026-10-24 · 第 1 层论证线回源核出】★★★** ★
 > ★ **原指引错**：★ 本节原写「代码在 `scripts/diagnose_uncertainty.py`（含饱和度那一版）」★★
 > ★ **那个文件（★ 实为 `creativity_lab/diagnose_uncertainty.py`、★ blob `294991f29a6c` ★）里【没有 w_dd / w_ds / 饱和度】★ ⇒ ★ 它测的是 `conf` + `gain`★★
 > ★ **★ ⇒ 饱和度的真正实现是 `creativity_lab/gate_policy.py`（★ blob `c57bb00a8916` ★）★ 第 117–132 行：★★
@@ -308,7 +308,7 @@ P8  如果依据不足以支撑结论，直接说明缺什么，不要用看起�
    重点包含 5–8 条**题面事实**（测第 1 类假阳性）和 5 条**明显错的事实**（测矛盾召回）
 3. 跑你们自己的测试，**要求矛盾召回 100%**。达不到就别往下走
 4. 用 `scripts/diagnose_uncertainty.py` 量那四道题的**饱和度**（用差值，不是原始值）
-> ★★★ **【已更正 · 2026-10-26 · 第 1 层论证线回源核出】★★★** ★
+> ★★★ **【已更正 · 2026-10-24 · 第 1 层论证线回源核出】★★★** ★
 > ★ **原指引错**：★ 本节原写「代码在 `scripts/diagnose_uncertainty.py`（含饱和度那一版）」★★
 > ★ **那个文件（★ 实为 `creativity_lab/diagnose_uncertainty.py`、★ blob `294991f29a6c` ★）里【没有 w_dd / w_ds / 饱和度】★ ⇒ ★ 它测的是 `conf` + `gain`★★
 > ★ **★ ⇒ 饱和度的真正实现是 `creativity_lab/gate_policy.py`（★ blob `c57bb00a8916` ★）★ 第 117–132 行：★★
