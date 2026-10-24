@@ -39,11 +39,31 @@ import urllib.request
 # ★ ★ 推后回读远端 commit 时【必须逐字核对】的字段（★ 契约，★ 卫生自检查的就是它）★★
 CHECK_FIELDS = ("message", "author", "date")
 
-# ★ ★ 传输层规范化（★ 2026-10-25 实测坐实）：★ GitHub 会【去掉 commit message 的尾部换行】★★
-# ★ ★ ⇒ ★ ⇒ 所以【逐字比对】必须【两边做同样的归一化】，★ 否则必然误报 ★★
-# ★ ★ ⇒ ★ ★ 只归一化【实测到的那一处】★★ ⇒ ⇒ ★ ⇒ **★ 不做通篇 strip（★ 那会掩盖真差异）★★**
+# ★ ★★★ 【★ 传输层规范化清单（★ 2026-10-25 实测坐实，★ 表驱动）★★★】★★
+# ★ ⇒ ⇒ ★ 每一条都【只归一化实测到的那一处】★★ ⇒ ⇒ ★ ⇒ **★ 不做通篇 strip（★ 那会掩盖真差异）★★**
+# ★ ★ ⇒ ★ ⇒ **★ 通则：★ 归一化函数【只归一化【实测到的那几处】】★ ⇒ ⇒ ⇒ 通篇 strip 会【掩盖真差异】★★** ★★
+NORMALIZERS = []
+
+
 def _norm_message(s: str) -> str:
+    """★ ① message 尾部换行：★ GitHub 实测会【去掉】尾部换行（★ 2026-10-25）★★"""
     return s.rstrip("\n")
+
+
+def _norm_date(s: str) -> str:
+    """★ ② date 时区表示：★ GitHub 实测把【带偏移的 ISO8601】规范化为【UTC Z】（★ 2026-10-25）★★
+
+    ★ ★ 实测：★ 本地 `%aI` = `2026-10-24T16:12:26+08:00` ★ ⇒ ★ 远端 = `2026-10-24T08:12:26Z` ★★
+    ★ ★ ⇒ ★ 同一时刻、★ 不同表示 ⇒ ⇒ ★ ⇒ **★ ⇒ 归一化到 UTC 后逐字比 ★★** ★★
+    """
+    try:
+        from datetime import datetime, timezone as _tz
+        d = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        if d.tzinfo is None:
+            return s
+        return d.astimezone(_tz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except Exception:
+        return s
 
 API = "https://api.github.com"
 
@@ -241,7 +261,7 @@ def main():
         bad.append("message")
     if actual["author"] != expect["author"]:
         bad.append("author")
-    if actual["date"] != expect["date"]:
+    if _norm_date(actual["date"]) != _norm_date(expect["date"]):
         bad.append("date")
     assert set(CHECK_FIELDS) == {"message", "author", "date"}, "★ 契约字段集与核对项不一致"
     if bad:
