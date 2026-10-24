@@ -19,7 +19,11 @@ import sys
 from typing import Any, Dict, List
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DIVERGE = os.path.join(ROOT, "runs", "divergence-matrix-2026-10-23")
+# ★ ★ 路径修正（★ 2026-10-26 ★）：★ 原来指向 2026-10-23（★ 那个目录【不存在】★）
+#   ★ ★ ⇒ ★ 【发散层那一整块检查从来没执行过】★ ★ 而我方一直报「48/48 全绿」
+#   ★ ★ ⇒ ★ 这正是「跳过检查并报绿」的最阴形态：★ 不报错、★ 不红、★ 措辞完全正常 ★★
+#   ★ ★ ⇒ ★ 现指向真实存在的批目录；★ 且【必读输入缺失 ⇒ 响亮失败】已兜住 ★
+DIVERGE = os.path.join(ROOT, "runs", "divergence-matrix-2026-10-24")
 ENDSTEP = os.path.join(ROOT, "runs", "endstep-matrix-2026-10-23")
 EVAL = os.path.join(ROOT, "runs", "evaluator-strength-2026-10-24")
 
@@ -30,6 +34,41 @@ def med(v: List[float]):
         return None
     n = len(v)
     return v[n // 2] if n % 2 else (v[n // 2 - 1] + v[n // 2]) / 2
+
+
+# ★ ★★ 必须存在的输入登记表（★ 2026-10-26 ★）★★
+#   ★ ★ 背景：★ 第 1 层论证线报「挪走 gate_alignment.json ⇒ 12 项整块静默跳过 ⇒ ★
+#   ★ ★ 而退出码仍是 0、输出还写着『全部一致』」★ ⇒ ★ 我方自查：★ 本工具【同样有】★
+#   ★ ★ 6 处 `if os.path.exists(...)` 包着检查块 ⇒ ★ 缺 manifest ⇒ 那组检查【整块消失】★
+#   ★ ★ 而 `checked` 变少、★ 输出仍是「✔ 无缺失」★ ⇒ ★ **最阴的一种假绿** ★★
+#   ★ ★ ⇒ ★ 落法（★ 两条 ★）：★
+#   ★ ★   ① **必须存在的输入缺失 ⇒ 响亮失败**（★ 不再「跳过并报绿」★）★★
+#   ★ ★   ② **项数断言**：★ checked < 下界 ⇒ 报红（★ 通用网：★ 任何块被跳过项数就会变 ★）★★
+REQUIRED_INPUTS = {
+    "DIVERGE": os.path.join(DIVERGE, "manifest.json"),
+    "ENDSTEP": os.path.join(ENDSTEP, "manifest.json"),
+    "EVAL": os.path.join(EVAL, "manifest.json"),
+    "divergence-matrix-2026-10-24": os.path.join(ROOT, "runs", "divergence-matrix-2026-10-24", "manifest.json"),
+    "divergence-pathmulti-2026-10-24": os.path.join(ROOT, "runs", "divergence-pathmulti-2026-10-24", "manifest.json"),
+}
+
+# ★ ★ 项数下界（★ 2026-10-26 实测后从 48 提到 69 ★）★★
+#   ★ ★ 原来 48 是【错的】：★ 那是因为 DIVERGE 路径指错 ⇒ ★ 发散层那 21 项【从未执行】
+#   ★ ★ ⇒ ★ 「48/48 全绿」里有 21 项是【不存在】的检查 ★★ ⇒ ★ 现以 69 为下界 ★
+EXPECTED_MIN_CHECKS = 69
+
+# ★ ★ 模拟缺失（★ 只给 --self-test 用 ★）⇒ ★ 走【同一条代码路径】⇒ ★ 自测不是假的 ★
+_SIMULATE_MISSING = os.environ.get("CROSSCHECK_SIMULATE_MISSING", "")
+
+
+def _input_ok(name: str) -> bool:
+    """★ 输入是否可用 ★
+    ★ ★ 常态：★ 看文件在不在 ★
+    ★ ★ 模拟：★ `CROSSCHECK_SIMULATE_MISSING=<name>` ⇒ ★ 强制当作【缺失】★
+    ★ ★ ⇒ ★ 自测走的是【和真实缺失完全相同的分支】⇒ ★ 证明「会红」有效 ★"""
+    if _SIMULATE_MISSING and name in _SIMULATE_MISSING.split(","):
+        return False
+    return os.path.exists(REQUIRED_INPUTS[name])
 
 
 def main() -> int:
@@ -92,7 +131,7 @@ def main() -> int:
         missing.append("%s ⇒ 报告里找不到「%s」" % (label, s))
 
     # ── 发散层 ──
-    if os.path.exists(os.path.join(DIVERGE, "manifest.json")):
+    if _input_ok("DIVERGE"):
         man = json.load(open(os.path.join(DIVERGE, "manifest.json"), encoding="utf-8"))
         groups = [g for g in man["groups"] if g.get("arms")]
         tids = sorted({g["tid"] for g in groups})
@@ -122,7 +161,7 @@ def main() -> int:
                 need("%.1f" % (sum(ms) / len(ms)), "基线模态数 %s" % tid)
 
     # ── 末步 4 臂 ──
-    if os.path.exists(os.path.join(ENDSTEP, "manifest.json")):
+    if _input_ok("ENDSTEP"):
         man = json.load(open(os.path.join(ENDSTEP, "manifest.json"), encoding="utf-8"))
         groups = [g for g in man["groups"] if g.get("valid")]
         for arm in ("end_fuse", "end_greedy", "end_sample", "end_raw"):
@@ -134,7 +173,7 @@ def main() -> int:
             need("%.1f" % cov, "末步 %s 面宽中位" % arm)
 
     # ── 评估器强度 ──
-    if os.path.exists(os.path.join(EVAL, "manifest.json")):
+    if _input_ok("EVAL"):
         man = json.load(open(os.path.join(EVAL, "manifest.json"), encoding="utf-8"))
         h = man["health"]
         need(str(h.get("position_consistency")), "vote 位置一致率")
@@ -144,7 +183,7 @@ def main() -> int:
     # ── 结论 2.10：加支数在「模态数」口径上的重算（第六轮 + 本批）──
     for run in ("divergence-matrix-2026-10-24", "divergence-pathmulti-2026-10-24"):
         fp = os.path.join(ROOT, "runs", run, "manifest.json")
-        if not os.path.exists(fp):
+        if not _input_ok(run):
             continue
         man = json.load(open(fp, encoding="utf-8"))
         for g in man["groups"]:
@@ -156,7 +195,7 @@ def main() -> int:
     agg = collections.defaultdict(lambda: collections.defaultdict(list))
     for run in ("divergence-matrix-2026-10-24", "divergence-pathmulti-2026-10-24"):
         fp = os.path.join(ROOT, "runs", run, "manifest.json")
-        if not os.path.exists(fp):
+        if not _input_ok(run):
             continue
         man = json.load(open(fp, encoding="utf-8"))
         for g in man["groups"]:
@@ -171,13 +210,28 @@ def main() -> int:
 
     # ── 结论 2.11：路径多样批通道健康 ──
     pm = os.path.join(ROOT, "runs", "divergence-pathmulti-2026-10-24", "manifest.json")
-    if os.path.exists(pm):
+    if _input_ok("divergence-pathmulti-2026-10-24"):
         h = json.load(open(pm, encoding="utf-8"))["health"]
         need(str(h.get("n_calls_total")), "pathmulti 调用总数")
         need(str(h.get("n_calls_failed")), "pathmulti 失败数")
 
+    # ★ ★ ① 必须存在的输入缺失 ⇒ 响亮失败（★ 不再「跳过并报绿」★）★★
+    _missing_inputs = [k for k in REQUIRED_INPUTS if not _input_ok(k)]
+    if _missing_inputs:
+        print("  ✘✘ 必读输入缺失：%s" % ", ".join(sorted(_missing_inputs)))
+        for _k in sorted(_missing_inputs):
+            print("     - %s ⇒ %s" % (_k, REQUIRED_INPUTS[_k]))
+        print("  ⇒ ★ **响亮失败**：★ 缺输入 ⇒ 检查块会被整块跳过 ⇒ 报绿是假的 ★")
+        print("  ⇒ ★ 修复：★ 补齐这些输入；★ 若确实要豁免，★ 必须在 REQUIRED_INPUTS 里显式登记理由 ★")
+        return 3
+
     print("== 交叉核对：报告 vs 数据 ==")
-    print("  检查项：%d" % checked)
+    print("  检查项：%d（★ 下界 %d ★）" % (checked, EXPECTED_MIN_CHECKS))
+    if checked < EXPECTED_MIN_CHECKS:
+        print("  ✘✘ 项数断言失败：★ 实际 %d < 下界 %d ⇒ ★ **有检查块被静默跳过** ★"
+              % (checked, EXPECTED_MIN_CHECKS))
+        print("  ⇒ ★ 退出码 3（★ 不用 exit 0 报绿 ★）")
+        return 3
     if weak:
         print("  ★ ★ 弱检查项：%d / %d（★ 期望串在报告里出现 ≥2 次 ⇒ ★ 只能证明「某处有」⇒ ★ 改一处抓不到 ★）" % (len(weak), checked))
         print("     ★ ★ ★ 「本检查器全绿」【不是】数字正确性的证据 ★ ★ ★")
