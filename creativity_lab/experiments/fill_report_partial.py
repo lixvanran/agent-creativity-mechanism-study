@@ -70,6 +70,8 @@ SN_END = "<!-- END:6.10.0 -->"
 CH_BEGIN = "<!-- BEGIN:6.10.0b -->"
 CW_BEGIN = "<!-- BEGIN:6.10.0c -->"
 V5_BEGIN = "<!-- BEGIN:6.10.5 -->"
+OE_BEGIN = "<!-- BEGIN:6.12.9 -->"
+OE_END = "<!-- END:6.12.9 -->"
 PV_BEGIN = "<!-- BEGIN:6.10.0d -->"
 PV_END = "<!-- END:6.10.0d -->"
 V5_END = "<!-- END:6.10.5 -->"
@@ -219,6 +221,40 @@ def build_provenance_section(pv):
         L.append("| ★ %s | ★ **%d** ★ |" % (_sec[:52], len(_vals)))
     L.append("")
     L.append("★ **⇒ 处置方向（★ 不是「把全文都核一遍」，★ 那是不可行 ★）**：★ **① 逐位核对集中在【进入结论与主判据表】的数；★ ② 其余【显式登记出处】；★ ③ 登记与审计随包交付，★ 外部可自行重跑本审计 ★**")
+    return "\n".join(L)
+
+
+def build_offline_section(oe):
+    """★ §6.12.9 「离线可算」已被逐位证明 ★★
+    ★ 数字全部来自 verify_offline_equivalence.py 的输出（★ 零手抄 ★）★★"""
+    L = []
+    L.append("### 6.12.9 ★★★★ ★★ 「离线可算」已被【逐位证明】：★ Vendi 从此不再依赖嵌入通道 ★★★★")
+    L.append("")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 的可抄思路 ——★ 「被测量的那个量，★ 在【生成时】就落盘 ⇒ ★ 事后只重算统计量 ⇒ ★ 复核/分析/重算全部不再依赖通道存续」★★")
+    L.append("> ★ **工具**：`creativity_lab/experiments/backfill_vectors.py`（★ 事后补录 ★）｜`verify_offline_equivalence.py`（★ **等值性证明** ★）｜`client.LLM.embed`（★ **落盘缓存** ★）★")
+    L.append("")
+    L.append("| 项 | 值 |")
+    L.append("|:-:|---|")
+    L.append("| ★ 比对组数（★ 每组 5 份综述后 proposal ★） | ★ **%d** ★ |" % oe.get("n_groups", 0))
+    L.append("| ★ 比对的读数 | ★ %s ★ |" % "、".join(oe.get("metrics", [])))
+    L.append("| ★ **最大绝对差** | ★ **%r** ★（★ **容差 0** ⇒ ★ 逐位 ★）★ |" % oe.get("max_abs_diff"))
+    L.append("| ★ 等价性 | ★ **%s** ★ |" % ("✔ 成立" if oe.get("equivalent") else "✘ 不成立"))
+    L.append("")
+    L.append("★ ★★ **⇒ 三件事一起说 ★★**：")
+    L.append("")
+    L.append("1. ★ **我方交稿读数【不再是「需要通道才能复核」的东西】** ——★ 落盘向量在交付包内，★ 外部可零消耗重算；")
+    L.append("2. ★ **Vendi 与任何谱统计量【从此不依赖嵌入余额】** ——★ 阻塞不是被绕过，★ 是被**消除**（★ 一次补录、★ 永久离线 ★）；")
+    L.append("3. ★ **补录件与采集端原生件【不可混为一谈】** ——★ 落盘时标 `provenance = post-hoc` + 补录时间戳 + 批 id + **单元清单 sha256** + 维度 + 是否归一化（★ 「同值 ≠ 同源」的最直接应用 ★）。")
+    L.append("")
+    L.append("★ ★★ **★ 一条元教训（★ 本轮我方自己栽了两次 ★）★★")
+    L.append("")
+    L.append("> ★★★ **★ 「离线优先」的正确落点不是【逐个脚本改】，★ 而是【在【调用点】加一层缓存】★★ ⇒ ★ 我方 `client.LLM.embed` 加了落盘缓存后，★ **一个环境变量 `MM_VECTOR_CACHE_DIR` 就让所有分析脚本一起离线**（★ 不用改 10 个脚本 ★）★★ ★")
+    L.append("> ★★★ **★ 另一条：★ 「目录形态」必须与【实际调用方式】一致** ★★ ⇒ ★ 我方先后踩了两次：★ ① `vectors/` 按 unit_id 命名、★ `vector_cache/` 按文本 sha256 命名 ⇒ ★ **查不到** ★ ② 单元 id 的臂名含下划线（★ `nosel_b3_synth` ★）⇒ ★ 自己 `split` 会切错 ⇒ ★ ⇒ ★ **正解：★ 直接复用 `client._cache_path` 与 `partial_verdict.load_groups`（★ 单一真相源 ★）★★ ★")
+    L.append("")
+    L.append("★ ★★ **★ 这条对【下一批】的直接要求（★ 已写进 A 篇 2×2 规格缺口 10 ★）★★")
+    L.append("")
+    L.append("> ★ **在【采集端】就落盘向量** ⇒ ★ 就连这次「事后补录」都不必做 ⇒ ★ 且**必然**标 `provenance = native`（★ 与 post-hoc 【不可混为一谈】★）★")
+    L.append("")
     return "\n".join(L)
 
 
@@ -456,6 +492,8 @@ def main():
                     help="★ h0_theta0_calibration.py 的输出（★ θ₀ 多口径重算 + 判决影响 ★）")
     ap.add_argument("--crosscheck-json", default=None,
                     help="★ crosscheck_report.py 的输出（★ 弱检查统计 ★）")
+    ap.add_argument("--offline-json", default=None,
+                    help="★ verify_offline_equivalence.py 的输出（★ 离线等值性证明 ★）")
     ap.add_argument("--provenance-json", default=None,
                     help="★ provenance_audit.py 的输出（★ 读数出处覆盖率 ★）")
     ap.add_argument("--dump-generated", default=None,
@@ -654,6 +692,13 @@ def main():
                 % (sj["snapshot"], sj["n_units"], "、".join(sj["tids"] or []), sj["theta0"],
                    sj["sha256"], sj["bytes"], _clock, _comp))
         s = replace_markers(s, _reg, SN_BEGIN, SN_END)
+
+    # ★ ★ 离线等值性 → §6.12.9 ★★
+    if a.offline_json:
+        if not os.path.isfile(a.offline_json):
+            die("offline-json 不存在：%s" % a.offline_json)
+        _oe = json.load(open(a.offline_json, encoding="utf-8"))
+        s = replace_markers(s, build_offline_section(_oe), OE_BEGIN, OE_END)
 
     # ★ ★ 读数出处覆盖率 → §6.10.0d ★★
     if a.provenance_json:

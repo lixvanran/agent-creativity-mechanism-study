@@ -158,14 +158,71 @@ class LLM:
     _cache: dict = {}
 
     def embed(self, texts: list[str], typ: str = "db") -> list[list[float]]:
-        miss = [t for t in texts if t not in self._cache]
-        for i in range(0, len(miss), 32):
-            chunk = miss[i:i + 32]
-            d = self._post(f"{BASE}/embeddings",
-                           {"model": "embo-01", "type": typ, "texts": chunk})
-            for t, v in zip(chunk, d["vectors"]):
-                self._cache[t] = v
-        return [self._cache[t] for t in texts]
+        """★ 嵌入：★ **落盘缓存优先**（★ 命中即零通道消耗 ★）★★
+        ★ ★ 「把【需要在通道上算的量】挪到【生成时/首次算时】算好并落盘」
+        ★ ★ ⇒ ★ 事后所有分析、★ 重算、★ 复核都【不再依赖通道存续】★★ ★
+        ★ ★ 缓存目录：★ 环境变量 `MM_VECTOR_CACHE_DIR`（★ 未设 ⇒ ★ 行为与原来完全一致 ★）★★
+        ★ ★ 缓存键：★ 文本 sha256 + 模型 + 类型 ⇒ ★ **不降维**（★ 谱熵依赖完整谱 ★）★★
+        ★ ★ 命中但文件损坏 ⇒ **响亮失败**（★ 不静默回退到通道 ★）★★"""
+        cache_dir = os.environ.get("MM_VECTOR_CACHE_DIR", "").strip()
+        out = []
+        miss = []
+        for i, t in enumerate(texts):
+            hit = self._cache.get(t)
+            if hit is not None:
+                out.append(hit)
+                continue
+            if cache_dir:
+                _p = _cache_path(cache_dir, t, typ)
+                if os.path.isfile(_p):
+                    try:
+                        obj = json.load(open(_p, encoding="utf-8"))
+                        v = obj.get("vector")
+                        if not isinstance(v, list) or not v:
+                            raise ValueError("缓存内容为空/损坏")
+                        self._cache[t] = v
+                        out.append(v)
+                        continue
+                    except Exception as e:                        # noqa: BLE001
+                        raise RuntimeError("★ 向量缓存损坏（%s）：%s ★ 响亮失败，★ 不静默回退到通道" % (_p, e))
+            miss.append((i, t))
+            out.append(None)                                    # type: ignore[arg-type]
+        if miss:
+            need = [t for _i, t in miss]
+            for i in range(0, len(need), 32):
+                chunk = need[i:i + 32]
+                d = self._post(f"{BASE}/embeddings",
+                               {"model": "embo-01", "type": typ, "texts": chunk})
+                for t, v in zip(chunk, d["vectors"]):
+                    self._cache[t] = v
+                    if cache_dir:
+                        _p = _cache_path(cache_dir, t, typ)
+                        os.makedirs(os.path.dirname(_p), exist_ok=True)
+                        tmp = _p + ".tmp"
+                        with open(tmp, "w", encoding="utf-8") as _f:
+                            json.dump({"text_sha256": _cache_key(t, typ), "model": "embo-01",
+                                       "type": typ, "dim": len(v), "vector": v,
+                                       "cached_at_utc": _utcnow()}, _f, ensure_ascii=False)
+                        os.replace(tmp, _p)
+            for i, t in miss:
+                out[i] = self._cache[t]
+        return out
+
+
+# ── 向量落盘缓存（★ 2026-10-26 ★）────────────────────────────────────
+def _utcnow() -> str:
+    import datetime as _dt
+    return _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _cache_key(text: str, typ: str) -> str:
+    import hashlib as _hl
+    return _hl.sha256(("embo-01\x00" + typ + "\x00" + text).encode("utf-8")).hexdigest()
+
+
+def _cache_path(cache_dir: str, text: str, typ: str) -> str:
+    k = _cache_key(text, typ)
+    return os.path.join(cache_dir, k[:2], k + ".json")
 
 
 def cosine(a, b) -> float:

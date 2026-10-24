@@ -164,6 +164,8 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=20261025)
     ap.add_argument("--boot", type=int, default=10000)
     ap.add_argument("--json-out", default=None)
+    ap.add_argument("--vectors-dir", default=None,
+                    help="★ 落盘向量目录（★ backfill_vectors.py 的输出 ★）★ **有它就离线优先** ★")
     ap.add_argument("--unit-list", default=None,
                     help="★ 冻结的单元清单文件（★ 每行一个 basename，★ 不含 .json ★）⇒ ★ 与其它分析脚本同源 ★")
     a = ap.parse_args()
@@ -188,16 +190,48 @@ def main() -> int:
         return 3
 
     # ── 读数（主层：每组 5 份 post）──
-    from creativity_lab.client import LLM
-    llm = LLM()
+    # ★ ★ 离线优先（★ 2026-10-26 ★）★★
+    #   ★ 「被测量的量在【生成时/补录时】就落盘」⇒ ★ 事后分析只重算统计量 ⇒ ★ 不碰通道 ★
+    #   ★ ⇒ ★ ① 有落盘向量就用它（★ 零通道消耗、★ 离线可复核 ★）★ ② 缺的才调通道 ★★
     texts, need = [], []
     for k, arts in full.items():
         for t in arts:
             if t not in texts:
                 texts.append(t)
-    print("   嵌入文本 %d 条（embo-01）" % len(texts))
-    vecs = llm.embed(texts)
-    vmap = {t: v for t, v in zip(texts, vecs)}
+    vmap = {}
+    if a.vectors_dir:
+        _vd = a.vectors_dir
+        _n_hit = 0
+        for _fn in sorted(os.listdir(_vd)):
+            if not _fn.endswith(".json") or _fn.startswith("MANIFEST"):
+                continue
+            _uid = _fn[:-5]
+            _vp = os.path.join(_vd, _fn)
+            _up = os.path.join(a.out, "units", "%s.json" % _uid)
+            if not os.path.isfile(_up):
+                continue
+            try:
+                _o = json.load(open(_vp, encoding="utf-8"))
+                _u = json.load(open(_up, encoding="utf-8"))
+                _p = _u.get("post")
+                if isinstance(_p, str) and _p.strip() and _o.get("vector"):
+                    vmap.setdefault(_p, _o["vector"])
+                    _n_hit += 1
+            except Exception:                                       # noqa: BLE001
+                continue
+        print("   ★ 离线落盘向量：★ %d 个单元文件（★ provenance 标在 manifest 里 ★）" % _n_hit)
+    missing = [t for t in texts if t not in vmap]
+    print("   嵌入文本 %d 条（embo-01）｜ 离线命中 %d ｜ 需调通道 %d"
+          % (len(texts), len(texts) - len(missing), len(missing)))
+    if missing:
+        from creativity_lab.client import LLM
+        llm = LLM()
+        _vecs = llm.embed(missing)
+        for _t, _v in zip(missing, _vecs):
+            vmap[_t] = _v
+        print("   ⇒ ★ 已调通道补 %d 条（★ **落盘后下次就完全离线** ★）" % len(missing))
+    else:
+        print("   ⇒ ★ **零通道消耗**（★ 全部走落盘向量 ★）⇒ ★ 复核/重算不再依赖余额 ★")
 
     reads: Dict[tuple, Dict[str, Any]] = {}
     for k, arts in full.items():

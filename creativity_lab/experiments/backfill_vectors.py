@@ -43,6 +43,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, ROOT)
 
 PROVENANCE = "post-hoc"          # ★ 纪律 ④ ★
+
+# ★ ★ 与 client.LLM.embed 的【落盘缓存】共用的 key/path 算法（★ 单一真相源 ★）★★
+#   ★ ⇒ ★ 补录件【同时】写成缓存格式 ⇒ ★ 之后任何脚本调 client.embed 都【零通道命中】★★
+from creativity_lab.client import _cache_key, _cache_path, _utcnow  # noqa: E402
 BATCH = 32                        # ★ 嵌入批量（★ 与 client.embed 的分块一致 ★）
 
 
@@ -69,6 +73,8 @@ def main():
     ap.add_argument("--run-dir", required=True)
     ap.add_argument("--unit-list", required=True)
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--cache-dir", default="",
+                    help="★ client.embed 的落盘缓存目录（★ 单一真相源：★ 与补录件同 key ★）")
     ap.add_argument("--dry-run", action="store_true", help="★ 只盘点不调通道（★ 零消耗 ★）")
     a = ap.parse_args()
 
@@ -86,6 +92,24 @@ def main():
         vp = os.path.join(a.out_dir, "%s.json" % uid)
         if os.path.isfile(vp):
             have.append(uid)
+            # ★ ★ 已有向量也【补写缓存格式】⇒ ★ 幂等补齐（★ 缓存与补录件同源 ★）★★
+            try:
+                _o = json.load(open(vp, encoding="utf-8"))
+                _u = json.load(open(os.path.join(udir, "%s.json" % uid), encoding="utf-8"))
+                _p = _u.get("post")
+                _v = _o.get("vector")
+                if isinstance(_p, str) and _p.strip() and _v:
+                    _cp = _cache_path(a.cache_dir, _p, "db")
+                    if not os.path.isfile(_cp):
+                        os.makedirs(os.path.dirname(_cp), exist_ok=True)
+                        _tmp = _cp + ".tmp"
+                        with open(_tmp, "w", encoding="utf-8") as _f:
+                            json.dump({"text_sha256": _cache_key(_p, "db"), "model": "embo-01",
+                                       "type": "db", "dim": len(_v), "vector": _v,
+                                       "cached_at_utc": _utcnow()}, _f, ensure_ascii=False)
+                        os.replace(_tmp, _cp)
+            except Exception:                                   # noqa: BLE001
+                pass
             continue
         jp = os.path.join(udir, "%s.json" % uid)
         if not os.path.isfile(jp):
@@ -160,6 +184,15 @@ def main():
             with open(tmp, "w", encoding="utf-8") as f:
                 json.dump(obj, f, ensure_ascii=False)
             os.replace(tmp, os.path.join(a.out_dir, "%s.json" % uid))
+            # ★ 同步写缓存格式（★ 单一真相源：★ 两者 key 相同 ★）★★
+            _cp = _cache_path(a.cache_dir, dict((x[0], x[1]) for x in todo)[uid], "db")
+            os.makedirs(os.path.dirname(_cp), exist_ok=True)
+            _tmp2 = _cp + ".tmp"
+            with open(_tmp2, "w", encoding="utf-8") as _f:
+                json.dump({"text_sha256": _cache_key(dict((x[0], x[1]) for x in todo)[uid], "db"),
+                           "model": "embo-01", "type": "db", "dim": len(v), "vector": v,
+                           "cached_at_utc": _utcnow()}, _f, ensure_ascii=False)
+            os.replace(_tmp2, _cp)
             n_done += 1
         print("   · 已补 %d / %d" % (n_done, len(todo)))
 
