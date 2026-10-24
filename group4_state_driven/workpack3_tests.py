@@ -4,7 +4,16 @@
 ★ **这些测试只证明"规则落实"，不证明"能力提高"**（外部来信原话：
   「接口自检通过只证明设计落实，不证明能力提高」）。
 
-用法：python3 workpack3_tests.py
+★★★ **【2026-10-25 · 状态层接口已对齐 · 本文件降级为历史对照 · ★ 不是实现依据】**
+★★★ 第二组经直发通道交付了 `creativity_lab/state_layer.py` 逐字节原文
+★★★ （sha256 `38795bf6adfdee05…` · 10257 B · ✅ 已核）⇒ ⇒ **接口归属归第二组**。
+★★★ ⇒ **现行可执行测试是 `creativity_lab/experiments/test_state_layer.py`**
+★★★ （★ 第二组出规格表 / 第四组按表实现 ⇒ ★ 6/6 通过 ⇒ exit 0 ⇒ ★ 另带 `--self-test`
+★★★ 变异注入自检 6/6）。
+★★★ ⇒ **本文件保留作第四组自建版的历史对照**（★ 两版差异见
+★★★ `WORKPACK3_MIN_ARCHITECTURE.md` §6）⇒ ⇒ ★ **跑它不代表任何现行结论**。
+
+用法：python3 group4_state_driven/workpack3_tests.py
 """
 from __future__ import annotations
 
