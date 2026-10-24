@@ -123,7 +123,7 @@ def main():
     print("  → 原「22 条矛盾」里，真正与依据冲突的是 %d 条" % n_con)
 
     json.dump(dict(regression=rows, recheck=recheck),
-              open("%s/verifier_v4.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+              open("%s/verifier_v4.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("\n已存 %s/verifier_v4.json" % OUT)
 
 

@@ -156,8 +156,8 @@ def main():
                     print("  ERR %s: %s" % (k, str(e)[:60]), flush=True)
                 if n % 12 == 0:
                     print("  %d/%d  (%.0fs)" % (n, len(futs), time.time() - t0), flush=True)
-                    json.dump(texts, open(fp, "w"), ensure_ascii=False, indent=1, sort_keys=True)
-        json.dump(texts, open(fp, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+                    json.dump(texts, open(fp, "w"), ensure_ascii=False, indent=1)
+        json.dump(texts, open(fp, "w"), ensure_ascii=False, indent=1)
     for a in ARMS:
         L = [len(v) for k, v in texts.items() if k.split("|")[1] == a]
         print("  %-11s %d 份，平均 %dB" % (a, len(L), sum(L) / max(len(L), 1)), flush=True)
@@ -175,8 +175,8 @@ def main():
                 allclaims[futs[f]] = f.result()
                 if n % 24 == 0:
                     print("  %d/%d" % (n, len(futs)), flush=True)
-                    json.dump(allclaims, open(fp, "w"), ensure_ascii=False, indent=1, sort_keys=True)
-        json.dump(allclaims, open(fp, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+                    json.dump(allclaims, open(fp, "w"), ensure_ascii=False, indent=1)
+        json.dump(allclaims, open(fp, "w"), ensure_ascii=False, indent=1)
     empty = [k for k, v in allclaims.items() if not v]
     tot = sum(len(v) for v in allclaims.values())
     print("  断言总数 %d，空抽取 %d 份 (%.1f%%)" % (tot, len(empty), 100 * len(empty) / max(len(allclaims), 1)), flush=True)
@@ -201,8 +201,8 @@ def main():
             n = {x: sum(1 for y in v.values() if y == x) for x in ("支持", "矛盾", "未提及", "解析失败")}
             print("  法%s 断言 %2d → 支持 %2d / 矛盾 %2d / 未提及 %2d / 失败 %d"
                   % (law, len(pool), n["支持"], n["矛盾"], n["未提及"], n["解析失败"]), flush=True)
-            json.dump(verd, open(fp, "w"), ensure_ascii=False, indent=1, sort_keys=True)
-    json.dump(verd, open(fp, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+            json.dump(verd, open(fp, "w"), ensure_ascii=False, indent=1)
+    json.dump(verd, open(fp, "w"), ensure_ascii=False, indent=1)
 
     print("\n== 4. 奖励与差集 ==", flush=True)
     recs = []
@@ -227,7 +227,7 @@ def main():
         recs.append(dict(key=k, tid=tid, law=law, arm=arm, length=len(txt), n_claims=len(cs),
                          n_sup=len(sup), n_con=len(con), n_unment=len(un), n_new=len(new),
                          reward=round(len(new) / max(len(txt), 1) * 100, 4), dead=False))
-    json.dump(recs, open("%s/records.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+    json.dump(recs, open("%s/records.json" % OUT, "w"), ensure_ascii=False, indent=1)
 
     print("\n%-24s %5s %5s %5s %5s %5s" % ("key", "clm", "sup", "con", "unm", "new"))
     for r in sorted(recs, key=lambda x: -x["reward"])[:15]:
