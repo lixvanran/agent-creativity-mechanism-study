@@ -57,6 +57,13 @@ REQUIRED_INPUTS = {
 #   ★ ★ ⇒ ★ 「48/48 全绿」里有 21 项是【不存在】的检查 ★★ ⇒ ★ 现以 69 为下界 ★
 EXPECTED_MIN_CHECKS = 69
 
+# ★ ★ 项数下界可被环境变量覆盖（★ 只给自测用 ★）★★
+#   ★ ★ 用途：★ 让自测能【把它改坏】⇒ ★ 验证「项数断言真在判定路径上」★★
+#   ★ ★ （★ 第 1 层论证线 2026-10-26：★ 「断言写了但没接上」⇒ ★ 表现与恒真检查项一样 ★）★★
+_env_min = os.environ.get("CROSSCHECK_EXPECTED_MIN")
+if _env_min:
+    EXPECTED_MIN_CHECKS = int(_env_min)
+
 # ★ ★ 模拟缺失（★ 只给 --self-test 用 ★）⇒ ★ 走【同一条代码路径】⇒ ★ 自测不是假的 ★
 _SIMULATE_MISSING = os.environ.get("CROSSCHECK_SIMULATE_MISSING", "")
 

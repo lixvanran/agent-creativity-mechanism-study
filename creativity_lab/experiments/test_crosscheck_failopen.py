@@ -58,6 +58,12 @@ def main():
         rc, out = run({"CROSSCHECK_SIMULATE_MISSING": name})
         check("★ 缺 %s ⇒ 必须响亮失败（exit≠0）" % name, rc != 0, "实际 exit=%d" % rc)
         check("★ 缺 %s ⇒ 输出必须点名它" % name, name in out, "")
+    # ②′ 变异：★ 把【项数下界】人为改坏 ⇒ ★ 断言必须报红 ★
+    #   ★ ★ 这直接验证「项数断言真在【判定路径】上」——★
+    #   ★ ★ 若它写成了「只打印不退出」或「接在失败判定之后」⇒ ★ 这里会抓不到 ★★
+    rc, out = run({"CROSSCHECK_EXPECTED_MIN": "9999"})
+    check("★ 项数下界被改坏 ⇒ 必须报红（exit≠0）", rc != 0, "实际 exit=%d" % rc)
+    check("★ 项数下界被改坏 ⇒ 输出必须点名「项数断言」", "项数断言" in out, "")
     # ③ 变异：缺一个 ⇒ 仍不能报「无缺失」
     rc, out = run({"CROSSCHECK_SIMULATE_MISSING": "DIVERGE"})
     check("★ 缺输入 ⇒ 绝不能出现「✔ 无缺失」", "无缺失" not in out, "")
