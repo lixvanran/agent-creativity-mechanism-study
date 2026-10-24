@@ -1,0 +1,29 @@
+== 诊断题 DS-01（preregistered_4plus2）==
+   !! 异常：KeyError('n_pool')
+== 诊断题 DS-02（small_1slot_no_round2）==
+   calls=3 tokens=4420 pool=8 shipped=6 支持=7 矛盾=0 未提及=1 解析失败=0
+   round2_executed=False collapse_flag=False（诊断量）
+   models_used=['MiniMax-M3.1-Flash-Preview']
+   --- 答案 ---
+# 某快递规定：普通件 10 公斤以内每件 12 元；超出部分每公斤加收 3 元。生鲜件不得保价，含液体时另付 20 元包装费。寄一件 8 公斤的生鲜件（含液体）应付多少元？该件是否可以保价？
+
+## 经核验成立的依据
+
+- [EV-DS02-01] 单件8公斤的生鲜件重量未超过10公斤。
+- [EV-DS02-01] 单件8公斤的生鲜件基础运费为12元。
+- [EV-DS02-02] 单件8公斤的生鲜件不产生超重加费。
+- [EV-DS02-04] 单件8公斤且含液体的生鲜件另加20元包装费。
+- [EV-DS02-01] 单件8公斤且含液体的生鲜件合计费用为32元。
+- [EV-DS02-03] 生鲜件属于不得保价范围。
+Traceback (most recent call last):
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/A/smoke/smoke_a.py", line 250, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/A/smoke/smoke_a.py", line 182, in main
+    summary["checks"]["every_task_has_parsed_verdicts"] = all(
+                                                          ^^^^
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/A/smoke/smoke_a.py", line 183, in <genexpr>
+    r["meta"]["n_pool"] == 0 or r["meta"]["n_parsefail"] < r["meta"]["n_pool"]
+    ~~~~~~~~~^^^^^^^^^^
+KeyError: 'n_pool'
+EXIT=1

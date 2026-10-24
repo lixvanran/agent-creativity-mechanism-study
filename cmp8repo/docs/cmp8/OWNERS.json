@@ -1,0 +1,130 @@
+{
+  "schema": "remote-ref-ownership/v1",
+  "repo": "lixvanran/agent-creativity-mechanism-study",
+  "branch": "cmp8-handover-2026-10-20",
+  "generated_at": "2026-10-24T07:50:09Z",
+  "generator": "tools/build_owners_json.py（可重跑）",
+  "note": "★ 远端 message 在 API 重建 commit 路径下会丢失 ⇒ 归属以本表为准。★ 未知归属一律标 needs_confirmation=true，不猜。",
+  "layers": [
+    {
+      "layer": 12,
+      "sha": "6ce6251b2f71cfb0f63feb16130ae927ba2d893e",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "[三组] OWNERS.json 归属查找改前缀匹配；本层远端 commit 首次带真实 message（此前默认 update）",
+      "summary": null,
+      "needs_confirmation": true,
+      "note": ""
+    },
+    {
+      "layer": 11,
+      "sha": "44f41f4a3492a4bd808f7b95ab3f0847b30d29fa",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "[三组] 修 push_via_api 缺 message 报错并禁止 update；新增机器可读 OWNERS.json 归属表生成器（兼容两种 message 结构、前缀匹配归属）",
+      "summary": null,
+      "needs_confirmation": true,
+      "note": ""
+    },
+    {
+      "layer": 10,
+      "sha": "a6208aec1c2090ebe464a9e6bbba7eded1ce255f",
+      "group": "三组",
+      "local_commit": "14dddc5",
+      "remote_message": "update",
+      "summary": "OWNERS.json生成+打包改先验后换",
+      "needs_confirmation": false,
+      "note": "远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
+    },
+    {
+      "layer": 9,
+      "sha": "24e3ebb95cdd6f6837add5d863f183751b7aadcc",
+      "group": "三组",
+      "local_commit": "356ecaa",
+      "remote_message": "update",
+      "summary": "OWNERS.json生成器(含User-Agent与API兜底)",
+      "needs_confirmation": false,
+      "note": "远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
+    },
+    {
+      "layer": 8,
+      "sha": "41009794b3d486f4133a59a2655fa8f051d3800a",
+      "group": "三组",
+      "local_commit": "d4ef317",
+      "remote_message": "update",
+      "summary": "分维度表按精确口径+贡献三条加定位句+OWNERS生成器",
+      "needs_confirmation": false,
+      "note": "远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
+    },
+    {
+      "layer": 7,
+      "sha": "7ab16b40101edc3ea5434681ae7a1ef24bc5e642",
+      "group": "三组",
+      "local_commit": "223efd1",
+      "remote_message": "update",
+      "summary": "[三组] commit message 格式改为[组名]前缀",
+      "needs_confirmation": false,
+      "note": "远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
+    },
+    {
+      "layer": 6,
+      "sha": "9e7af45adb04fcb2233cb48728631b73b5883c75",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "第二组 · 交付 2026-10-25（★ 叠加在远端 head f0d8004fa6ba 之上）",
+      "summary": null,
+      "needs_confirmation": true,
+      "note": ""
+    },
+    {
+      "layer": 5,
+      "sha": "f0d8004fa6ba2039ce170f491b32a40aeec40403",
+      "group": "三组",
+      "local_commit": "797190b",
+      "remote_message": "update",
+      "summary": "KNOWN_ISSUES重写+摘要加两判官反号+§2.3措辞+§6.4.4e",
+      "needs_confirmation": false,
+      "note": "远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
+    },
+    {
+      "layer": 4,
+      "sha": "4654245ac709a4a7a6a19482934476b58aea4b0c",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "第二组 · 交付 2026-10-25（★ 叠加在远端 head 5b7fb4670320 之上）",
+      "summary": null,
+      "needs_confirmation": true,
+      "note": ""
+    },
+    {
+      "layer": 3,
+      "sha": "5b7fb46703201b47e6a66721c3cf71c9916b2e5c",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "第二组 · 交付 2026-10-25（★ 叠加在远端 head 8934cb193cc2 之上）",
+      "summary": null,
+      "needs_confirmation": true,
+      "note": ""
+    },
+    {
+      "layer": 2,
+      "sha": "8934cb193cc220fd622d332f252c0b3351a31766",
+      "group": "三组",
+      "local_commit": "e483f4a",
+      "remote_message": "update",
+      "summary": "分维度偏好表 + 负对照分母真因",
+      "needs_confirmation": false,
+      "note": "远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
+    },
+    {
+      "layer": 1,
+      "sha": "2055e086ad98ff444da85edfd58e55f1b2f3387e",
+      "group": "三组",
+      "local_commit": "6a48f8a",
+      "remote_message": "update",
+      "summary": "解耦帧组合seed + 论文更正nf偏好 + 留出集续跑脚本",
+      "needs_confirmation": false,
+      "note": "远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
+    }
+  ]
+}

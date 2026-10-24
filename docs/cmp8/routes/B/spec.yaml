@@ -1,0 +1,608 @@
+# 路线 B · 训练架构 —— 机器可读规格
+# 与 DESIGN.md 配套。供：画程序流程图 + 协议一致性检查。
+# ⚠️ 本文件是**规格**，不是结果；不含任何实测结论。
+version: 1
+route: B
+route_name: "训练架构（操作序列由训练学出）"
+status: design_draft
+produced_at: "2026-10-20"
+protocol:
+  ref: "/workspace/lab/routes/PROTOCOL.md"
+  version: "PROTOCOL-v1.0"
+  clauses:                    # 逐条遵守的接口契约
+    - "§8(a1) 输入格式"
+    - "§8(a2) 输出目录结构（answer.md / cards.json / meta.json / summary.json）"
+    - "§8(a3) 卡片抽取归独立抽取器；本路线只产 answer.md 与 meta.json"
+    - "§8(a4) 跨臂可比元数据（arm_config_hash 等）"
+    - "§8(b) 必报指标项"
+    - "§8(c) 对照臂（协议 4 条 + 路线 B 4 条）"
+    - "§8(d) 红线 R-1 … R-13"
+    - "§8(e) 交回三件：DESIGN.md / spec.yaml / summary.json（summary.json 由协议独立流程生成）"
+  hard_redlines_honored:
+    - "R-1 未把 U1–U4 写进训练/提示词/调参/诊断/校准（冒烟用 2 道自造题 + guard.py 黑名单自检）"
+    - "R-2 宽度/条数/长度不进特征也不进奖励；代理 Ŵ 是比例"
+    - "R-3 不用模型自述当判据"
+    - "R-4 择优只用外部核验器"
+    - "R-5 提示词里无 ADHD/多动/跳脱人格描述"
+    - "R-6 提示词与架构里无答案暗示/评价标准/作者猜测/题目实体"
+    - "R-7 特征与题无关（只读图状态）"
+    - "R-8 被测侧只走 MiniMax 订阅端点；无 OpenRouter 调用"
+    - "R-9 不事后改 C_t / 排除口径 / 阈值 / 统计口径"
+    - "R-10 失败后不重跑到通过"
+    - "R-11 不声称任何路线更优"
+    - "R-12 报任何比率必带 valid/total、parsefail_rate、conflict_n/den"
+    - "R-13 不用 U1–U4 的结论空间/依据包建 DEV 或校准抽取器"
+
+# ───────────────────────────────────────────────────────── 流程图（顶层 nodes / edges）
+# ★ 硬契约：`/workspace/lab/build_spec_flowchart.py` 的 `normalize()` 只吃**顶层**
+#   `nodes:` / `edges:`（另有 flowchart: 块 / topology.* 两种兜底写法，本 spec 不用）。
+#   没有这两块 ⇒ 渲染结果是**空页**（2026-10-21 独立复核实测：0 rect / 0 path / 0 text）。
+#   节点 id ↔ DESIGN.md §3.9「流程图节点对照」一一对应（一个节点 = DESIGN 正文里的一个环节）。
+nodes:
+  - id: n0_start
+    label: "第 r 轮开始"
+    sub: "8 题 × 10 步"
+    kind: terminal
+  - id: n1_cand
+    label: "候选集 candidates(g)"
+    sub: "合法性过滤 3 条"
+    kind: process
+  - id: n2_feat
+    label: "特征与分数（成对）"
+    sub: "30 维交叉项；s=w·f"
+    kind: process
+  - id: n3_pi
+    label: "策略分布 pi(a|s)"
+    sub: "标准化后 softmax"
+    kind: process
+  - id: n4_neff
+    label: "n_eff 达标？"
+    sub: "1/Σp² ≥ 2.8"
+    kind: decision
+  - id: n5_tau
+    label: "τ 控制器调 τ"
+    sub: "塌缩对策 C3"
+    kind: process
+  - id: n6_sample
+    label: "采样 a ~ pi"
+    sub: "记录 tau_used"
+    kind: process
+  - id: n7_op
+    label: "选中的 op a"
+    sub: "6 op 动作空间"
+    kind: decision
+  - id: n8_gen
+    label: "GEN_PLAIN / GEN_ANGLE"
+    sub: "生成一份答案"
+    kind: process
+  - id: n9_proc
+    label: "EXTRACT / SPLIT"
+    sub: "抽断言 / 拆断言"
+    kind: process
+  - id: n10_verify
+    label: "VERIFY"
+    sub: "判官归因 关系|编号"
+    kind: process
+  - id: n11_step
+    label: "步级奖励"
+    sub: "新锚定条目 +1.0"
+    kind: process
+  - id: n12_proxy
+    label: "代理 w_hat"
+    sub: "覆盖锚定条目占比"
+    kind: process
+  - id: n13_term
+    label: "终局奖励"
+    sub: "alpha·w_hat - 矛盾罚"
+    kind: process
+  - id: n14_update
+    label: "reinforce 更新 w"
+    sub: "精确 log-pi 梯度 + L2"
+    kind: process
+  - id: n15_ema
+    label: "EMA 部署权重"
+    sub: "v ← 0.9v + 0.1w"
+    kind: process
+  - id: n16_monitor
+    label: "监控面板：fatal？"
+    sub: "16 项阈值告警"
+    kind: decision
+  - id: n17_stop
+    label: "停该策略并记录"
+    sub: "早停 + 报 FB"
+    kind: terminal
+  - id: n18_next
+    label: "下一轮 r+1"
+    sub: "回到候选集（循环）"
+    kind: terminal
+  - id: n19_eval
+    label: "FB1-FB12 判死检查"
+    sub: "训练结束后执行"
+    kind: terminal
+edges:
+  - from: n0_start
+    to: n1_cand
+    label: "取候选"
+  - from: n1_cand
+    to: n2_feat
+    label: "成对构造"
+  - from: n2_feat
+    to: n3_pi
+    label: "打分"
+  - from: n3_pi
+    to: n4_neff
+    label: "看 n_eff"
+  - from: n4_neff
+    to: n5_tau
+    label: "n_eff < 目标 ⇒ 调大 τ"
+  - from: n4_neff
+    to: n6_sample
+    label: "n_eff ≥ 目标"
+  - from: n5_tau
+    to: n6_sample
+    label: "调完重算 π"
+  - from: n6_sample
+    to: n7_op
+    label: "on-policy 采样"
+  - from: n7_op
+    to: n8_gen
+    label: "a ∈ {GEN_PLAIN, GEN_ANGLE}"
+  - from: n7_op
+    to: n9_proc
+    label: "a ∈ {EXTRACT, SPLIT}"
+  - from: n7_op
+    to: n10_verify
+    label: "a = VERIFY"
+  - from: n7_op
+    to: n13_term
+    label: "a = STOP ⇒ 终局"
+  - from: n8_gen
+    to: n11_step
+    label: "步奖励 0.0"
+  - from: n9_proc
+    to: n11_step
+    label: "步奖励 0.0"
+  - from: n10_verify
+    to: n11_step
+    label: "按条目去重计分"
+  - from: n11_step
+    to: n12_proxy
+    label: "episode 结束"
+  - from: n12_proxy
+    to: n13_term
+    label: "算终局奖励"
+  - from: n13_term
+    to: n14_update
+    label: "逐 episode 更新"
+  - from: n14_update
+    to: n15_ema
+    label: "部署权重"
+  - from: n15_ema
+    to: n16_monitor
+    label: "逐轮评估"
+  - from: n16_monitor
+    to: n17_stop
+    label: "fatal 告警 ⇒ 早停"
+  - from: n16_monitor
+    to: n18_next
+    label: "无 fatal ⇒ 继续"
+  - from: n17_stop
+    to: n19_eval
+    label: "触发否证条件"
+  - from: n18_next
+    to: n19_eval
+    label: "r = R ⇒ 训练结束"
+
+# ───────────────────────────────────────────────────────── 动作空间
+action_space:
+  ops:
+    - {id: GEN_PLAIN,  kind: generate, desc: "生成一份完整答案（无认知位置）"}
+    - {id: GEN_ANGLE,  kind: generate, desc: "生成一份完整答案（带认知位置，位置均匀抽）"}
+    - {id: EXTRACT,    kind: process,  desc: "从最近一份 ANSWER 抽可核验断言"}
+    - {id: SPLIT,      kind: process,  desc: "把一条复合断言拆成可分别核验的子断言"}
+    - {id: VERIFY,     kind: verify,   desc: "对未核验断言做四分类核验并归因到依据条目编号"}
+    - {id: STOP,       kind: stop,     desc: "结束 episode"}
+  removed_from_legacy:
+    - id: MERGE
+      reason: "在旧实现中从未进入候选集 ⇒ f[5] 恒 0、w[5] 永不更新（死维）"
+  classes: [GENERATE, PROCESS, VERIFY, STOP]     # 动作集合的机械划分（非状态分桶）
+  slots:                                            # GEN_ANGLE 的认知位置词表（任务无关，不进特征）
+    - 适用规则来源
+    - 踩红线的做法
+    - 办理流程与材料
+    - 按情形分别处理
+    - 时间与顺序要求
+    - 例外与特殊情形
+  slot_sampling: uniform
+  slot_enters_features: false
+  slot_enters_reward: false
+
+candidate_rules:
+  note: "合法性过滤（人定，3 条）+ 架构选择（学）。目标选择与内容无关 ⇒ 不会变成 best-of-N。"
+  always: [GEN_PLAIN, GEN_ANGLE]
+  EXTRACT:  {requires: "存在 ANSWER 节点", target: "最后一个 ANSWER"}
+  VERIFY:   {requires: "存在 verdict==None 的 CLAIM", target: "最早的 2 个未核验 CLAIM", batch_per_action: 2}
+  SPLIT:    {requires: "存在 verdict ∈ {None, 未提及} 的 CLAIM", target: "最早的 1 个"}
+  STOP:     {requires: "存在 ANSWER 节点"}
+  human_legality_filters:          # 只过滤"无意义/无信息增益"，不含任何偏好
+    - "无 ANSWER 不能 STOP（否则交付是空动作）"
+    - "VERIFY 只对未核验断言开放（核验已核验过的 = 无信息增益的重复调用）"
+    - "SPLIT 只对 {未核验, 依据未覆盖} 断言开放（已确认矛盾者拆分无意义）"
+  learned_architecture_choices:    # 这些才是"架构"，全部由交叉项承载
+    - 何时生成
+    - 生成几次
+    - 抽不抽断言
+    - 先拆还是先核验
+    - 核验多少条
+    - 什么时候停
+
+# ───────────────────────────────────────────────────────── 特征维度表
+features:
+  dim: 30
+  type: float
+  all_task_independent: true       # R-7：只读图状态
+  blocks:
+    - {idx: [0, 5],   name: "op_one_hot",            type: onehot, dim: 6,
+       members: [GEN_PLAIN, GEN_ANGLE, EXTRACT, SPLIT, VERIFY, STOP]}
+    - {idx: [6, 9],   name: "class_x_g1_no_claims",  type: cross, dim: 4,
+       gap: "图里一条断言都没有"}
+    - {idx: [10, 13], name: "class_x_g2_unverified", type: cross, dim: 4,
+       gap: "未核验断言数 / 4（饱和）"}
+    - {idx: [14, 17], name: "class_x_g3_uncovered",  type: cross, dim: 4,
+       gap: "依据未覆盖（未提及）断言数 / 4（饱和）"}
+    - {idx: [18, 21], name: "class_x_g4_zero_supported", type: cross, dim: 4,
+       gap: "有断言但至今零支持"}
+    - {idx: [22, 25], name: "class_x_t1_tgt_unverified",  type: cross, dim: 4,
+       target_state: "target 未核验"}
+    - {idx: [26, 29], name: "class_x_t2_tgt_unmentioned", type: cross, dim: 4,
+       target_state: "target 依据未覆盖"}
+  class_order: [GENERATE, PROCESS, VERIFY, STOP]
+  excluded_features:                # 明确不做的（及其理由）
+    - {name: "text_length",  reason: "R-2：长度不是维度证据，且旧 f[11] 会把『写得长』当偏好"}
+    - {name: "raw_global_gap_terms", reason: "与 op 无关的项在 softmax 里是公共常数 ⇒ 对选择零作用（实测 L4）"}
+    - {name: "tgt_supported / tgt_contradicted", reason: "结构上不可达（见 target_reachability）⇒ 属死维"}
+  target_reachability:
+    VERIFY: [unverified]
+    SPLIT:  [unverified, unmentioned]
+    EXTRACT: [answer_node]
+    note: "支持/矛盾 的断言在 v2 候选规则下永远不会成为 target"
+  feature_version: "routeB-v2-f30"
+  supersedes: "legacy 14 维 (creativity_lab/ops.py:op_features)"
+
+# ───────────────────────────────────────────────────────── 策略与训练超参
+policy:
+  family: linear_softmax
+  score: "s(a|s) = w · f(a,s),  w ∈ R^30"
+  distribution: "π(a|s) = softmax( (s-mean(s))/std(s) / τ )"     # 尺度无关
+  on_policy_requirements:
+    - "行为分布与更新分布共用同一个 policy_probs(s, τ)"
+    - "轨迹里记录 tau_used；更新端用行为时的 τ 重算 π"
+    - "分数与特征成对排序；choice 是真实下标"
+  init: zeros
+  ema:
+    beta: 0.9
+    use: "部署策略 = EMA 权重（不挑 checkpoint）"
+  regularization:
+    l2: 0.01
+    note: "交互项参数量翻倍 ⇒ 必须 L2 收缩"
+  update:
+    algorithm: REINFORCE
+    lr: 0.05
+    gamma: 0.9
+    baseline: "上一轮 episode 回报均值（滑动基线）"
+    batch: "逐 episode 更新（每 episode 一次）"
+
+training_hyperparams:
+  rounds: 8
+  topics_per_round: 8
+  episode_step_budget: 10
+  episode_call_budget: 10
+  tokens_per_task_cap: 40000        # 协议 §4.4
+  calls_per_task_cap_eval: 3000     # 协议 §4.4
+  tau:
+    init: 1.2
+    min: 0.6
+    max: 4.0
+    controller: "n_eff 反馈：n_eff < target ⇒ τ×1.15；n_eff > 1.35×target ⇒ τ×0.97"
+    n_eff_target: 2.8
+  temperature_is_scale_invariant: true
+  seed_policy: "每 episode 的 rng 由 (round, topic) 派生 ⇒ 续跑与不续跑逐字等价"
+  checkpoint: "原子写（.tmp → os.replace），每轮落盘"
+  early_stop:
+    trigger: "fatal 级监控告警（塌缩 / 权重冻结 / 矛盾越界 / 留出漂移 / 搜索闭合 / 截断越界）"
+    max_reruns: 2                   # 协议 S5
+    rule: "重跑必须换种子、事前登记、同时报首跑结果（R-10）"
+  token_budget_ladder:              # 每次逻辑调用的 max_tokens 与重试阶梯（**重试是真实调用，计入预算**）
+    al_gen:  {max_tokens: 8000, retries: []}
+    al_ex:   {max_tokens: 2000, retries: [3200, 4400]}
+    al_split: {max_tokens: 1600, retries: [2400, 3200]}
+    check2:  {max_tokens: 1200, retries: [1800, 2400]}
+    note: "阶梯加长的原因：MiniMax-M3.1 会把预算花在 <think> 块上，正文被挤掉 ⇒ finish_reason=length（见 DESIGN §3.8）"
+
+truncation_accounting:              # 协议 F8 同族风险
+  step_level:
+    name: truncated_rate
+    def: "最终产出**仍**被 max_tokens 截断的步数 / 步数"
+    impact: "断言变少 ⇒ 代理 Ŵ 偏低 ⇒ **污染测量**"
+    reported_as: ["truncated_rate", "n_empty", "truncated_steps"]
+    gate: "truncated_rate > 10% ⇒ 该臂该通道不可跨臂比较（FB12）"
+  attempt_level:
+    name: truncated_attempt_rate
+    def: "曾撞 max_tokens 的尝试数 / 尝试数（含重试）"
+    impact: "只影响成本（重试成功即无污染）"
+    reported_as: ["n_attempts_truncated", "n_attempts_empty"]
+  actions:
+    - "D1 预算阶梯加长（见 training_hyperparams.token_budget_ladder）"
+    - "D2 每次逻辑调用后读 rec[-1].finish_reason ⇒ 显式记账（train_policy_v2._call_flags）"
+    - "D3 truncated_rate / n_empty 与 parsefail_rate / valid-total 并列必报"
+    - "D4 代理校准（Ŵ↔VD）**只在 truncated_rate==0 的 episode 上做**"
+    - "D5 对被截断的 episode 跑加大预算的配对复现，单报 ΔŴ_truncated（把测量误差与策略效应分开）"
+    - "D6 跨臂闸门 truncated_rate>10%（F8 同族扩展；需协议 owner 确认，确认前本路线自行执行）"
+    - "D7 重试计入调用预算（按尝试数计）"
+  never: "不得把截断样本从统计里悄悄删掉（那正是 F8 的病根）"
+
+# ───────────────────────────────────────────────────────── 奖励项
+reward:
+  step_terms:
+    - {event: "VERIFY -> 支持 且**新覆盖**一条锚定依据条目", value: 1.0,
+       unit: "每条**新覆盖**的锚定依据条目（按条目去重；重复覆盖 +0）"}
+    - {event: "VERIFY -> 矛盾",        value: -2.0,
+       unit: "每条断言（**不**按条目去重 ⇒ 重复写错会重复扣分，保守方向）"}
+    - {event: "VERIFY -> 未提及/非主张/解析失败", value: 0.0}
+    - {event: "GEN_*/EXTRACT/SPLIT",   value: 0.0,
+       reason: "形状动作的价值只能通过后续核验兑现 ⇒ 不给形状奖励（防『多写多抽』被直接奖励）"}
+    - {event: "VERIFY -> 支持但归因到**非锚定**（花絮）条目", value: 0.0,
+       reason: "步级只对承载结论的锚定条目计分"}
+  terminal_terms:
+    - {event: "代理 Ŵ", formula: "alpha * w_hat", alpha: 3.0}
+    - {event: "矛盾率 > cap", formula: "-2.0", conflict_cap: 0.33}
+  cost_in_reward: false
+  cost_in_reward_reason: "若把调用数写进奖励，策略会学成『早点停』；成本由固定预算 + 等预算对照臂处理"
+  proxy:
+    name: "w_hat"
+    formula: "覆盖到的锚定依据条目数 / 锚定依据条目总数"
+    numerator: "被至少一条『判为支持』的断言覆盖到的、anchored=True 的依据条目"
+    denominator: "该题事前写死的 anchored=True 条目数（与产出长度无关）"
+    dedup: "按依据条目硬划分（无相似度阈值）"
+    reads: ["外部依据包", "判官判定"]
+    never_reads: ["生成臂自述", "结论空间 C_t 的内容", "题目文本"]
+    leakage_guard: "分母（锚定条目数）与 anchored 标记绝不进入特征或生成侧提示词"
+    known_gaps:
+      - "G1 协议按删除反事实归族 ⇒ 代理系统性偏大"
+      - "G2 结论空间外的维度协议也测不到（L1）"
+      - "G3 代理算在图上；装配只保留『支持』的断言 ⇒ 图上的 Ŵ 与最终答案上的 Ŵ 相等"
+      - "G4 判官误判『未提及』⇒ 代理偏小"
+      - "G5 anchored 标记是人工写的 ⇒ 分母可能标错"
+      - "G6 截断/空产出 ⇒ 断言变少 ⇒ 代理系统性偏低，且偏差与策略效应混在一起（见 truncation_accounting）"
+      - "G7 步级奖励的『矛盾 -2.0』按断言条数计、不按条目去重；步级只对锚定条目计分（花絮 +0）⇒ 见 reward.step_terms"
+    mednick_coverage:
+      useful_承重: "✅ 代理 Ŵ 实现（分子 = 被『判为支持』的断言覆盖到的锚定条目数，分母固定）"
+      far_远去冗余: "❌ **未实现**：训练信号里没有『远』；它由**协议主判据 VD 在验收层**强制（协议按删除反事实归族）⇒ 代理对此系统性偏大（G1）"
+      consequence: "代理的偏离由 **FB6** 判死：§4.4 预注册校准（Spearman(Ŵ,vd_final) ≥ 0.50 且方向一致率 ≥ 0.75）不过 ⇒ 训练目标判定为未验证 ⇒ 结果不得支持任何结论"
+  calibration:                        # 预注册交叉校验
+    subset: "训练题中事先指定的 2 题 × 4 episode = 8 episode"
+    restrict_to_untruncated: true      # 只在 truncated_rate == 0 的 episode 上做校准（D4）
+    measures: ["w_hat", "真 VD（协议独立抽取器 + 判官 + 归族）"]
+    thresholds:
+      spearman_min: 0.50
+      direction_agreement_min: 0.75
+    on_fail: "训练目标判定为未验证 ⇒ 停止训练并如实报告失败（不允许临时换代理）"
+    degraded_path: "独立抽取器未就绪 ⇒ 结果标 provisional，FB6 视为『未判定』而非『通过』"
+  anti_cheat:
+    - "奖励只读外部依据包 + 判官判定"
+    - "分母固定、分子按条目去重 ⇒ 灌水/重复/加长都不涨分"
+    - "矛盾不贡献分子且有硬罚"
+    - "择优只用外部核验器"
+    - "不把 oracle 统计放进诊断信号（track-d 教训）"
+
+# ───────────────────────────────────────────────────────── 对照臂
+arms:
+  - {id: B0_direct,    kind: protocol, desc: "直调基线，每任务 R=3 独立完整生成", uses_features: false}
+  - {id: B1_eq_calls,  kind: protocol, desc: "等调用数：K 次内部采样，固定取最后一份（与内容无关）", uses_features: false}
+  - {id: B2_eq_token,  kind: protocol, desc: "等 token：采样到 T_W 为止，固定取最后一份", uses_features: false}
+  - {id: B3_best_of_n, kind: protocol, desc: "best-of-N：由外部核验器挑矛盾最少的一份", uses_features: false}
+  - {id: R_w0,         kind: routeB,   desc: "w=0 初始策略（确定性 tie-break：同分取候选表第一个）", uses_features: true}
+  - {id: R_rand,       kind: routeB,   desc: "均匀随机策略（在候选集上均匀抽）", uses_features: true}
+  - {id: A_fixed,      kind: cross,    desc: "路线 A 的固定架构（读 /workspace/lab/routes/A/spec.yaml；缺失则用 fallback 并标 route_a_spec=fallback）", uses_features: false}
+  - {id: A_script,     kind: routeB,   desc: "人定固定脚本 GEN_ANGLE×2 → EXTRACT → VERIFY×2 → ASSEMBLE", uses_features: false}
+arms_meta:
+  note_w0_vs_random: "旧实现下 w=0 与均匀随机在数值上等价 ⇒ 本设计用**不同代码路径**实现并显式声明，否则两条臂重复"
+  budget_freeze:
+    K: "学到策略在 DEV 集上调用数的中位数，由一次预注册运行确定"
+    T_W: "学到策略在 DEV 集上 token 的中位数，同上"
+    written_into: arm_config_hash
+    overflow: "超出 ⇒ 样本按协议 E4 作废（不是截断后照算）"
+  batch_split:                        # 协议 §4.8 单批 $1.50 上限
+    reason: "8 臂 × 12 题 × 3 rep ⇒ 判官 ≈ $1.89 > $1.50"
+    batches: 2
+    per_batch_usd: 0.95
+    stop_rule: "S1：累计 > $1.50 ⇒ 立即停并报 partial"
+
+# ───────────────────────────────────────────────────────── 否证条件
+falsification:
+  - {id: FB1,  cond: "‖w_final − w_init‖ ≤ 0.01，或整段训练权重累计移动 < 1e-4", verdict: "权重没动 ⇒ 判死"}
+  - {id: FB2,  cond: "状态依赖检验：≥200 个合成状态对上，argmax 随状态改变的比例 < 0.25", verdict: "学到的还是风格 ⇒ 判死"}
+  - {id: FB3,  cond: "协议 F1：VD_net 任务级中位数 ≤ 0", verdict: "判死"}
+  - {id: FB4,  cond: "协议 F2：n_cards_total 涨 ≥20% 而承重卡涨 <10%", verdict: "灌水 ⇒ 判死"}
+  - {id: FB5,  cond: "协议 F3/F4/F5 任一触发", verdict: "判死"}
+  - {id: FB6,  cond: "Spearman(Ŵ,真VD) < 0.50 或方向一致率 < 0.75（或校准无法执行）", verdict: "训练目标未验证 ⇒ 不得支持任何结论"}
+  - {id: FB7,  cond: "Spearman(训练排名, 留出排名) < 0.30 且训练奖励在上升", verdict: "题集特化 ⇒ 判死"}
+  - {id: FB8,  cond: "训练最后 1/3 期间 n_eff < 1.5 的决策占比 > 30%", verdict: "判死"}
+  - {id: FB9,  cond: "与 R_rand 的 VD 差不可分辨（≤ 2× 种子噪声地板）", verdict: "与瞎选无异 ⇒ 判死"}
+  - {id: FB10, cond: "相对 B0 的增益在 B1/B2 下消失", verdict: "增益由预算解释 ⇒ 不构成架构证据"}
+  - {id: FB11, cond: "搜索闭合告警（轨迹签名多样性 < 0.30）持续 2 轮", verdict: "搜索空间过早闭合 ⇒ 判死"}
+  - {id: FB12, cond: "步级 truncated_rate > 10%（任一臂、任一通道）", verdict: "F8 同族扩展：该臂该通道不可跨臂比较（对协议的提案，需 owner 确认；确认前本路线自行执行）"}
+
+# ───────────────────────────────────────────────────────── 监控项
+monitoring:
+  metrics:
+    - {id: n_eff,             def: "1/Σp²（逐步）", warn: "< 2.0", crit: "< 1.3", level: crit,
+       action: "τ 控制器加大 τ；连续 3 轮 crit ⇒ 停策略", selftest: collapse_fires}
+    - {id: op_entropy,        def: "H(π_op)/log|A|", warn: "< 0.35", level: warn,
+       action: "加大 τ", selftest: op_entropy_fires}
+    - {id: op_coverage,       def: "本轮出现过的不同 op 数", warn: "< 4 / 6", level: warn,
+       action: "加大 τ + 记录", selftest: op_coverage_fires}
+    - {id: weight_frozen,     def: "‖w_r − w_{r−1}‖", warn: "< 1e-4 连续 2 轮", level: crit,
+       action: "停 + 查梯度/基线", selftest: weight_frozen_fires}
+    - {id: reward_stall,      def: "|R_r − R_{r−1}|", warn: "< 1e-3 连续 2 轮", level: warn,
+       action: "查代理/判官；可触发重启（≤2 次）", selftest: reward_stall_fires}
+    - {id: conflict_rate,     def: "终局 n矛盾/(n支持+n矛盾)", warn: "> 2× 种子噪声地板", level: crit,
+       action: "停该臂（协议 F4）", selftest: conflict_fires}
+    - {id: width,             def: "断言条数（只记账）", warn: "与 B0 差 > 50%", level: warn,
+       action: "记 warning（灌水观察）", selftest: null}
+    - {id: holdout_drift,     def: "Spearman(训练排名, 留出排名)", warn: "< 0.30", level: crit,
+       action: "早停 + 报 FB7", selftest: null}
+    - {id: search_closure,    def: "轨迹签名的归一化熵", warn: "< 0.30", level: crit,
+       action: "报 FB11", selftest: closure_fires}
+    - {id: policy_diversity,  def: "同一组合成状态上策略两两动作分布的 JS 散度", warn: "< 0.05", level: warn,
+       action: "记录（闭合早期信号）", selftest: null}
+    - {id: proxy_validity,    def: "Spearman(Ŵ, 真VD)（校准子集）", warn: "< 0.50", level: crit,
+       action: "停训练（FB6）", selftest: null}
+    - {id: budget,            def: "n_calls / n_tokens / 超限数", warn: "超 cap", level: void,
+       action: "协议 E4 作废计数；作废 > 20% ⇒ 停臂", selftest: null}
+    - {id: judge_quality,     def: "parsefail_rate / silent_empty_count", warn: "> 10%", level: crit,
+       action: "协议 F8：该臂不可跨臂比较", selftest: null}
+    - {id: truncated_rate,    def: "步级：最终产出仍被 max_tokens 截断的步数 / 步数（并报 n_empty）", warn: "> 10%", level: crit,
+       action: "FB12（F8 同族）：该臂该通道不可跨臂比较；加长预算阶梯后重跑（换种子 + 同时报首跑结果）", selftest: "冒烟实测复现"}
+    - {id: truncated_attempt_rate, def: "尝试级：曾撞 max_tokens 的尝试数 / 尝试数", warn: "> 20%", level: warn,
+       action: "只影响成本：记账 + 决定是否再加长预算阶梯", selftest: null}
+    - {id: tau_trace,         def: "τ 随轮次变化", warn: "单调上升不下降", level: warn,
+       action: "查塌缩", selftest: tau_increases_when_collapsed}
+  no_oracle_stats_in_diagnostics: true
+
+# ───────────────────────────────────────────────────────── 防过早闭合
+anti_closure:
+  candidates:
+    - {id: C1, name: "任务多样性（扩到 ~24 题）", chosen: partial, reason: "有效但建题成本高；8 题已能提供数百次决策"}
+    - {id: C2, name: "留出纪律 + EMA + 早停（留出只做监控，绝不挑 checkpoint）", chosen: yes,
+       reason: "对治已实测的失效（留出 Spearman=+0.166）"}
+    - {id: C3, name: "熵下限 / τ 控制器（n_eff 反馈）", chosen: yes,
+       reason: "对治已实测的塌缩（轮2 VERIFY=0/STOP=0），零边际成本"}
+    - {id: C4, name: "策略种群多样性（JS 散度监控）", chosen: diagnostic_only,
+       reason: "完整种群成本×3；降级为低成本版（同一组合成状态上的 JS 散度 + 轨迹签名熵）"}
+    - {id: C5, name: "参数空间随机重启/扰动", chosen: fallback,
+       reason: "仅在塌缩 + 奖励停滞双告警时触发，≤2 次/策略（协议 S5）"}
+  verification:
+    - "每条告警配变异注入自测（monitor.selftest，8/8 响）"
+    - "反向对照：固定 τ=0.02 跑一轮 ⇒ 必须触发 COLLAPSE_CRIT"
+    - "留出漂移 Spearman < 0.30 ⇒ HOLDOUT_DRIFT（fatal）⇒ 早停"
+
+# ───────────────────────────────────────────────────────── 数据流
+data_flow:
+  train:
+    topics: "/workspace/lab/cmp8repo/creativity_lab/data/policy_topics.json（8 题）"
+    evidence_index: "新增（未写）：8 题的编号化原子依据索引 + anchored 标记"
+    contains_user_questions: false
+  calibration:
+    subset: "训练题中事先指定的 2 题 × 4 episode"
+    needs: "协议独立抽取器（§9 N2，尚未就绪）⇒ 未就绪时结果标 provisional"
+  eval:
+    devset: "/workspace/lab/routes/DEV/devset.json（路线 A 建并冻结；**当前尚未建**）"
+    evidence: "/workspace/lab/routes/DEV/evidence/"
+    conclusion_spaces: "/workspace/lab/routes/DEV/devset.json:conclusion_space"
+    code_change_needed: false
+    note: "DEV 建成后只换数据源，代理代码不变"
+  final_test:
+    items: [U1, U2, U3, U4]
+    when: "三条路线全部冻结后统一跑一次（协议 §5 N5）"
+    used_in_training: false
+
+# ───────────────────────────────────────────────────────── 成本
+cost:
+  measured_smoke:
+    calls: 14
+    call_cap: 20
+    logical_steps: 12                 # n_logical_calls = sum(e2e[].steps)（**步骤数**，不是客户端 chat 次数）
+    client_chat_calls: 13             # 判官有 1 个批次多试了 1 次（12 步 + 1 次逻辑重试）
+    calls_ok: 12
+    retries: 2                        # 多出的 2 次 HTTP 尝试
+    wall_clock_secs: 184.0            # t0 "2026-10-21 01:50:06" → t_end "2026-10-21 01:53:10"
+    total_secs_field: 197.9           # total_secs = sum(calls[].secs)：**逐次尝试秒数之和**（client 每次 chat() 只设一次 t0 ⇒ 重复计时），**不是** wall clock
+    mean_secs_per_call: 13.1          # 184.0 ÷ 14（wall clock 口径）
+    attempts_truncated: 2             # 尝试级：都在**判官通道 check2**（calls[4]=1200/length/0、calls[5]=2000/length/0）
+    attempts_truncated_channel: check2
+    attempts_empty: 2
+    step_truncated: 0                 # 步级：0 ⇒ 没有测量被污染的步
+    n_empty: 0
+    cost_usd: 0.0
+    source_fields: "smoke/smoke_log.json → calls[] / e2e[] / t0 / t_end / total_secs（逐字段对照见 DESIGN §9.1）"
+    note: "记录在案的那次冒烟**不测 D1**（smoke.py 当时把所有通道阶梯覆盖成 (2000,) ⇒ 跑的不是生产阶梯）⇒ D1 至今**未经检验**（DESIGN §3.8.1 / §11 L10）"
+  training_estimate:
+    episodes: 64
+    calls_per_episode: 10
+    calls_single_policy: 640
+    calls_full_population_M3: 1920
+    cost_usd: 0.0
+    wall_clock_hours: "单策略 0.29 h（640 次 × 13.1 s ÷ 8 worker；串行 2.33 h）｜ 完整 C4 种群 0.47 h（1920 次 × 13.1 s ÷ 15 worker；串行 6.99 h）"
+    extrapolation: "按冒烟 **wall clock** 口径 13.1 s/次外推，**未跑**；分通道均值（al_gen 43.7 / al_ex 13.7 / check2 8.3 秒）交叉核对 ≈ 0.28 h，一致"
+  calibration_estimate:
+    calls: 80
+    judge_usd: 0.10
+  dev_eval_estimate:
+    samples: 288
+    tested_side_calls: 2880
+    judge_usd: 1.84
+    embedding_usd: 0.05
+    total_usd: 1.89
+    protocol_cap_single_batch_usd: 1.50
+    action: "预注册分 2 批（每批 ≈ 0.95）；S1 超限即停并报 partial"
+
+# ───────────────────────────────────────────────────────── 冒烟
+smoke:
+  script: "/workspace/lab/routes/B/code/smoke.py"
+  log_json: "/workspace/lab/routes/B/smoke/smoke_log.json"
+  log_md: "/workspace/lab/routes/B/smoke/smoke_log.md"
+  call_cap: 20
+  call_cap_note: "硬上限 20；SMOKE_CALL_CAP **只能调低**（min(20, env)）⇒ 环境变量抬不高它"
+  calls_used: 14
+  logical_steps: 12
+  client_chat_calls: 13
+  retries: 2
+  endpoint: "https://api.minimaxi.com/v1"
+  endpoint_assert: "脚本启动时断言端点不含 openrouter.ai，否则 abort"
+  blacklist_assert: "脚本启动时（**任何 LLM 调用之前**）跑 guard.route_payload() ⇒ 命中即 abort"
+  openrouter_calls: 0
+  diagnostic_topics: "/workspace/lab/routes/B/code/data/diag_topics.json（2 道自造题）"
+  verifies:
+    - "端到端流程跑通（生成→抽取→核验并归因到依据条目→机械装配）"
+    - "提示词可解析（判官输出 关系|条目编号）"
+    - "特征空间状态可分性对照（离线）"
+    - "监控告警变异注入自测（离线）"
+    - "见证回归断言（离线，含 --mutate 变异注入 ⇒ 必须 FAIL）"
+    - "截断被记账（步级 0 / 尝试级 2，**都在判官通道 check2**）"
+  does_not_verify:
+    - "训练是否学到东西（冒烟用 w=0 与固定优先策略，无梯度更新）"
+    - "Ŵ 与真 VD 的关系（需协议独立抽取器，尚未就绪）"
+    - "任何 DEV 题或 U1–U4"
+    - "D1 预算阶梯加长（smoke 当时把所有通道的阶梯覆盖成 (2000,) ⇒ 不是生产阶梯）"
+    - "C_t 真的送进判官（smoke 当时漏传 conclusion_space ⇒ 判官拿到的是占位串）"
+    - "训练循环 / 策略梯度 / 步级奖励去重（这三项由**离线自测**覆盖，0 次模型调用）"
+  ladder_modes:
+    default: override
+    override: "各通道 budgets 统一覆盖成 (2000,)（历史行为；记录在案的那次）⇒ **不测 D1**"
+    production: "SMOKE_LADDER=production ⇒ **不覆盖**，各通道用生产阶梯（al_ex 2000→3200→4400；check2 1200→1800→2400）⇒ D1 被真正检验"
+    effective_report: "smoke.ladder_report()（离线、0 次调用）⇒ 把「这次跑的是不是生产阶梯」变成可核对的事实"
+  runs_during_development: 5         # 前 4 次用于定位三个真问题；每次调用上限都是 20（前 4 次的日志未保留）
+
+# ───────────────────────────────────────────────────────── 实现文件
+files:
+  - {path: "/workspace/lab/routes/B/DESIGN.md", role: "人读规格"}
+  - {path: "/workspace/lab/routes/B/spec.yaml", role: "机器读规格（本文件）"}
+  - {path: "/workspace/lab/routes/B/code/ops_v2.py", role: "v2 动作空间/候选集/30 维特征/策略分布"}
+  - {path: "/workspace/lab/routes/B/code/evidence_index.py", role: "编号化依据包 + 带条目归因的判官（协议 §4.6 逐字）+ 代理 Ŵ"}
+  - {path: "/workspace/lab/routes/B/code/monitor.py", role: "监控面板 + τ 控制器 + 告警变异自测"}
+  - {path: "/workspace/lab/routes/B/code/train_policy_v2.py", role: "训练循环（on-policy + EMA + 早停 + 校准闸门）+ 精确策略梯度 + 步级奖励去重"}
+  - {path: "/workspace/lab/routes/B/code/stub_llm.py", role: "离线 stub 模型（0 次真实调用；只为证明训练循环可执行）"}
+  - {path: "/workspace/lab/routes/B/code/guard.py", role: "U1–U4 黑名单自检（命中即 abort）"}
+  - {path: "/workspace/lab/routes/B/code/smoke.py", role: "冒烟脚本（阶梯模式开关 + 黑名单前置 abort + 硬上限 20）"}
+  - {path: "/workspace/lab/routes/B/code/test_v2_witness.py", role: "见证回归断言（含 --mutate 变异注入自测）"}
+  - {path: "/workspace/lab/routes/B/code/test_train_loop.py", role: "训练循环离线自测（0 次真实调用）"}
+  - {path: "/workspace/lab/routes/B/code/test_policy_grad.py", role: "策略梯度对拍（精确式 vs 数值梯度；并量化旧解析式的偏差）"}
+  - {path: "/workspace/lab/routes/B/code/test_step_reward_dedup.py", role: "步级奖励去重探针（A/B/C/D 四情形）"}
+  - {path: "/workspace/lab/routes/B/code/test_judge_parser.py", role: "判官解析器行为表（接受什么/丢什么/已知弱点）"}
+  - {path: "/workspace/lab/routes/B/code/test_judge_prompt.py", role: "判官提示词自查（协议 §4.6:522-526 逐字 + C_t 非空）"}
+  - {path: "/workspace/lab/routes/B/code/test_spec_flowchart.py", role: "spec 可渲染性自检（双解析 + 渲染非空 + 变异注入）"}
+  - {path: "/workspace/lab/routes/B/code/yaml_lite.py", role: "YAML 解析校验器（证明本 spec.yaml 可被机器解析）"}
+  - {path: "/workspace/lab/routes/B/code/data/diag_topics.json", role: "2 道自造诊断题"}
+untouched:
+  - "/workspace/lab/cmp8repo/creativity_lab/** （在跑的训练进程依赖；check_ops_consistency.py 要求两份 ops.py 逐字节一致）"

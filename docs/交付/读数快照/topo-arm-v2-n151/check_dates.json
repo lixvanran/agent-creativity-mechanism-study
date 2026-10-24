@@ -1,0 +1,263 @@
+{
+ "checked_at_utc": "2026-10-24T13:12:24Z",
+ "future_dates": [],
+ "machine_date_utc": "2026-10-24",
+ "n_date_tokens": 2567,
+ "n_files_scanned": 1048,
+ "n_future_dates": 0,
+ "n_future_self_claim_today": 0,
+ "n_too_past": 269,
+ "passed": true,
+ "too_past": [
+  {
+   "date": "2022-11-28",
+   "days_ago": 1426,
+   "file": "./AGENTS.md"
+  },
+  {
+   "date": "2026-07-22",
+   "days_ago": 94,
+   "file": "./FINDINGS.md"
+  },
+  {
+   "date": "2026-07-11",
+   "days_ago": 105,
+   "file": "./FINDINGS.md"
+  },
+  {
+   "date": "2022-03-23",
+   "days_ago": 1676,
+   "file": "./FINDINGS.md"
+  },
+  {
+   "date": "2026-04-23",
+   "days_ago": 184,
+   "file": "./FINDINGS.md"
+  },
+  {
+   "date": "2024-04-03",
+   "days_ago": 934,
+   "file": "./FINDINGS.md"
+  },
+  {
+   "date": "2026-03-24",
+   "days_ago": 214,
+   "file": "./FINDINGS.md"
+  },
+  {
+   "date": "2013-01-18",
+   "days_ago": 5027,
+   "file": "./cmp8/creativity_lab/data/user4_q4.json"
+  },
+  {
+   "date": "2013-01-18",
+   "days_ago": 5027,
+   "file": "./cmp8/rebuild/cmp8_p0.py"
+  },
+  {
+   "date": "2024-09-09",
+   "days_ago": 775,
+   "file": "./creativity_lab/experiments/topo_arm.py"
+  },
+  {
+   "date": "2026-07-13",
+   "days_ago": 103,
+   "file": "./docs/13份资料综合方案.md"
+  },
+  {
+   "date": "2024-09-09",
+   "days_ago": 775,
+   "file": "./docs/cmp8/routes/COLLAPSE/eval/MAS_Diversity-ACTUAL-CONFIGS.md"
+  },
+  {
+   "date": "2026-04-23",
+   "days_ago": 184,
+   "file": "./docs/cmp8/routes/COLLAPSE/eval/MAS_Diversity-ACTUAL-CONFIGS.md"
+  },
+  {
+   "date": "2024-09-09",
+   "days_ago": 775,
+   "file": "./docs/cmp8/routes/COLLAPSE/eval/MAS_Diversity-ACTUAL-CONFIGS.md"
+  },
+  {
+   "date": "2026-04-23",
+   "days_ago": 184,
+   "file": "./docs/cmp8/routes/COLLAPSE/eval/PREREG-TOPOLOGY-ARM.md"
+  },
+  {
+   "date": "2024-09-09",
+   "days_ago": 775,
+   "file": "./docs/cmp8/routes/COLLAPSE/eval/PREREG-TOPOLOGY-ARM.md"
+  },
+  {
+   "date": "2026-01-15",
+   "days_ago": 282,
+   "file": "./docs/cmp8/routes/DEV/DEV-SPEC.md"
+  },
+  {
+   "date": "2016-02-09",
+   "days_ago": 3910,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2016-02-09",
+   "days_ago": 3910,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2016-02-09",
+   "days_ago": 3910,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2016-02-09",
+   "days_ago": 3910,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2019-08-20",
+   "days_ago": 2622,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2019-08-20",
+   "days_ago": 2622,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2024-08-29",
+   "days_ago": 786,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2024-12-20",
+   "days_ago": 673,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2024-12-20",
+   "days_ago": 673,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2026-05-15",
+   "days_ago": 162,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2026-02-26",
+   "days_ago": 240,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2023-08-31",
+   "days_ago": 1150,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2023-08-31",
+   "days_ago": 1150,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2023-08-31",
+   "days_ago": 1150,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2023-08-31",
+   "days_ago": 1150,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2025-12-31",
+   "days_ago": 297,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2025-12-31",
+   "days_ago": 297,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2025-12-31",
+   "days_ago": 297,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2025-12-31",
+   "days_ago": 297,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2025-12-31",
+   "days_ago": 297,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2025-12-31",
+   "days_ago": 297,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2025-12-31",
+   "days_ago": 297,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2013-10-26",
+   "days_ago": 4746,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2013-10-26",
+   "days_ago": 4746,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2013-10-26",
+   "days_ago": 4746,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  },
+  {
+   "date": "2022-10-27",
+   "days_ago": 1458,
+   "file": "./docs/cmp8/routes/DEV/devset.json"
+  }
+ ]
+}

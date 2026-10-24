@@ -1,0 +1,35 @@
+Problem: 公路自行车个人比赛（无车队），单圈1.6km共计15圈，单圈由两个800m直路和两个回头弯构成，本人在大集团里处于中上等水平，该如何安排战术？
+
+Wide set
+  (unclustered)
+    - 在每圈的第一直路保持低调跟随，利用第二直路的高速冲刺点发动短距离突围。
+    - 在回头弯占据内线位置，利用离心力提前加速，以最快速度冲出弯道。
+    - 每圈结束后记录单圈最快时间，目标在下一圈打破纪录，提升游戏化竞争感。
+    - 800米直路省力滑行，两个回头弯前减力，出弯后再加速。
+    - Act as a market‑maker by maintaining a steady pace on the straights, providing liquidity to the peloton and keeping the field cohesive.
+    - Run an auction in each hairpin: bid extra power to secure the inside line, the scarce resource that determines next‑lap positioning.
+    - Enter a futures contract by launching an early breakaway, investing effort now for a guaranteed payout (the lead) at race end.
+    - Use the final laps as a clearing house where the peloton settles the market price—your sprint speed—determining the winner’s payoff.
+    - Exploit the bid‑ask spread between your effort on the straights (ask) and the group’s pace (bid) to slip away when the spread is favorable.
+    - Perform arbitrage by exploiting the energy‑cost differential between long straights and tight hairpins to gain positions without extra expenditure.
+    - Deploy a real-time aerodynamic morphing system that dynamically adjusts bike geometry using AI-driven wind data to minimize drag throughout each lap.
+    - Create a full‑body biometric digital twin that predicts fatigue and instantly reallocates power output to sustain optimal performance across 15 laps.
+    - Integrate a swarm of autonomous drafting drones that generate optimized slipstreams using real‑time fluid‑dynamics simulations.
+    - Use a quantum‑optimized race planner to solve for minute‑by‑minute power distribution, gear shifts, and line choices through each hairpin.
+    - Implement a nano‑delivery nutrition system that delivers precise glucose and electrolytes at the exact metabolic demand detected by continuous blood monitoring.
+    - Embed road‑surface sensors across the circuit and feed live data to a predictive control system that alters suspension stiffness and tire pressure on the fly.
+  现实可执行的核心战术
+    - 每5圈设定一次检查点，评估体能和排名，若落后则加大输出。
+    - 在第10圈（总赛程的2/3）发动决定性进攻，利用对手疲劳加速。
+    - 利用大集团的尾流进行低功耗滑行，节省体力在关键时刻使用。
+    - 前5圈保持在主集团前1/3，只跟最强 Wheels，不主动领骑。
+    - 固定“直路跟轮、弯前收油、弯后提速”的节奏，手动数完15圈。
+    - 只跟关键加速者：有人连拉两段直路仍不接，就立刻放弃。
+    - 回头弯先跟住前车，弯心有安全空间再走内线，出弯立刻前移。
+    - 第14圈结束前进入前20名，最后一个800米直路提前起身并全力冲刺。
+
+Converge — shortlist
+
+Focus — deepened branches
+Provocation
+  What if we took this seriously: What's the assumption nobody named yet?

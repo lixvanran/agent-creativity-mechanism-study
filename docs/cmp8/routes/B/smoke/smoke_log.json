@@ -1,0 +1,758 @@
+{
+ "t0": "2026-10-21 01:50:06",
+ "call_cap": 20,
+ "model": "MiniMax-M3.1-Flash-Preview",
+ "events": [
+  {
+   "tag": "endpoint",
+   "base_url": "https://api.minimaxi.com/v1",
+   "ok": true
+  },
+  {
+   "tag": "blacklist",
+   "ok": true,
+   "total_hits": 0,
+   "blacklist_source_files": [
+    "user4_q1.json",
+    "user4_q2.json",
+    "user4_q3.json",
+    "user4_q4.json"
+   ]
+  },
+  {
+   "tag": "state_discrimination",
+   "states": [
+    "none",
+    "unmentioned",
+    "supported",
+    "contradicted",
+    "unverified"
+   ],
+   "L1_legacy_same_target_same_f7_13": {
+    "unmentioned": true,
+    "supported": true,
+    "contradicted": true,
+    "unverified": true
+   },
+   "L1_all_true": true,
+   "L2_legacy_target_delta_per_op": {
+    "EXTRACT": 0.0,
+    "VERIFY": 0.0,
+    "SPLIT": 0.0
+   },
+   "L2_delta_is_op_independent": true,
+   "L2b_random_w_delta_per_op": {
+    "EXTRACT": -1.708838,
+    "VERIFY": -1.708838,
+    "SPLIT": -1.708838
+   },
+   "L2b_delta_is_op_independent": true,
+   "legacy_checkpoint_w_found": true,
+   "L3a_legacy_relative_order_of_target_ops_by_state": {
+    "unverified": [
+     2,
+     0,
+     1
+    ],
+    "unmentioned": [
+     2,
+     0,
+     1
+    ],
+    "supported": [
+     2,
+     0,
+     1
+    ],
+    "contradicted": [
+     2,
+     0,
+     1
+    ]
+   },
+   "L3a_order_is_state_invariant": true,
+   "L3b_legacy_score_vectors_identical_3verdict_states": true,
+   "L3c_legacy_argmax_by_state": {
+    "unverified": "GEN_PLAIN",
+    "unmentioned": "GEN_PLAIN",
+    "supported": "GEN_PLAIN",
+    "contradicted": "GEN_PLAIN"
+   },
+   "L4_legacy_argmax_unchanged_by_global_feature": true,
+   "V1_v2_rows_differing_per_state": {
+    "none": 5,
+    "unmentioned": 5,
+    "supported": 5,
+    "contradicted": 5,
+    "unverified": 5
+   },
+   "V1_v2_4states_not_all_identical": true,
+   "V1_v2_unmentioned_vs_supported_differ": true,
+   "V2_witness_argmax_by_state": {
+    "none": "VERIFY",
+    "unmentioned": "SPLIT",
+    "supported": "GEN_PLAIN",
+    "contradicted": "GEN_PLAIN",
+    "unverified": "VERIFY"
+   },
+   "V2_witness_argmax_varies": true,
+   "L6_legacy_candidate_sets_by_state": {
+    "none": [
+     "EXTRACT",
+     "GEN_ANGLE",
+     "GEN_PLAIN",
+     "SPLIT",
+     "STOP",
+     "VERIFY"
+    ],
+    "unmentioned": [
+     "EXTRACT",
+     "GEN_ANGLE",
+     "GEN_PLAIN",
+     "SPLIT",
+     "STOP"
+    ],
+    "supported": [
+     "EXTRACT",
+     "GEN_ANGLE",
+     "GEN_PLAIN",
+     "STOP"
+    ],
+    "contradicted": [
+     "EXTRACT",
+     "GEN_ANGLE",
+     "GEN_PLAIN",
+     "STOP"
+    ],
+    "unverified": [
+     "EXTRACT",
+     "GEN_ANGLE",
+     "GEN_PLAIN",
+     "SPLIT",
+     "STOP",
+     "VERIFY"
+    ]
+   },
+   "L6_split_unavailable_when_supported": true,
+   "L6_verify_unavailable_when_supported": true,
+   "feature_dim_v2": 30,
+   "feature_names_len": 30
+  },
+  {
+   "tag": "proxy_selftest",
+   "w_hat_A": 0.5,
+   "w_hat_B_repeat": 0.5,
+   "w_hat_C_floral": 0.5,
+   "w_hat_D_new_anchored": 1.0,
+   "w_hat_E_with_conflict": 1.0,
+   "repeat_does_not_increase": true,
+   "floral_does_not_increase": true,
+   "new_anchored_increases": true,
+   "conflict_does_not_increase": true,
+   "conflict_rate_E": 0.2,
+   "terminal_reward_example": 3.0,
+   "all_pass": true
+  },
+  {
+   "tag": "monitor_selftest",
+   "collapse_fires": true,
+   "op_entropy_fires": true,
+   "op_coverage_fires": true,
+   "weight_frozen_fires": true,
+   "reward_stall_fires": true,
+   "conflict_fires": true,
+   "closure_fires": true,
+   "tau_increases_when_collapsed": true,
+   "all_pass": true
+  },
+  {
+   "tag": "witness_regression",
+   "argmax_by_state": {
+    "none": "VERIFY",
+    "unmentioned": "SPLIT",
+    "supported": "GEN_PLAIN",
+    "contradicted": "GEN_PLAIN",
+    "unverified": "VERIFY"
+   },
+   "witness_holds": true,
+   "argmax_varies": true,
+   "legacy_order_state_invariant": true,
+   "v2_features_differ_across_states": true,
+   "PASS": true
+  },
+  {
+   "tag": "episode",
+   "topic_id": "DS1",
+   "steps": 6,
+   "ops": {
+    "GEN_ANGLE": 1,
+    "EXTRACT": 1,
+    "VERIFY": 4
+   },
+   "n_claims": 8,
+   "proxy": {
+    "w_hat": 0.3333333333333333,
+    "n_anchored": 3,
+    "covered_anchored": 1,
+    "covered_any": 1,
+    "n_supported": 1,
+    "n_contradicted": 0,
+    "conflict_rate": 0.0,
+    "support_rate": 1.0,
+    "unverified": 7
+   },
+   "final_reward": 1.0,
+   "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
+   "answer_len": 307,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": []
+  },
+  {
+   "tag": "answer_head",
+   "topic_id": "DS1",
+   "head": "# 我在市图书馆借了一本小说，第一次续借之后还能再续吗？读者证有效期是多久？ |  | ## 经核验成立的依据 | - 规则写明“最多续借1次”时，完成第一次续借后不能再次续借。 |  | ## 依据未覆盖、仅供参考的事项 | - 续借次数和读者证有效期并非全国统一。 | - 《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。 | - 规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。 | - 读者证期限以卡面标示"
+  },
+  {
+   "tag": "episode",
+   "topic_id": "DS2",
+   "steps": 6,
+   "ops": {
+    "GEN_ANGLE": 1,
+    "EXTRACT": 1,
+    "VERIFY": 4
+   },
+   "n_claims": 9,
+   "proxy": {
+    "w_hat": 0.3333333333333333,
+    "n_anchored": 3,
+    "covered_anchored": 1,
+    "covered_any": 1,
+    "n_supported": 2,
+    "n_contradicted": 0,
+    "conflict_rate": 0.0,
+    "support_rate": 1.0,
+    "unverified": 7
+   },
+   "final_reward": 1.0,
+   "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
+   "answer_len": 312,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": []
+  },
+  {
+   "tag": "answer_head",
+   "topic_id": "DS2",
+   "head": "# 我在健身房办了年卡，明年要出差两个月，这期间能不能冻结会员？到期没去能退吗？ |  | ## 经核验成立的依据 | - 健身卡到期未消费，不当然退款。 | - 合同约定未使用可退的，应退未消费余额。 |  | ## 依据未覆盖、仅供参考的事项 | - 不存在“健身年卡全国统一冻结或退费”标准。 | - 会员协议和办卡时公示条款优先于门店书面确认。 | - 业务员的口头承诺无效。 | - 冻结次数、费用及提前申请期限均以合同为准。 | - 合同没有冻结条款的，可以协商转卡或延期"
+  }
+ ],
+ "endpoint": {
+  "base_url": "https://api.minimaxi.com/v1",
+  "is_minimax": true,
+  "openrouter_used": false
+ },
+ "blacklist": {
+  "blacklist_source_files": [
+   "user4_q1.json",
+   "user4_q2.json",
+   "user4_q3.json",
+   "user4_q4.json"
+  ],
+  "blacklist_size": 5167,
+  "fragment_min_len": 8,
+  "text_hits": {
+   "diag_ask_DS1": 0,
+   "diag_ask_DS2": 0,
+   "prompt_GEN": 0,
+   "prompt_EXTRACT": 0,
+   "prompt_SPLIT": 0,
+   "prompt_CHECK_V2": 0,
+   "diag_evidence_DS1": 0,
+   "diag_ct_DS1": 0,
+   "diag_evidence_DS2": 0,
+   "diag_ct_DS2": 0
+  },
+  "file_hits": {
+   "evidence_index.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/evidence_index.py": 0
+   },
+   "guard.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/guard.py": 0
+   },
+   "monitor.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/monitor.py": 0
+   },
+   "ops_v2.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/ops_v2.py": 0
+   },
+   "smoke.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/smoke.py": 0
+   },
+   "test_v2_witness.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/test_v2_witness.py": 0
+   },
+   "train_policy_v2.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/train_policy_v2.py": 0
+   },
+   "yaml_lite.py": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/code/yaml_lite.py": 0
+   },
+   "DESIGN.md": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/DESIGN.md": 0
+   },
+   "spec.yaml": {
+    "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/lab/routes/B/spec.yaml": 0
+   }
+  },
+  "total_hits": 0,
+  "ok": true,
+  "caveat": "子串匹配只证明'没有原样搬运'，不能证明'没有改写搬运'（协议 L14）"
+ },
+ "calls": [
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "al_gen",
+   "max_tokens": 8000,
+   "finish_reason": "stop",
+   "content_len": 261,
+   "ok": true,
+   "secs": 49.53
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "al_ex",
+   "max_tokens": 2000,
+   "finish_reason": "stop",
+   "content_len": 245,
+   "ok": true,
+   "secs": 15.26
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 17,
+   "ok": true,
+   "secs": 6.12
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 16,
+   "ok": true,
+   "secs": 4.52
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "length",
+   "content_len": 0,
+   "ok": false,
+   "secs": 13.99
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 2000,
+   "finish_reason": "length",
+   "content_len": 0,
+   "ok": false,
+   "secs": 38.61
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 17,
+   "ok": true,
+   "secs": 4.28
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 17,
+   "ok": true,
+   "secs": 4.96
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "al_gen",
+   "max_tokens": 8000,
+   "finish_reason": "stop",
+   "content_len": 367,
+   "ok": true,
+   "secs": 37.95
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "al_ex",
+   "max_tokens": 2000,
+   "finish_reason": "stop",
+   "content_len": 297,
+   "ok": true,
+   "secs": 12.15
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 17,
+   "ok": true,
+   "secs": 1.4
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 17,
+   "ok": true,
+   "secs": 2.36
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 16,
+   "ok": true,
+   "secs": 4.24
+  },
+  {
+   "model": "MiniMax-M3.1-Flash-Preview",
+   "purpose": "check2",
+   "max_tokens": 1200,
+   "finish_reason": "stop",
+   "content_len": 16,
+   "ok": true,
+   "secs": 2.49
+  }
+ ],
+ "n_calls": 14,
+ "n_calls_ok": 12,
+ "n_attempts_truncated": 2,
+ "n_attempts_empty": 2,
+ "e2e": [
+  {
+   "topic_id": "DS1",
+   "steps": 6,
+   "ops": {
+    "GEN_ANGLE": 1,
+    "EXTRACT": 1,
+    "VERIFY": 4
+   },
+   "n_claims": 8,
+   "proxy": {
+    "w_hat": 0.3333333333333333,
+    "n_anchored": 3,
+    "covered_anchored": 1,
+    "covered_any": 1,
+    "n_supported": 1,
+    "n_contradicted": 0,
+    "conflict_rate": 0.0,
+    "support_rate": 1.0,
+    "unverified": 7
+   },
+   "final_reward": 1.0,
+   "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
+   "answer_len": 307,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": [],
+   "answer_head": "# 我在市图书馆借了一本小说，第一次续借之后还能再续吗？读者证有效期是多久？ |  | ## 经核验成立的依据 | - 规则写明“最多续借1次”时，完成第一次续借后不能再次续借。 |  | ## 依据未覆盖、仅供参考的事项 | - 续借次数和读者证有效期并非全国统一。 | - 《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。 | - 规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。 | - 读者证期限以卡面标示"
+  },
+  {
+   "topic_id": "DS2",
+   "steps": 6,
+   "ops": {
+    "GEN_ANGLE": 1,
+    "EXTRACT": 1,
+    "VERIFY": 4
+   },
+   "n_claims": 9,
+   "proxy": {
+    "w_hat": 0.3333333333333333,
+    "n_anchored": 3,
+    "covered_anchored": 1,
+    "covered_any": 1,
+    "n_supported": 2,
+    "n_contradicted": 0,
+    "conflict_rate": 0.0,
+    "support_rate": 1.0,
+    "unverified": 7
+   },
+   "final_reward": 1.0,
+   "signature": "GEN_ANGLE>EXTRACT>VERIFY>VERIFY>VERIFY>VERIFY",
+   "answer_len": 312,
+   "n_truncated": 0,
+   "n_empty": 0,
+   "truncated_rate": 0.0,
+   "truncated_steps": [],
+   "answer_head": "# 我在健身房办了年卡，明年要出差两个月，这期间能不能冻结会员？到期没去能退吗？ |  | ## 经核验成立的依据 | - 健身卡到期未消费，不当然退款。 | - 合同约定未使用可退的，应退未消费余额。 |  | ## 依据未覆盖、仅供参考的事项 | - 不存在“健身年卡全国统一冻结或退费”标准。 | - 会员协议和办卡时公示条款优先于门店书面确认。 | - 业务员的口头承诺无效。 | - 冻结次数、费用及提前申请期限均以合同为准。 | - 合同没有冻结条款的，可以协商转卡或延期"
+  }
+ ],
+ "raw_outputs": [
+  {
+   "op": "GEN_ANGLE",
+   "raw": "**判断：**续借次数和读者证有效期并非全国统一。《公共图书馆条例》未规定具体次数、年限；应适用市图书馆官网/公众号最新《借阅规则》《办证须知》，以借阅系统结果为准；如该市另有统一规则，适用较新、较具体的市级规则。\n\n**做法：**在到期前登录读者账户，或持读者证、该书到服务台查询。规则写“最多续借1次”，则第一次后不能再续；写“最多2次”，且未逾期、未超累计借期、未被他人预约，才可再续1次。读者证期限以卡面或系统“有效期至”为准，续借不会自动延期；换证通常需原读者证和身份证件。因未提供城市或馆名，无法确定唯一数值。"
+  },
+  {
+   "op": "EXTRACT",
+   "raw": "1. 续借次数和读者证有效期并非全国统一。\n2. 《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。\n3. 规则写明“最多续借1次”时，完成第一次续借后不能再次续借。\n4. 规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。\n5. 读者证期限以卡面标示或读者账户系统中“有效期至”的日期为准。\n6. 续借不会自动延期。\n7. 换证通常需要提供原读者证和身份证件。\n8. 未提供城市或馆名时，无法确定唯一的续借次数和读者证有效期数值。"
+  },
+  {
+   "batch": [
+    "续借次数和读者证有效期并非全国统一。",
+    "《公共图书馆条例》未规定具体的续借次数和读者证有效期年限。"
+   ],
+   "attempt": 0,
+   "raw": "未提及 | -1\n未提及 | -1"
+  },
+  {
+   "batch": [
+    "规则写明“最多续借1次”时，完成第一次续借后不能再次续借。",
+    "规则写明“最多续借2次”时，读者只有在未逾期、未超过累计借期且未被他人预约的情况下，才可再续借1次。"
+   ],
+   "attempt": 0,
+   "raw": "支持 | E2\n未提及 | -1"
+  },
+  {
+   "batch": [
+    "读者证期限以卡面标示或读者账户系统中“有效期至”的日期为准。",
+    "续借不会自动延期。"
+   ],
+   "attempt": 0,
+   "raw": ""
+  },
+  {
+   "batch": [
+    "读者证期限以卡面标示或读者账户系统中“有效期至”的日期为准。",
+    "续借不会自动延期。"
+   ],
+   "attempt": 1,
+   "raw": "未提及 | -1\n未提及 | -1"
+  },
+  {
+   "batch": [
+    "换证通常需要提供原读者证和身份证件。",
+    "未提供城市或馆名时，无法确定唯一的续借次数和读者证有效期数值。"
+   ],
+   "attempt": 0,
+   "raw": "未提及 | -1\n非主张 | -1"
+  },
+  {
+   "op": "GEN_ANGLE",
+   "raw": "**判断：**不存在“健身年卡全国统一冻结或退费”标准。适用来源依次为：当地预付健身卡规定（如有）及《消费者权益保护法实施条例》中按约提供、应退未履行预付款的要求＞你签署的《会员服务协议》和办卡时公示条款＞门店书面确认；业务员口头承诺无效。\n\n**做法：**在原卡到期日前书面申请停卡，提交卡号、身份证、出差起止日期及单位证明或行程单，并确认“冻结60天、有效期顺延至×年×月×日、是否收费、申请提前期限”。冻结次数、费用及提前申请期限均以合同为准；合同无冻结条款的，可协商转卡或延期。\n\n到期未消费不当然退款。合同约定未使用可退的，应退未消费余额，已消费部分及事先明示的合理手续费可扣；已激活且无退款约定通常不退，未提供服务或格式条款不合理的，可要求退未履行部分。拒付时保存合同、付款及沟通记录，向12315或当地体育主管部门投诉。"
+  },
+  {
+   "op": "EXTRACT",
+   "raw": "1. 不存在“健身年卡全国统一冻结或退费”标准。\n2. 当地预付健身卡规定（如有）及《消费者权益保护法实施条例》中关于按约提供、应退未履行预付款的要求，优先于会员协议和办卡时公示条款。\n3. 会员协议和办卡时公示条款优先于门店书面确认。\n4. 业务员的口头承诺无效。\n5. 冻结次数、费用及提前申请期限均以合同为准。\n6. 合同没有冻结条款的，可以协商转卡或延期。\n7. 健身卡到期未消费，不当然退款。\n8. 合同约定未使用可退的，应退未消费余额。\n9. 退款时可以扣除已消费部分及事先明示的合理手续费。\n10. 已激活且无退款约定通常不退；未提供服务或格式条款不合理的，可以要求退未履行部分。"
+  },
+  {
+   "batch": [
+    "不存在“健身年卡全国统一冻结或退费”标准。",
+    "会员协议和办卡时公示条款优先于门店书面确认。"
+   ],
+   "attempt": 0,
+   "raw": "未提及 | -1\n未提及 | -1"
+  },
+  {
+   "batch": [
+    "业务员的口头承诺无效。",
+    "冻结次数、费用及提前申请期限均以合同为准。"
+   ],
+   "attempt": 0,
+   "raw": "未提及 | -1\n未提及 | -1"
+  },
+  {
+   "batch": [
+    "合同没有冻结条款的，可以协商转卡或延期。",
+    "健身卡到期未消费，不当然退款。"
+   ],
+   "attempt": 0,
+   "raw": "未提及 | -1\n支持 | E2"
+  },
+  {
+   "batch": [
+    "合同约定未使用可退的，应退未消费余额。",
+    "退款时可以扣除已消费部分及事先明示的合理手续费。"
+   ],
+   "attempt": 0,
+   "raw": "支持 | E2\n未提及 | -1"
+  }
+ ],
+ "n_logical_calls": 12,
+ "truncated_rate_overall": 0.0,
+ "state_discrimination": {
+  "states": [
+   "none",
+   "unmentioned",
+   "supported",
+   "contradicted",
+   "unverified"
+  ],
+  "L1_legacy_same_target_same_f7_13": {
+   "unmentioned": true,
+   "supported": true,
+   "contradicted": true,
+   "unverified": true
+  },
+  "L1_all_true": true,
+  "L2_legacy_target_delta_per_op": {
+   "EXTRACT": 0.0,
+   "VERIFY": 0.0,
+   "SPLIT": 0.0
+  },
+  "L2_delta_is_op_independent": true,
+  "L2b_random_w_delta_per_op": {
+   "EXTRACT": -1.708838,
+   "VERIFY": -1.708838,
+   "SPLIT": -1.708838
+  },
+  "L2b_delta_is_op_independent": true,
+  "legacy_checkpoint_w_found": true,
+  "L3a_legacy_relative_order_of_target_ops_by_state": {
+   "unverified": [
+    2,
+    0,
+    1
+   ],
+   "unmentioned": [
+    2,
+    0,
+    1
+   ],
+   "supported": [
+    2,
+    0,
+    1
+   ],
+   "contradicted": [
+    2,
+    0,
+    1
+   ]
+  },
+  "L3a_order_is_state_invariant": true,
+  "L3b_legacy_score_vectors_identical_3verdict_states": true,
+  "L3c_legacy_argmax_by_state": {
+   "unverified": "GEN_PLAIN",
+   "unmentioned": "GEN_PLAIN",
+   "supported": "GEN_PLAIN",
+   "contradicted": "GEN_PLAIN"
+  },
+  "L4_legacy_argmax_unchanged_by_global_feature": true,
+  "V1_v2_rows_differing_per_state": {
+   "none": 5,
+   "unmentioned": 5,
+   "supported": 5,
+   "contradicted": 5,
+   "unverified": 5
+  },
+  "V1_v2_4states_not_all_identical": true,
+  "V1_v2_unmentioned_vs_supported_differ": true,
+  "V2_witness_argmax_by_state": {
+   "none": "VERIFY",
+   "unmentioned": "SPLIT",
+   "supported": "GEN_PLAIN",
+   "contradicted": "GEN_PLAIN",
+   "unverified": "VERIFY"
+  },
+  "V2_witness_argmax_varies": true,
+  "L6_legacy_candidate_sets_by_state": {
+   "none": [
+    "EXTRACT",
+    "GEN_ANGLE",
+    "GEN_PLAIN",
+    "SPLIT",
+    "STOP",
+    "VERIFY"
+   ],
+   "unmentioned": [
+    "EXTRACT",
+    "GEN_ANGLE",
+    "GEN_PLAIN",
+    "SPLIT",
+    "STOP"
+   ],
+   "supported": [
+    "EXTRACT",
+    "GEN_ANGLE",
+    "GEN_PLAIN",
+    "STOP"
+   ],
+   "contradicted": [
+    "EXTRACT",
+    "GEN_ANGLE",
+    "GEN_PLAIN",
+    "STOP"
+   ],
+   "unverified": [
+    "EXTRACT",
+    "GEN_ANGLE",
+    "GEN_PLAIN",
+    "SPLIT",
+    "STOP",
+    "VERIFY"
+   ]
+  },
+  "L6_split_unavailable_when_supported": true,
+  "L6_verify_unavailable_when_supported": true,
+  "feature_dim_v2": 30,
+  "feature_names_len": 30
+ },
+ "proxy_selftest": {
+  "w_hat_A": 0.5,
+  "w_hat_B_repeat": 0.5,
+  "w_hat_C_floral": 0.5,
+  "w_hat_D_new_anchored": 1.0,
+  "w_hat_E_with_conflict": 1.0,
+  "repeat_does_not_increase": true,
+  "floral_does_not_increase": true,
+  "new_anchored_increases": true,
+  "conflict_does_not_increase": true,
+  "conflict_rate_E": 0.2,
+  "terminal_reward_example": 3.0,
+  "all_pass": true
+ },
+ "monitor_selftest": {
+  "collapse_fires": true,
+  "op_entropy_fires": true,
+  "op_coverage_fires": true,
+  "weight_frozen_fires": true,
+  "reward_stall_fires": true,
+  "conflict_fires": true,
+  "closure_fires": true,
+  "tau_increases_when_collapsed": true,
+  "all_pass": true
+ },
+ "witness_regression": {
+  "argmax_by_state": {
+   "none": "VERIFY",
+   "unmentioned": "SPLIT",
+   "supported": "GEN_PLAIN",
+   "contradicted": "GEN_PLAIN",
+   "unverified": "VERIFY"
+  },
+  "witness_holds": true,
+  "argmax_varies": true,
+  "legacy_order_state_invariant": true,
+  "v2_features_differ_across_states": true,
+  "PASS": true
+ },
+ "blacklist_ok": true,
+ "t_end": "2026-10-21 01:53:10",
+ "total_secs": 197.9
+}

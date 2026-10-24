@@ -1,0 +1,14 @@
+{
+ "backfilled_at_utc": "2026-10-24T12:04:58Z",
+ "batch_id": "topo-arm-v2-2026-10-24",
+ "dim": 1536,
+ "failures": [],
+ "n_units_in_list": 151,
+ "n_vectors_written": 151,
+ "normalized": false,
+ "note": "★ 事后补录件，★ 与采集端原生落盘件【不可混为一谈】★ ★ ★ 谱熵依赖完整谱 ⇒ ★ 本目录内【未做任何降维】★",
+ "provenance": "post-hoc",
+ "run_dir": "runs/topo-arm-v2-2026-10-24",
+ "unit_list": "docs/交付/读数快照/topo-arm-v2-n151/UNITS-n151.txt",
+ "unit_list_sha256": "a3f19d3550d902575ce913db0f644554411037bae40958d3520514c2a80fc1ee"
+}

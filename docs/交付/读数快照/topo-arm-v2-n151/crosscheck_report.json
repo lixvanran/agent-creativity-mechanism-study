@@ -1,0 +1,243 @@
+{
+ "checked": 69,
+ "missing": [],
+ "n_missing": 0,
+ "n_weak": 47,
+ "weak": [
+  {
+   "expect": "0.285",
+   "label": "发散层 base@T1 的秩/n 中位",
+   "occurrences": 6
+  },
+  {
+   "expect": "2.1",
+   "label": "题间/臂间 比值",
+   "occurrences": 65
+  },
+  {
+   "expect": "1.0",
+   "label": "基线模态数 T2",
+   "occurrences": 86
+  },
+  {
+   "expect": "0.160",
+   "label": "末步 end_fuse 面深中位",
+   "occurrences": 3
+  },
+  {
+   "expect": "325",
+   "label": "末步 end_fuse 字数中位",
+   "occurrences": 8
+  },
+  {
+   "expect": "0.0",
+   "label": "末步 end_fuse 面宽中位",
+   "occurrences": 179
+  },
+  {
+   "expect": "0.285",
+   "label": "末步 end_greedy 面深中位",
+   "occurrences": 6
+  },
+  {
+   "expect": "1.0",
+   "label": "末步 end_greedy 面宽中位",
+   "occurrences": 86
+  },
+  {
+   "expect": "0.288",
+   "label": "末步 end_sample 面深中位",
+   "occurrences": 2
+  },
+  {
+   "expect": "1.0",
+   "label": "末步 end_sample 面宽中位",
+   "occurrences": 86
+  },
+  {
+   "expect": "1.000",
+   "label": "末步 end_raw 面深中位",
+   "occurrences": 12
+  },
+  {
+   "expect": "1861",
+   "label": "末步 end_raw 字数中位",
+   "occurrences": 2
+  },
+  {
+   "expect": "5.0",
+   "label": "末步 end_raw 面宽中位",
+   "occurrences": 28
+  },
+  {
+   "expect": "0.11",
+   "label": "评估器一致率 lex|value",
+   "occurrences": 4
+  },
+  {
+   "expect": "0.00",
+   "label": "评估器一致率 lex|vote",
+   "occurrences": 48
+  },
+  {
+   "expect": "0.00",
+   "label": "评估器一致率 value|vote",
+   "occurrences": 48
+  },
+  {
+   "expect": "2",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r1",
+   "occurrences": 1046
+  },
+  {
+   "expect": "0",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r2",
+   "occurrences": 1531
+  },
+  {
+   "expect": "3",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r3",
+   "occurrences": 542
+  },
+  {
+   "expect": "0",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T2 r1",
+   "occurrences": 1531
+  },
+  {
+   "expect": "1",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T2 r2",
+   "occurrences": 1048
+  },
+  {
+   "expect": "1",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T2 r3",
+   "occurrences": 1048
+  },
+  {
+   "expect": "2",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r1",
+   "occurrences": 1046
+  },
+  {
+   "expect": "3",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r2",
+   "occurrences": 542
+  },
+  {
+   "expect": "0",
+   "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r3",
+   "occurrences": 1531
+  },
+  {
+   "expect": "2",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r1",
+   "occurrences": 1046
+  },
+  {
+   "expect": "4",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r2",
+   "occurrences": 554
+  },
+  {
+   "expect": "3",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r3",
+   "occurrences": 542
+  },
+  {
+   "expect": "0",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r1",
+   "occurrences": 1531
+  },
+  {
+   "expect": "2",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r2",
+   "occurrences": 1046
+  },
+  {
+   "expect": "0",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r3",
+   "occurrences": 1531
+  },
+  {
+   "expect": "2",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r1",
+   "occurrences": 1046
+  },
+  {
+   "expect": "2",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r2",
+   "occurrences": 1046
+  },
+  {
+   "expect": "0",
+   "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r3",
+   "occurrences": 1531
+  },
+  {
+   "expect": "4.0",
+   "label": "base 模态中位 S4",
+   "occurrences": 21
+  },
+  {
+   "expect": "7.0",
+   "label": "n8 模态中位 S4",
+   "occurrences": 3
+  },
+  {
+   "expect": "5.0",
+   "label": "base 模态中位 S5",
+   "occurrences": 28
+  },
+  {
+   "expect": "5.0",
+   "label": "n8 模态中位 S5",
+   "occurrences": 28
+  },
+  {
+   "expect": "4.0",
+   "label": "base 模态中位 S6",
+   "occurrences": 21
+  },
+  {
+   "expect": "5.0",
+   "label": "n8 模态中位 S6",
+   "occurrences": 28
+  },
+  {
+   "expect": "4.0",
+   "label": "base 模态中位 T1",
+   "occurrences": 21
+  },
+  {
+   "expect": "1.0",
+   "label": "base 模态中位 T2",
+   "occurrences": 86
+  },
+  {
+   "expect": "2.0",
+   "label": "n8 模态中位 T2",
+   "occurrences": 10
+  },
+  {
+   "expect": "5.0",
+   "label": "base 模态中位 T3",
+   "occurrences": 28
+  },
+  {
+   "expect": "7.0",
+   "label": "n8 模态中位 T3",
+   "occurrences": 3
+  },
+  {
+   "expect": "233",
+   "label": "pathmulti 调用总数",
+   "occurrences": 5
+  },
+  {
+   "expect": "1",
+   "label": "pathmulti 失败数",
+   "occurrences": 1048
+  }
+ ]
+}

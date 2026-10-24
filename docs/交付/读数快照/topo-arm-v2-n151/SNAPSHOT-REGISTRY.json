@@ -1,0 +1,38 @@
+{
+ "bytes": 8144,
+ "clock_note": "★ frozen_at = 机器 UTC 时钟；★ label_date = 叙事日期（★ 二者可能不同 ★）★",
+ "entries": [
+  {
+   "bytes": 8144,
+   "frozen_at": "2026-10-24T14:06Z",
+   "sha256": "50b54ff7f2b822d3cec990d612697ec91e26440fada1be07474d4d8ad6587425",
+   "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-24.json",
+   "src": "partial_verdict.json"
+  }
+ ],
+ "frozen_at": "2026-10-24T14:06Z",
+ "history": [
+  {
+   "bytes": 7971,
+   "frozen_at": "2026-10-24T10:09Z",
+   "label_date": "2026-10-24",
+   "note": "★ ★ 旧顶层（★ 本次因加 arm_units 而重冻 ★）⇒ ★ 旧条目【曾因「同名覆盖不推进 history」被丢掉】★★ ★ 现补回留痕 ★",
+   "sha256": "a412f4ac0416a441e7a9df9fc21f6de8648e7ce2550b7ed26e4d04560baae61a",
+   "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-24.json",
+   "src": "partial_verdict.json"
+  }
+ ],
+ "history_note": "★ ★ history 里的条目是【旧版本】★ ⇒ ★ 用途：★ 「同名但内容不同」的留痕 ★★ ★",
+ "label_date": "2026-10-24",
+ "n_units": 151,
+ "note": "★ 本批仍在跑；★ 交稿文献引用的部分预判决以本快照为准（★ 副本+sha256+条数 ★）★",
+ "sha256": "50b54ff7f2b822d3cec990d612697ec91e26440fada1be07474d4d8ad6587425",
+ "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-24.json",
+ "src": "partial_verdict.json",
+ "theta0": 1.339,
+ "tids": [
+  "S4",
+  "S5",
+  "S6"
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "checked_at_utc": "2026-10-24T12:09:10Z",
+ "equivalent": true,
+ "max_abs_diff": 0.0,
+ "metrics": [
+  "vendi",
+  "modes",
+  "structured_dedup_count"
+ ],
+ "n_groups": 30,
+ "note": "★ 落盘向量算出的读数与通道现算【逐位相同】⇒ ★ 此后不再依赖嵌入通道 ★",
+ "vectors_dir": "docs/交付/读数快照/topo-arm-v2-n151/vector_cache"
+}

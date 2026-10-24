@@ -1,0 +1,897 @@
+{
+ "direction_risk": {
+  "X0_current_A": 0.301,
+  "X0_prereg_B": 0.3303,
+  "X0_ratio_B_over_A": 1.0973,
+  "note": "★ 门槛是【标准化效应量】⇒ θ₀ 变大 ⇒ 更难超门槛 ⇒ 判决偏向【不可分辨】；★ θ₀ 变小 ⇒ 更易超门槛 ⇒ 偏向【可分辨】★",
+  "sigma_current_A": 0.2248,
+  "sigma_prereg_B": 0.2228,
+  "sigma_ratio_B_over_A": 0.9911,
+  "theta0_current_A": 1.339,
+  "theta0_prereg_B": 1.483,
+  "theta0_ratio_B_over_A": 1.1075
+ },
+ "h0": {
+  "A_all_arms": {
+   "X0_q95_over_sqrt2": 0.301,
+   "desc": "★ 当前实现实际用的：新批全部 6 臂 × 同题 rep1−rep2",
+   "detail": [
+    {
+     "arm": "nosel_b3",
+     "diff": -0.2558,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b3",
+     "diff": 0.0546,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b3_synth",
+     "diff": -0.0031,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b3_synth",
+     "diff": 0.6156,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "topo_gs_homo",
+     "diff": 0.0977,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "topo_gs_homo",
+     "diff": -0.2704,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "topo_ngt_homo",
+     "diff": -0.0425,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "topo_ngt_homo",
+     "diff": 0.0231,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "topo_sg_homo",
+     "diff": -0.0034,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "topo_sg_homo",
+     "diff": 0.1182,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "topo_ngt_hetero",
+     "diff": -0.0271,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "topo_ngt_hetero",
+     "diff": 0.1653,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    }
+   ],
+   "diffs": [
+    -0.2558,
+    0.0546,
+    -0.0031,
+    0.6156,
+    0.0977,
+    -0.2704,
+    -0.0425,
+    0.0231,
+    -0.0034,
+    0.1182,
+    -0.0271,
+    0.1653
+   ],
+   "n_pairs": 12,
+   "q95_bootstrap_ci": [
+    0.1653,
+    0.6156
+   ],
+   "q95_linear": 0.4257,
+   "q95_nearest_rank": 0.6156,
+   "short": "新批全部 6 臂 × rep1−rep2",
+   "sigma_bootstrap_ci": [
+    0.0746,
+    0.3203
+   ],
+   "sigma_rep": 0.2248,
+   "theta0_standardized": 1.339
+  },
+  "B_prereg_full": {
+   "X0_q95_over_sqrt2": 0.3303,
+   "desc": "★ 预注册完整：B_prereg_new ＋ 旧批 nosel_b5 9 个",
+   "detail": [
+    {
+     "arm": "nosel_b3",
+     "diff": -0.2558,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b3",
+     "diff": 0.0546,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.0423,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.4883,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      3
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.446,
+     "kaline": "层①",
+     "rep_pair": [
+      2,
+      3
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": 0.2042,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.0468,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      3
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.251,
+     "kaline": "层①",
+     "rep_pair": [
+      2,
+      3
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": 0.1255,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S6"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.1148,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      3
+     ],
+     "tid": "S6"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.2403,
+     "kaline": "层①",
+     "rep_pair": [
+      2,
+      3
+     ],
+     "tid": "S6"
+    }
+   ],
+   "diffs": [
+    -0.2558,
+    0.0546,
+    -0.0423,
+    -0.4883,
+    -0.446,
+    0.2042,
+    -0.0468,
+    -0.251,
+    0.1255,
+    -0.1148,
+    -0.2403
+   ],
+   "n_pairs": 11,
+   "q95_bootstrap_ci": [
+    0.248,
+    0.4883
+   ],
+   "q95_linear": 0.4672,
+   "q95_nearest_rank": 0.4883,
+   "short": "上者 ＋ 旧批 `nosel_b5` 9 个",
+   "sigma_bootstrap_ci": [
+    0.1352,
+    0.2742
+   ],
+   "sigma_rep": 0.2228,
+   "theta0_standardized": 1.483
+  },
+  "B_prereg_new": {
+   "X0_q95_over_sqrt2": 0.1738,
+   "desc": "★ 预注册主项：新批 nosel_b3 × 同题 rep1−rep2",
+   "detail": [
+    {
+     "arm": "nosel_b3",
+     "diff": -0.2558,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b3",
+     "diff": 0.0546,
+     "kaline": "层②",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    }
+   ],
+   "diffs": [
+    -0.2558,
+    0.0546
+   ],
+   "n_pairs": 2,
+   "q95_bootstrap_ci": [
+    NaN,
+    NaN
+   ],
+   "q95_linear": 0.2457,
+   "q95_nearest_rank": 0.2558,
+   "short": "新批 `nosel_b3` × rep1−rep2",
+   "sigma_bootstrap_ci": [
+    NaN,
+    NaN
+   ],
+   "sigma_rep": 0.2195,
+   "theta0_standardized": 0.792
+  },
+  "C_old_only": {
+   "X0_q95_over_sqrt2": 0.3333,
+   "desc": "★ 诊断：旧批 nosel_b5 单独 9 个（层①口径）",
+   "detail": [
+    {
+     "arm": "nosel_b5",
+     "diff": -0.0423,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.4883,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      3
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.446,
+     "kaline": "层①",
+     "rep_pair": [
+      2,
+      3
+     ],
+     "tid": "S4"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": 0.2042,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.0468,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      3
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.251,
+     "kaline": "层①",
+     "rep_pair": [
+      2,
+      3
+     ],
+     "tid": "S5"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": 0.1255,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      2
+     ],
+     "tid": "S6"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.1148,
+     "kaline": "层①",
+     "rep_pair": [
+      1,
+      3
+     ],
+     "tid": "S6"
+    },
+    {
+     "arm": "nosel_b5",
+     "diff": -0.2403,
+     "kaline": "层①",
+     "rep_pair": [
+      2,
+      3
+     ],
+     "tid": "S6"
+    }
+   ],
+   "diffs": [
+    -0.0423,
+    -0.4883,
+    -0.446,
+    0.2042,
+    -0.0468,
+    -0.251,
+    0.1255,
+    -0.1148,
+    -0.2403
+   ],
+   "n_pairs": 9,
+   "q95_bootstrap_ci": [
+    0.2403,
+    0.4883
+   ],
+   "q95_linear": 0.4714,
+   "q95_nearest_rank": 0.4883,
+   "short": "旧批 `nosel_b5` 9 个（层①）",
+   "sigma_bootstrap_ci": [
+    0.1306,
+    0.2947
+   ],
+   "sigma_rep": 0.2358,
+   "theta0_standardized": 1.413
+  }
+ },
+ "n_boot": 10000,
+ "n_groups_full": 30,
+ "n_units_actual": 151,
+ "old_recompute_gate": {
+  "mismatch": [],
+  "n_checked": 9,
+  "n_mismatch": 0,
+  "passed": true
+ },
+ "reps": [
+  1,
+  2
+ ],
+ "seed": 20261025,
+ "status": "★ 已跑批·部分 n=151 ｜ ★ 不得当作整批结论 ★",
+ "tids": [
+  "S4",
+  "S5",
+  "S6"
+ ],
+ "verdict_changed_by_calibration": [],
+ "verdicts": {
+  "H-TOPO-4a": {
+   "contrast": [
+    "topo_ngt_homo",
+    "nosel_b3_synth"
+   ],
+   "dir_votes": [
+    [
+     "S4",
+     0.008400000000000001,
+     1
+    ],
+    [
+     "S5",
+     -0.11455,
+     -1
+    ],
+    [
+     "S6",
+     0.0274,
+     1
+    ]
+   ],
+   "n_cells": 5,
+   "per_calibration": {
+    "A_all_arms": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 1,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2248,
+     "std_list": [
+      -0.05,
+      0.125,
+      -1.827,
+      0.808,
+      0.122
+     ],
+     "theta0": 1.339,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    },
+    "B_prereg_full": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 1,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2228,
+     "std_list": [
+      -0.051,
+      0.126,
+      -1.844,
+      0.816,
+      0.123
+     ],
+     "theta0": 1.483,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    },
+    "B_prereg_new": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 2,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2195,
+     "std_list": [
+      -0.051,
+      0.128,
+      -1.872,
+      0.828,
+      0.125
+     ],
+     "theta0": 0.792,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    },
+    "C_old_only": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 1,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2358,
+     "std_list": [
+      -0.048,
+      0.119,
+      -1.742,
+      0.771,
+      0.116
+     ],
+     "theta0": 1.413,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    }
+   },
+   "tri_dirs": {
+    "modes": [
+     1,
+     1
+    ],
+    "structured_dedup": [
+     0,
+     0
+    ],
+    "vendi": [
+     3,
+     2
+    ]
+   }
+  },
+  "H-TOPO-4c": {
+   "contrast": [
+    "nosel_b3_synth",
+    "nosel_b3"
+   ],
+   "dir_votes": [
+    [
+     "S4",
+     -0.35885,
+     -1
+    ],
+    [
+     "S5",
+     0.324,
+     1
+    ],
+    [
+     "S6",
+     0.3461,
+     1
+    ]
+   ],
+   "n_cells": 5,
+   "per_calibration": {
+    "A_all_arms": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 2,
+     "n_cells_over_theta0": 3,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2248,
+     "std_list": [
+      -1.034,
+      -2.158,
+      2.689,
+      0.194,
+      1.54
+     ],
+     "theta0": 1.339,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    },
+    "B_prereg_full": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 2,
+     "n_cells_over_theta0": 3,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2228,
+     "std_list": [
+      -1.044,
+      -2.178,
+      2.713,
+      0.195,
+      1.553
+     ],
+     "theta0": 1.483,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    },
+    "B_prereg_new": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 2,
+     "n_cells_over_theta0": 4,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2195,
+     "std_list": [
+      -1.059,
+      -2.21,
+      2.754,
+      0.198,
+      1.577
+     ],
+     "theta0": 0.792,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    },
+    "C_old_only": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 2,
+     "n_cells_over_theta0": 3,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 1,
+     "pos": 2,
+     "sigma_rep": 0.2358,
+     "std_list": [
+      -0.986,
+      -2.058,
+      2.564,
+      0.184,
+      1.468
+     ],
+     "theta0": 1.413,
+     "tri_consistent": false,
+     "tri_verdict": "否 ⇒ 不可分辨",
+     "verdict": "不可分辨"
+    }
+   },
+   "tri_dirs": {
+    "modes": [
+     2,
+     2
+    ],
+    "structured_dedup": [
+     0,
+     0
+    ],
+    "vendi": [
+     3,
+     2
+    ]
+   }
+  },
+  "H-TOPO-4d": {
+   "contrast": [
+    "topo_ngt_homo",
+    "topo_gs_homo"
+   ],
+   "dir_votes": [
+    [
+     "S4",
+     -0.1033,
+     -1
+    ],
+    [
+     "S5",
+     -0.010249999999999995,
+     -1
+    ],
+    [
+     "S6",
+     0.0645,
+     1
+    ]
+   ],
+   "n_cells": 5,
+   "per_calibration": {
+    "A_all_arms": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 0,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 2,
+     "pos": 1,
+     "sigma_rep": 0.2248,
+     "std_list": [
+      -0.771,
+      -0.148,
+      0.607,
+      -0.698,
+      0.287
+     ],
+     "theta0": 1.339,
+     "tri_consistent": true,
+     "tri_verdict": "是",
+     "verdict": "未观察到支持"
+    },
+    "B_prereg_full": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 0,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 2,
+     "pos": 1,
+     "sigma_rep": 0.2228,
+     "std_list": [
+      -0.778,
+      -0.149,
+      0.613,
+      -0.705,
+      0.289
+     ],
+     "theta0": 1.483,
+     "tri_consistent": true,
+     "tri_verdict": "是",
+     "verdict": "未观察到支持"
+    },
+    "B_prereg_new": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 0,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 2,
+     "pos": 1,
+     "sigma_rep": 0.2195,
+     "std_list": [
+      -0.79,
+      -0.151,
+      0.622,
+      -0.715,
+      0.294
+     ],
+     "theta0": 0.792,
+     "tri_consistent": true,
+     "tri_verdict": "是",
+     "verdict": "未观察到支持"
+    },
+    "C_old_only": {
+     "dead_rulers": [
+      "structured_dedup"
+     ],
+     "n_cells_over_mde_0.448": 0,
+     "n_cells_over_theta0": 0,
+     "n_rulers_informative": 2,
+     "n_tid": 3,
+     "neg": 2,
+     "pos": 1,
+     "sigma_rep": 0.2358,
+     "std_list": [
+      -0.735,
+      -0.141,
+      0.579,
+      -0.666,
+      0.274
+     ],
+     "theta0": 1.413,
+     "tri_consistent": true,
+     "tri_verdict": "是",
+     "verdict": "未观察到支持"
+    }
+   },
+   "tri_dirs": {
+    "modes": [
+     1,
+     2
+    ],
+    "structured_dedup": [
+     0,
+     0
+    ],
+    "vendi": [
+     2,
+     3
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,128 @@
+{
+  "tier_a": {
+    "tier": "A",
+    "n_fixtures": 13,
+    "n_mutations": 8,
+    "mutations": [
+      {
+        "mutation": "A3_机械复核",
+        "target": "本题应当落在 C2 上",
+        "base": "A3_still_in_anchor",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      },
+      {
+        "mutation": "A4_空岔口",
+        "target": "还要注意一些别的方面",
+        "base": "A4_fork_not_named",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      },
+      {
+        "mutation": "A5_归族",
+        "target": "多租户限流应当以租户为维度隔离配额",
+        "base": "A5_merged_variant",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      },
+      {
+        "mutation": "A6_影响矩阵被引用",
+        "target": "建议再补充一些部署细节",
+        "base": "A6_not_cited",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      },
+      {
+        "mutation": "A7_矛盾卡",
+        "target": "限流粒度应当按全局计",
+        "base": "A7_contradicted",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      },
+      {
+        "mutation": "A4_独立复核",
+        "target": "灰度发布应当先放 5% 流量观察再全量",
+        "base": "A4_fork_not_named",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      },
+      {
+        "mutation": "A3_族级锚外",
+        "target": "回滚策略应当按依赖图逆序执行",
+        "base": "A3_fork_covered_by_anchor",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      },
+      {
+        "mutation": "A4_第二探针",
+        "target": "建议在实施前充分沟通各方需求后再推进",
+        "base": "A4_fork_not_named",
+        "mutated": "kept",
+        "flipped": true,
+        "note": "若 flipped=False ⇒ 该条件根本没被测到 ⇒ 自检无效"
+      }
+    ],
+    "prompt_templates": {
+      "CARD_Q_IN": {
+        "ok": true,
+        "n_chars": 1126
+      },
+      "CARD_Q_OUT": {
+        "ok": true,
+        "n_chars": 1821
+      },
+      "FORK_Q": {
+        "ok": true,
+        "n_chars": 295
+      },
+      "EXTRACT_Q": {
+        "ok": true,
+        "n_chars": 145
+      }
+    },
+    "failures": [],
+    "passed": true
+  },
+  "tier_b": {
+    "tier": "B",
+    "judge_vendor": "minimax",
+    "judge_model": "MiniMax-M3.1-Flash-Preview",
+    "fork_assignment": {
+      "n_tasks": 9,
+      "purity": 0.825,
+      "purity_num": 99,
+      "purity_den": 120,
+      "separation": 0.9555084745762712,
+      "sep_num": 451,
+      "sep_den": 472
+    },
+    "judge_selfcheck": {
+      "effort": "medium",
+      "channel_health": 0.8438,
+      "calls": {
+        "n_calls": 32,
+        "n_empty_content": 3,
+        "n_truncated": 2,
+        "n_error": 1,
+        "total_tokens": 48525,
+        "completion_tokens": 27513,
+        "n_with_reasoning": 31
+      },
+      "true_pass": 4,
+      "true_total": 4,
+      "false_rejected": 6,
+      "false_total": 6,
+      "false_wrongly_accepted": 0
+    },
+    "failures": [],
+    "passed": true
+  },
+  "overall_passed": true
+}

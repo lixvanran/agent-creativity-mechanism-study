@@ -1,0 +1,973 @@
+{
+  "policy": {
+    "u": [
+      -1.0,
+      -1.0,
+      -1.5,
+      -1.5,
+      -1.5,
+      -1.5
+    ],
+    "v": [
+      -4.0,
+      -4.0
+    ],
+    "t": [
+      -2.5,
+      -1.5,
+      -4.0
+    ],
+    "m": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -1.0,
+        -1.0,
+        -1.5,
+        -1.5,
+        -1.5,
+        -1.5
+      ]
+    ],
+    "arb": [
+      -2.5,
+      -2.5,
+      -3.0
+    ]
+  },
+  "round": 8,
+  "hist": [
+    {
+      "round": 0,
+      "sample": 0,
+      "task": "D01",
+      "spec": [
+        "compress",
+        "slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": 6.62,
+      "base": 6.62,
+      "kept": true,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -1.18,
+      "diversity": 26.0,
+      "conflicts": 1,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 26,
+      "calls": 9,
+      "diversity_population": 0.0,
+      "grad": {
+        "u": 0.5,
+        "v": 0.5,
+        "t": 0.5,
+        "m": 0.5
+      }
+    },
+    {
+      "round": 0,
+      "sample": 1,
+      "task": "D02",
+      "spec": [
+        "drop_conflicting",
+        "cross_slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": -19.619999999999997,
+      "base": -1.2519999999999998,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -23.22,
+      "diversity": 12.0,
+      "conflicts": 23,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 12,
+      "calls": 11,
+      "diversity_population": 0.9712230215827338,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 0,
+      "sample": 2,
+      "task": "D01",
+      "spec": [
+        "compress",
+        "slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": 5.319999999999999,
+      "base": 0.7196000000000001,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -0.08,
+      "diversity": 18.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 18,
+      "calls": 4,
+      "diversity_population": 0.9218455261215451,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 1,
+      "sample": 0,
+      "task": "D02",
+      "spec": [
+        "none",
+        "cross_slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": -2.24,
+      "base": -0.16827999999999999,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -5.24,
+      "diversity": 10.0,
+      "conflicts": 5,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 10,
+      "calls": 12,
+      "diversity_population": 0.9374274738507569,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 1,
+      "sample": 1,
+      "task": "D01",
+      "spec": [
+        "name_decision_point",
+        "slot",
+        1
+      ],
+      "failure_kind": "conflict",
+      "r": 5.72,
+      "base": 1.598204,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 0,
+      "quality": -1.18,
+      "diversity": 23.0,
+      "conflicts": 1,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 23,
+      "calls": 9,
+      "diversity_population": 0.908998101367952,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 1,
+      "sample": 2,
+      "task": "D02",
+      "spec": [
+        "keep_all",
+        "slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": 4.1000000000000005,
+      "base": 2.3487428,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 0,
+      "quality": -0.9,
+      "diversity": 14.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 1,
+      "cover": 14,
+      "calls": 5,
+      "diversity_population": 0.944502905565797,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 2,
+      "sample": 0,
+      "task": "D01",
+      "spec": [
+        "keep_all",
+        "slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": 4.12,
+      "base": 2.88011996,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -0.08,
+      "diversity": 14.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 14,
+      "calls": 4,
+      "diversity_population": 0.9069016441801527,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 2,
+      "sample": 1,
+      "task": "D02",
+      "spec": [
+        "compress",
+        "slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": 0.6199999999999999,
+      "base": 2.202083972,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -1.18,
+      "diversity": 6.0,
+      "conflicts": 1,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 6,
+      "calls": 9,
+      "diversity_population": 0.942340426055357,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 2,
+      "sample": 2,
+      "task": "D01",
+      "spec": [
+        "ground_in_evidence",
+        "cross_slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": 6.82,
+      "base": 3.5874587803999995,
+      "kept": true,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -2.18,
+      "diversity": 30.0,
+      "conflicts": 2,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 30,
+      "calls": 9,
+      "diversity_population": 0.9125195101641275,
+      "grad": {
+        "u": 0.5,
+        "v": 0.5,
+        "t": 0.5,
+        "m": 0.5
+      }
+    },
+    {
+      "round": 3,
+      "sample": 0,
+      "task": "D02",
+      "spec": [
+        "ground_in_evidence",
+        "cross_slot",
+        1
+      ],
+      "failure_kind": "conflict",
+      "r": -0.9799999999999998,
+      "base": 2.2172211462799996,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -5.18,
+      "diversity": 14.0,
+      "conflicts": 5,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 14,
+      "calls": 9,
+      "diversity_population": 0.9273444662389685,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 3,
+      "sample": 1,
+      "task": "D01",
+      "spec": [
+        "ground_in_evidence",
+        "cross_slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": 7.42,
+      "base": 3.7780548023959994,
+      "kept": true,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -0.08,
+      "diversity": 25.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 25,
+      "calls": 4,
+      "diversity_population": 0.9125978714400349,
+      "grad": {
+        "u": 0.5,
+        "v": 0.5,
+        "t": 0.5,
+        "m": 0.5
+      }
+    },
+    {
+      "round": 3,
+      "sample": 2,
+      "task": "D02",
+      "spec": [
+        "compress",
+        "slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": -0.44000000000000017,
+      "base": 2.5126383616771992,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -5.24,
+      "diversity": 16.0,
+      "conflicts": 5,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 16,
+      "calls": 12,
+      "diversity_population": 0.9269536609958261,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 4,
+      "sample": 0,
+      "task": "D01",
+      "spec": [
+        "ground_in_evidence",
+        "slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": 5.02,
+      "base": 3.2648468531740393,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 0,
+      "quality": -0.08,
+      "diversity": 17.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 17,
+      "calls": 4,
+      "diversity_population": 0.9172704354881903,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 4,
+      "sample": 1,
+      "task": "D02",
+      "spec": [
+        "none",
+        "cross_slot",
+        1
+      ],
+      "failure_kind": "conflict",
+      "r": 4.72,
+      "base": 3.7013927972218275,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -0.08,
+      "diversity": 16.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 16,
+      "calls": 4,
+      "diversity_population": 0.9239159516508211,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 4,
+      "sample": 2,
+      "task": "D01",
+      "spec": [
+        "keep_all",
+        "cross_slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": 4.5200000000000005,
+      "base": 3.9469749580552795,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 0,
+      "quality": -1.18,
+      "diversity": 19.0,
+      "conflicts": 1,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 19,
+      "calls": 9,
+      "diversity_population": 0.9013353711184866,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 5,
+      "sample": 0,
+      "task": "D02",
+      "spec": [
+        "ground_in_evidence",
+        "cross_slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": 5.62,
+      "base": 4.448882470638695,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 0,
+      "quality": -0.08,
+      "diversity": 19.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 19,
+      "calls": 4,
+      "diversity_population": 0.9261638495998552,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 5,
+      "sample": 1,
+      "task": "D01",
+      "spec": [
+        "drop_conflicting",
+        "slot",
+        1
+      ],
+      "failure_kind": "conflict",
+      "r": 7.42,
+      "base": 5.340217729447087,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -0.08,
+      "diversity": 25.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 25,
+      "calls": 4,
+      "diversity_population": 0.9024786531566206,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 5,
+      "sample": 2,
+      "task": "D02",
+      "spec": [
+        "ground_in_evidence",
+        "slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": -24.54,
+      "base": -3.6238475893870388,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -27.24,
+      "diversity": 9.0,
+      "conflicts": 27,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 9,
+      "calls": 12,
+      "diversity_population": 0.9158066911260233,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 6,
+      "sample": 0,
+      "task": "D01",
+      "spec": [
+        "name_decision_point",
+        "slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": 3.48,
+      "base": -1.492693312570927,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -2.22,
+      "diversity": 19.0,
+      "conflicts": 2,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 19,
+      "calls": 11,
+      "diversity_population": 0.9043472206751302,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 6,
+      "sample": 1,
+      "task": "D02",
+      "spec": [
+        "ground_in_evidence",
+        "cross_slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": 6.22,
+      "base": 0.8211146812003511,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -0.08,
+      "diversity": 21.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 21,
+      "calls": 4,
+      "diversity_population": 0.9365664277062572,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 6,
+      "sample": 2,
+      "task": "D01",
+      "spec": [
+        "compress",
+        "cross_slot",
+        0
+      ],
+      "failure_kind": "conflict",
+      "r": 1.26,
+      "base": 0.9527802768402458,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -3.24,
+      "diversity": 15.0,
+      "conflicts": 3,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 15,
+      "calls": 12,
+      "diversity_population": 0.8977134786614421,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 7,
+      "sample": 0,
+      "task": "D02",
+      "spec": [
+        "name_decision_point",
+        "cross_slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": 3.5199999999999996,
+      "base": 1.7229461937881718,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 1,
+      "quality": -0.08,
+      "diversity": 12.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 12,
+      "calls": 4,
+      "diversity_population": 0.9144257818798182,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    },
+    {
+      "round": 7,
+      "sample": 1,
+      "task": "D01",
+      "spec": [
+        "keep_all",
+        "slot",
+        1
+      ],
+      "failure_kind": "conflict",
+      "r": 8.02,
+      "base": 3.6120623356517196,
+      "kept": true,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -0.08,
+      "diversity": 27.0,
+      "conflicts": 0,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 27,
+      "calls": 4,
+      "diversity_population": 0.8997155616858714,
+      "grad": {
+        "u": 0.5,
+        "v": 0.5,
+        "t": 0.5,
+        "m": 0.5
+      }
+    },
+    {
+      "round": 7,
+      "sample": 2,
+      "task": "D02",
+      "spec": [
+        "keep_all",
+        "cross_slot",
+        2
+      ],
+      "failure_kind": "conflict",
+      "r": -4.74,
+      "base": 1.1064436349562035,
+      "kept": false,
+      "archive_n": 1,
+      "arb": 2,
+      "quality": -9.24,
+      "diversity": 15.0,
+      "conflicts": 9,
+      "n_empty": 0,
+      "n_fallback": 0,
+      "n_conflict_pairs": 0,
+      "cover": 15,
+      "calls": 12,
+      "diversity_population": 0.9288143808109576,
+      "grad": {
+        "u": -0.5,
+        "v": -0.5,
+        "t": -0.5,
+        "m": -0.5
+      }
+    }
+  ],
+  "lam": {
+    "conflict": 1.0,
+    "empty": 0.5,
+    "fallback": 0.5,
+    "cover": 0.3,
+    "cost": 0.02,
+    "conflict_pairs": 0.8
+  },
+  "seed": 20261022,
+  "objective": "scalar",
+  "archive": {
+    "mode": "scalar",
+    "n_items": 1,
+    "specs": [
+      [
+        "keep_all",
+        "slot",
+        1
+      ]
+    ],
+    "distinct_families": 1,
+    "self_sim": null,
+    "self_sim_decision": null,
+    "collision": null,
+    "mean_quality": -0.08,
+    "mean_diversity": 0.8997155616858714
+  },
+  "history_n": 24,
+  "history_specs": [
+    [
+      "compress",
+      "slot",
+      0
+    ],
+    [
+      "drop_conflicting",
+      "cross_slot",
+      2
+    ],
+    [
+      "compress",
+      "slot",
+      0
+    ],
+    [
+      "none",
+      "cross_slot",
+      0
+    ],
+    [
+      "name_decision_point",
+      "slot",
+      1
+    ],
+    [
+      "keep_all",
+      "slot",
+      0
+    ],
+    [
+      "keep_all",
+      "slot",
+      2
+    ],
+    [
+      "compress",
+      "slot",
+      2
+    ],
+    [
+      "ground_in_evidence",
+      "cross_slot",
+      0
+    ],
+    [
+      "ground_in_evidence",
+      "cross_slot",
+      1
+    ],
+    [
+      "ground_in_evidence",
+      "cross_slot",
+      2
+    ],
+    [
+      "compress",
+      "slot",
+      0
+    ],
+    [
+      "ground_in_evidence",
+      "slot",
+      2
+    ],
+    [
+      "none",
+      "cross_slot",
+      1
+    ],
+    [
+      "keep_all",
+      "cross_slot",
+      0
+    ],
+    [
+      "ground_in_evidence",
+      "cross_slot",
+      2
+    ],
+    [
+      "drop_conflicting",
+      "slot",
+      1
+    ],
+    [
+      "ground_in_evidence",
+      "slot",
+      2
+    ],
+    [
+      "name_decision_point",
+      "slot",
+      2
+    ],
+    [
+      "ground_in_evidence",
+      "cross_slot",
+      0
+    ],
+    [
+      "compress",
+      "cross_slot",
+      0
+    ],
+    [
+      "name_decision_point",
+      "cross_slot",
+      2
+    ],
+    [
+      "keep_all",
+      "slot",
+      1
+    ],
+    [
+      "keep_all",
+      "cross_slot",
+      2
+    ]
+  ]
+}

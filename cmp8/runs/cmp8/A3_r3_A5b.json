@@ -1,0 +1,22 @@
+{
+ "ops": {
+  "GEN_ANGLE": 2,
+  "EXTRACT": 4,
+  "GEN_PLAIN": 1,
+  "SPLIT": 2,
+  "VERIFY": 1
+ },
+ "width": 1,
+ "conflict": 1.0,
+ "n_legal": 1,
+ "n_verify": 1,
+ "hit": 0,
+ "miss": 0,
+ "fallback": false,
+ "claims": [
+  "该段落无可判真假的陈述。"
+ ],
+ "verd": {
+  "该段落无可判真假的陈述。": "矛盾"
+ }
+}

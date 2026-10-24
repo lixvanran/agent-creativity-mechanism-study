@@ -6,3 +6,11 @@ dist/
 .env
 runs/
 *.onnx
+routes/LIT/_raw/
+repro/runs/
+
+# 临时工作目录
+.tmp/
+
+# 推送状态（机器本地）
+.mavis/push_state.secondgroup.json

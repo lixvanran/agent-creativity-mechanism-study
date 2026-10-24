@@ -1,0 +1,66 @@
+{
+ "checked_at_utc": "2026-10-24T13:00Z",
+ "compatibility_note": "★ 历史批的 calls 记录里【没有一条提到 min_ok】⇒ ★ ⇒ 说明该路径【从未触发】⇒ ★ ⇒ 显式传 min_ok 对历史读数【逐字节兼容】★",
+ "default_min_ok": 200,
+ "dual_py_sha256": "300da79579017f5040cf55135eb62ca9123f36ad49c2b77ab60e8ee8585e4b14",
+ "llm_chat_call_sites": 4,
+ "llm_chat_sites_with_explicit_min_ok": 4,
+ "min_ok_constants_in_dual_py": {
+  "DIVERGE": 120,
+  "FUSE": 120,
+  "PREMISE": 120,
+  "SELECT": 20
+ },
+ "min_ok_path_ever_triggered": false,
+ "n_calls_records": 1479,
+ "n_records_mentioning_min_ok": 0,
+ "n_units": 151,
+ "n_units_shorter_than_default": 1,
+ "post_len_max": 501,
+ "post_len_median": 342,
+ "post_len_min": 198,
+ "post_len_p05": 220,
+ "prompts_py_sha256": "19d7783aef1ec340ff59be86f8c9f95732932b51c1e2c97759aedcc8c789671c",
+ "spec_min_ok_table": [
+  {
+   "min_ok": 120,
+   "output_spec": "OUT_SPEC「控制在 400 字以内」",
+   "prompt": "BRANCH_ASK",
+   "spec_hits_in_prompt": [],
+   "step": "diverge"
+  },
+  {
+   "min_ok": 120,
+   "output_spec": "150–250 字",
+   "prompt": "PREMISE_Q",
+   "spec_hits_in_prompt": [
+    "150-250字"
+   ],
+   "step": "premise"
+  },
+  {
+   "min_ok": 120,
+   "output_spec": "OUT_SPEC「400 字以内」",
+   "prompt": "FUSE_ASK",
+   "spec_hits_in_prompt": [],
+   "step": "fuse"
+  },
+  {
+   "min_ok": 20,
+   "output_spec": "理由 60–120 字 + 原样贴出被选篇全文",
+   "prompt": "SELECT_ASK",
+   "spec_hits_in_prompt": [
+    "先写 60-120 字",
+    "原样贴出"
+   ],
+   "step": "select"
+  }
+ ],
+ "units_shorter_than_default": [
+  {
+   "len": 198,
+   "unit": "S5_r1_nosel_b3_u1"
+  }
+ ],
+ "verdict": "★ ★ 统一阈值 200 已在历史批里【实际误杀 1 个单元】★ ⇒ ★ ⇒ 污染率读数里【有一部分是被阈值制造出来的】★★ ★"
+}

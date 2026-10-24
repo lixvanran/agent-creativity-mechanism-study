@@ -1,0 +1,46 @@
+Problem: 公路自行车个人比赛（无车队），单圈1.6km共计15圈，单圈由两个800m直路和两个回头弯构成，本人在大集团里处于中上等水平，该如何安排战术？
+
+Wide set
+  前5圈的体能保存与跟轮策略
+    - 在两个回头弯的内侧切线（Apex Cut），把每圈的骑行距离缩短约10米。
+    - 全程使用最大化的尾流（drafting）——紧贴前方1‑2米，仅在每条直路最后100米脱离并加速冲刺。
+    - 把回头弯当作流水线刷新：入弯只做必要降挡，出弯立即提速，并把速度带入下一段800米直路。
+  第5、10圈的选择性突袭
+    - 在第5圈和第10圈的开局发动突袭，提前突围至2‑3秒优势后再退回集团。
+    - Exploit the hairpin turns to launch spontaneous attacks based on feel.
+    - Launch random probe attacks to test the group’s reaction and create uncertainty.
+  第6-10圈的节奏控制与齿轮换挡
+    - 精准把握800 m直路结束前的齿轮换档时机：在进入回头弯前30 m完成升档，保持高转速。
+    - 集团分裂时先跟人数较多且节奏稳定的一侧，只有小股持续拉开才转入追轮
+  最后5圈的冲刺准备与定位
+    - 采用‘前拉后缩’自轮换战术：在直路前端占位30秒全力加速，随后自然减速退回集团，循环利用体能峰值。
+    - 把每个回头弯的最优点（距离拐点约2 m处）标记为加速触发点，只在此点解除刹车并全力出弯。
+    - 每个回头弯前移入集团前半区，弯中不硬攻，优先贴住出弯后率先提速者
+    - 对两名冲刺候选保持近距离观察，谁领风就跟谁、谁掉速就暂缓关注
+    - 最后两圈只响应真正拉出距离的冲刺者，先跟其车轮，未拉开则撤出并保留最后加速
+  (unclustered)
+    - Run a decade‑trained AI to compute the exact power target for each lap, dynamically adjusting in real time based on race dynamics.
+    - Ride a morphing carbon‑fiber frame that actively changes geometry to minimise drag on the 800 m straights and maximise grip in the hairpins.
+    - Deploy a swarm of nano‑drones that generate a low‑pressure drafting envelope around you, effectively creating a personal slipstream.
+    - Incorporate a high‑efficiency kinetic‑energy recovery system that harvests braking energy in each hairpin and boosts you on the next straight.
+    - Wear an adaptive aero‑skin suit with micro‑actuators that reshape its surface using real‑time wind‑sensor feedback.
+    - Implement a real‑time 360° LIDAR/vision network feeding an AI with precise positions of every rider, allowing pinpoint timing of attacks and breaks.
+    - Use predetermined hand signals to coordinate attacks on the straights.
+  赛前观察与起点定位
+    - 把大集团当作总线：保持在能获得前轮尾流、又便于向两侧抢位的中间位置，尽量跟轮而不持续领骑。
+    - 首圈确认两段直路的顺逆风，把顺风直路及合适的出弯加速段设为主要攻击窗口。
+    - 把15圈分层管理：前中圈收集节奏、风向和掉速规律，最后3—5圈再集中使用冲刺预算。
+    - Rely on a mental map of the 800‑m straights and hairpins to time surges.
+    - Use visible landmarks (e.g., a billboard) as lap counters instead of electronic displays.
+    - 前半程持续记录领风者、掉速者以及出弯后仍能加速的人
+  全程心态与实时决策
+    - 为掉队和加速设置去抖阈值：净空差持续约1—2秒且前车确实降速时再行动，不因短暂晃动频繁变速。
+    - 采用跟轮、匹配、撤回的状态机：有人加速才响应，攻击失败且前方出现空档时立刻吃回尾流。
+    - Pre‑arrange a lap‑by‑lap pace plan before the start and stick to it.
+    - 没有攻击机会时不主动长领风，尽量躲在集团尾流中保存体力
+
+Converge — shortlist
+
+Focus — deepened branches
+Provocation
+  What if we took this seriously: What's the assumption nobody named yet?

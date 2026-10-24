@@ -1,0 +1,411 @@
+{
+  "purpose": "可执行性冒烟（不产出任何实验结论）",
+  "endpoint": "https://api.minimaxi.com/v1",
+  "primary_model": "MiniMax-M3.1-Flash-Preview",
+  "openrouter_used": false,
+  "endpoints_seen": [
+    "https://api.minimaxi.com/v1/chat/completions"
+  ],
+  "models_seen": [
+    "MiniMax-M2.7",
+    "MiniMax-M3.1-Flash-Preview"
+  ],
+  "model_fallback_observed": [
+    "MiniMax-M2.7"
+  ],
+  "global_call_cap": 20,
+  "total_api_calls": 18,
+  "total_tokens": 50637,
+  "n_logical_calls": 16,
+  "elapsed_sec": 0.0,
+  "usage": [
+    {
+      "i": 1,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 317,
+      "completion_tokens": 604,
+      "total_tokens": 921
+    },
+    {
+      "i": 2,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 316,
+      "completion_tokens": 980,
+      "total_tokens": 1296
+    },
+    {
+      "i": 3,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 320,
+      "completion_tokens": 686,
+      "total_tokens": 1006
+    },
+    {
+      "i": 4,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 315,
+      "completion_tokens": 575,
+      "total_tokens": 890
+    },
+    {
+      "i": 5,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 388,
+      "completion_tokens": 3057,
+      "total_tokens": 3445
+    },
+    {
+      "i": 6,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 388,
+      "completion_tokens": 508,
+      "total_tokens": 896
+    },
+    {
+      "i": 7,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 414,
+      "completion_tokens": 772,
+      "total_tokens": 1186
+    },
+    {
+      "i": 8,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 390,
+      "completion_tokens": 1009,
+      "total_tokens": 1399
+    },
+    {
+      "i": 9,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 781,
+      "completion_tokens": 1580,
+      "total_tokens": 2361
+    },
+    {
+      "i": 10,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 780,
+      "completion_tokens": 265,
+      "total_tokens": 1045
+    },
+    {
+      "i": 11,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 506,
+      "completion_tokens": 6000,
+      "total_tokens": 6506
+    },
+    {
+      "i": 12,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M2.7",
+      "prompt_tokens": 345,
+      "completion_tokens": 3253,
+      "total_tokens": 3598
+    },
+    {
+      "i": 13,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 330,
+      "completion_tokens": 3883,
+      "total_tokens": 4213
+    },
+    {
+      "i": 14,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 808,
+      "completion_tokens": 8000,
+      "total_tokens": 8808
+    },
+    {
+      "i": 15,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M2.7",
+      "prompt_tokens": 647,
+      "completion_tokens": 8000,
+      "total_tokens": 8647
+    },
+    {
+      "i": 16,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 332,
+      "completion_tokens": 1466,
+      "total_tokens": 1798
+    },
+    {
+      "i": 17,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 375,
+      "completion_tokens": 796,
+      "total_tokens": 1171
+    },
+    {
+      "i": 18,
+      "url": "https://api.minimaxi.com/v1/chat/completions",
+      "model": "MiniMax-M3.1-Flash-Preview",
+      "prompt_tokens": 733,
+      "completion_tokens": 718,
+      "total_tokens": 1451
+    }
+  ],
+  "tasks": [
+    {
+      "tid": "DS-01",
+      "topology": "preregistered_4plus2",
+      "cfg": {
+        "round1_facets": [
+          "FA1",
+          "FA2",
+          "FA3",
+          "FA4"
+        ],
+        "round2_facets": [
+          "FA5",
+          "FA6"
+        ],
+        "max_calls": 24,
+        "max_tokens": 40000,
+        "max_claims": 48,
+        "extract_cap": 8,
+        "verify_batch": 12,
+        "collapse_mult": 1.0
+      },
+      "meta": {
+        "answer_chars": 0,
+        "answer_fallback": false,
+        "arm_id": "A_fixed",
+        "budget_error": "token 预算不足：已用 46217 / 上限 40000",
+        "collapse_flag": false,
+        "cost_usd": 0.0,
+        "internal_parsefail_rate": null,
+        "metadata_missing": [
+          "judge_model",
+          "judge_prompt_version",
+          "judge_temp",
+          "judge_same_vendor",
+          "judge_selfcheck",
+          "embedding_model",
+          "aligner_version",
+          "extractor_version",
+          "extractor_f1",
+          "lexical_baseline_f1"
+        ],
+        "n_calls": 0,
+        "n_shipped": 0,
+        "n_tokens": 0,
+        "over_budget_count": 1,
+        "parsefail_rate": null,
+        "prompt_version": "ROUTE-A-prompt-v2.0",
+        "protocol_a4_not_produced": [
+          "judge_model",
+          "judge_prompt_version",
+          "judge_temp",
+          "judge_same_vendor",
+          "judge_selfcheck",
+          "embedding_model",
+          "aligner_version",
+          "extractor_version",
+          "extractor_f1",
+          "lexical_baseline_f1"
+        ],
+        "rep": 1,
+        "run_id": null,
+        "seed": "S1",
+        "seed_policy": "api_seed_unsupported__label_only__NOT_reproducible",
+        "silent_empty_count": 0,
+        "task_id": "DS-01",
+        "temperature": 0.7,
+        "total": 1,
+        "total_samples": 1,
+        "valid": 0,
+        "valid_samples": 0
+      },
+      "n_pool_items": 0,
+      "n_claims_extracted": 0,
+      "answer": ""
+    },
+    {
+      "tid": "DS-02",
+      "topology": "small_1slot_no_round2",
+      "cfg": {
+        "round1_facets": [
+          "FA1"
+        ],
+        "round2_facets": [],
+        "max_calls": 24,
+        "max_tokens": 40000,
+        "max_claims": 48,
+        "extract_cap": 8,
+        "verify_batch": 12,
+        "collapse_mult": 1.0
+      },
+      "meta": {
+        "answer_chars": 316,
+        "answer_fallback": false,
+        "answer_truncated_count": 1,
+        "answer_truncated_denominator": "n_supported",
+        "arm_config_hash": "sha256:0581d8c548aea2cc",
+        "arm_id": "A_fixed",
+        "collapse_flag": false,
+        "collapse_kept": 7,
+        "collapse_threshold": 1.0,
+        "conflict_rate_generated": 0.0,
+        "cost_basis": "minimax_subscription",
+        "cost_usd": 0.0,
+        "devset_hash": "NOT_PROVIDED",
+        "devset_id": "NOT_PROVIDED",
+        "evidence_hash": "sha256:c6d23984d432afdd",
+        "evidence_pack_version": "smoke-local-v2",
+        "evidence_prompt_checks": 4,
+        "facet_enabled": true,
+        "internal_parsefail_rate": 0.0,
+        "metadata_missing": [
+          "devset_id",
+          "devset_hash",
+          "judge_model",
+          "judge_prompt_version",
+          "judge_temp",
+          "judge_same_vendor",
+          "judge_selfcheck",
+          "embedding_model",
+          "aligner_version",
+          "extractor_version",
+          "extractor_f1",
+          "lexical_baseline_f1"
+        ],
+        "model": "MiniMax-M3.1-Flash-Preview",
+        "model_requested": "MiniMax-M3.1-Flash-Preview",
+        "models_tier": [
+          "MiniMax-M3.1-Flash-Preview"
+        ],
+        "models_used": [
+          "MiniMax-M3.1-Flash-Preview"
+        ],
+        "n_calls": 3,
+        "n_contradicted": 0,
+        "n_dup_suppressed": 1,
+        "n_empty_retry": 0,
+        "n_parsefail": 0,
+        "n_pool": 8,
+        "n_shipped": 6,
+        "n_silent_empty": 0,
+        "n_supported": 7,
+        "n_tokens": 4420,
+        "n_unmentioned": 1,
+        "n_unverified": 0,
+        "novel_axis": true,
+        "over_budget_count": 0,
+        "parsefail_rate": 0.0,
+        "prompt_hash": "sha256:a016e794853e4d26",
+        "prompt_version": "ROUTE-A-prompt-v2.0",
+        "protocol_a4_not_produced": [
+          "judge_model",
+          "judge_prompt_version",
+          "judge_temp",
+          "judge_same_vendor",
+          "judge_selfcheck",
+          "embedding_model",
+          "aligner_version",
+          "extractor_version",
+          "extractor_f1",
+          "lexical_baseline_f1"
+        ],
+        "rep": 1,
+        "reproducibility": "not_reproducible__no_api_seed_parameter",
+        "resample_mode": "structured",
+        "round2_executed": false,
+        "run_id": "A_fixed_2026-10-20T19:27:03Z",
+        "run_nonce": "2026-10-20T19:27:03Z",
+        "scope_kind": "supported",
+        "seed": "S1",
+        "seed_effective": null,
+        "seed_policy": "api_seed_unsupported__label_only__NOT_reproducible",
+        "silent_empty_count": 0,
+        "stage_counts": {
+          "n1_gen": 1,
+          "n2_claims": 8,
+          "n3_dedup_loose": 8,
+          "n3_dedup_strict": 7,
+          "n4_resample": 0,
+          "n5_claims": 0,
+          "n6_split": 0,
+          "n7_dedup_loose": 7,
+          "n7_dedup_strict": 6,
+          "n7_impl1_lex": 7,
+          "n7_impl2_struct": 6,
+          "n7_scope": 7,
+          "n8_shipped": 6,
+          "pool_pre_split": 8,
+          "pool_total": 8,
+          "pool_truncated": 0
+        },
+        "support_rate_generated": 1.0,
+        "task_id": "DS-02",
+        "temperature": 0.7,
+        "total": 1,
+        "total_samples": 1,
+        "utility_axis": true,
+        "valid": 1,
+        "valid_samples": 1
+      },
+      "n_pool_items": 0,
+      "n_claims_extracted": 0,
+      "answer": "# 某快递规定：普通件 10 公斤以内每件 12 元；超出部分每公斤加收 3 元。生鲜件不得保价，含液体时另付 20 元包装费。寄一件 8 公斤的生鲜件（含液体）应付多少元？该件是否可以保价？\n\n## 经核验成立的依据\n\n- [EV-DS02-01] 单件8公斤的生鲜件重量未超过10公斤。\n- [EV-DS02-01] 单件8公斤的生鲜件基础运费为12元。\n- [EV-DS02-02] 单件8公斤的生鲜件不产生超重加费。\n- [EV-DS02-04] 单件8公斤且含液体的生鲜件另加20元包装费。\n- [EV-DS02-01] 单件8公斤且含液体的生鲜件合计费用为32元。\n- [EV-DS02-03] 生鲜件属于不得保价范围。"
+    }
+  ],
+  "runs_written": [
+    [
+      "/workspace/lab/routes/RUNS/A_fixed/DS-01/rep1.answer.md",
+      "/workspace/lab/routes/RUNS/A_fixed/DS-01/rep1.meta.json"
+    ],
+    [
+      "/workspace/lab/routes/RUNS/A_fixed/DS-02/rep1.answer.md",
+      "/workspace/lab/routes/RUNS/A_fixed/DS-02/rep1.meta.json"
+    ]
+  ],
+  "checks": {
+    "prompts_parse_all_nonempty": true,
+    "no_openrouter_in_prompts_or_endpoints": true,
+    "all_api_urls_are_minimax": true,
+    "evidence_not_in_generation_prompts": true,
+    "no_sample_invalidated": false,
+    "every_task_has_parsed_verdicts": true,
+    "within_global_call_cap": true,
+    "multitask_budget_is_per_task": true,
+    "preregistered_topology_fa5_fa6_called": true,
+    "preregistered_topology_round2_executed_in_meta": false,
+    "every_answer_within_char_cap": true,
+    "runs_outputs_written": true
+  },
+  "counters": {
+    "evidence_leak_count": 0,
+    "n_resample_fa5_fa6_calls": 2
+  },
+  "invalidated_samples": [
+    {
+      "tid": "DS-01",
+      "reason": "token 预算不足：已用 46217 / 上限 40000",
+      "tokens_used": 46217,
+      "token_cap": 40000,
+      "n_calls": 0,
+      "n_tokens": 0,
+      "note": "预算溢出的样本**作废并计数**（协议 E4）；不是被截断后照常算"
+    }
+  ]
+}

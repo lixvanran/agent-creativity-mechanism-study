@@ -1,0 +1,146 @@
+[
+ {
+  "i": 1,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 317,
+  "completion_tokens": 604,
+  "total_tokens": 921
+ },
+ {
+  "i": 2,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 316,
+  "completion_tokens": 980,
+  "total_tokens": 1296
+ },
+ {
+  "i": 3,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 320,
+  "completion_tokens": 686,
+  "total_tokens": 1006
+ },
+ {
+  "i": 4,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 315,
+  "completion_tokens": 575,
+  "total_tokens": 890
+ },
+ {
+  "i": 5,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 388,
+  "completion_tokens": 3057,
+  "total_tokens": 3445
+ },
+ {
+  "i": 6,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 388,
+  "completion_tokens": 508,
+  "total_tokens": 896
+ },
+ {
+  "i": 7,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 414,
+  "completion_tokens": 772,
+  "total_tokens": 1186
+ },
+ {
+  "i": 8,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 390,
+  "completion_tokens": 1009,
+  "total_tokens": 1399
+ },
+ {
+  "i": 9,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 781,
+  "completion_tokens": 1580,
+  "total_tokens": 2361
+ },
+ {
+  "i": 10,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 780,
+  "completion_tokens": 265,
+  "total_tokens": 1045
+ },
+ {
+  "i": 11,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 506,
+  "completion_tokens": 6000,
+  "total_tokens": 6506
+ },
+ {
+  "i": 12,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M2.7",
+  "prompt_tokens": 345,
+  "completion_tokens": 3253,
+  "total_tokens": 3598
+ },
+ {
+  "i": 13,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 330,
+  "completion_tokens": 3883,
+  "total_tokens": 4213
+ },
+ {
+  "i": 14,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 808,
+  "completion_tokens": 8000,
+  "total_tokens": 8808
+ },
+ {
+  "i": 15,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M2.7",
+  "prompt_tokens": 647,
+  "completion_tokens": 8000,
+  "total_tokens": 8647
+ },
+ {
+  "i": 16,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 332,
+  "completion_tokens": 1466,
+  "total_tokens": 1798
+ },
+ {
+  "i": 17,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 375,
+  "completion_tokens": 796,
+  "total_tokens": 1171
+ },
+ {
+  "i": 18,
+  "url": "https://api.minimaxi.com/v1/chat/completions",
+  "model": "MiniMax-M3.1-Flash-Preview",
+  "prompt_tokens": 733,
+  "completion_tokens": 718,
+  "total_tokens": 1451
+ }
+]

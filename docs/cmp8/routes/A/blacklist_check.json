@@ -1,0 +1,43 @@
+{
+ "source_files": 8,
+ "blacklist_strict": 5644,
+ "blacklist_hint": 104,
+ "files": [
+  {
+   "path": "DESIGN.md",
+   "chars": 50854,
+   "lines": 843,
+   "hits": []
+  },
+  {
+   "path": "spec.yaml",
+   "chars": 13750,
+   "lines": 438,
+   "hits": []
+  },
+  {
+   "path": "route_a.py",
+   "chars": 38026,
+   "lines": 915,
+   "hits": []
+  },
+  {
+   "path": "facets.py",
+   "chars": 6164,
+   "lines": 227,
+   "hits": []
+  }
+ ],
+ "strict_hits": 0,
+ "hint_hits": 0,
+ "files_scanned": 4,
+ "files_missing": 0,
+ "guards_failed": [],
+ "status": "PASS",
+ "scanned_files": [
+  "DESIGN.md",
+  "spec.yaml",
+  "route_a.py",
+  "facets.py"
+ ]
+}
