@@ -296,6 +296,13 @@ class ActionPolicy:
 
     # ★ 仲裁的三个选项（**与修复动作正交**）：0=mark（标注不删）1=keep_pos 2=keep_neg
     ARB_IDS = ("mark", "keep_pos", "keep_neg")
+    # ★★ 2026-10-24：**架构的两个自由度也交给学习**
+    #   `nf` = 发散程度（用几个认知位置）⇒ ★ 这是"该不该发散"的决策权
+    #   `mm` = 合并方式（机械汇总 / decision-packet / 逐路投票）⇒ ★ 这是"怎么合并"的决策权
+    #   ⇒ A01 实测：四个臂**全部踩坑** ⇒ 写死"每题都发散 3 路"是错的
+    #   ⇒ ⇒ 让**策略自己学**在什么题上该少发散、该怎么合并
+    NF_IDS = (1, 2, 3, 4)
+    MM_IDS = ("mechanical", "packet", "vote")
 
     def __init__(self, w: Optional[Dict[str, Any]] = None):
         w = w or {}
@@ -307,6 +314,9 @@ class ActionPolicy:
                    (w.get("m") or [[0.0] * len(REPAIR_IDS) for _ in FAILURE_IDS])]
         # ★ 仲裁权重（层3 要学的第二件事：冲突时保留哪一侧 / 收不收窄）
         self.arb = list(w.get("arb") or [0.0] * len(self.ARB_IDS))
+        # ★★ 架构自由度：发散程度 + 合并方式
+        self.nf = list(w.get("nf") or [0.0] * len(self.NF_IDS))
+        self.mm = list(w.get("mm") or [0.0] * len(self.MM_IDS))
 
     # ---- 打分
     def score_spec(self, spec: ActionSpec, failure_kind: Optional[str]) -> float:
@@ -361,10 +371,34 @@ class ActionPolicy:
 
     def param_count(self) -> int:
         return (len(self.u) + len(self.v) + len(self.t)
-                + len(self.m) * len(self.m[0]) + len(self.arb))
+                + len(self.m) * len(self.m[0]) + len(self.arb)
+                + len(self.nf) + len(self.mm))
+
+    # ── ★★ 架构自由度：发散程度 + 合并方式（★ 由策略决定，不由人写死）
+    def choose_architecture(self, failure_kind, rng):
+        """★ 采样两个架构决策：(发散程度 n_frames, 合并方式 merge_mode)。
+
+        ⇒ **A01 实测：四个臂全部踩坑** ⇒ 写死"每题都发散 3 路 + 机械汇总"是错的
+        ⇒ ⇒ 让策略自己学：**在什么题上该少发散、该怎么合并**
+        ⇒ ⇒ 三个决策正交：修复动作 × 仲裁方式 × **架构方式**
+        """
+        def _sample(weights):
+            mx = max(weights)
+            ex = [pow(2.718281828459045, w - mx) for w in weights]
+            tot = sum(ex) or 1.0
+            r, acc = rng.random(), 0.0
+            for i, e in enumerate(ex):
+                acc += e / tot
+                if r <= acc:
+                    return i
+            return len(weights) - 1
+        nf = self.NF_IDS[_sample(self.nf)]
+        mm = self.MM_IDS[_sample(self.mm)]
+        return nf, mm
 
     def export(self) -> Dict[str, Any]:
-        return dict(u=self.u, v=self.v, t=self.t, m=self.m, arb=self.arb)
+        return dict(u=self.u, v=self.v, t=self.t, m=self.m, arb=self.arb,
+                    nf=self.nf, mm=self.mm)
 
     @staticmethod
     def load(d: Dict[str, Any]) -> "ActionPolicy":
@@ -607,6 +641,44 @@ def _polarity(text):
         if w in t and (best[0] == 0 or len(w) > len(best[1] or "")):
             best = (-1, w)
     return best
+
+
+def merge_claims(claims: Sequence[str], mode: str = "mechanical") -> Dict[str, Any]:
+    """★ 合并方式（**由策略选，不由人写死**）。
+
+    | mode | 行为 | 依据 |
+    |---|---|---|
+    | `mechanical` | 去冗余后**全部保留**（现状）| —— |
+    | `packet` | **decision packet**：全部保留 + **显式标注未决异议** | DCI (arXiv:2603.11781) *"Disagreements are preserved … not flattened"* |
+    | `vote` | 多数票（plurality）**收窄** | Self-Consistency (arXiv:2203.11171)；⚠️ 概率加权不如 plurality |
+
+    ⇒ ★ **合并是"代价发生的那一步"**（§6.4.4：逐帧投票维度 4.50 vs 机械汇总 2.50）
+    ⇒ ⇒ **所以它必须是学出来的决策，不是写死的。**
+    """
+    cl = [c for c in (claims or []) if (c or "").strip()]
+    pairs = detect_opposite_pairs(cl)
+    if mode == "vote" and cl:
+        from collections import Counter
+        cnt = Counter(cl)
+        top = max(cnt.values())
+        winners = {c for c, v in cnt.items() if v == top}
+        kept, seen = [], set()
+        for c in cl:
+            if c in winners and c not in seen:
+                seen.add(c)
+                kept.append(c)
+        return dict(claims=kept, mode=mode, n_conflicts=len(pairs),
+                    note="多数票收窄")
+    kept = dedup(cl)
+    if mode == "packet":
+        # ★ decision packet：**不删**，但把冲突双方标出来（"未决异议"）
+        marked = []
+        for c in kept:
+            is_conf = any(c == p["pos"] or c == p["neg"] for p in pairs)
+            marked.append(("⚠未决异议：" if is_conf else "") + c)
+        return dict(claims=kept, marked=marked, mode=mode, n_conflicts=len(pairs),
+                    note="保留全部 + 显式标注未决异议（decision packet）")
+    return dict(claims=kept, mode=mode, n_conflicts=len(pairs), note="机械汇总")
 
 
 def detect_opposite_pairs(claims):
@@ -991,6 +1063,26 @@ class CollapseFixWorkflow:
         arm_records: List[Dict[str, Any]] = []
         failures: Dict[str, int] = {}
 
+        # ── 策略先建立（架构自由度要用它选）★ 顺序：policy/_rng 必须在此之前
+        _pol_src = C.get("policy")
+        if _pol_src is None:
+            policy = ActionPolicy.from_lookup()
+        elif isinstance(_pol_src, dict):
+            policy = ActionPolicy.load(_pol_src)
+        else:
+            policy = _pol_src
+        _rng = random.Random(int(C.get("policy_seed", 20261022)) + 7919)
+
+        # ★★ 架构自由度交给策略（"该不该发散" + "怎么合并"是**学出来的**）
+        _arch_pick = None
+        _merge_mode = C.get("merge_mode", "mechanical")
+        if policy is not None and C.get("learn_architecture", True):
+            _nf, _mm = policy.choose_architecture("conflict", _rng)
+            _arch_pick = (int(_nf), str(_mm))
+            C = dict(C)
+            C["n_slots"] = int(_nf)
+            _merge_mode = str(_mm)
+            ops.append("ARCH[%df/%s]" % (int(_nf), _mm))
         frames = select_frames(C["n_slots"], seed=C["seed"])
         # 第 0 轮：基线动作
         # 初始动作：lookup 模式 ⇒ "base"（无修法）；policy 模式 ⇒ ("none","slot",0)
@@ -1000,14 +1092,6 @@ class CollapseFixWorkflow:
         _arb_meta = None
         # ★ 策略：lookup 模式 ⇒ **手写映射**（层2 的"设计的手段"）
         #         policy 模式 ⇒ 传入的权重（w=0 ⇒ 均匀 ⇒ 未训练基线）
-        _pol_src = C.get("policy")
-        if _pol_src is None:
-            policy = ActionPolicy.from_lookup()
-        elif isinstance(_pol_src, dict):
-            policy = ActionPolicy.load(_pol_src)
-        else:
-            policy = _pol_src
-        _rng = random.Random(int(C.get("policy_seed", 20261022)) + 7919)
         n_rounds = max(1, int(C["max_rounds"]))
         slot_claims: List[List[str]] = []
         slot_records: List[Dict[str, Any]] = []
@@ -1130,8 +1214,9 @@ class CollapseFixWorkflow:
                 final_claims = dedup(all_slot_claims)
         else:
             # ★ 机械汇总：**不丢任何一条**，也不多花一次调用
-            final_claims = dedup(all_slot_claims)
-            ops.append("AGGREGATE(mechanical)")
+            _mg = merge_claims(all_slot_claims, _merge_mode)
+            final_claims = _mg["claims"]
+            ops.append("AGGREGATE(%s)" % _merge_mode)
             # ★★ 跨槽位冲突仲裁（层2 默认"容忍"⇒ 不收窄搜索空间）
             _am = C.get("arbitrate_mode", "none")
             _arb_pick = None
@@ -1175,6 +1260,8 @@ class CollapseFixWorkflow:
         return dict(
             paths=_paths,
             arbitration=(_arb_meta if "_arb_meta" in dir() else None),
+            arch_pick=_arch_pick, merge_mode=_merge_mode,
+            n_conflicts_merge=_mg.get("n_conflicts") if "_mg" in dir() else None,
             arbitration_pick=(_arb_meta or {}).get("pick"),
             n_conflicts_final=len(detect_opposite_pairs(final_claims)),
             chat_stats=self.chat_stats,
