@@ -26,6 +26,56 @@ def _rank(sc):
     return sorted(range(len(sc)), key=lambda i: -float(sc[i]))
 
 
+# ★★★ 2026-10-25 新增：★ 目标集按【align 打分器同口径】重算 ★★★
+# ★ 为什么不能信落盘的 target_*：★ 落盘时 `target_set6` 的口径是
+# ★ 「depth == 放弃 ⇒ drop；★ else ⇒ deep」⇒ ⇒ **"点到为止"被算进 deep**
+# ★ ⇒ 而 `score_state_alignment5` 用的是 `st.deep_set()`（★ **只收"深入展开"**）
+# ★ ⇒ ⇒ **两者漂移** ⇒ ⇒ 落盘的 target_* 与打分器实际用的目标集不是一回事
+# ★ ⇒ ⇒ **后果：★ ① 用它判"align 是否可打分"会判错（T07-3 就是）
+# ★ ⇒ ⇒           ② 用它判"目标集是否变化"会判错**
+# ★ ⇒ ⇒ 修法：★ **从落盘的 `state_meta.decisions` 按 deep_set/drop_set 重算**
+# ★ ⇒ ⇒（★ decisions 是【原始数据】⇒ ⇒ 不必重跑批就能得到正确读数）
+def _target_sets(r):
+    """返回 (base_deep, base_drop, quota_deep, quota_drop, scorable_B, scorable_D)。
+
+    ★ 与 `workflow_arch6.state_variants6` 同逻辑：★ base 剔除"放弃"；
+    ★ quota 若无自然"放弃"则**补一条**（★ priority 最低者）⇒ ⇒ 与运行期一致。
+    """
+    def _prio(d):
+        try:
+            return int(d.get("priority") or 99)
+        except (TypeError, ValueError):
+            return 99
+
+    def _dsets(decs):
+        deep, drop = set(), set()
+        for d in decs or []:
+            gi = int(d.get("gap_index") or 0)
+            if gi <= 0:
+                continue
+            dep = str(d.get("depth") or "").strip()
+            if dep == "深入展开":
+                deep.add(gi)
+            elif dep == "放弃":
+                drop.add(gi)
+        return deep, drop
+
+    decs = list((r.get("state_meta") or {}).get("decisions") or [])
+    base = [d for d in decs if str(d.get("depth") or "").strip() != "放弃"]
+    quota = list(decs)
+    if not any(str(d.get("depth") or "").strip() == "放弃" for d in quota):
+        cands = [d for d in quota if str(d.get("depth") or "").strip() != "放弃"] or quota
+        if cands:
+            nd = dict(sorted(cands, key=lambda d: (-_prio(d), int(d.get("gap_index") or 0)))[-1])
+            nd["depth"] = "放弃"
+            quota = quota + [nd]
+    bd, bdr = _dsets(base)
+    qd, qdr = _dsets(quota)
+    return (bd, bdr, qd, qdr,
+            bool(bd or bdr),   # ★ B 档可打分 ⇔ 状态目标集非空
+            bool(qd or qdr))   # ★ D 档可打分
+
+
 def load(path: Path) -> list:
     if not path.exists():
         return []
@@ -33,9 +83,19 @@ def load(path: Path) -> list:
 
 
 def main():
-    src = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "runs" / "arch6_stage1.jsonl"
+    # ★★★ 2026-10-25：★ 加 `--out`（★ 不再猜落盘路径）★★★
+    #   ★ 为什么：★ 同步脚本曾跑本脚本（输出到 code/runs/）却去拷 experiment-design/runs/
+    #   ★ ⇒ ⇒ **一直在拷陈旧 analysis** ⇒ ⇒ ★ 这就是"派生读数陈旧"的真因
+    #   ★ ⇒ ⇒ **唯一可靠的同步方式 = 让产出方【自报】落盘路径** ★
+    _argv = sys.argv[1:]
+    out = None
+    if "--out" in _argv:
+        i = _argv.index("--out")
+        out = Path(_argv[i + 1])
+        del _argv[i:i + 2]
+    src = Path(_argv[0]) if _argv else HERE / "runs" / "arch6_stage1.jsonl"
     rows = load(src)
-    out = HERE / "runs" / "arch6_stage1_analysis.json"
+    out = out or (HERE / "runs" / "arch6_stage1_analysis.json")
 
     print("=" * 74)
     print("v6 Stage-1 分析：%s" % src)
@@ -43,16 +103,44 @@ def main():
     print("样本行数：%d" % len(rows))
     ok = [r for r in rows if not r.get("error")]
     errs = [r for r in rows if r.get("error")]
+    # ★★★ 2026-10-25：★ 建立【可打分单元】白名单 ★★★
+    #   ★ 判据（★ align 打分器同口径）：★ 状态目标集全空 ⇒ align=None
+    #   ★ ⇒ ⇒ 旧代码把 None 静默归零 ⇒ ⇒ 落盘成 0.0 ⇒ ⇒ **看起来像合法的 0 分**
+    #   ★ ⇒ ⇒ 但它是【仪器层 0】⇒ ⇒ **不得混进任何内容层统计**（σ / 平移 / 同质率）
+    scorable_tags = set()
+    for r in ok:
+        _bd, _bdr, _qd, _qdr, sc_b, sc_d = _target_sets(r)
+        if sc_b and sc_d:
+            scorable_tags.add(r.get("tag"))
+    ok_sc = [r for r in ok if r.get("tag") in scorable_tags]
+    print("  可打分单元（★ 状态目标集非空）：%d / %d" % (len(ok_sc), len(ok)))
     print("  有效 %d / 失败 %d" % (len(ok), len(errs)))
     if errs:
         for r in errs[:6]:
             print("    ✘ %s: %s" % (r.get("tag"), r.get("error")))
 
     # ── ① 目标集变化率（代价是否真进了状态）
-    tc = [r.get("target_changed") for r in ok if r.get("target_changed") is not None]
+    # ★★★ 2026-10-25 修正：★ 不再信任落盘的 `target_changed` ★★★
+    #   ★ 落盘时 `target_set6` 的口径与 `score_state_alignment5` 漂移（★ "点到为止"归属不同）
+    #   ★ ⇒ ⇒ 改为**从 state_meta.decisions 按打分器同口径重算**
+    tc, tc_detail = [], []
+    for r in ok:
+        _bd, _bdr, _qd, _qdr, sc_b, sc_d = _target_sets(r)
+        if not (sc_b and sc_d):
+            continue          # ★ 不可打分 ⇒ 不计入分母
+        ch = bool(_bd != _qd or _bdr != _qdr)
+        tc.append(ch)
+        tc_detail.append({"tag": r.get("tag"), "changed": ch,
+                          "base": {"deep": sorted(_bd), "drop": sorted(_bdr)},
+                          "quota": {"deep": sorted(_qd), "drop": sorted(_qdr)}})
     tcr = (sum(1 for x in tc if x) / len(tc)) if tc else None
     print("\n── ① 目标集变化率（有代价 ⇒ 状态目标集是否真的变了）")
+    print("   ★ 口径：★ 从 state_meta.decisions 按【align 打分器同口径】重算"
+          "（★ 不信任落盘的 target_changed ⇒ ★ 旧口径漂移）")
     print("   n=%d  变化率=%s" % (len(tc), ("%.4f" % tcr) if tcr is not None else "n/a"))
+    for d in tc_detail:
+        if not d["changed"]:
+            print("      %-8s 未变：base=%s quota=%s" % (d["tag"], d["base"], d["quota"]))
 
     # ── ② 排序改变率（代价是否改变了选择）
     # ★ RANK_RECOMPUTED：从 scores 重算（落盘的 rank 不可信 ⇒ 见 _rank 的 BUG 记录）
@@ -102,10 +190,24 @@ def main():
     detail_rows = []
     n_with_disc = 0          # ★ 对照端（B）有区分力的单元数
     n_changed = 0
+    n_unscoreable = 0
     for r in ok:
         bs = (r.get("B_state_nocost") or {}).get("scores") or []
         ds = (r.get("D_state_quota") or {}).get("scores") or []
         if not (bs and ds):
+            continue
+        # ★★★ 2026-10-25 新增：★ 排除【不可打分】单元 ★★★
+        #   ★ 判据（★ align 打分器同口径）：★ 状态目标集全空 ⇒ 该样本无取舍代价
+        #   ★ ⇒ ⇒ `score_state_alignment5` 返回 None ⇒ ★ **旧代码把 None 静默归零**
+        #   ★ ⇒ ⇒ 落盘的 [0,0,0] 是【仪器层】⇒ ⇒ **不得当内容层 0** ⇒ ⇒ **不得计入分母**
+        _bd, _bdr, _qd, _qdr, sc_b, sc_d = _target_sets(r)
+        if not (sc_b and sc_d):
+            n_unscoreable += 1
+            detail_rows.append({"tag": r.get("tag"), "changed": None,
+                                "unscoreable": True,
+                                "reason": "状态目标集全空 ⇒ align=None ⇒ 旧代码归零",
+                                "spread_B": None, "spread_D": None,
+                                "control_has_discrimination": None})
             continue
         rb, rd = _rank(bs), _rank(ds)
         changed = bool(rb != rd)
@@ -118,9 +220,18 @@ def main():
         if changed:
             n_changed += 1
         detail_rows.append({"tag": r.get("tag"), "changed": changed,
+                            "unscoreable": False,
                             "spread_B": round(spread_b, 6), "spread_D": round(spread_d, 6),
-                            "control_has_discrimination": has_disc})
-    n_all = len(detail_rows)
+                            "control_has_discrimination": has_disc,
+                            "target_base": {"deep": sorted(_bd), "drop": sorted(_bdr)},
+                            "target_quota": {"deep": sorted(_qd), "drop": sorted(_qdr)},
+                            "target_changed": bool(_bd != _qd or _bdr != _qdr),
+                            "change_kind": ("真排序改变" if (changed and has_disc and spread_d > 1e-9)
+                                            else ("创造区分" if (changed and not has_disc)
+                                                  else "无"))})
+    n_all = sum(1 for d in detail_rows if not d.get("unscoreable"))
+    print("   ★ 排除不可打分单元 %d 个（★ 状态目标集全空 ⇒ align=None ⇒ 旧代码归零）"
+          % n_unscoreable)
     print("   分母 n=%d   改变 %d   ⇒ 改变率=%.4f" % (n_all, n_changed, (n_changed / n_all) if n_all else 0))
     if n_all:
         p = n_changed / n_all
@@ -136,16 +247,35 @@ def main():
         print("   ⇒ ★ ⇒ 改变率 %d/%d 的真实分母应是 **%d**（有区分力的单元）⇒ ⇒ = %.4f" % (
             n_changed, n_all, n_with_disc, (n_changed / n_with_disc) if n_with_disc else 0))
         for d in detail_rows:
-            print("      %-8s changed=%-5s spread_B=%.4f spread_D=%.4f 对照端有区分力=%s" % (
-                d["tag"], d["changed"], d["spread_B"], d["spread_D"], d["control_has_discrimination"]))
+            if d.get("unscoreable"):
+                print("      %-8s ★★ 不可打分（★ 排除）：%s" % (d["tag"], d.get("reason")))
+                continue
+            print("      %-8s changed=%-5s spread_B=%.4f spread_D=%.4f 对照端有区分力=%-5s 目标集变=%-5s %s" % (
+                d["tag"], d["changed"], d["spread_B"], d["spread_D"],
+                d["control_has_discrimination"], d.get("target_changed"),
+                d.get("change_kind") or ""))
         # ── ★★★ 第二个口径：★ 排序改变可以来自【D 端内部重排】⇒ ⇒ 只看 B 端会漏 ★★★
         #   ★ G01-3 就是这一类：★ B 端全同（spread_B=0）⇒ 但 D 端有区分 ⇒ ⇒ 排序仍变了
         #   ⇒ ⇒ ★ **「改变」有两个来源**：★ ① B 有区分 ⇒ 代价把 B 的领先者换掉（★ 改变既有排序）
         #   ⇒ ⇒ ★                       ② B 无区分但 D 有区分 ⇒ 代价【创造】了区分（★ 更强）
-        n_either = sum(1 for d in detail_rows
+        sc_rows = [d for d in detail_rows if not d.get("unscoreable")]
+        n_either = sum(1 for d in sc_rows
                         if d["spread_B"] > 1e-9 or d["spread_D"] > 1e-9)
-        n_changed_with_either = sum(1 for d in detail_rows
+        n_changed_with_either = sum(1 for d in sc_rows
                                     if d["changed"] and (d["spread_B"] > 1e-9 or d["spread_D"] > 1e-9))
+        # ★★★ 严口径（★ 2026-10-25 新增）：★ "真排序改变" = 两档【都有区分力】且顺序不同
+        #   ★ ★ 为什么要单列：★ B 档全并列时 order 恒为原序 [0,1,2] ⇒ ⇒ 机械比顺序
+        #   ★ ★ 会把"代价【创造】了区分"误判成"排序被改变"⇒ ⇒ ★ ⇒ 两者机制不同 ⇒ ⇒ 必须分开
+        n_both_disc = sum(1 for d in sc_rows
+                          if d["spread_B"] > 1e-9 and d["spread_D"] > 1e-9)
+        n_true_change = sum(1 for d in sc_rows
+                             if d["changed"] and d["spread_B"] > 1e-9 and d["spread_D"] > 1e-9)
+        print("   ⇒ ★ ★ 严口径（★ 两档都有区分力）：★ %d/%d 单元两档都有区分力" % (n_both_disc, n_all))
+        print("      ★ 其中顺序真变了的：%d ⇒ 严口径改变率 = %s" % (
+            n_true_change, ("%.4f" % (n_true_change / n_both_disc)) if n_both_disc else "n/a（★ 分母为 0）"))
+        n_created = sum(1 for d in sc_rows if d.get("change_kind") == "创造区分")
+        print("      ★ 代价【创造】了区分的单元（★ B 全并列 ⇒ 不存在『排序改变』可谈）：%s" % (
+            [d["tag"] for d in sc_rows if d.get("change_kind") == "创造区分"] or "无"))
         print("   ⇒ ★ ★ 第二口径（★ 任一端有区分力）：★ %d/%d 单元有区分力" % (n_either, n_all))
         print("      ★ 排序改变且至少一端有区分力：%d/%d ⇒ = %.4f" % (
             n_changed_with_either, n_either, (n_changed_with_either / n_either) if n_either else 0))
@@ -170,29 +300,38 @@ def main():
             continue
         if not all(abs(float(x)) < 1e-12 for x in bs + ds):
             continue
-        ful = (r.get("ful_B") or {}).get("fulfill")
-        tgt = r.get("target_quota") or {}
-        has_targets = bool(tgt.get("deep") or tgt.get("drop"))
-        if ful is not None and float(ful) > 0 and has_targets:
-            zero_cls["content_zero"].append(r.get("tag"))
-        elif not has_targets:
+        # ★★★ 2026-10-25 修正：★ 判"可否打分"必须用【align 打分器同口径】★★★
+        #   ★ 旧判据用落盘的 `target_quota`，★ 而它的口径与打分器漂移（★ "点到为止"归属不同）
+        #   ★ ⇒ ⇒ 旧判据会把"状态目标集全空"的单元判成"目标非空 ⇒ 内容层 0"
+        #   ★ ⇒ ⇒ 【★ 那是把"仪器层 0"（None 被旧代码归零）伪装成"内容层 0" ★】
+        _bd, _bdr, _qd, _qdr, sc_b, sc_d = _target_sets(r)
+        if not (sc_b and sc_d):
+            # ★ ★ 状态目标集全空 ⇒ align=None ⇒ ★ 旧代码 `0.0 if v is None else v` ⇒ 落盘成 0
+            # ⇒ ⇒ 这是【不可打分 None 被旧实现归零】⇒ ⇒ **不得当内容层 0**
             zero_cls["unscoreable_none"].append(r.get("tag"))
+            continue
+        ful = (r.get("ful_B") or {}).get("fulfill")
+        if ful is not None and float(ful) > 0:
+            zero_cls["content_zero"].append(r.get("tag"))
         else:
             zero_cls["other"].append(r.get("tag"))
     print("   内容层 0（★ 候选声明与状态决策**真的**不相交 ⇒ Jaccard=0）：%s"
          % (zero_cls["content_zero"] or "无"))
-    print("   不可打分 None（★ 状态目标集为空 ⇒ 该样本无取舍代价）：%s"
+    print("   不可打分 None（★ 状态目标集全空 ⇒ align=None ⇒ ★ 旧代码静默归零）：%s"
          % (zero_cls["unscoreable_none"] or "无"))
     print("   其他：%s" % (zero_cls["other"] or "无"))
-    print("   ⇒ ★ 判据：★ fulfil>0 且 target 非空 ⇒ ⇒ 该 0 是【内容层】⇒ ⇒ 不得归为仪器层")
+    print("   ⇒ ★ 判据（★ 2026-10-25 修正）：★ 先用【align 同口径】判可否打分")
+    print("     ⇒ 状态目标集全空 ⇒ **不可打分 None** ⇒ ⇒ 落盘的 0 是【仪器层】⇒ ⇒ 不得当内容层 0")
+    print("     ⇒ 可打分且 fulfil>0 ⇒ 该 0 是【内容层】⇒ ⇒ 不得归为仪器层")
     print("   ⇒ ★ ★ 内容层 0 的单元：★ 候选与状态完全不相交 ⇒ ⇒ 对「平移 vs 区分」零信息量 ⇒ ⇒ 须单独标注")
+    print("   ⇒ ★ ★ ★ 不可打分的单元【不进排序改变率分母】（★ 它的 0 是仪器层假象）")
 
     # ── ★★ ②b 机制诊断：代价是「常数平移」还是「区分候选」
     #     若代价对所有候选一视同仁地降低 align ⇒ 它只是常数偏移 ⇒ 排序必然不变
     #     ⇒ ⇒ "排序改变率≈0" 的机制解释就在这里（而不是"模型没接入"）。
     shift_var, shift_all = [], []
     dvar, bvar = [], []
-    for r in ok:
+    for r in ok_sc:      # ★★★ 2026-10-25：★ 排除不可打分单元（★ 其 0 是仪器层假象）★★★
         bs = (r.get("B_state_nocost") or {}).get("scores") or []
         ds = (r.get("D_state_quota") or {}).get("scores") or []
         if len(bs) == len(ds) and bs:
@@ -219,9 +358,9 @@ def main():
         m = sum(xs) / n
         return sum((x - m) ** 2 for x in xs) / (n - 1)
     bvar_true = [_v([float(x) for x in ((r.get("B_state_nocost") or {}).get("scores") or [])])
-                 for r in ok if len((r.get("B_state_nocost") or {}).get("scores") or []) > 1]
+                 for r in ok_sc if len((r.get("B_state_nocost") or {}).get("scores") or []) > 1]
     dvar_true = [_v([float(x) for x in ((r.get("D_state_quota") or {}).get("scores") or [])])
-                 for r in ok if len((r.get("D_state_quota") or {}).get("scores") or []) > 1]
+                 for r in ok_sc if len((r.get("D_state_quota") or {}).get("scores") or []) > 1]
     print("   状态化尺子区分力（★ 方差 / 标准差 两个口径都给，避免命名误导）：")
     print("     B 档：var 均值=%s ／ sd 均值=%s" % (
         ("%.4f" % (sum(bvar_true) / len(bvar_true))) if bvar_true else "n/a",
@@ -239,14 +378,15 @@ def main():
     #     若同题同批的候选在"自主声明"上高度同质 ⇒ 两个打分器面对的是一批等价候选
     #     ⇒ ⇒ 任何选择器都只能取第一个 ⇒ ⇒ 排序改变率必然 0
     homo, decl_sets = 0, []
-    for r in ok:
+    for r in ok_sc:     # ★★★ 2026-10-25：★ 排除不可打分单元 ★★★
         bs = (r.get("B_state_nocost") or {}).get("scores") or []
         if len(bs) > 1:
             if len(set(round(float(x), 6) for x in bs)) == 1:
                 homo += 1
     print("\n── ②c ★ 候选池同质率（★ 选择层有没有东西可选）")
+    print("   ★ 分母只算可打分单元（★ 不可打分者不是『同质』，★ 是『没被评分』）")
     print("   B 档三候选 align **全同**的样本：%d/%d  ⇒ 同质率=%.4f" % (
-        homo, len(ok), (homo / len(ok)) if ok else 0))
+        homo, len(ok_sc), (homo / len(ok_sc)) if ok_sc else 0))
     print("   ⇒ 同质率高 ⇒ **候选之间没有可区分的差异** ⇒ ⇒ 任何选择器都只能取第一个")
     print("   ⇒ ⇒ 这是「排序改变率=0」的**第三个解释**（既不是『代价没接入』也不是『纯平移』）")
 
@@ -282,14 +422,23 @@ def main():
             print("   %-10s %d/%d" % (g, c, len(gates)))
 
     # ── ⑤ σ 实测（状态化打分器在两格上的 gap）
-    gaps = []
+    # ★★★ 2026-10-25 修正：★ 排除【不可打分】单元 ★★★
+    #   ★ 旧代码把 align=None 静默归零 ⇒ ⇒ 落盘成 0.0 ⇒ ⇒ **看起来像个合法的 0 分**
+    #   ★ ⇒ ⇒ 把它算进 gap 序列 ⇒ ⇒ **σ 被假 0 污染** ⇒ ⇒ MDE 跟着偏
+    #   ★ ⇒ ⇒ 这是"仪器层 0 混进内容层统计"的典型 ⇒ ⇒ 必须按【可打分性】过滤
+    gaps, n_gap_excluded = [], 0
     for r in ok:
+        _bd, _bdr, _qd, _qdr, sc_b, sc_d = _target_sets(r)
+        if not (sc_b and sc_d):
+            n_gap_excluded += 1
+            continue
         b = (r.get("B_state_nocost") or {}).get("align")
         d = (r.get("D_state_quota") or {}).get("align")
         if b is not None and d is not None:
             gaps.append(float(d) - float(b))
     s_new = sd(gaps) if len(gaps) > 1 else None
     print("\n── ⑤ σ 实测（有代价 vs 无代价 的状态化 align 差）")
+    print("   ★ 排除不可打分单元 %d 个（★ 其 align 是 None 被旧代码归零的假 0）" % n_gap_excluded)
     print("   n=%d  均值=%s  σ_new=%s   （v5 外推值 σ=0.2186 仅作对照）" % (
         len(gaps), ("%.4f" % (sum(gaps) / len(gaps))) if gaps else "n/a",
         ("%.4f" % s_new) if s_new is not None else "n/a"))
@@ -337,7 +486,13 @@ def main():
         "src": str(src), "n_rows": len(rows), "n_ok": len(ok), "n_err": len(errs),
         "errors": [{"tag": r.get("tag"), "error": r.get("error")} for r in errs],
         "target_change_rate": tcr,
-        "candidate_homogeneity_rate": (homo / len(ok)) if ok else None,
+        "target_change_detail": tc_detail,
+        # ★★★ 2026-10-25：★ 分母改为【可打分单元】★★★
+        "candidate_homogeneity_rate": (homo / len(ok_sc)) if ok_sc else None,
+        "candidate_homogeneity_n": homo,
+        "candidate_homogeneity_denominator": len(ok_sc),
+        "n_scorable": len(ok_sc),
+        "n_unscoreable": n_unscoreable,
         "align_shift_mean": mean_shift,
         "align_shift_var_mean": (sum(shift_var) / len(shift_var)) if shift_var else None,
         "align_sd_B": (sum(bvar) / len(bvar)) if bvar else None,

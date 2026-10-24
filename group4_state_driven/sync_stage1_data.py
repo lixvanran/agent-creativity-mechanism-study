@@ -125,11 +125,17 @@ def main():
         sys.path.insert(0, os.path.join(REPO, "group4_state_driven", "code"))
         os.chdir(os.path.join(REPO, "group4_state_driven", "code"))
         import subprocess
-        p = subprocess.run([sys.executable, "-B", "analyze_arch6.py", src_jsonl],
+        # ★★★ 2026-10-25 修正：★ ★ 【★ 路径错配 ⇒ ⇒ 一直在拷陈旧 analysis ★】★★
+        #   ★ 旧写法：跑 `code/analyze_arch6.py`（★ 输出到 code/runs/）
+        #   ★        却去拷 `EXP/runs/arch6_stage1_analysis.json`（★ ★ 那是旧脚本的旧产物 ★）
+        #   ★ ⇒ ⇒ **仓内 analysis 长期是陈旧的** ⇒ ⇒ ★ 这正是"派生读数与原始样本不匹配"的真因
+        #   ★ ⇒ ⇒ 修法：★ **让产出方自报落盘路径**（★ --out）⇒ ⇒ 不猜路径
+        produced = os.path.join(REPO, "group4_state_driven", "code", "runs",
+                                "arch6_stage1_analysis.json")
+        p = subprocess.run([sys.executable, "-B", "analyze_arch6.py", src_jsonl,
+                            "--out", produced],
                            capture_output=True, text=True)
         os.chdir(REPO)
-        # 分析脚本把结果写到 EXP/runs/ ⇒ 把它拷进仓
-        produced = os.path.join(RUNS, "arch6_stage1_analysis.json")
         if os.path.exists(produced):
             atomic_copy(produced, dst_an)
             new_n = json.load(open(dst_an, encoding="utf-8")).get("n_rows")

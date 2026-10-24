@@ -1,17 +1,183 @@
 {
-  "src": "group4_state_driven/data/arch6_stage1.jsonl",
+  "src": "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/mech-study/group4_state_driven/data/arch6_stage1.jsonl",
   "n_rows": 9,
   "n_ok": 9,
   "n_err": 0,
   "errors": [],
   "target_change_rate": 1.0,
-  "candidate_homogeneity_rate": 0.8888888888888888,
-  "align_shift_mean": -0.09873333333333333,
-  "align_shift_var_mean": 0.14374396290834915,
-  "align_sd_B": 0.038550853059367424,
-  "align_sd_D": 0.11952872001973167,
-  "align_var_B": 0.013375514444444445,
-  "align_var_D": 0.03266532925925926,
+  "target_change_detail": [
+    {
+      "tag": "G01-1",
+      "changed": true,
+      "base": {
+        "deep": [
+          1,
+          2,
+          3
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          1,
+          2,
+          3
+        ],
+        "drop": [
+          1
+        ]
+      }
+    },
+    {
+      "tag": "G01-2",
+      "changed": true,
+      "base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          3
+        ]
+      }
+    },
+    {
+      "tag": "G01-3",
+      "changed": true,
+      "base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      }
+    },
+    {
+      "tag": "T07-1",
+      "changed": true,
+      "base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      }
+    },
+    {
+      "tag": "T07-2",
+      "changed": true,
+      "base": {
+        "deep": [
+          2,
+          3
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          2,
+          3
+        ],
+        "drop": [
+          2
+        ]
+      }
+    },
+    {
+      "tag": "T10-3",
+      "changed": true,
+      "base": {
+        "deep": [
+          2
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          2
+        ],
+        "drop": [
+          3
+        ]
+      }
+    },
+    {
+      "tag": "T10-1",
+      "changed": true,
+      "base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      }
+    },
+    {
+      "tag": "T10-2",
+      "changed": true,
+      "base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      }
+    }
+  ],
+  "candidate_homogeneity_rate": 0.875,
+  "candidate_homogeneity_n": 7,
+  "candidate_homogeneity_denominator": 8,
+  "n_scorable": 8,
+  "n_unscoreable": 1,
+  "align_shift_mean": -0.111075,
+  "align_shift_var_mean": 0.1617119582718928,
+  "align_sd_B": 0.04336970969178835,
+  "align_sd_D": 0.13446981002219813,
+  "align_var_B": 0.01504745375,
+  "align_var_D": 0.036748495416666666,
   "ALIGN_VAR_IS_SD_FIXED": true,
   "sel_change_quota_rate": 0.3333333333333333,
   "sel_change_nocost_rate": 0.4444444444444444,
@@ -171,44 +337,44 @@
   "family_gate_counts": {
     "escape": 9
   },
-  "sigma_new": 0.229897660806813,
+  "sigma_new": 0.24574312808296392,
   "sigma_v5_extrapolated": 0.2186,
-  "gap_mean": -0.009222222222222224,
+  "gap_mean": -0.010375000000000002,
   "mde_table": [
     {
       "n_per_cell": 3,
-      "mde80": 0.7437,
-      "power_delta015": 0.087
+      "mde80": 0.795,
+      "power_delta015": 0.083
     },
     {
       "n_per_cell": 5,
-      "mde80": 0.5761,
-      "power_delta015": 0.113
+      "mde80": 0.6158,
+      "power_delta015": 0.105
     },
     {
       "n_per_cell": 8,
-      "mde80": 0.4554,
-      "power_delta015": 0.152
+      "mde80": 0.4868,
+      "power_delta015": 0.139
     },
     {
       "n_per_cell": 10,
-      "mde80": 0.4074,
-      "power_delta015": 0.178
+      "mde80": 0.4354,
+      "power_delta015": 0.162
     },
     {
       "n_per_cell": 15,
-      "mde80": 0.3326,
-      "power_delta015": 0.244
+      "mde80": 0.3555,
+      "power_delta015": 0.219
     },
     {
       "n_per_cell": 20,
-      "mde80": 0.288,
-      "power_delta015": 0.308
+      "mde80": 0.3079,
+      "power_delta015": 0.276
     },
     {
       "n_per_cell": 25,
-      "mde80": 0.2576,
-      "power_delta015": 0.371
+      "mde80": 0.2754,
+      "power_delta015": 0.332
     }
   ],
   "fulfillment": {
@@ -235,82 +401,236 @@
     {
       "tag": "G01-1",
       "changed": false,
+      "unscoreable": false,
       "spread_B": 0.0,
       "spread_D": 0.5,
-      "control_has_discrimination": false
+      "control_has_discrimination": false,
+      "target_base": {
+        "deep": [
+          1,
+          2,
+          3
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          1,
+          2,
+          3
+        ],
+        "drop": [
+          1
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "无"
     },
     {
       "tag": "G01-2",
       "changed": false,
+      "unscoreable": false,
       "spread_B": 0.0,
       "spread_D": 0.0,
-      "control_has_discrimination": false
+      "control_has_discrimination": false,
+      "target_base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          3
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "无"
     },
     {
       "tag": "G01-3",
       "changed": true,
+      "unscoreable": false,
       "spread_B": 0.0,
       "spread_D": 0.5,
-      "control_has_discrimination": false
+      "control_has_discrimination": false,
+      "target_base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "创造区分"
     },
     {
       "tag": "T07-1",
       "changed": false,
+      "unscoreable": false,
       "spread_B": 0.0,
       "spread_D": 0.0,
-      "control_has_discrimination": false
+      "control_has_discrimination": false,
+      "target_base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "无"
     },
     {
       "tag": "T07-2",
       "changed": true,
+      "unscoreable": false,
       "spread_B": 0.6667,
       "spread_D": 0.4167,
-      "control_has_discrimination": true
+      "control_has_discrimination": true,
+      "target_base": {
+        "deep": [
+          2,
+          3
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          2,
+          3
+        ],
+        "drop": [
+          2
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "真排序改变"
     },
     {
       "tag": "T07-3",
-      "changed": false,
-      "spread_B": 0.0,
-      "spread_D": 0.0,
-      "control_has_discrimination": false
+      "changed": null,
+      "unscoreable": true,
+      "reason": "状态目标集全空 ⇒ align=None ⇒ 旧代码归零",
+      "spread_B": null,
+      "spread_D": null,
+      "control_has_discrimination": null
     },
     {
       "tag": "T10-3",
       "changed": false,
+      "unscoreable": false,
       "spread_B": 0.0,
       "spread_D": 0.0,
-      "control_has_discrimination": false
+      "control_has_discrimination": false,
+      "target_base": {
+        "deep": [
+          2
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          2
+        ],
+        "drop": [
+          3
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "无"
     },
     {
       "tag": "T10-1",
       "changed": false,
+      "unscoreable": false,
       "spread_B": 0.0,
       "spread_D": 0.0,
-      "control_has_discrimination": false
+      "control_has_discrimination": false,
+      "target_base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "无"
     },
     {
       "tag": "T10-2",
       "changed": true,
+      "unscoreable": false,
       "spread_B": 0.0,
       "spread_D": 0.5,
-      "control_has_discrimination": false
+      "control_has_discrimination": false,
+      "target_base": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": []
+      },
+      "target_quota": {
+        "deep": [
+          1,
+          2
+        ],
+        "drop": [
+          1
+        ]
+      },
+      "target_changed": true,
+      "change_kind": "创造区分"
     }
   ],
-  "rank_change_n": 9,
+  "rank_change_n": 8,
   "rank_change_count": 3,
-  "rank_change_rate": 0.3333333333333333,
+  "rank_change_rate": 0.375,
   "rank_change_wilson_ci95": [
-    0.1206,
-    0.6458
+    0.1368,
+    0.6943
   ],
   "control_has_discrimination_n": 1,
-  "control_has_discrimination_rate": 0.1111111111111111,
+  "control_has_discrimination_rate": 0.125,
   "rank_change_rate_over_discriminating_only": 3.0,
   "zero_classification": {
-    "content_zero": [
+    "content_zero": [],
+    "unscoreable_none": [
       "T07-3"
     ],
-    "unscoreable_none": [],
     "other": []
   }
 }

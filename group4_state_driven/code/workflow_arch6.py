@@ -112,16 +112,15 @@ def target_set6(st: State5) -> dict:
       （写透目标 / 放弃目标）⇒ ⇒ 补配额**确实**改变目标（实测 align 0.3333 → 0.6667）。
       ⇒ ⇒ 本函数改为返回两项的真实集合。
     """
-    deep, drop = set(), set()
-    for d in (st.decisions or []):
-        gi = int(d.get("gap_index") or 0)
-        if gi <= 0:
-            continue
-        if str(d.get("depth") or "").strip() == "放弃":
-            drop.add(gi)
-        else:
-            deep.add(gi)
-    return {"deep": sorted(deep), "drop": sorted(drop)}
+    # ★ ★★ 修正记录（2026-10-25 · ★ 核查 Stage-1 落盘值时发现）★★
+    # ★ ★ 原实现是「depth == 放弃 ⇒ drop；★ else ⇒ deep」⇒ ⇒ "点到为止"被算进 deep
+    # ★ ★ ⇒ ★ 而 `score_state_alignment5` 用的是 `st.deep_set()`（★ **只收"深入展开"**）
+    # ★ ★ ⇒ ⇒ **两者口径不一致** ⇒ ⇒ **落盘的 target_* 与打分器实际用的目标集不是一回事**
+    # ★ ★ ⇒ ⇒ 后果：★ ① 用 target_* 判断"align 是否可打分"会判错
+    # ★ ★ ⇒ ⇒           ② 用 target_* 判断"目标集是否变化"会判错
+    # ★ ★ ⇒ ⇒ **本函数改为直接调用 `st.deep_set()` / `st.drop_set()` ⇒ ⇒ 口径必然一致**
+    # ★ ★ ⇒ ⇒（★ 同一函数两个判据 ⇒ ⇒ 不可能再漂）
+    return {"deep": sorted(st.deep_set()), "drop": sorted(st.drop_set())}
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -268,8 +267,16 @@ def family_pick6(cands: Sequence[Candidate5], fam: FamilyScorers6,
             continue
         c = ok[idxs[0]]
         al = align_scorer(c)
-        al = 0.0 if al is None else al
+        # ★ ★★ 修正（2026-10-25）★★：★ 同上 ⇒ ⇒ **None 不再被静默归零**
+        # ★ ⇒ ⇒ 不可打分者不参与"最优 Gate"的竞争，★ 但**显式记进 per_gate**
+        if al is None:
+            per_gate[name] = {"n": len(sc), "picked": c.idx, "align": None,
+                              "unscoreable": True,
+                              "rank": [ok[i].idx for i in full]}
+            continue
+        al = float(al)
         per_gate[name] = {"n": len(sc), "picked": c.idx, "align": round(al, 4),
+                          "unscoreable": False,
                           "rank": [ok[i].idx for i in full]}
         if al > best["align"]:
             best = {"gate": name, "align": al, "idx": c.idx,
@@ -297,17 +304,34 @@ def state_pick6(cands: Sequence[Candidate5], st: State5,
     if not ok:
         return {"picked": None, "picked_idx": None, "reason": "no_valid_candidate"}
     sc = []
+    n_none = 0
     for c in ok:
         v = WA5.score_state_alignment5(c, st)
-        sc.append(0.0 if v is None else float(v))
-    full = _rank_by_score6(sc)
+        # ★ ★★ 修正（2026-10-25）★★：★ 原来 `0.0 if v is None else float(v)`
+        # ★ ⇒ ⇒ **把"不可打分"（★ 状态目标集全空 ⇒ 该样本无取舍代价）
+        # ★ ⇒ ⇒ 静默记成 0.0** ⇒ ⇒ **违反「不静默归零」** ⇒ ⇒ 且会把
+        # ★ ⇒ ⇒ "仪器层 0"伪装成"内容层 0"（★ T07-3 就是这样被误判的）
+        # ★ ⇒ ⇒ 现在：**None 保持 None**（★ 不参与排序），并单独计数
+        if v is None:
+            n_none += 1
+            sc.append(None)
+        else:
+            sc.append(float(v))
+    # ★ 排序时把 None 放到最后（★ 不可打分者不参与竞争，★ 但仍占位以保持下标对齐）
+    order_key = [(1 if x is None else 0, 0.0 if x is None else -x, i)
+                 for i, x in enumerate(sc)]
+    full = [i for _, _, i in sorted(order_key)]
     idxs = full[:1]
     if not idxs:
         return {"picked": None, "picked_idx": None, "reason": "no_score"}
     c = ok[idxs[0]]
-    return {"picked": c, "picked_idx": c.idx, "align": round(sc[idxs[0]], 4),
-            "scores": [round(x, 4) for x in sc],
-            "rank": [ok[i].idx for i in full]}
+    # ★ 若【全部候选都不可打分】⇒ ⇒ align 必须是 None（★ 不得回退成 0.0）
+    _al = sc[idxs[0]]
+    return {"picked": c, "picked_idx": c.idx,
+            "align": round(_al, 4) if _al is not None else None,
+            "scores": [round(x, 4) if x is not None else None for x in sc],
+            "rank": [ok[i].idx for i in full],
+            "n_unscoreable": n_none}
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -462,6 +486,52 @@ def _selfcheck(verbose=True) -> int:
     # 9) Select 只用 greedy（确定性）
     sel = Select(mode="greedy")
     chk("greedy 选最大", sel([0.1, 0.9, 0.5], k=1) == [1])
+
+    # ★★★ 10) ★★ 2026-10-25 三处修正的回归断言 ★★
+    #   ★ 每条都必须是【只有新实现才通过】⇒ ⇒ 否则它们守不住任何东西
+
+    # 10a) ★ target_set6 与 deep_set/drop_set【同口径】⇒ ⇒ "点到为止"【不算】deep
+    _st = State5(stance="s", keeps=[], gaps=[{"index": 1, "entities": ["x"]},
+                                             {"index": 2, "entities": ["y"]}],
+                 decisions=[{"gap_index": 1, "depth": "深入展开", "priority": 1},
+                            {"gap_index": 2, "depth": "点到为止", "priority": 2}])
+    _ts = target_set6(_st)
+    chk("★ target_set6：'深入展开' ⇒ deep",
+        _ts["deep"] == [1], str(_ts))
+    chk("★ target_set6：★ '点到为止'【不算】deep（★ ★ 与 deep_set 同口径）",
+        _ts["deep"] != [1, 2], "★ 旧口径会把'点到为止'算进 deep ⇒ %r" % (_ts,))
+    chk("★ target_set6：'放弃' ⇒ drop",
+        target_set6(State5(stance="s", keeps=[],
+                            gaps=[{"index": 1, "entities": []}],
+                            decisions=[{"gap_index": 1, "depth": "放弃", "priority": 1}]))["drop"] == [1])
+    chk("★ target_set6 ≡ deep_set/drop_set（★ 同一函数两判据 ⇒ 不可能漂）",
+        _ts["deep"] == sorted(_st.deep_set()) and _ts["drop"] == sorted(_st.drop_set()))
+
+    # 10b) ★ align=None【不被静默归零】⇒ ⇒ scores 里保留 None
+    _c_none = Candidate5(idx=1, text="正文", decl_write=set(), decl_drop=set(), decl_parsed=False)
+    _c_ok = Candidate5(idx=2, text="正文", decl_write={1}, decl_drop=set(), decl_parsed=True)
+    _st_empty = State5(stance="s", keeps=[], gaps=[{"index": 1, "entities": ["x"]}],
+                        decisions=[{"gap_index": 1, "depth": "点到为止", "priority": 1}])
+    # ★ ★ 注意：★ `score_state_alignment5` 只在【状态侧】集合非空时才计一项
+    # ★ ★ ⇒ ★ 状态目标集全空 ⇒ ★ 【所有候选都不可打分】⇒ ★ 这是 T07-3 的情形
+    _pk = state_pick6([_c_none, _c_ok], _st_empty)
+    chk("★ state_pick6：★ 不可打分者 ⇒ scores 保留 None（★ 不静默归零）",
+        None in (_pk.get("scores") or []), str(_pk.get("scores")))
+    chk("★ state_pick6：★ 状态目标集全空 ⇒ 全部候选不可打分（★ T07-3 情形）",
+        _pk.get("n_unscoreable") == 2, str(_pk.get("n_unscoreable")))
+    _pk_all = state_pick6([_c_none], _st_empty)
+    chk("★ state_pick6：★ 全部不可打分 ⇒ align 必须是 None（★ 不得回退成 0.0）",
+        _pk_all.get("align") is None, str(_pk_all.get("align")))
+
+    # 10c) ★ 不可打分者【不参与排序竞争】（★ 排在最后，★ 而不是当成 0 分去争）
+    _c_low = Candidate5(idx=3, text="正文", decl_write=set(), decl_drop=set(), decl_parsed=True)
+    _st_ok = State5(stance="s", keeps=[], gaps=[{"index": 1, "entities": ["x"]}],
+                    decisions=[{"gap_index": 1, "depth": "深入展开", "priority": 1}])
+    _pk2 = state_pick6([_c_none, _c_low], _st_ok)
+    chk("★ state_pick6：★ 不可打分者排在可打分者【之后】",
+        (_pk2.get("rank") or []) == [3, 1], str(_pk2.get("rank")))
+    chk("★ state_pick6：★ 混合情形下 n_unscoreable == 1",
+        _pk2.get("n_unscoreable") == 1, str(_pk2.get("n_unscoreable")))
 
     if verbose:
         ok = 0
