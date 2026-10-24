@@ -223,7 +223,7 @@ def evaluate(spec, topics, tag, reuse=True):
                 agg = _recompute(raw, topics)   # CAP 此刻还是默认值，稍后由 main 统一重算
                 if agg is not None:
                     d["agg"] = agg
-                    json.dump(d, open(fn, "w"), ensure_ascii=False, indent=1)
+                    json.dump(d, open(fn, "w"), ensure_ascii=False, indent=1, sort_keys=True)
                     return agg, raw
         except Exception:
             pass
@@ -278,7 +278,7 @@ def evaluate(spec, topics, tag, reuse=True):
                    texts=spec.get("_texts", []), agg=agg,
                    per=[{k: v for k, v in r.items() if k not in ("claims", "verd")} for r in res],
                    raw=res),
-              open(fn, "w"), ensure_ascii=False, indent=1)
+              open(fn, "w"), ensure_ascii=False, indent=1, sort_keys=True)
     return agg, res
 
 
@@ -384,7 +384,7 @@ def main():
     json.dump(dict(history=[(k, {kk: vv for kk, vv in s.items() if kk != "_pf_texts"},
                              a) for k, s, a in history],
                    final=[(k, a) for k, a in final], cap=globals().get("CAP")),
-              open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1)
+              open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
     print("总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
 
 

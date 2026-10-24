@@ -31,6 +31,50 @@ TARGETS = ["tools/push_overlay.py", "tools/push_via_api.py"]
 FAILED = []
 
 
+
+def _hardcoded_date(tree) -> bool:
+    """★ ★★ 【★ 数据流判据（★ 2026-10-25）★★】★★
+
+    ★ **★ 问题（★ 实测）★★**：★ 「源码里出现任何日期串」⇒ ⇒ ★ ⇒ **【误报】** ★★
+    ★ ⇒ ★ 例：★ `Accept: application/vnd.github.v3+json` 里的 `"2022-11-28"` ⇒ ⇒ ★ ⇒ 误判成硬编码 ★★
+    ★ ⇒ ⇒ ★ ⇒ **★ ⇒ 「提到日期」≠「日期被硬编码进 author.date」★★**（★ 与「指标名≠口径」同族）★★
+
+    ★ **★ 正确做法：★ 追【date 字段的赋值链】★★**
+    ★ ① 收集「变量名 → 常量」绑定
+    ★ ② 找 dict 里 key == "date" 的位置
+    ★ ③ 该值若是字面量 ⇒ 硬编码；★ 若是变量 ⇒ 追它的绑定 ⇒ 是常量 ⇒ 硬编码
+    ★ ④ 若是 `datetime(2026, 10, 25)` 这种【带年份裸整数的调用】⇒ 硬编码
+    """
+    const_bind = {}
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Assign) and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name):
+            if isinstance(n.value, (ast.Constant, ast.Call)):
+                # ★ ★ ★ 【★ 这里必须存【AST 节点】、★ 不是【Python 值】★★ ★
+                # ★ ★ ⇒ ★ 存了 Python 值的话，★ 后面 `isinstance(bound, ast.Constant)` ⇒ ⇒ ★
+                # ★ ★ ⇒ ★ **★ 永远为假 ⇒ ⇒ ★ ⇒ 【两种形态都抓不到】★★ ⇒ ⇒ ★ ⇒ **假绿 ★★
+                # ★ ★ ⇒ ★ ⇒ ★ **★ 通则：★ 同一个变量在判据函数里【只能有一种含义】★★**
+                const_bind[n.targets[0].id] = n.value
+    for n in ast.walk(tree):
+        if not isinstance(n, ast.Dict):
+            continue
+        for k, v in zip(n.keys, n.values):
+            if not (isinstance(k, ast.Constant) and k.value == "date"):
+                continue
+            if isinstance(v, ast.Constant):
+                return True
+            if isinstance(v, ast.Name) and v.id in const_bind:
+                bound = const_bind[v.id]
+                if isinstance(bound, ast.Constant):
+                    return True
+                # ★ ★ ★ 追踪【变量 → Call】：★ now = datetime(2026, 10, 25).strftime(...) ★★
+                if isinstance(bound, ast.Call):
+                    for sub in ast.walk(bound):
+                        if isinstance(sub, ast.Constant) and isinstance(sub.value, int) \
+                                and not isinstance(sub.value, bool) and 1900 <= sub.value <= 2100:
+                            return True
+    return False
+
+
 def check(name, cond, detail=""):
     if cond:
         print("  ✔ %s" % name)
@@ -128,10 +172,9 @@ def main() -> int:
                             if isinstance(sl, ast.Constant) and isinstance(sl.value, str) \
                                     and sl.value in ("message", "author", "date"):
                                 compared.add(sl.value)
-            if isinstance(node, ast.Constant) and isinstance(node.value, str) \
-                    and re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", node.value):
-                # ★ ★ date 若是【硬编码常量】，★ 那"核对 date"是恒等比较 ⇒ ⇒ 假绿 ★★
-                hardcoded_ts = True
+            # ★ ★ ★ 【★ 硬编码日期：★ 统一走【数据流判据】（★ 见 _hardcoded_date）★★★ ★★
+            # ★ ★ ⇒ ★ 【源码里出现任何日期串】≠【日期被硬编码进 author.date】★★
+            # ★ ★ ⇒ ★ ⇒ ★ 旧的全串扫描已删（★ 单一真相源；★ 且它会误报 Accept header 里的日期）★★
             # ★ ★ ★ 【★ 契约锚点 ★】：★ 一个含三个字段名的元组/列表常量 ★★
             if isinstance(node, (ast.Tuple, ast.List)):
                 vals = {e.value for e in node.elts
@@ -145,6 +188,8 @@ def main() -> int:
             if isinstance(node, ast.Constant) and isinstance(node.value, str) \
                     and node.value in ("message", "author", "date"):
                 occurrences[node.value] = occurrences.get(node.value, 0) + 1
+        # ★ ★ 单一真相源：★ 硬编码日期【只】由数据流判据给出 ★★
+        hardcoded_ts = _hardcoded_date(tree)
         need = {"message", "author", "date"}
         check("★ %s · 推后回读远端 commit 并核对 message/author/date（★ 行为级）" % rel,
               reads_commit and declared >= need and compared >= need and not hardcoded_ts,

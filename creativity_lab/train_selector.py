@@ -158,7 +158,7 @@ def main():
     json.dump(dict(features=FEATS, holdout=list(hold),
                    diff=res_d, abs=res_a, win_diff=win_d, win_abs=win_a,
                    model_abs=model_a),
-              open("%s/selector.json" % OUT, "w"), ensure_ascii=False, indent=1)
+              open("%s/selector.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
     print("\n模型已存 %s/selector.json" % OUT)
 
 

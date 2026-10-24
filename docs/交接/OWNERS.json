@@ -1,0 +1,337 @@
+{
+  "branches": {
+    "cmp8-handover-2026-10-20": "98d0c304dfb953b6efab12f53de01bbf0a2f944d",
+    "feature/g4-arch4-state-driven": "2ee28b3c87a33701225d0ba578481df256056efa",
+    "main": "e012f1e2574cd28a5e64fc4609786a46a534efd4"
+  },
+  "commits": {
+    "1caddc2a1e890b0bd732d8cd62e40417a1588e08": {
+      "branch": "main",
+      "date": "2026-10-17T00:54:35Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "独立复核推翻部分结论：撤回「两个独立方法论互相印证」"
+    },
+    "24e3ebb95cdd6f6837add5d863f183751b7aadcc": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:46:44Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "update"
+    },
+    "27c12dd3ec507a5027e6e1df07187c8446f81b31": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:57:00Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "[三组] 归属表生成器改 v2：按 tree sha 匹配远端层与本地 commit ⇒ 自维护（去掉硬编码 sha 表）；组名"
+    },
+    "2ee28b3c87a33701225d0ba578481df256056efa": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:58:28Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: 闭合三条：★ 分包把归档拆散 + 校验器有环境依赖 + KI-01 三问"
+    },
+    "2fb12c9bd674e379631b0629bbfc29fd26584ded": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:38:16Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: 论文第二版 + PREREG v4 + 报告可重填 + 三条裁决落地（★ 归档 12.4MB 已在上一笔）"
+    },
+    "3352961ccededd576bab7734e999e9623f1abc72": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:10:38Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: SHASUMS 重建（40 项，绑 commit 541d755）"
+    },
+    "3a423b79139f8d2ba5c82ed9b6a02f38edc36142": {
+      "branch": "main",
+      "date": "2026-10-18T10:48:38Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "训练 v2：Agent 自主探索架构 —— 机制跑通，5 份提案全被约束否掉"
+    },
+    "41009794b3d486f4133a59a2655fa8f051d3800a": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:46:08Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "update"
+    },
+    "44f41f4a3492a4bd808f7b95ab3f0847b30d29fa": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:49:10Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "[三组] 修 push_via_api 缺 message 报错并禁止 update；新增机器可读 OWNERS.json 归属"
+    },
+    "541d755edc941e79f5731e8c8fd7571258b472fc": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:10:31Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: 接第二组 rev3（tol 必填）+ 四版差分探针 + 底层打包委托 + 台账除陈旧文字"
+    },
+    "5d225643763c8a03014a705c0b2b4a763ea34431": {
+      "branch": "main",
+      "date": "2026-10-18T04:55:14Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "架构图页：差集核验 v4 验收管线 + 被砍掉的组件 + 三个结论"
+    },
+    "6ce6251b2f71cfb0f63feb16130ae927ba2d893e": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:49:42Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "[三组] OWNERS.json 归属查找改前缀匹配；本层远端 commit 首次带真实 message（此前默认 update"
+    },
+    "7026c6559b72325b9f1ebbb6f6a28802fdb1d9df": {
+      "branch": "main",
+      "date": "2026-10-18T04:58:25Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "HANDOVER：给 multi-mind 组的交接说明"
+    },
+    "739f77906d554b263883a57e4f5559c87569c2a0": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T06:46:05Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: SHASUMS 重建（31 项，绑 commit a31a45e）"
+    },
+    "7644279c448cabe140a9b8d5fa2fc4afc302edd7": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T06:48:48Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: SHASUMS 重建（31 项，绑 commit 8aea548）"
+    },
+    "78aa8afe32ef1c15f3086d8a497b1782e73836b7": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:18:55Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: 归档 MANIFEST 重建（含 .gitkeep）"
+    },
+    "78ab8b49bdb8e798940409e64bfdd0b013e6bf8a": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:52:24Z",
+      "email": "mavis@local",
+      "grade": "硬（owner 行）",
+      "owner": "第二组",
+      "pusher": "第二组",
+      "subject": "★ push_overlay：★ message 归一化（★ GitHub 实测会去尾部换行）+ 核对失败措辞改【核对不通过 ≠"
+    },
+    "7ab16b40101edc3ea5434681ae7a1ef24bc5e642": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:43:54Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "update"
+    },
+    "850129eb5ad407ca65103874e1d2ab8f504bdfcd": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:18:54Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: 归档空目录 paper/ 加 .gitkeep 占位（★ git 不追踪空目录 ⇒ 远端补上目录结构）"
+    },
+    "888e514738d21e8a7c288129ce0ee7a0173dae7a": {
+      "branch": "main",
+      "date": "2026-10-18T11:48:32Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "架构 V2「核验在环」：留出集上交付宽 +50%、矛盾率 61.5%→0%"
+    },
+    "8aea548494612ff62451291e6d9eac44d2c4f4ab": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T06:48:44Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: 交付包打包器（非 ASCII 安全）+ 同名文件冲突清查 + 清理"
+    },
+    "8f7deab406c04c0ca37028b19b5eb92dcc041c77": {
+      "branch": "main",
+      "date": "2026-10-18T06:21:23Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "更正：我把「探索」和「验证」混为一谈了 —— 工作流确实拓展了思维面"
+    },
+    "98d0c304dfb953b6efab12f53de01bbf0a2f944d": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:59:15Z",
+      "email": "1697739243@qq.com",
+      "grade": "硬（owner 行）",
+      "owner": "三组",
+      "pusher": "lixvanran",
+      "subject": "[三组] 归属表补历史 fallback（修复前那批远端 message=update 的层）；树 sha 匹配不成立的原因=叠"
+    },
+    "9ae5bfda2561128904ff4c6c3f8bcba3c154a825": {
+      "branch": "main",
+      "date": "2026-10-17T13:16:13Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "方法修正：核验器验证通过 + 消除 direct 偏置，**臂间排名反转**"
+    },
+    "9cc3ee9659c5cf9b4253e40143c6c215402574bd": {
+      "branch": "main",
+      "date": "2026-10-17T15:23:06Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "18 题规模训练执行：两种奖励双双失败，训练作废"
+    },
+    "a6208aec1c2090ebe464a9e6bbba7eded1ce255f": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:47:27Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "update"
+    },
+    "bfc9ceeb970866c1ebad83f3a5286ddb2e6a0289": {
+      "branch": "main",
+      "date": "2026-10-17T13:38:48Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "训练方法报告（v1.0）：差集核验完整方法文档"
+    },
+    "d9b0286f9f77cdaced02fc137abcf099b42c07c6": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:51:42Z",
+      "email": "mavis@local",
+      "grade": "硬（owner 行）",
+      "owner": "第二组",
+      "pusher": "第二组",
+      "subject": "★ 第二组 · 推送工具：★ msg 首行带最新本地 subject + owner 行 + 真实 date + 推后回读核对 "
+    },
+    "df62250f0144b9a542754ebd0f2db0e0eefe4dd7": {
+      "branch": "main",
+      "date": "2026-10-17T00:34:18Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "训练执行：差集核验首轮，训练被拒绝"
+    },
+    "e012f1e2574cd28a5e64fc4609786a46a534efd4": {
+      "branch": "main",
+      "date": "2026-10-18T15:27:13Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "训练方法 v3：可学习架构（架构本身是学习产物）"
+    },
+    "e09492d3050a002e34bc1a7427f54e6f1bade083": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:50:31Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "[三组] pack_safe 的推送调用补上 commit message（配合新的强制守卫）"
+    },
+    "e30dd8e6db763544c210380616532c3c61c184b5": {
+      "branch": "cmp8-handover-2026-10-20",
+      "date": "2026-10-24T07:57:56Z",
+      "email": "1697739243@qq.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 账号直推（★ 组别待主会话确认）",
+      "pusher": "lixvanran",
+      "subject": "[三组] 修归属表生成器的仓库根路径；归属表改为按 tree sha 自维护匹配"
+    },
+    "eb20b73f6a49c79bfbaf5017da29c0376b012396": {
+      "branch": "main",
+      "date": "2026-10-18T03:34:27Z",
+      "email": "noreply@github.com",
+      "grade": "弱（author 推断）",
+      "owner": "★ 弱推断：★ 用户 lixvanran 用 `Mavis` 这个 git 身份直推（★ 待主会话/三组确认）",
+      "pusher": "Mavis (lixvanran)",
+      "subject": "巡练第一轮：无效。以及三个真发现"
+    },
+    "eb2cf9ac5d6567791cfc75445d59a657ca6b0be0": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:17:04Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: 归档历史批次原始产物（177 个文件 / 12.4 MB）★ 沙箱挂掉不再丢证据链"
+    },
+    "f09123d79af113bce8d1a1188d07841a1f03647e": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:02:38Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: v6 Stage-1 交付前复核查出三个实现 bug + 一个路径错配 ⇒ 全部修正并重填报告"
+    },
+    "f462b968d2eeaa4c3770e118ee3a047b6785ea34": {
+      "branch": "feature/g4-arch4-state-driven",
+      "date": "2026-10-24T07:02:44Z",
+      "email": "lixvanran@users.noreply.github.com",
+      "grade": "硬（owner 行）",
+      "owner": "★ **第四组**（★ 状态机 / 架构化状态层）",
+      "pusher": "Mavis (第四组)",
+      "subject": "g4: SHASUMS 重建（35 项，绑 commit f09123d）"
+    }
+  },
+  "generated_at": "2026-10-24 07:59:24Z",
+  "remote_snapshot_at": "2026-10-24 07:59:24Z",
+  "repo": "lixvanran/agent-creativity-mechanism-study",
+  "unconfirmed": []
+}

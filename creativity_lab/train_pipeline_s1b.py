@@ -91,7 +91,7 @@ def main():
             print("     ✅支持  %s" % c[:46], flush=True)
         for c in con:
             print("     ❌矛盾  %s" % c[:46], flush=True)
-    json.dump(verdicts, open("%s/verdicts3.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(verdicts, open("%s/verdicts3.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
 
     print("\n== 4b. 每候选奖励 ==", flush=True)
     recs = []
@@ -112,7 +112,7 @@ def main():
             reward=round(len(new) / max(len(txt), 1) * 100, 4),
             net=round((len(new) - len(lost) - len(wrong)) / max(len(txt), 1) * 100, 4),
         ))
-    json.dump(recs, open("%s/records3.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(recs, open("%s/records3.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
 
     print("\n%-22s %5s %5s %5s %5s %5s %8s" % ("key", "len", "clm", "sup", "new", "wrong", "net"))
     for r in sorted(recs, key=lambda x: -x["net"]):

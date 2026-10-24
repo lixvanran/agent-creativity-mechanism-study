@@ -30,7 +30,6 @@
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
 import json
 import os
 import shutil
@@ -54,8 +53,6 @@ sys.path.insert(0, BATCH_U1)
 import u1_lib as U            # noqa: E402
 import measure as M           # noqa: E402
 import workflow as W          # noqa: E402
-import anchor_out as AO       # noqa: E402
-import premature_closure as PC  # noqa: E402
 
 DEV = "/workspace/lab/routes/DEV"
 OUT = os.path.join(HERE, "runs")
@@ -64,10 +61,8 @@ OUT = os.path.join(HERE, "runs")
 # ══════════════════════════════════════════════════════════════════════
 # 工具
 # ══════════════════════════════════════════════════════════════════════
-def load_tasks(n=None, devset=None):
-    """devset 可指定题集文件（默认 DEV/devset.json；对抗题集用 DEV-ADV-*.json）。"""
-    path = devset or os.path.join(DEV, "devset.json")
-    with open(path, encoding="utf-8") as f:
+def load_tasks(n=None):
+    with open(os.path.join(DEV, "devset.json"), encoding="utf-8") as f:
         d = json.load(f)
     tasks = d["tasks"] if isinstance(d, dict) and "tasks" in d else d
     return tasks[:n] if n else tasks
@@ -84,37 +79,10 @@ def ct_text(task):
                      for i, c in enumerate(cs))
 
 
-def measure_one(llm, task, answer, answer_id, judge_model=None, anchor_out=True):
-    """两份判官同跑一份答案：
-
-    ① **普通判官**（拿 `C_t`）⇒ 承重维度数、矛盾、净增益
-    ② **锚外判官**（**不给 `C_t`**）⇒ 它自己说"改变了哪个决策"
-       ⇒ 再由我们比这个岔口在不在 `C_t` 里 ⇒ `VD_anchor_out`
-    ★ 两者**共用同一批抽取出的断言** ⇒ 省一次抽取调用
-    ⚠️ 锚外的解析失败率**单独计数**，不许混进主判据的读数。
-    """
-    # ★ 抽取的模型名必须**跟着判官走**（否则换厂商 ⇒ 400 ⇒ 静默空串 ⇒ 读数 0）
-    claims = M.extract_claims(llm, answer, model=judge_model)
+def measure_one(llm, task, answer, answer_id):
+    """用协议判官把一份答案折成**承重卡片**（沿用 batch-U1 的 `measure_answer`）。"""
     res = M.measure_answer(llm, task["ask"], ev_items(task), ct_text(task),
-                           answer, answer_id, claims=claims,
-                           judge_model=judge_model)
-    # ── 锚外：换一个**不知道 C_t** 的判官
-    anchor = dict(n_anchor_out=0, n_anchored=0, n_unknown=0,
-                   anchor_out_claims=[], anchored_claims=[],
-                   parsefail_rate=None, n_cards=0)
-    if anchor_out:
-        try:
-            aor = M.measure_anchor_out(llm, task["ask"], ev_items(task),
-                                        answer, answer_id + "/ao", claims=claims,
-                                        judge_model=judge_model)
-            ao_cards = aor.get("cards") or []
-            dec = AO.decide_anchor_out(ao_cards, task.get("conclusion_space") or [])
-            dec["parsefail_rate"] = aor.get("parsefail_rate")
-            dec["n_cards"] = len(ao_cards)
-            anchor = dec
-        except Exception as e:
-            anchor["error"] = "%s: %s" % (type(e).__name__, e)
-
+                           answer, answer_id)
     cards = []
     for i, c in enumerate(res.get("cards_all") or []):
         v = c.get("verdict")
@@ -130,7 +98,7 @@ def measure_one(llm, task, answer, answer_id, judge_model=None, anchor_out=True)
             supports_conclusions=["C%d" % int(x) for x in (c.get("supports_conclusions") or [])],
             stage="final",
         ))
-    return res, cards, anchor
+    return res, cards
 
 
 def dims_from_cards(cards):
@@ -165,50 +133,17 @@ def arm_direct(llm, task, model):
                 chat_stats=direct_stats)
 
 
-def arm_frames_vote(llm, task, model, slots=3, seed=0):
-    """★ 对照臂 `B0_frames_vote`：**每个认知帧各跑一遍独立答案，再投票**。
-
-    ★ 为什么必须有（Self-Discover arXiv:2402.03620 逐字）：
-      "superior performance against … CoT + Self-Consistency and **majority voting of
-       every module** while requiring 10-40x fewer inference compute"
-    ⇒ ⇒ 没有这个臂，"多帧 ⇒ 多维度"站不住。
-    ⇒ ⇒ **用与 W 臂完全相同的帧**（同 seed ⇒ 同帧集合）⇒ 公平比较。
-    """
-    frames = W.select_frames(slots, seed=seed)
-    print("      [B0fv] %d 帧各跑一遍 + plurality 投票：%s"
-          % (len(frames), frames), flush=True)
-    r = AO.frames_vote_baseline(llm, task, model, frames, seed=seed)
-    print("      [B0fv] 抽到 %d 条" % len(r["claims"]), flush=True)
-    return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
-                paths=r.get("paths"), frames=r.get("frames") or [],
-                archive={}, failures={}, illum={}, rounds=[])
-
-
-def arm_bestof(llm, task, model, n=3, seed=0):
-    """★ 等预算对照臂：N 次独立直调 + 机械去冗余（调用数与 W 相同）。"""
-    print("      [B0bestof%d] N 次独立直调…" % n, flush=True)
-    r = AO.best_of_n_direct(llm, task, model, n=n, seed=seed)
-    print("      [B0bestof%d] 抽到 %d 条" % (n, len(r["claims"])), flush=True)
-    # ★ paths 必须透传（否则等预算臂的"路径间多样性"算不出来 ⇒ 与 W 不可比）
-    return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
-                paths=r.get("paths"), frames=r.get("frames") or [],
-                archive=r.get("archive") or {}, failures=r.get("failures") or {},
-                illum=r.get("illum") or {}, rounds=r.get("rounds") or [])
-
-
 def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2,
-                 evolve=True, layer="L3", action_mode="lookup", policy=None):
+                 evolve=True, layer="L3"):
     wf = W.CollapseFixWorkflow(llm, n_slots=n_slots, seed=seed,
                                 model=model, judge_model=model,
-                                max_rounds=max_rounds, evolve=evolve, layer=layer,
-                                action_mode=action_mode, policy=policy)
+                                max_rounds=max_rounds, evolve=evolve, layer=layer)
     print("      [W ] 跑工作流（%s）…" % layer, flush=True)
     r = wf.run(task["ask"])
     print("      [W ] 演化=%s 失败=%s" % (r["archive"].get("names"), r["failures"]), flush=True)
     return dict(answer=r["answer"], claims=r["claims"], ops=r["ops"],
                 frames=r["frames"], archive=r["archive"], failures=r["failures"],
                 illum=r["illum"], rounds=r["rounds"],
-                paths=r.get("paths"),          # ★ 供"路径间多样性/思维跳跃"用
                 layer=r.get("layer"), evolve=r.get("evolve"))
 
 
@@ -223,60 +158,10 @@ def main():
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--dry", action="store_true", help="只跑不落盘")
-    ap.add_argument("--resume", action="store_true",
-                    help="★ 断点续跑：跳过 arms.jsonl 里已完成的 (题,臂,rep)")
-    ap.add_argument("--action-mode", default="lookup", choices=["lookup", "policy"],
-                    help="lookup=6 个手写模板（层2 的设计）；policy=36 个可组合动作+策略（层3）")
-    ap.add_argument("--policy-file", default="",
-                    help="学出来的策略 JSON（runs/policy_train/policy.json）")
-    ap.add_argument("--arms", default="B0,W_design_L2,W_train_L3",
-                    help="逗号分隔的臂名")
-    ap.add_argument("--judge", default="minimax", choices=["minimax", "openrouter"],
-                    help="判官厂商（★ 跨厂商交叉用 openrouter ⇒ judge_same_vendor=false）")
-    ap.add_argument("--devset", default="",
-                    help="题集 json（默认 DEV/devset.json；对抗题集用 DEV-ADV-*.json）")
-    ap.add_argument("--judge-model", default="",
-                    help="判官模型（openrouter 时默认 u1_lib.OR_MODEL）")
     args = ap.parse_args()
 
-    tasks = load_tasks(args.tasks, args.devset)
-    _adv = {t["task_id"]: t for t in tasks if t.get("trap_fingerprints")}
-    if _adv:
-        print("★ 诱导钻牛角尖题集：%d 题（带陷阱指纹，钻牛角尖率可机械判定）" % len(_adv))
+    tasks = load_tasks(args.tasks)
     model = os.environ.get("MM_MODEL", "MiniMax-M3.1-Flash-Preview")
-    # ★ 断点续跑：沙箱会杀长跑后台进程 ⇒ 每次重启都要能接着跑
-    _done = set()
-    _jl = os.path.join(args.out, "arms.jsonl")
-    if args.resume and os.path.exists(_jl):
-        for _ln in open(_jl, encoding="utf-8"):
-            try:
-                _d = json.loads(_ln)
-                _done.add((_d.get("task_id"), _d.get("arm"), _d.get("rep")))
-            except Exception:
-                pass
-        print("断点续跑：已完成 %d 个臂，跳过它们" % len(_done))
-    _pol = None
-    if args.policy_file and os.path.exists(args.policy_file):
-        with open(args.policy_file, encoding="utf-8") as f:
-            _pol = W.ActionPolicy.load(json.load(f))
-        print("载入策略：%s（%d 参数）" % (args.policy_file, _pol.param_count()))
-    elif args.action_mode == "policy":
-        _pol = W.ActionPolicy()          # w=0 ⇒ 均匀 ⇒ **未训练基线**
-        print("★ 未载入策略 ⇒ 用 w=0 均匀策略（未训练基线）")
-    want_arms = [a.strip() for a in args.arms.split(",") if a.strip()]
-    # ★ 判官客户端：**生成侧始终 MiniMax**，只有**测量侧**可换厂商
-    #   ⇒ 跨厂商交叉 = 同一批答案、**同一份判官提示词**、只换判官模型（ToT 的做法）
-    #   ⇒ 生成侧不动 ⇒ 唯一变化就是"谁在判" ⇒ 读数差异就归因到判官
-    if args.judge == "openrouter":
-        jm = args.judge_model or U.OR_MODEL
-        judge_llm = U.OpenRouterLLM()
-        judge_same_vendor = False
-        print("判官：%s（★ 跨厂商 ⇒ judge_same_vendor=false）" % jm)
-    else:
-        jm = args.judge_model or U.MM_MODEL
-        judge_llm = U.MiniMaxLLM()
-        judge_same_vendor = True
-        print("判官：%s" % jm)
     llm = U.MiniMaxLLM()
     print("模型：%s ｜ 题数：%d ｜ rep：%d" % (model, len(tasks), args.reps))
     print("=" * 74)
@@ -286,38 +171,23 @@ def main():
     for ti, task in enumerate(tasks):
         for rep in range(1, args.reps + 1):
             row = dict(task_id=task["task_id"], rep=rep, arms={})
-            _ARMS = {
-                "B0_direct": lambda: arm_direct(llm, task, model),
-                # ★ 等预算对照臂：N 次独立直调 + 机械去冗余 ⇒ **调用数与 W 相同**
-                #   ⇒ 差集恰好是 {认知帧解耦 + 机械汇总 + 动作演化}
-                #   ⇒ 同时实现 ToT 的「同预算 best-of-k」（轴＝调用数，不是节点数）
-                "B0_bestof3": lambda: arm_bestof(llm, task, model, 3, rep),
-                # ★ Self-Discover 的对照：每帧各跑一遍 + 投票（plurality）
-                "B0_frames_vote": lambda: arm_frames_vote(llm, task, model,
-                                                          args.slots, rep),
+            for arm_name, fn in (
+                ("B0_direct", lambda: arm_direct(llm, task, model)),
                 # ★ 层2「用设计的手段」：架构先验设计好、**运行时不自修改**
-                "W_design_L2": lambda: arm_workflow(
+                ("W_design_L2", lambda: arm_workflow(
                     llm, task, model, seed=rep, n_slots=args.slots,
-                    max_rounds=args.rounds, evolve=False, layer="L2",
-                    action_mode=args.action_mode, policy=_pol),
+                    max_rounds=args.rounds, evolve=False, layer="L2")),
                 # ★ 层3「用训练/自迭代的手段」：从失败**构造新动作**、档案累积
-                "W_train_L3": lambda: arm_workflow(
+                ("W_train_L3", lambda: arm_workflow(
                     llm, task, model, seed=rep, n_slots=args.slots,
-                    max_rounds=args.rounds, evolve=True, layer="L3",
-                    action_mode=args.action_mode, policy=_pol),
-            }
-            for arm_name, fn in ((k, _ARMS[k]) for k in want_arms if k in _ARMS):
-                if (task["task_id"], arm_name, rep) in _done:
-                    print("  %-4s %-13s rep%s ★ 已完成，跳过"
-                          % (task["task_id"], arm_name, rep), flush=True)
-                    continue
+                    max_rounds=args.rounds, evolve=True, layer="L3")),
+            ):
                 c0 = llm.n_api_calls
                 try:
                     a = fn()
                     print("      [%s] 测量（判官）…" % arm_name, flush=True)
-                    res, cards, anchor = measure_one(judge_llm, task, a["answer"],
-                                                     "%s/%s/rep%d" % (arm_name, task["task_id"], rep),
-                                                     judge_model=jm)
+                    res, cards = measure_one(llm, task, a["answer"],
+                                             "%s/%s/rep%d" % (arm_name, task["task_id"], rep))
                     fams = dims_from_cards(cards)
                     row["arms"][arm_name] = dict(
                         answer=a["answer"], n_chars=len(a["answer"]),
@@ -328,20 +198,11 @@ def main():
                         dims=sorted(fams),
                         parsefail_rate=res.get("parsefail_rate"),
                         cards=cards,
-                        anchor_out=anchor,
-                        vd_anchor_out=(anchor or {}).get("n_anchor_out", 0),
                         ops=a.get("ops"), frames=a.get("frames"),
                         archive=a.get("archive"), failures=a.get("failures"),
                         illum=a.get("illum"),
                         chat_stats=a.get("chat_stats"),
                         rounds=a.get("rounds"),
-                        paths=a.get("paths"),
-                        # ★ 钻牛角尖判定（零判官、纯文本正则）
-                        pc=(PC.premature_closure(_adv[task["task_id"]], a.get("answer") or "")
-                            if task["task_id"] in _adv else None),
-                        # ★ **代码版本标记**：⇒ 任何时候都能一眼看出"这批读数是哪份代码产的"
-                        #   （我们已经栽过好几次"跑的是旧代码却以为在跑新代码"）
-                        code_version="paths+arb+framesvote@2026-10-24",
                         calls=llm.n_api_calls - c0,
                     )
                 except Exception as e:
@@ -352,43 +213,19 @@ def main():
                          row["arms"][arm_name].get("n_load_bearing", "-"),
                          row["arms"][arm_name].get("calls", "-"),
                          row["arms"][arm_name].get("error", "")))
-                # ★★ **逐臂增量落盘**（2026-10-22 实测教训：批次**静默**死掉时，
-                #   只在末尾汇总的 JSON 会**全丢** ⇒ 日志里的数字救不回来）
-                os.makedirs(args.out, exist_ok=True)
-                with open(os.path.join(args.out, "arms.jsonl"), "a", encoding="utf-8") as _f:
-                    _f.write(json.dumps(dict(
-                        task_id=task["task_id"], rep=rep, arm=arm_name,
-                        judge_model=jm, judge_same_vendor=judge_same_vendor,
-                        **row["arms"][arm_name]), ensure_ascii=False) + "\n")
             all_rows.append(row)
             print("  " + "-" * 70)
 
-    # ★ 从**增量落盘**重建 rows ⇒ 即使进程被杀，已完成的臂也**不会丢**
-    _jl = os.path.join(args.out, "arms.jsonl")
-    if os.path.exists(_jl):
-        _rows = defaultdict(dict)
-        for _ln in open(_jl, encoding="utf-8"):
-            try:
-                _d = json.loads(_ln)
-            except Exception:
-                continue
-            _rows[(_d.get("task_id"), _d.get("rep"))][_d.get("arm")] = _d
-        all_rows = [dict(task_id=k[0], rep=k[1], arms=v)
-                    for k, v in _rows.items()]
-        print("  ★ 从 arms.jsonl 重建 %d 行（%d 个臂）"
-              % (len(all_rows), sum(len(v) for v in _rows.values())))
-
     # ── 汇总读数
     summary = dict(
-        model=model, judge_model=jm, judge_same_vendor=judge_same_vendor,
-        judge_vendor=args.judge,
+        model=model, judge_same_vendor=True,
         note=("判官与被测**同厂商**（MiniMax）⇒ 内部对照用；"
               "**不能**作为对外结论（协议 §4.3 要求跨厂商判官）"),
         n_tasks=len(tasks), reps=args.reps, slots=args.slots, rounds=args.rounds,
         secs=round(time.time() - t0, 1), total_calls=llm.n_api_calls,
         arms={}, rows=all_rows,
     )
-    for arm in want_arms:
+    for arm in ("B0_direct", "W_design_L2", "W_train_L3"):
         dims, lbs, pf = [], [], []
         for row in all_rows:
             a = row["arms"].get(arm) or {}
@@ -407,17 +244,12 @@ def main():
     common_rates = []
     for row in all_rows:
         arms = row["arms"]
-        # ★ 按**实际存在且无错误**的臂动态计算
-        #   （原先硬编码 ("B0_direct","W_design_L2","W_train_L3") ⇒ 臂集合一变就 KeyError
-        #     ⇒ **整批静默崩掉** ⇒ 这就是之前那几次"进程莫名消失"的真凶）
-        _have = [a for a in arms
-                 if isinstance(arms.get(a), dict) and "error" not in arms[a]
-                 and arms[a].get("cards") is not None]
-        if len(_have) < 2:
+        if any("error" in arms.get(a, {}) for a in
+               ("B0_direct", "W_design_L2", "W_train_L3")):
             continue
         common_rates.append(W.common_rate([
-            [c.get("claim") or "" for c in (arms[a].get("cards") or [])]
-            for a in _have
+            [c.get("claim") or "" for c in arms[a]["cards"]]
+            for a in ("B0_direct", "W_design_L2", "W_train_L3")
         ]))
     summary["medianity"] = dict(
         common_rate_across_arms=common_rates,
@@ -427,7 +259,7 @@ def main():
     # ── 动作演化读数
     evo = []
     for row in all_rows:
-        a = row["arms"].get("W_train_L3") or row["arms"].get("W_design_L2") or {}
+        a = row["arms"].get("W_train_L3") or {}
         if "error" in a:
             continue
         evo.append(dict(task_id=row["task_id"],
