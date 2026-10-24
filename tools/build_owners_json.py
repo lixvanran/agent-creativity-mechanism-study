@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """机器可读的远端归属表 OWNERS.json（可重跑；未知归属显式标 needs_confirmation，不猜）"""
-import json, os, subprocess, urllib.request
+import io, json, os, subprocess, urllib.request
 
 REPO="lixvanran/agent-creativity-mechanism-study"; BRANCH="cmp8-handover-2026-10-20"
 TOK=os.environ.get("GITHUB_TOKEN_LIXVANRAN","")
