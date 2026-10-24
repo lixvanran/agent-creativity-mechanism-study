@@ -300,19 +300,25 @@ def test6_spec_redlines(SL):
 
 
 def test7_detect_tie(SL):
-    """★ **⑦ 并列检测（rev2）**：★ 返回【所有】并列簇（★ `List[Dict]`）；★ 无并列 ⇒ `[]`
+    """★ **⑦ 并列检测（rev3）**：★ 返回【所有】并列簇（★ `List[Dict]`）；★ 无并列 ⇒ `[]`
 
     ★ 负向：★ **`detect_tie` 不改状态**（★ 纯函数 ⇒ 接线方式由调用方决定）
     ★ ★ 第二组裁决：「并列 ⇒ 分歧」是【规则的一部分】⇒ ⇒ 接口层提供能力，★ 接线归第四组
-    ★ ★ **rev2 相对 rev1 的关键变化（★ 第 5 条差异）**：★ **中位并列也必须检出**
+
+    ★ ★★ rev3 相对 rev2 的变化（★ 2026-10-25 第二组落地）★★：
+    ★ ★ ① `tol` 从【死参数】变成【必填关键字参数】（★ keyword-only、★ 无默认值）
+    ★ ★ ② 分组规则从 `round(v, 12)` 改成【排序后相邻差 ≤ tol】（★ 传递闭包）
+    ★ ★ ③ 返回类型 / 簇序 / members·scores 结构【不变】⇒ ⇒ 第四组探针【不用改】
     """
-    # ── 无并列 ⇒ 空列表（★ rev2：不是 None）──
-    assert SL.detect_tie([0.1, 0.5, 0.9]) == [], "无并列时应返回空列表"
-    assert SL.detect_tie([]) == [], "空列表应返回空列表"
-    assert SL.detect_tie([0.5]) == [], "单元素应返回空列表（无并列可言）"
+
+    # ══ rev2 时代的语义（★ 必须继续成立）══
+    # ── 无并列 ⇒ 空列表（★ rev2 起：不是 None）──
+    assert SL.detect_tie([0.1, 0.5, 0.9], tol=1e-9) == [], "无并列时应返回空列表"
+    assert SL.detect_tie([], tol=1e-9) == [], "空列表应返回空列表"
+    assert SL.detect_tie([0.5], tol=1e-9) == [], "单元素应返回空列表（无并列可言）"
 
     # ── 有并列 ⇒ 返回 members ──
-    tie = SL.detect_tie([0.9, 0.9, 0.2])
+    tie = SL.detect_tie([0.9, 0.9, 0.2], tol=1e-9)
     assert tie is not None and len(tie) >= 1, "有两个 0.9 时应检出并列"
     clusters = tie if isinstance(tie, list) else [tie]
     first = clusters[0]
@@ -323,36 +329,93 @@ def test7_detect_tie(SL):
         "scores 应为并列两者的分数，实际 %r" % (first.get("scores"),)
 
     # ── 三个并列 ──
-    tie3 = SL.detect_tie([0.5, 0.5, 0.5])
+    tie3 = SL.detect_tie([0.5, 0.5, 0.5], tol=1e-9)
     assert tie3 is not None and len(tie3) >= 1, "三个并列应检出并列"
     clusters3 = tie3 if isinstance(tie3, list) else [tie3]
     assert len(clusters3[0].get("members") or []) == 3, \
         "三个并列应检出 3 个成员，实际 %r" % (clusters3[0].get("members"),)
 
-    # ── ★★ rev2 关键断言：★ 中位并列【也必须检出】（★ rev1 返回 None）★★
-    mid = SL.detect_tie([0.9, 0.5, 0.5])
+    # ── ★★ 中位并列【也必须检出】（★ rev2 修的第 5 条差异）★★
+    mid = SL.detect_tie([0.9, 0.5, 0.5], tol=1e-9)
     assert mid is not None and len(mid) >= 1, \
-        "★★ rev2：第二名并列（0.5,0.5）也是合法分歧 ⇒ 必须检出，实际 %r" % (mid,)
+        "★★ 中位并列（0.5,0.5）也是合法分歧 ⇒ 必须检出，实际 %r" % (mid,)
     mid_clusters = mid if isinstance(mid, list) else [mid]
     members = set()
     for c in mid_clusters:
         members.update(c.get("members") or [])
     assert {1, 2} <= members, \
-        "★★ rev2：中位并列成员 {1,2} 应被检出，实际 %r" % (members,)
+        "★★ 中位并列成员 {1,2} 应被检出，实际 %r" % (members,)
 
     # ── 负向：★ 不改状态（★ 纯函数）──
     st = SL.State(budget_remaining=5)
     before = json.dumps(st.to_dict(), ensure_ascii=False, sort_keys=True)
-    SL.detect_tie([0.9, 0.5, 0.5])
+    SL.detect_tie([0.9, 0.5, 0.5], tol=1e-9)
     after = json.dumps(st.to_dict(), ensure_ascii=False, sort_keys=True)
     assert before == after, "★ detect_tie 是纯函数 ⇒ 不得修改状态"
 
     # ── ★ 接线语义：检出并列 ⇒ 调用方可写入分歧 ⇒ 动作变 connect ──
     st2 = SL.State(budget_remaining=5)
-    for d in (SL.detect_tie([0.9, 0.9, 0.2]) or []):
+    for d in (SL.detect_tie([0.9, 0.9, 0.2], tol=1e-9) or []):
         st2 = SL.preserve_divergence(st2, d)
     act, arg = SL.choose_action(st2)
     assert act == "connect", "写入分歧后动作应为 connect，实际 %r" % (act,)
+
+    # ══════════════════════════════════════════════════════════════
+    # ★★★ rev3 专属断言（★ 每条都必须是【只有 rev3 才通过】）★★★
+    # ══════════════════════════════════════════════════════════════
+
+    # ★ rev3 ① 差 1e-10（≤ tol=1e-9）⇒ 判并列
+    #   ★ ★ 独立实现：★ 用 [0.3, 0.3+1e-10]（★ 不用第二组那组输入值）
+    t1 = SL.detect_tie([0.3, 0.3 + 1e-10], tol=1e-9)
+    assert len(t1) == 1, "★ rev3①：差 1e-10 ≤ tol ⇒ 应有 1 簇，实际 %r" % (t1,)
+    assert t1[0].get("members") == [0, 1], \
+        "★ rev3①：members 应为 [0,1]，实际 %r" % (t1[0].get("members"),)
+
+    # ★ rev3 ② 同一对分值、tol=1e-11 ⇒ 【不】并列（★ 证明 tol 真的在起作用，★ 不是死参数）
+    t2 = SL.detect_tie([0.3, 0.3 + 1e-10], tol=1e-11)
+    assert t2 == [], "★ rev3②：tol=1e-11 ⇒ 差 1e-10 > tol ⇒ 不该并列，实际 %r" % (t2,)
+
+    # ★ rev3 ③ 传递闭包：三值相邻差都 ≤ tol ⇒ 归一簇
+    t3 = SL.detect_tie([0.5, 0.5 + 0.4e-9, 0.5 + 0.8e-9], tol=1e-9)
+    assert len(t3) == 1, "★ rev3③：传递闭包 ⇒ 应归一簇，实际 %r" % (t3,)
+    assert t3[0].get("members") == [0, 1, 2], \
+        "★ rev3③：members 应为 [0,1,2]，实际 %r" % (t3[0].get("members"),)
+
+    # ★ rev3 ④ ★★ 簇内【首尾差 1.8e-9 > tol】⇒ 仍归一簇（★ ⇒ tol ≠ 簇内最大跨度）
+    t4 = SL.detect_tie([0.5, 0.5 + 0.9e-9, 0.5 + 1.8e-9], tol=1e-9)
+    assert len(t4) == 1, "★ rev3④：首尾差 1.8e-9 > tol 仍应归一簇，实际 %r" % (t4,)
+    sc4 = t4[0].get("scores") or []
+    assert sc4 and abs((max(sc4) - min(sc4)) - 1.8e-9) < 1e-15, \
+        "★ rev3④：簇内首尾差应约 1.8e-9（★ > tol），实际 %r" % (sc4,)
+
+    # ★ rev3 ⑤ ★★ 不传 tol ⇒ TypeError（★ 必填 ⇒ 漏传【立刻炸】而不是静默用默认值）
+    try:
+        SL.detect_tie([0.5, 0.5])
+        raise AssertionError("★ rev3⑤：不传 tol 应当 TypeError（★ tol 是必填关键字参数）")
+    except TypeError:
+        pass
+
+    # ★ rev3 ⑥ ★★ 位置传 tol ⇒ TypeError（★ keyword-only ⇒ 逼调用方显式写 tol=）
+    try:
+        SL.detect_tie([0.5, 0.5], 1e-9)
+        raise AssertionError("★ rev3⑥：位置传 tol 应当 TypeError（★ keyword-only）")
+    except TypeError:
+        pass
+
+    # ★ rev3 ⑦ ★★ 与 rev2 的【真实差异点】：★ tol=1e-13、差 5e-13 ⇒ 【不】并列
+    #   ★ rev2（round(v,12)）会判为并列 ⇒ ⇒ ★ 这条是【rev2 挂、rev3 过】的断言
+    t7 = SL.detect_tie([0.7, 0.7 + 5e-13], tol=1e-13)
+    assert t7 == [], "★ rev3⑦：tol=1e-13、差 5e-13 ⇒ 不该并列（★ rev2 会并列），实际 %r" % (t7,)
+
+    # ★ rev3 ⑧ ★★ members 必须是【原索引升序】（★ 簇内按分值降序会破坏它）
+    #   ★ ★ 第二组 rev3 初版曾把 members 改成"按分值降序"⇒ ⇒ ★ ★ 这条守住"原索引升序"
+    t8 = SL.detect_tie([0.7, 0.2, 0.7], tol=1e-9)
+    assert len(t8) == 1, "★ rev3⑧：应有 1 簇，实际 %r" % (t8,)
+    assert t8[0].get("members") == [0, 2], \
+        "★ rev3⑧：members 应按【原索引升序】= [0,2]，实际 %r" % (t8[0].get("members"),)
+    sc8 = t8[0].get("scores") or []
+    assert sc8 and abs(sc8[0] - 0.7) < 1e-12 and abs(sc8[1] - 0.7) < 1e-12, \
+        "★ rev3⑧：scores 应与 members 同序（★ 两者都是 0.7），实际 %r" % (sc8,)
 
 
 def test8_rev1_regressions(SL):
@@ -508,11 +571,27 @@ MUTATIONS = [
      "                pass",
      "test8_rev1_regressions",
      "★ 支持性证据不留痕（★ 旧 bug ③ 复活）"),
-    ("m10_detect_tie_only_max_cluster",
-     "    for key in sorted(buckets, reverse=True):",
-     "    for key in sorted(buckets, reverse=True)[:1]:",
+    # ★ ★ rev3 专属变异（★ 2026-10-25 第二组落地 rev3 后加）★ ★
+    ("m10_detect_tie_tol_ignored",
+     "    if float(scores[i]) - float(scores[cur[-1]]) <= tol:",
+     "    if float(scores[i]) - float(scores[cur[-1]]) <= 1e9:",
      "test7_detect_tie",
-     "★★ detect_tie 只查最大簇（★ ★ 复活 rev1 的第 5 条差异 ⇒ 中位并列漏检）★★"),
+     "★★ detect_tie 的 tol 失效（★ ★ 什么都合一簇 ⇒ rev3②⑦ 必挂）★★"),
+    ("m12_detect_tie_tol_optional",
+     "def detect_tie(scores: List[float], *, tol: float) -> List[Dict[str, Any]]:",
+     "def detect_tie(scores: List[float], tol: float = 1e-9) -> List[Dict[str, Any]]:",
+     "test7_detect_tie",
+     "★★ tol 变回可选且有默认值（★ ★ 漏传不再 TypeError ⇒ rev3⑤⑥ 必挂）★★"),
+    ("m13_detect_tie_members_by_score_desc",
+     "        g_asc = sorted(g)",
+     "        g_asc = sorted(g, key=lambda i: -float(scores[i]))",
+     "test7_detect_tie",
+     "★★ members 改成按分值降序（★ ★ 违反『原索引升序』⇒ rev3⑧ 必挂）★★"),
+    ("m14_detect_tie_not_transitive",
+     "    if float(scores[i]) - float(scores[cur[-1]]) <= tol:",
+     "    if float(scores[i]) - float(scores[cur[0]]) <= tol:",
+     "test7_detect_tie",
+     "★★ 分组改成与簇【首】比较（★ ★ 非传递 ⇒ rev3④ 必挂）★★"),
     ("m11_detect_tie_always_none",
      "    return out",
      "    return []",

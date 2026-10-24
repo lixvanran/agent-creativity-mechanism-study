@@ -37,7 +37,25 @@ if _ROOT not in sys.path:
 _VER = os.path.join(_ROOT, "group4_state_driven", "data", "state_layer_versions")
 REV0_PATH = os.path.join(_VER, "state_layer_rev0.py")   # ★ rev0（sha 38795bf6adfdee05）
 REV1_PATH = os.path.join(_VER, "state_layer_rev1.py")   # ★ rev1（sha 69a29c506a4e4ab0）
-REV2_PATH = os.path.join(_ROOT, "creativity_lab", "state_layer.py")  # ★ rev2（sha b70bfb0beb2bd591）
+REV2_PATH = os.path.join(_VER, "state_layer_rev2.py")   # ★ rev2（sha b70bfb0beb2bd591）
+REV3_PATH = os.path.join(_ROOT, "creativity_lab", "state_layer.py")  # ★ rev3（sha c1c9224a1ed59fa8）
+
+
+def _dt(SL, scores):
+    """★ **跨版本调用 `detect_tie`（★ rev3 起 `tol` 变必填）**。
+
+    ★ ★ 为什么需要它：★ rev3 把 `tol` 改成【必填关键字参数】⇒ ⇒ 不传就 TypeError
+    ★ ⇒ ⇒ ★ 而本探针要**同时加载 rev0/rev1/rev2/rev3** ⇒ ⇒ ★ 老版本【不接受】`tol`
+    ★ ⇒ ⇒ ★ **⇒ 探针必须先探签名，★ 再决定怎么调**（★ 探针跟接口版本走 ★）
+    """
+    import inspect
+    try:
+        sig = inspect.signature(SL.detect_tie)
+    except (TypeError, ValueError):
+        sig = None
+    if sig is not None and "tol" in sig.parameters:
+        return SL.detect_tie(scores, tol=1e-9)
+    return SL.detect_tie(scores)
 
 
 def _load(path: str, name: str):
@@ -95,7 +113,7 @@ def gap4_no_tie_mechanism(SL):
     has_fn = hasattr(SL, "detect_tie")
     if has_fn:
         st = SL.State(budget_remaining=9)
-        d = SL.detect_tie([0.9, 0.9, 0.2])
+        d = _dt(SL, [0.9, 0.9, 0.2])
         # ★ ★ rev2：★ 无并列 ⇒ []（★ rev1 是 None）；★ 有并列 ⇒ List[Dict]（★ 全部并列簇）
         # ★ ⇒ ⇒ 【不能只看 is None】⇒ ⇒ 否则 rev2 会被误判成"差异仍存在"
         n = 0 if d is None else (len(d) if isinstance(d, list) else 1)
@@ -113,8 +131,8 @@ def gap5_tie_only_at_max(SL):
     """
     if not hasattr(SL, "detect_tie"):
         return False, "（rev0 无 detect_tie ⇒ 本条不适用）"
-    mid = SL.detect_tie([0.9, 0.5, 0.5])
-    top = SL.detect_tie([0.9, 0.9, 0.2])
+    mid = _dt(SL, [0.9, 0.5, 0.5])
+    top = _dt(SL, [0.9, 0.9, 0.2])
     # ★ ★ rev2 的返回类型变了：★ 无并列 ⇒ []（★ rev1 是 None）；★ 有并列 ⇒ List[Dict]（★ 全部并列簇）
     # ★ ⇒ ⇒ 这里【不能只看 is not None】⇒ ⇒ 必须问"有没有检出【簇】"
     def _n_clusters(x):
@@ -177,16 +195,20 @@ def probe(tag, mod):
 
 def main():
     argv = sys.argv[1:]
-    rev2 = _load(REV2_PATH, "sl_rev2")
-    if rev2 is None:
-        print("✘ 找不到 rev2（现行）：%s" % REV2_PATH)
+    rev3 = _load(REV3_PATH, "sl_rev3")
+    if rev3 is None:
+        print("✘ 找不到 rev3（现行）：%s" % REV3_PATH)
         return 2
 
-    r2 = probe("★ rev2（★ 现行 · sha b70bfb0beb2bd591）", rev2)
+    r3 = probe("★ rev3（★ 现行 · sha c1c9224a1ed59fa8）", rev3)
 
+    r2 = None
     r1 = None
     r0 = None
     if "--both" in argv or "--all" in argv:
+        rev2 = _load(REV2_PATH, "sl_rev2")
+        if rev2 is not None:
+            r2 = probe("★ rev2（对照 · sha b70bfb0beb2bd591）", rev2)
         rev1 = _load(REV1_PATH, "sl_rev1")
         if rev1 is not None:
             r1 = probe("★ rev1（对照 · sha 69a29c506a4e4ab0）", rev1)
@@ -195,11 +217,11 @@ def main():
             r0 = probe("★ rev0（对照 · sha 38795bf6adfdee05）", rev0)
 
     print("\n" + "-" * 78)
-    print("★ 差异汇总（以 rev2 为准）")
-    still = [x for x in r2 if x[1] is True]
-    fixed = [x for x in r2 if x[1] is False]
-    errs = [x for x in r2 if x[1] is None]
-    for i, (name, holds, spec_row, impl, conseq) in enumerate(r2, 1):
+    print("★ 差异汇总（以 rev3 为准）")
+    still = [x for x in r3 if x[1] is True]
+    fixed = [x for x in r3 if x[1] is False]
+    errs = [x for x in r3 if x[1] is None]
+    for i, (name, holds, spec_row, impl, conseq) in enumerate(r3, 1):
         print("  %d) %s" % (i, name))
         print("     · 判定：%s" % ("★ 仍存在 ⇒ 待第二组裁决" if holds is True
                                    else ("✔ 已修复" if holds is False else "★ 探针异常")))
@@ -211,16 +233,18 @@ def main():
     # ★ ★ 三版矩阵（★ 让"哪条在哪个版本被修掉"一眼可读）
     def _n(mod):
         return None if mod is None else sum(1 for x in mod if x[1] is True)
-    n0, n1, n2 = _n(r0), _n(r1), _n(r2)
-    print("★ 仍存在条数：rev0=%s / rev1=%s / rev2=%s" % (n0, n1, n2))
-    if r1 is not None:
-        # ★ ★ rev2 修掉了 rev1 里【仍成立】的差异
-        rev2_map = {z[0]: z[1] for z in r2}
-        fixed_in_rev2 = [x[0] for x in r1
-                         if x[1] is True and rev2_map.get(x[0]) is False]
-        if fixed_in_rev2:
-            print("★ ★ rev2 相对 rev1 修掉的：")
-            for nm in fixed_in_rev2:
+    n0, n1, n2, n3 = _n(r0), _n(r1), _n(r2), _n(r3)
+    print("★ 仍存在条数：rev0=%s / rev1=%s / rev2=%s / rev3=%s" % (n0, n1, n2, n3))
+    # ★ ★ 逐版看"相对上一版修掉了什么"（★ 探针必须跟接口版本走 ⇒ ⇒ 矩阵要能读）
+    for prev, cur, label in ((r0, r1, "rev1"), (r1, r2, "rev2"), (r2, r3, "rev3")):
+        if prev is None or cur is None:
+            continue
+        cur_map = {z[0]: z[1] for z in cur}
+        fixed_in = [x[0] for x in prev
+                    if x[1] is True and cur_map.get(x[0]) is False]
+        if fixed_in:
+            print("★ ★ %s 相对上一版修掉的：" % label)
+            for nm in fixed_in:
                 print("     · %s" % nm)
     print("★ ★ 本探针【不改任何一版 state_layer.py】⇒ ⇒ 差异上报第二组裁决 ⇒ 第四组不单方面改规则。")
     return 0

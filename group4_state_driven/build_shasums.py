@@ -34,9 +34,15 @@ FILES = [
     ("Stage-1 环境快照", "group4_state_driven/data/env_snapshot.json"),
     ("重复采样留痕", "group4_state_driven/data/duplicate_resampling.json"),
     ("★ 重标记前原始样本（★ 独立采样判据的证据）", "group4_state_driven/data/arch6_stage1.pre_dedup.jsonl"),
-    ("状态层接口（★ ★ 第二组 rev2 · 现行）", "creativity_lab/state_layer.py"),
+    ("状态层接口（★ ★ 第二组 rev3 · 现行）", "creativity_lab/state_layer.py"),
     ("★ 状态层 rev0 归档（★ 历史版）", "group4_state_driven/data/state_layer_versions/state_layer_rev0.py"),
     ("★ 状态层 rev1 归档（★ 历史版）", "group4_state_driven/data/state_layer_versions/state_layer_rev1.py"),
+    ("★ 状态层 rev2 归档（★ 历史版）", "group4_state_driven/data/state_layer_versions/state_layer_rev2.py"),
+    ("★ rev3 应用脚本（★ 第二组提供）", "creativity_lab/experiments/apply_state_layer_rev3.py"),
+    ("★ 状态层 rev2 归档（★ 历史版 · 补）", "group4_state_driven/data/state_layer_versions/state_layer_rev2.py"),
+    ("★ 第二组 pack_repo（★ 底层打包器）", "creativity_lab/experiments/pack_repo.py"),
+    ("★ 第二组 unit_store", "creativity_lab/experiments/unit_store.py"),
+    ("★ 第二组 check_batch_progress", "creativity_lab/experiments/check_batch_progress.py"),
     ("状态层规格测试（★ 第四组实现 · ★ rev2 语义）", "creativity_lab/experiments/test_state_layer.py"),
     ("状态层差异探针（★ ★ 三版本差分）", "group4_state_driven/probe_state_layer_spec_gap.py"),
     ("★ Stage-1 独立采样判据", "group4_state_driven/check_independent_samples.py"),
@@ -125,8 +131,9 @@ def main():
     lines.append("| ★ **`calllog.jsonl` 不完整** | ★ 补跑段的调用未落盘（★ 进程在 `dump_calllog()` 之前被终止）⇒ ★ **通道健康度的分母不完整** ⇒ ★ **凡用 calllog 算健康度的结论本批不成立**（★ 详见 `EXEC_LOG_stage1.md` §1.4） |")
     lines.append("| ★ **seed 未落盘** | ★ runner 里 `rec[\"seed\"] = None` ⇒ ★ **本批不可按 seed 复现** |")
     lines.append("| ★ **重复采样已处置** | ★ T10-1 出现两次（★ 两个进程并发写）⇒ ★ 后写入者重标记为 T10-2 ⇒ ★ **每题恰好 3 个重复** ⇒ ★ 留痕 `data/duplicate_resampling.json` |")
-    lines.append("| ★ **状态层接口 = rev1** | ★ sha `69a29c506a4e4ab0…`；★ **rev2（detect_tie 返回所有并列簇）尚未落地**（★ 第四组按语义重写后 sha 不符 ⇒ ★ 已回滚 rev1 ⇒ ★ **待第二组给逐字原文**） |")
-    lines.append("| ★ **`REPORT_arch6_stage1.md` 的数字** | ★ 全部由 `fill_report_stage1*.py` 从 `arch6_stage1_analysis.json` 填入 ⇒ ★ **不许手改** ⇒ ★ 改完必跑 `verify_report_stage1.py`（★ 69 项机械校验） |")
+    lines.append("| ★ **状态层接口 = rev3** | ★ sha `c1c9224a1ed59fa8…`（★ **第二组 2026-10-25 落地**；★ 由 `creativity_lab/experiments/apply_state_layer_rev3.py` 应用 ⇒ ★ **sha 双向校验通过**）；★ rev0/rev1/rev2 全部归档在 `data/state_layer_versions/`（★ sha 绑 commit） |")
+    lines.append("| ★ **rev3 的 `tol` 是必填** | ★ `detect_tie(scores, *, tol)` ⇒ ★ **所有调用点必须显式传 `tol=`** ⇒ ★ 漏传【立刻 TypeError】⇒ ★ 不会静默用默认值 ⇒ ★ 读数不会漂 |")
+    lines.append("| ★ **`REPORT_arch6_stage1.md` 的数字** | ★ 全部由 `fill_report_stage1*.py` 从 `arch6_stage1_analysis.json` 填入 ⇒ ★ **不许手改** ⇒ ★ 改完必跑 `verify_report_stage1.py`（★ 71 项机械校验） |")
     lines.append("")
 
     tmp = SHASUMS + ".tmp"
