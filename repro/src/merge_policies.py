@@ -24,6 +24,7 @@ def avg_vectors(vectors):
     return [sum(v[i] for v in vectors) / float(n) for i in range(len(vectors[0]))]
 
 
+
 def merge(paths):
     pols, hists = [], []
     for p in paths:
@@ -73,12 +74,28 @@ def merge(paths):
                 m_shape=getattr(avg_m, "shape", None),
                 m_pad_cells=getattr(avg_m, "pad_cells", None),
                 per_source_samples={os.path.basename(os.path.dirname(p)): len(h)
-                                    for p, h in zip(paths, hists)})
+                                    for p, h in zip(paths, hists)},
+                per_source_samples_NOTE='★ 注意：此字段取的是 hist 条目【键数】，不是样本数；★ 真实样本总数以 n_samples 为准（外部核验请用 n_samples）')
     return out, meta, hists
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    # ★★ 2026-10-25 修【反馈循环 bug】：原写法只过滤了 "--out" 这个**标志**，
+    #   却没过滤它的**值** ⇒ ⇒ "--out runs/policy_merged.json" 里的路径被当成
+    #   第 6 个**输入源** ⇒ ⇒ 每次重跑都把上一次的输出再平均进去（88→176→264→352）
+    #   ⇒ ⇒ 而且【第一次合并是干净的】（输出文件当时还不存在）⇒ ⇒ 既有读数未受影响
+    _argv = sys.argv[1:]
+    args, i = [], 0
+    while i < len(_argv):
+        a = _argv[i]
+        if a == "--out":
+            i += 2          # ★ 跳过 --out 及其【值】
+            continue
+        if a.startswith("--"):
+            i += 1
+            continue
+        args.append(a)
+        i += 1
     outp = None
     if "--out" in sys.argv:
         outp = sys.argv[sys.argv.index("--out") + 1]
