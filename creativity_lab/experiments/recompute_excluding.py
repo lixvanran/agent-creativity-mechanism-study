@@ -44,9 +44,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PV = os.path.join(HERE, "partial_verdict.py")
 
 
-def die(msg):
+def die(msg, code=1):
     print("✘ %s" % msg)
-    sys.exit(1)
+    sys.exit(code)
 
 
 def find_contaminated(unit_dir, max_len, allowed=None):
@@ -107,6 +107,34 @@ def main():
             die("unit-list 不存在：%s" % a.unit_list)
         allowed = set(x.strip() for x in open(a.unit_list, encoding="utf-8") if x.strip())
         print("★ 单元清单：%s（★ %d 个 ★）" % (a.unit_list, len(allowed)))
+    # ★★★★ 覆盖度闸门（★ 入口处 · 2026-10-26 补 · 第 1 层论证线自曝同族后我方自查抓出 ★★★★）
+    #   ★ ★ 事件：★ 空数据下本脚本【exit 0】并【产出一份结构完整的空 json】
+    #   ★   ★ （★ 5 个顶层键：★ contaminated_units / fragile_cells / stable_cells /
+    #   ★   ★ verdict_impact / note ★）⇒ ★ ⇒ 它【长得像一份正常结果】⇒ ★ ★【比崩溃更危险】★★ ★
+    #   ★ ⇒ 根因：★ 「无污染单元」那条分支【直接落盘并 return 0】⇒ ★ 空数据必走这条路 ★★★ ★
+    # ★ ★ 关键设计点（★ 别写错判据 ★）：★ 我方交稿读数【本来就允许是部分批】★
+    #   ★ ⇒ ★ 所以覆盖度判据【不是】「单元数 == target-units」★★
+    #   ★ ⇒ ★ 而是「★ 实际被分析的单元集 == 【冻结单元清单】给出的集合 ★」⇒ ★ ★ 不多不少 ★★
+    #   ★ ⇒ ★ 因为【预期】只能来自【预期登记】★ ⇒ ★ raw 只能告诉你「有多少」★
+    #   ★ ⇒ ★ 告诉你不了「本该有多少」★★★ ★
+    if allowed is not None:
+        _avail = set(fn[:-5] for fn in os.listdir(unit_dir)
+                     if fn.endswith(".json") and fn[:-5] in allowed)
+        _missing = sorted(allowed - _avail)
+        if _missing:
+            print("✘✘ 覆盖度不足：★ 单元清单登记 %d 个、★ units/ 下实际可读 %d 个 ★"
+                  % (len(allowed), len(_avail)))
+            print("   缺 %d 个（★ 逐个列出前 30 ★）：%s"
+                  % (len(_missing), "、".join(_missing[:30])))
+            die("★ 【数据不覆盖预期】⇒ ★ 响亮失败、不落盘（★ exit 7 ★）★"
+                " ⇒ ★ 空 summary 与正常 summary 在输出层【完全同形】★"
+                " ⇒ ★ 只能靠覆盖度断言区分 ★★", code=7)
+    _n_avail = len([fn for fn in os.listdir(unit_dir)
+                    if fn.endswith(".json") and (allowed is None or fn[:-5] in allowed)])
+    if _n_avail == 0:
+        die("★ 可用单元数 = 0（★ 空数据 ⇒ 不产出任何读数、★ 不落盘 ★）★", code=7)
+    print("★ 覆盖度闸门通过：★ 实际可读单元 %d 个（★ 清单登记 %s 个 ★）★"
+          % (_n_avail, len(allowed) if allowed is not None else "未指定"))
     contaminated = find_contaminated(unit_dir, a.max_content_len, allowed)
     print("== ① 污染单元（★ 最终输出长度 < %d ★）==" % a.max_content_len)
     if not contaminated:
