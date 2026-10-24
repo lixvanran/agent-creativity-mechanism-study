@@ -145,20 +145,45 @@
 
 ---
 
-## ★ KI-06 · ★★ 失败调用不入账 ⇒ 「每 rep 6 次」是逻辑口径不是 HTTP 口径 ★★
+## KI-06 · ★★★ 两种失败形态：HTTP 异常已入账，但「未达 min_ok 的短输出」仍被当成功支 ★★★
 
-★ **状态**：★ 【★ 已核实，★ 修复延后到批结束后 ★】★★
+状态：已核实。修正前的版本曾断言「except 分支不入账、那句注释是错的」——**该断言针对的是被覆盖过的旧树，对当前已推版本不成立，此处更正**。
 
-★ **事实**：`creativity_lab/client.py` 的 `except Exception:` 那条路**不 append 到 `self.rec`** ⇒ ★ **下架型号 = 3 次真实 HTTP 尝试 + 3 次 sleep，账上记 0** ★
-★ ★ **★ 且那个分支上面的代码注释写着「失败最终会体现在 rec 里（ok=False）」—— 【那句注释是错的】★★** ⇒ ★ 「注释说记了、实际没记」比「根本没记」更危险 ★
+### 一、当前 `client.py` 的实际行为（blob `d593a63a8fec`）
 
-★ **覆盖缺口**：★ 仓里 `creativity_lab/experiments/test_call_accounting.py` 只测「新旧口径的算法差异」，★ **不覆盖「HTTP 异常不入账」这条路径** ⇒ ★ **该路径目前无测试覆盖** ★
+`client.py:132-144` 有两层保护：
 
-★ **处置**：
-| 项 | 处置 | 时序 |
-|---|---|---|
-| ① manifest 分列「逻辑调用数 / HTTP 尝试数」 | 采纳 | 随 ② 一起 |
-| ② `client.py` 记账改动 + 改掉那句错注释 | 采纳 | ★ **批结束后**（★ 改它会让可续跑的批用新代码 ⇒ 属版本差 ⇒ 须写 EXEC-LOG 版本差标注段 ★）★ |
-| ③ 补一条覆盖「HTTP 异常入账」的测试 | 采纳 | 随 ② 一起 |
+1. `except Exception:` 分支不静默吞——换 payload 变体（去掉 reasoning_effort）再试，仍不行才睡 1.5s；
+2. 循环结束后 `if len(self.rec) == rec_before:` 显式补记一条失败（`ok=False, has_content=False, finish_reason="exception"`）。
 
-★ **为什么不能现在改**：★ 当前拓扑臂 v2 批（PID 2562）正在跑且**可续跑** ⇒ ★ 中途改 `client.py` ⇒ ★ 「续跑」与「首跑」用不同代码 ⇒ ★ 读数不可比。★★
+结论：**HTTP 异常路径已经入账，通道健康度不会漏算它。** 代码里那句「失败最终会体现在 rec 里（ok=False）」对当前版本是**对的**。
+
+### 二、但仍有两个真实缺口
+
+**缺口 A：HTTP 尝试数不等于 rec 条数。**
+一支下架型号在 3 轮预算 × 2 个 payload 变体下最坏 = 6 次 HTTP 尝试，但兜底只补记 1 条 rec。
+⇒ manifest 必须分列「逻辑调用数 / HTTP 尝试数 / rec 条数」，否则成本估算最多差 6 倍。
+⇒ 修法：`_payload_variants` 的「先带 reasoning_effort，失败退回不带」这条要写进 manifest 的倍率字段。
+
+**缺口 B：未达 `min_ok` 的短输出会被当成成功支。**
+`client.chat()` 的循环是 `if len(last) >= min_ok: return last`，否则 `break` 继续换更大预算；全部预算跑完后 `return last`。
+⇒ **`last` 在「传输成功但内容短」时是非空的短文本** ⇒ 臂层若用 `out.strip()` 判成功，就会把「写短了的分支」记成成功支。
+⇒ **这是多计支，与「5 支静默变 4 支」同族但方向相反。**
+⇒ 直接后果：臂内支数虚高 ⇒ 饱和度算子 `w_ds` 的样本对数不对 ⇒ 污染 2×2 的因变量。
+
+### 三、建议修法（治本 = B 方案）
+
+`client.chat()` 未达 `min_ok` 时 `return ""` 而不是 `return last`。
+两个语义都保住：`ok` = 长度达标，`has_content` = 传输成功；rec 里那条仍是 `ok=False, has_content=True`，传输成功这件事不丢。
+另两种改法不用：臂层按长度判会口径分裂（臂拿不到 client 的默认 min_ok）且白跑 3 轮预算；`chat()` 暴露 `last_ok` 在 `chat_many` 的线程池下是共享状态，不可靠。
+
+### 四、时序
+
+不在批运行期间改 `client.py`。当前拓扑臂 v2 批（PID 2562）正在跑且可续跑，中途改会让「续跑」与「首跑」用不同代码。
+本批的 `client.py` blob = `d593a63a8fec`（批启动 commit `17244d2d` 与当前 HEAD **同一 blob**）⇒ 批内无版本差。
+修法排在批结束后接入，并写入 EXEC-LOG 版本差标注段。
+
+### 五、本批的实测污染率（★ 可核验 ★）
+
+126 个已落盘单元中，**1 个**的最终 `post` 长度为 198 < min_ok=200（S5_r1_nosel_b3_u1）⇒ 污染率 **0.79%**。
+其余口径全对：`n_calls` 分布 {4:25, 3:20, 13:81} 与设计一致（nosel_b3=3 / nosel_b3_synth=4 / 4 个 topo 臂=13）；`n_failed` 全为 0；`len(calls) == n_calls` 全对 ⇒ 记账无缺口。
