@@ -66,20 +66,40 @@ def main():
         for m in q["models"]:
             if m["model_name"] == "general":
                 gen = m
+        _st = gen.get("interval_status", gen.get("current_interval_status"))
+        if _st is None:
+            print("   ★ 告警：读不到 interval_status（★ 不作为等待依据 ★ ⇒ ★ 等窗口改用【时间】判定 ★）")
         print("   窗口 %s → %s ｜ 剩 %s 分 ｜ status=%s ｜ 本周剩 %s h"
               % (gen["interval_start_utc"], gen["interval_end_utc"],
-                 gen["interval_remains_min"], gen["interval_status"], gen["weekly_remains_hours"]))
+                 gen["interval_remains_min"], _st, gen["weekly_remains_hours"]))
     else:
         print("   读不到配额：%s" % q.get("err"))
 
-    if gen and gen.get("current_interval_status") == 2 and not a.no_wait:
-        print("== ② 等窗口复位（★ 到 %s ★）==" % gen["interval_end_utc"])
-        if not wait_until(gen["interval_end_utc"], a.poll, a.max_wait):
-            print("   ✘ 等超时 ⇒ 不续跑 ⇒ 退出码 2")
+    # ★ ★ ★ 等窗口条件【不依赖状态字段】★★
+    #   ★ ★ 旧实现判 `gen.get("current_interval_status") == 2` ★ ⇒ ★ ★ 但打印用的字段是
+    #   ★ ★ `interval_status` ⇒ ★ 两者不一致 ⇒ ★ status 读到 None ⇒ ★ **跳过了等待** ★
+    #   ★ ★ ⇒ ★ 立即去试 ⇒ 429 ⇒ 白测一次（★ 本轮实测踩到 ★）★★
+    #   ★ ★ ⇒ ★ 更根本：★ 【等待条件必须基于【物理时间】】⇒ ★ 状态字段可能读不到/改名 ★
+    #   ★ ★ ⇒ ★ 读不到就【当还没到窗口】⇒ ★ **fail-closed**，★ 不是 fail-open ★★
+    if gen and not a.no_wait:
+        _end = gen.get("interval_end_utc")
+        if not _end:
+            print("   ✘ 读不到窗口结束时刻 ⇒ ★ 保守退出（★ 不猜 ★）⇒ 退出码 2")
             return 2
-        print("   ✔ 窗口时间已到")
+        _now = dt.datetime.utcnow()
+        _enddt = dt.datetime.strptime(_end, "%Y-%m-%dT%H:%M:%SZ")
+        _left = (_enddt - _now).total_seconds()
+        if _left > 0:
+            print("== ② 等窗口复位（★ 到 %s ★ ｜ 现在 %s ｜ 还剩 %d 秒 ★）=="
+                  % (_end, _now.strftime("%Y-%m-%dT%H:%M:%SZ"), int(_left)))
+            if not wait_until(_end, a.poll, a.max_wait):
+                print("   ✘ 等超时 ⇒ 不续跑 ⇒ 退出码 2")
+                return 2
+            print("   ✔ 窗口时间已到")
+        else:
+            print("== ② 窗口已到（★ 实测 %s ≥ %s ★）==" % (_now.strftime("%H:%M:%SZ"), _end))
     else:
-        print("== ② 跳过等待（★ 当前 status=%s ★）==" % (gen.get("current_interval_status") if gen else "?"))
+        print("== ② 跳过等待（★ --no-wait 或 读不到配额 ★）==")
 
     print("== ③ 实测 chat（★ 不通就不跑 ★）==")
     c = check_chat()
