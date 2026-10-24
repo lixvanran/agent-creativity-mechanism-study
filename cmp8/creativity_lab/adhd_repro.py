@@ -339,13 +339,6 @@ def run_adhd(problem, model="", llm=None, frames_n=5, ideas_per_frame=6, top_k=3
     wild = sorted([x for x in all_ideas if x["score"]], key=lambda x: -x["score"]["novelty"])
     out.append("  What if we took this seriously: %s" %
                (wild[0]["text"] if wild else "What's the assumption nobody named yet?"))
-    # ★★ 2026-10-24 最小侵入扩展（不重写任何逻辑）：
-    #   外部要测「面宽」必须拿到分支列表 ⇒ 原实现只返回渲染后的合并文本
-    #   ⇒ 这里把想法列表也放进 meta（调用方可选用，不影响原调用方）
-    meta["ideas"] = [x.get("text", "") for x in all_ideas if x.get("text")]
-    meta["ideas_meta"] = [{"id": x.get("id"), "frameId": x.get("frameId"),
-                           "text": x.get("text", ""),
-                           "score": x.get("score")} for x in all_ideas]
     return "\n".join(out), meta
 
 
