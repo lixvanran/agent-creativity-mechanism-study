@@ -39,6 +39,12 @@ import urllib.request
 # ★ ★ 推后回读远端 commit 时【必须逐字核对】的字段（★ 契约，★ 卫生自检查的就是它）★★
 CHECK_FIELDS = ("message", "author", "date")
 
+# ★ ★ 传输层规范化（★ 2026-10-25 实测坐实）：★ GitHub 会【去掉 commit message 的尾部换行】★★
+# ★ ★ ⇒ ★ ⇒ 所以【逐字比对】必须【两边做同样的归一化】，★ 否则必然误报 ★★
+# ★ ★ ⇒ ★ ★ 只归一化【实测到的那一处】★★ ⇒ ⇒ ★ ⇒ **★ 不做通篇 strip（★ 那会掩盖真差异）★★**
+def _norm_message(s: str) -> str:
+    return s.rstrip("\n")
+
 API = "https://api.github.com"
 
 
@@ -222,7 +228,7 @@ def main():
     actual = {"message": rmsg, "author": rauth.get("name"), "date": rauth.get("date")}
     expect = {"message": msg, "author": a.owner, "date": now}
     # ★ ★ 逐字段【显式】比较（★ ★ 字段名写在比较里 ⇒ ⇒ 【谁被核对了】在源码里可见 ⇒ ⇒ 可判 ★★）★★
-    if actual["message"] != expect["message"]:
+    if _norm_message(actual["message"]) != _norm_message(expect["message"]):
         bad.append("message")
     if actual["author"] != expect["author"]:
         bad.append("author")
@@ -231,7 +237,11 @@ def main():
     assert set(CHECK_FIELDS) == {"message", "author", "date"}, "★ 契约字段集与核对项不一致"
     if bad:
         # ★ ★ 响亮失败（★ 不用"警告后继续"）★★
-        raise SystemExit("✘ 推后回读核对失败：★ %s（★ 远端与本地不一致 ⇒ ⇒ 不许当成功）" % ", ".join(bad))
+        # ★ ★ 注意：★ 此时【远端已经推成功了】（★ PATCH 已 ok）★ ⇒ ⇒ ★ ⇒
+        # ★ ★ ⇒ ★ **★ ⇒ 所以不能把它说成"推失败"★★ ⇒ ⇒ ★ ⇒ **★ ⇒ 报【核对不通过】+ 让人去看 ★★**
+        raise SystemExit("✘ 推后回读核对不通过：★ %s\n"
+                         "  ★ ★ 远端【已推成功】（★ PATCH ok、★ ref 已动）★ ⇒ ⇒ ★ ⇒ "
+                         "  ★ ★ 这是【核对不通过】、★ 不是【推失败】★ ⇒ ⇒ ★ ⇒ 请人工核。" % ", ".join(bad))
     print("  ★ 回读核对：★ message / author / date 三项逐字一致 ✔")
     print("  ★ 远端独有文件丢失：%d（★ 应 0）" % len(lost))
     print("  ★ 同路径更新未生效：%d（★ 应 0）" % len(changed_bad))
