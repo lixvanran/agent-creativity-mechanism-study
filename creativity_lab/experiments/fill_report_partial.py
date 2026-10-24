@@ -66,6 +66,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", required=True)
     ap.add_argument("--json", required=True)
+    ap.add_argument("--f1c-json", default=None,
+                    help="★ f1c_leverage.py 的输出（★ 位置基线 + 内容依赖判据 ★）")
     ap.add_argument("--excl-json", default=None,
                     help="★ recompute_excluding.py 的输出（★ 用来给主判据表加『脆弱格』列 ★）")
     ap.add_argument("--contaminated-unit", default=None,
@@ -91,13 +93,23 @@ def main():
     # ★ 脆弱格清单（★ 可选 ★）
     fragile = set()
     fragile_detail = []
-    if a.excl_json:
-        if not os.path.isfile(a.excl_json):
-            die("excl-json 不存在：%s" % a.excl_json)
-        ej = json.load(open(a.excl_json, encoding="utf-8"))
-        for c in ej.get("fragile_cells", []):
-            fragile.add((c["contrast"], c["tid"], c["rep"]))
-            fragile_detail.append(c)
+    # ★ ★ 脆弱格的【正确判据】：★ 不是「A 有 B 无」（★ 那是整组退出的副作用 ★），
+    #   ★ 而是【内容依赖】：★ 该单元的杠杆 ≥ 2× 同位置基线（★ F-1c 判据 ★）★★
+    #   ★ 若 F-1c 判定【不属内容依赖】⇒ ★ 一格都不标脆弱 ★
+    f1c_ratio = None
+    if a.f1c_json:
+        if not os.path.isfile(a.f1c_json):
+            die("f1c-json 不存在：%s" % a.f1c_json)
+        fj = json.load(open(a.f1c_json, encoding="utf-8"))
+        f1c_ratio = fj.get("content_dependency_ratio")
+        if f1c_ratio is not None and f1c_ratio < 2.0:
+            pass    # ★ 不属内容依赖 ⇒ 脆弱集合为空 ★
+        else:
+            if a.excl_json and os.path.isfile(a.excl_json):
+                ej = json.load(open(a.excl_json, encoding="utf-8"))
+                for c in ej.get("fragile_cells", []):
+                    fragile.add((c["contrast"], c["tid"], c["rep"]))
+                    fragile_detail.append(c)
 
     s = open(a.report, encoding="utf-8").read()
 
@@ -154,7 +166,13 @@ def main():
             if (name, c["tid"], c["rep"]) in fragile:
                 n_frag += 1
                 frag_txt.append("%s r%d" % (c["tid"], c["rep"]))
-        frag_col = ("★ **%s** ★" % ("、".join(frag_txt))) if frag_txt else "—"
+        if frag_txt:
+            frag_col = "★ **%s** ★" % ("、".join(frag_txt))
+        elif f1c_ratio is not None:
+            frag_col = ("★ **无**（★ 已查：★ 该单元杠杆 %.2f× 同位置基线 ⇒ 不属内容依赖 ★）★"
+                        % f1c_ratio)
+        else:
+            frag_col = "—"
         new_line = ("| **%s** | %s | %d | %s | %d/%d | ★ %s | %s |"
                     % (name, label, n_cells, cell_txt, n_over, n_cells, dir_txt, frag_col))
         s = replace_line(s, prefix, new_line, "6.10.4 %s 行" % name)
