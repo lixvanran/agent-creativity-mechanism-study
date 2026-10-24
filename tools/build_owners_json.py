@@ -85,7 +85,14 @@ def main():
         c = api("/repos/%s/git/commits/%s" % (REPO, sha))
         # ★ API 建的 commit：message 在顶层；GitHub 原生 commit：在 commit.message ⇒ 两种都读
         _c = c.get("commit") or {}
-        msg = (c.get("message") or _c.get("message") or "").split("\n")[0]
+        _full = (c.get("message") or _c.get("message") or "")
+        msg = _full.split("\n")[0]
+        # ★ 硬级证据：commit body 里的 owner 行（★ GitHub 只去尾部换行 ⇒ 逐行找即可）
+        _owner_line = ""
+        for _ln in _full.split("\n")[1:]:
+            if _ln.strip().lower().startswith("owner:"):
+                _owner_line = _ln.split(":", 1)[1].strip()
+                break
         tree = (c.get("tree") or {}).get("sha")
         chain.append((sha, msg, tree))
         parents = c.get("parents") or []
@@ -100,6 +107,12 @@ def main():
         if cand:
             local_sha, local_msg = cand[0]
         matched = "tree_sha" if cand else "none"
+        level = "weak(prefix反推)"
+        if _owner_line:
+            # ★ 硬级：body 里的 owner 行优先于一切反推
+            g = _owner_line
+            level = "hard(owner行)"
+            matched = "owner_line"
         g = owner_of(local_msg or msg)
         summary = (local_msg or msg)
         # 规则 2：★ 远端 message 命中本仓某个 commit 的 subject ⇒ ★ 归属即本仓（三组）
@@ -116,12 +129,24 @@ def main():
                     summary = fb_sum
                     matched = "fallback(历史update层)"
                     break
+        if g is None:
+            for k, v in FALLBACK.items():
+                if sha.startswith(k):
+                    g, fb_local, fb_sum = v
+                    local_sha = local_sha or fb_local
+                    summary = fb_sum
+                    matched = "fallback(历史update层)"
+                    level = "medium(历史fallback)"
+                    break
         conf = (g is None)
+        if g is not None and level == "weak(prefix反推)":
+            level = "weak(prefix反推)"
         layers.append(dict(
             layer=len(chain) - i, sha=sha, group=g,
             local_commit=local_sha, remote_message=msg,
             summary=summary, needs_confirmation=conf,
             matched_by=matched,
+            evidence_level=level,
             note=("远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
                   if msg.strip().lower() in ("update", "update.", "wip", "tmp", "commit", "fix")
                   else "")))
@@ -129,7 +154,8 @@ def main():
     out = dict(schema="remote-ref-ownership/v2",
                repo=REPO, branch=BRANCH,
                generated_at=subprocess.check_output(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"]).decode().strip(),
-               generator="tools/build_owners_json.py（v2：按 tree sha 匹配本地 commit ⇒ 自维护）",
+               generator="tools/build_owners_json.py（v3：owner 行=硬级 / 前缀反推=弱级 / 皆无=待确认）",
+               remote_ref_snapshot=chain[0][0] if chain else None,
                note=("★ 归属由【远端层的 tree sha】匹配【本地 commit】得到 ⇒ 再从本地 message 前缀反推组名 "
                      "⇒ ⇒ 不需要维护任何硬编码表 ⇒ ⇒ 未知一律 needs_confirmation=true，不猜。"),
                layers=layers)
