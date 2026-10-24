@@ -2,7 +2,7 @@
  "checked": 69,
  "missing": [],
  "n_missing": 0,
- "n_weak": 47,
+ "n_weak": 48,
  "weak": [
   {
    "expect": "0.285",
@@ -40,6 +40,11 @@
    "occurrences": 6
   },
   {
+   "expect": "371",
+   "label": "末步 end_greedy 字数中位",
+   "occurrences": 2
+  },
+  {
    "expect": "1.0",
    "label": "末步 end_greedy 面宽中位",
    "occurrences": 86
@@ -67,7 +72,7 @@
   {
    "expect": "5.0",
    "label": "末步 end_raw 面宽中位",
-   "occurrences": 28
+   "occurrences": 29
   },
   {
    "expect": "0.11",
@@ -87,92 +92,92 @@
   {
    "expect": "2",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r1",
-   "occurrences": 1032
+   "occurrences": 1078
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r2",
-   "occurrences": 1503
+   "occurrences": 1549
   },
   {
    "expect": "3",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T1 r3",
-   "occurrences": 545
+   "occurrences": 579
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T2 r1",
-   "occurrences": 1503
+   "occurrences": 1549
   },
   {
    "expect": "1",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T2 r2",
-   "occurrences": 1035
+   "occurrences": 1104
   },
   {
    "expect": "1",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T2 r3",
-   "occurrences": 1035
+   "occurrences": 1104
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r1",
-   "occurrences": 1032
+   "occurrences": 1078
   },
   {
    "expect": "3",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r2",
-   "occurrences": 545
+   "occurrences": 579
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-matrix-2026-10-24 T3 r3",
-   "occurrences": 1503
+   "occurrences": 1549
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r1",
-   "occurrences": 1032
+   "occurrences": 1078
   },
   {
    "expect": "4",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r2",
-   "occurrences": 528
+   "occurrences": 565
   },
   {
    "expect": "3",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S4 r3",
-   "occurrences": 545
+   "occurrences": 579
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r1",
-   "occurrences": 1503
+   "occurrences": 1549
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r2",
-   "occurrences": 1032
+   "occurrences": 1078
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S5 r3",
-   "occurrences": 1503
+   "occurrences": 1549
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r1",
-   "occurrences": 1032
+   "occurrences": 1078
   },
   {
    "expect": "2",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r2",
-   "occurrences": 1032
+   "occurrences": 1078
   },
   {
    "expect": "0",
    "label": "Δ模态数 divergence-pathmulti-2026-10-24 S6 r3",
-   "occurrences": 1503
+   "occurrences": 1549
   },
   {
    "expect": "4.0",
@@ -187,12 +192,12 @@
   {
    "expect": "5.0",
    "label": "base 模态中位 S5",
-   "occurrences": 28
+   "occurrences": 29
   },
   {
    "expect": "5.0",
    "label": "n8 模态中位 S5",
-   "occurrences": 28
+   "occurrences": 29
   },
   {
    "expect": "4.0",
@@ -202,7 +207,7 @@
   {
    "expect": "5.0",
    "label": "n8 模态中位 S6",
-   "occurrences": 28
+   "occurrences": 29
   },
   {
    "expect": "4.0",
@@ -222,7 +227,7 @@
   {
    "expect": "5.0",
    "label": "base 模态中位 T3",
-   "occurrences": 28
+   "occurrences": 29
   },
   {
    "expect": "7.0",
@@ -237,7 +242,7 @@
   {
    "expect": "1",
    "label": "pathmulti 失败数",
-   "occurrences": 1035
+   "occurrences": 1104
   }
  ]
 }

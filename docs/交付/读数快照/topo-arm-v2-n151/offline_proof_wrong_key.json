@@ -1,0 +1,22 @@
+{
+ "cache_dir": "docs/交付/读数快照/topo-arm-v2-n151/vector_cache",
+ "checked_at_utc": "2026-10-24T12:29Z",
+ "keys_differing": 0,
+ "keys_differing_list": [],
+ "n_cache_files": 187,
+ "negative_control": {
+  "err": "KeyError: 'vectors'",
+  "passed": true,
+  "scenario": "★ 坏 key + 【无缓存】⇒ 通道拒绝 ★"
+ },
+ "note": "★ 「离线」不能只是声称：★ 坏 key 下仍能跑完 ⇒ ★ 它根本没走网络；★ 而坏 key + 无缓存【确实失败】⇒ ★ 前后照成立 ★",
+ "online_sha256": "a412f4ac0416a441e7a9df9fc21f6de8648e7ce2550b7ed26e4d04560baae61a",
+ "positive": {
+  "n_units_actual": 151,
+  "passed": true,
+  "scenario": "★ 坏 key + 【有缓存】⇒ 跑完且逐位一致 ★",
+  "theta0": 1.339
+ },
+ "proof": "offline_proof_by_wrong_key",
+ "top_level_keys_compared": 13
+}

@@ -57,6 +57,8 @@ def main():
                     help="★ 叙事日期（★ 写进 registry 的 label_date 字段 ★）；★ "
                          "frozen_at 一律用【机器 UTC 时钟】⇒ ★ 不与叙事日期混用 ★")
     ap.add_argument("--note", default=None)
+    ap.add_argument("--companions-only", action="store_true",
+                    help="★ 只把 --src 追加进【顶层 companions】★：★ 不动顶层条目（★ frozen_at/label_date/sha 保持原样 ★）★、★ 不推进 history ★")
     ap.add_argument("--replace", action="store_true",
                     help="★ 显式允许覆盖已存在的同名快照（★ 默认响亮失败 ★）★")
     a = ap.parse_args()
@@ -78,9 +80,22 @@ def main():
         dst_name = "SNAPSHOT-%s-%s.json" % (_tail, date)
         dst = os.path.join(a.run_dir, dst_name)
         if os.path.exists(dst):
-            if not a.replace:
+            if a.companions_only:
+                # ★ companions-only：★ 同名副本已存在 ⇒ ★ 核 sha（★ 同内容必然同 sha ★）
+                #   ★ 同 sha ⇒ ★ 跳过（★ 无害 ★）；★ 不同 sha ⇒ ★ 响亮失败（★ 不许静默替换 ★）★★
+                _old_sha = sha256_of(dst)
+                _new_sha = sha256_of(sp)
+                if _old_sha == _new_sha:
+                    print("★ companions-only：★ 副本已存在且【sha 相同】⇒ 跳过覆盖：%s" % dst_name)
+                else:
+                    die("companions-only：★ 同名副本内容已变（★ %s：★ %s ⇒ %s ★）★ ⇒ ★ "
+                        "【不许静默替换】★" % (dst_name, _old_sha[:12], _new_sha[:12]))
+            elif not a.replace:
                 die("快照已存在（★ 不许静默覆盖 ★；★ 确需覆盖请显式加 --replace ★）：%s" % dst)
-            print("★ --replace：覆盖已存在的快照 %s" % dst_name)
+            else:
+                print("★ --replace：覆盖已存在的快照 %s" % dst_name)
+        # ★ ★ 无条件执行（★ ★ 别把它塞进上面的 if/elif/else：★ 我曾把它删掉 ⇒ ★
+        #   ★ 老样本全过（★ 副本已存在 ⇒ 走 skip 分支 ★）、★ 新样本全崩 ⇒ ★ 只有新路径才暴露 ★）★★
         tmp = dst + ".tmp"
         shutil.copyfile(sp, tmp)
         os.replace(tmp, dst)
@@ -108,6 +123,50 @@ def main():
                 prev_top = dict(reg)
         else:
             die("registry 格式不认识：%s" % type(reg))
+    if a.companions_only:
+        # ★ ★ companions-only：★ 顶层条目【一个字都不动】★★
+        #   ★ 理由：★ 读数逐字节未变时（★ sha 相同 ★），★ 重冻会把「冻结时点」篡改成现在
+        #   ★   ⇒ ★ 篡改冻结语义 ⇒ ★ 而冻结时点正是「这批数据何时被钉住」的证据 ★★
+        if not prev_top:
+            die("companions-only：★ registry 里没有可追加的顶层条目 ★")
+        _old_comp = list(prev_top.get("companions") or [])
+        _by_src = {c.get("src"): c for c in _old_comp}
+        for e in entries:
+            if e["src"] == prev_top.get("src"):
+                continue                       # ★ 顶层自己的 src 不重复登记 ★
+            _c = {"snapshot": e["snapshot"], "src": e["src"],
+                  "sha256": e["sha256"], "bytes": e["bytes"]}
+            _prev = _by_src.get(e["src"])
+            if _prev and _prev.get("sha256") != _c["sha256"]:
+                die("companions-only：★ 同一 src 的 sha 变了（★ %s：★ %s ⇒ %s ★）★ ⇒ ★ "
+                    "【不许静默替换】★" % (e["src"], _prev.get("sha256", "")[:12], _c["sha256"][:12]))
+            _by_src[e["src"]] = _c
+        _new_comp = sorted(_by_src.values(), key=lambda c: c.get("src") or "")
+        # ★ ★ entries 也要同步（★ fill_report 读的是 entries ★）★ ⇒ ★ 两个字段必须一致 ★
+        _pe = {"src": prev_top.get("src"), "snapshot": prev_top.get("snapshot"),
+               "sha256": prev_top.get("sha256"), "bytes": prev_top.get("bytes"),
+               "frozen_at": prev_top.get("frozen_at")}
+        _new_entries = [_pe] + [dict(c, frozen_at=frozen_at) for c in _new_comp]
+        top = dict(prev_top)
+        top["entries"] = _new_entries
+        top["companions"] = _new_comp
+        top["companions_note"] = ("★ 本表用 --companions-only 扩充（★ 不改顶层条目 ★）；★ "
+                                  "顶层 sha256 为 %s ★" % prev_top.get("sha256", "")[:16])
+        tmp = reg_path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(top, f, ensure_ascii=False, indent=1, sort_keys=True)
+        os.replace(tmp, reg_path)
+        print("✔ registry 已更新（★ companions-only：★ 顶层条目【未动】★）")
+        print("★ 顶层快照：%s ｜ frozen_at 保持 %s" % (prev_top.get("snapshot"), prev_top.get("frozen_at")))
+        print("★ companions：%d 条 ⇒ %s" % (len(_new_comp),
+              "、".join(c.get("src", "") for c in _new_comp)))
+        return 0
+
+    if prev_top and not a.companions_only and prev_top.get("src") != entries[0]["src"]:
+        # ★ ★ 保护：★ 顶层 src 换了人却【不显式声明】⇒ ★ 旧顶层被推进 history ⇒ ★
+        #   ★ 而 history 里那条会被误读为「版本变迁」★ ⇒ ⇒ ★ 必须醒目提示 ★★
+        print("★ ★★ 警告：★ 顶层快照的 src 变了：★ %s ⇒ %s ★★" % (prev_top.get("src"), entries[0]["src"]))
+        print("   ⇒ 旧顶层会被推入 history（★ 请确认这是【换一份新定版】而不是【误操作】★）")
     if prev_top:
         # ★ 同名覆盖时【不】推进 history（★ 否则 history 里会出现同名不同内容的条目 ★）
         if prev_top.get("snapshot") == entries[0]["snapshot"] and a.replace:

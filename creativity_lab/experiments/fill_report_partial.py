@@ -224,7 +224,7 @@ def build_provenance_section(pv):
     return "\n".join(L)
 
 
-def build_offline_section(oe):
+def build_offline_section(oe, op=None):
     """★ §6.12.9 「离线可算」已被逐位证明 ★★
     ★ 数字全部来自 verify_offline_equivalence.py 的输出（★ 零手抄 ★）★★"""
     L = []
@@ -251,6 +251,18 @@ def build_offline_section(oe):
     L.append("> ★★★ **★ 「离线优先」的正确落点不是【逐个脚本改】，★ 而是【在【调用点】加一层缓存】★★ ⇒ ★ 我方 `client.LLM.embed` 加了落盘缓存后，★ **一个环境变量 `MM_VECTOR_CACHE_DIR` 就让所有分析脚本一起离线**（★ 不用改 10 个脚本 ★）★★ ★")
     L.append("> ★★★ **★ 另一条：★ 「目录形态」必须与【实际调用方式】一致** ★★ ⇒ ★ 我方先后踩了两次：★ ① `vectors/` 按 unit_id 命名、★ `vector_cache/` 按文本 sha256 命名 ⇒ ★ **查不到** ★ ② 单元 id 的臂名含下划线（★ `nosel_b3_synth` ★）⇒ ★ 自己 `split` 会切错 ⇒ ★ ⇒ ★ **正解：★ 直接复用 `client._cache_path` 与 `partial_verdict.load_groups`（★ 单一真相源 ★）★★ ★")
     L.append("")
+    if op:
+        L.append("★ ★★ **★★ 「离线」不能只是【声称】——★ 我方补了【断网证明】★★★")
+        L.append("")
+        L.append("| ★ 断网证明 | ★ 结果 |")
+        L.append("|:-:|---|")
+        L.append("| ★ **负对照**：★ 错 key + 【无缓存】 | ★ %s ★ |" % ("✔ 按预期失败（★ 通道拒绝坏 key ★）" if op.get("negative_control",{}).get("passed") else "✘ 未失败"))
+        L.append("| ★ **正对照**：★ 错 key + 【有缓存】 | ★ %s ★ |" % ("✔ 跑完，★ 读数逐位一致" if op.get("positive",{}).get("passed") else "✘ 未通过"))
+        L.append("| ★ 逐位对照的顶层键数 | ★ **%s**（★ **不同：%s** ★）★ |" % (op.get("top_level_keys_compared"), op.get("keys_differing")))
+        L.append("")
+        L.append("> ★★★ **★ 为什么这条必须做**：★ 「离线」若不加【断网证明】，★ 它与「**声称离线**」在输出层【完全同形】——★ 都能跑出正确读数 ★★★ ★")
+        L.append("> ★★★ **★ ⇒ 而【错 key + 有缓存仍成功】+【错 key + 无缓存确实失败】这一对，★ 才把「它根本没走网络」从【推测】变成【证据】★★ ★")
+        L.append("")
     L.append("★ ★★ **★ 这条对【下一批】的直接要求（★ 已写进 A 篇 2×2 规格缺口 10 ★）★★")
     L.append("")
     L.append("> ★ **在【采集端】就落盘向量** ⇒ ★ 就连这次「事后补录」都不必做 ⇒ ★ 且**必然**标 `provenance = native`（★ 与 post-hoc 【不可混为一谈】★）★")
@@ -492,6 +504,8 @@ def main():
                     help="★ h0_theta0_calibration.py 的输出（★ θ₀ 多口径重算 + 判决影响 ★）")
     ap.add_argument("--crosscheck-json", default=None,
                     help="★ crosscheck_report.py 的输出（★ 弱检查统计 ★）")
+    ap.add_argument("--offline-proof-json", default=None,
+                    help="★ offline_proof_wrong_key.json（★ 断网证明 ★）")
     ap.add_argument("--offline-json", default=None,
                     help="★ verify_offline_equivalence.py 的输出（★ 离线等值性证明 ★）")
     ap.add_argument("--provenance-json", default=None,
@@ -698,7 +712,12 @@ def main():
         if not os.path.isfile(a.offline_json):
             die("offline-json 不存在：%s" % a.offline_json)
         _oe = json.load(open(a.offline_json, encoding="utf-8"))
-        s = replace_markers(s, build_offline_section(_oe), OE_BEGIN, OE_END)
+        _op = None
+        if a.offline_proof_json:
+            if not os.path.isfile(a.offline_proof_json):
+                die("offline-proof-json 不存在：%s" % a.offline_proof_json)
+            _op = json.load(open(a.offline_proof_json, encoding="utf-8"))
+        s = replace_markers(s, build_offline_section(_oe, _op), OE_BEGIN, OE_END)
 
     # ★ ★ 读数出处覆盖率 → §6.10.0d ★★
     if a.provenance_json:
