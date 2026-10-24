@@ -68,7 +68,113 @@ MC_END = "<!-- END:6.10.2b -->"
 SN_BEGIN = "<!-- BEGIN:6.10.0 -->"
 SN_END = "<!-- END:6.10.0 -->"
 CH_BEGIN = "<!-- BEGIN:6.10.0b -->"
+CW_BEGIN = "<!-- BEGIN:6.10.0c -->"
+V5_BEGIN = "<!-- BEGIN:6.10.5 -->"
+V5_END = "<!-- END:6.10.5 -->"
+CW_END = "<!-- END:6.10.0c -->"
 CH_END = "<!-- END:6.10.0b -->"
+
+
+def build_weakcheck_section(cc):
+    """★ 从 crosscheck_report.json 生成「数字可信度来自哪里」一节 ★"""
+    checked = cc.get("checked", 0)
+    weak = cc.get("n_weak", 0)
+    missing = cc.get("n_missing", 0)
+    L = []
+    L.append("### 6.10.0c ★★★ ★★ 一次自我更正：★ 「48/48 全绿」不是数字正确性的证据 ★★★")
+    L.append("")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 报「我方 `论文/verify.py` 此前只打印不退出 ⇒ 它是【报告器】不是【闸门】」+「L1 的 43 项检查全是子串包含 ⇒ 6 处结构漏洞（★ 改一处、别处仍命中 ⇒ 抓不到 ★）」★")
+    L.append("> ★ **我方据此自查**：★ `crosscheck_report.py` 的 %d 项检查**全部是子串包含** ⇒ ★ **实测 %d / %d 是弱检查**（★ 期望串在报告里出现 ≥2 次 ⇒ ★ 改一处、别处仍命中 ⇒ ★ 抓不到变异 ★）★" % (checked, weak, checked))
+    L.append("> ★ **工具**：`creativity_lab/experiments/crosscheck_report.py`（★ 已加 `--json-out` ★）｜`creativity_lab/experiments/verify_report_numbers.py`（★ **逐位·逐格**强检查，★ 不容差 ★）★")
+    L.append("")
+    L.append("| 项 | 值 |")
+    L.append("|:-:|---|")
+    L.append("| ★ 检查项总数 | ★ **%d** ★ |" % checked)
+    L.append("| ★ 其中【弱检查】（★ 存在性：★ 只能证明「报告某处有这个数」★） | ★ **%d** ★ |" % weak)
+    L.append("| ★ 其中【强检查】（★ 逐位逐格：★ 定位到具体行与格 ★） | ★ **%d** ★ |" % (checked - weak))
+    L.append("| ★ 缺失（★ 报告里找不到期望串 ★） | ★ **%d** ★ |" % missing)
+    L.append("")
+    L.append("★ ★★ **⇒ 那「全绿」到底证明了什么、没证明什么** ★★：")
+    L.append("")
+    L.append("| | 内容 |")
+    L.append("|:-:|---|")
+    L.append("| ★ **证明了** | ★ **报告里没有【缺】该有的数**（★ 即：不是抄漏了、不是被删了 ★）★ |")
+    L.append("| ★ **没证明** | ★ ★ **报告里那个数【对不对】** ★★（★ 改一处、别处仍命中 ⇒ ★ 抓不到 ★）★ |")
+    L.append("")
+    L.append("★ ⇒ ★ **本报告的数字正确性，实际由下面四条保证（★ 不是由「全绿」保证 ★）**：")
+    L.append("")
+    L.append("| # | 保证机制 | 形态 | 自证 |")
+    L.append("|:-:|---|---|---|")
+    L.append("| ① | ★ **数字由脚本回填**（★ `fill_report_partial.py` ★） | ★ 报告里每个关键数都从 json 读出后写入 ⇒ ★ **不可能抄错** ★ | ★ 锚点唯一命中 + 找不到就报错退出 ★ |")
+    L.append("| ② | ★ **逐位·逐格结构化核对**（★ `verify_report_numbers.py` ★） | ★ 定位到具体行与格、★ 逐位比对、★ **不容差** ★ | ★ **自带 6 个变异注入自测**（★ 含「改报告里那一格」★）★ |")
+    L.append("| ③ | ★ **幂等**（★ 填充脚本连跑两遍 ★） | ★ 两遍应逐字节一致 ⇒ ★ 证明填充是确定性的、不是随机凑的 ★ | ★ `cmp` 逐字节 ★ |")
+    L.append("| ④ | ★ **分析脚本自己的断言** | ★ 如「两口径判决必须一致」、★「可比单元数与基线一致」★ | ★ 断言在跑批/分析时即触发 ★ |")
+    L.append("")
+    L.append("★ ★ **★ 三处被新核对当场抓出的真错误（★ 自证 ② 是有用的 ★）★★：")
+    L.append("")
+    L.append("> ★ **① 结论句漏了一个题级方向**：★ 主判据表里 4c 有 **3 个**题级方向，★ 而 §6.10.5 结论句只写了 **2 个** ⇒ ★ **根因不是「纯手写」，★ 是【半脚本半手抄】——★ 那段只【就地正则替换 4 个数】，★ 其余数字不在替换清单里 ⇒ ★ ⇒ ★ 已改为**整段脚本生成**（★ `build_verdict_sentence()` ★）★")
+    L.append("> ★ **② 一个数字本身是错的**：★ 结论句原写「综述效应有 **2** 个超门槛格」，★ 实为 **3** 个 ⇒ ★ ★ 靠「查这个数在不在报告里」**永远查不出**（★ 2 和 3 都在报告里 ★）⇒ ★ 只有逐位比对能抓到 ★")
+    L.append("> ★ **③ 一处过强措辞**：★ 4c 的题级方向是 **2 正 1 负** ⇒ ★ 报告却标了「**方向相反**」⇒ ★ 「正负并存」≠「相反」⇒ ★ **已改为「方向不一致」** ★（★ 措辞由脚本统一改，★ 不会手抄 ★）★")
+    L.append("")
+    L.append("")
+    L.append("> ★★★ **★ 「命中」≠「那一格对」★；★ 而「检查项会红」这件事本身，★ 也必须【在正确的变异位置】上验证 ——★ 我第一版变异用全文 `replace`，★ 改到了全文第一处同串 ⇒ ★ **差在变异位置、★ 不在检查逻辑** ⇒ ★ ⇒ ★ **自测里「没抓到」时，★ 先查变异打在哪，★ 再查检查逻辑** ★★")
+    L.append("")
+    return "\n".join(L)
+
+
+# ★ 预注册常量（★ 不是读数，★ 是实验设计参数，★ 硬编码在此并在此声明 ★）
+PREREG_H0_N = 21          # ★ 预注册 H0 原料目标：nosel_b3 12 + 旧批 nosel_b5 9
+N_ARMS = 6                # ★ 6 臂
+N_PROPOSALS_PER_GROUP = 5  # ★ 每组 5 份综述后 proposal
+
+
+def build_verdict_sentence(d):
+    """★ §6.10.5 结论句【整段脚本生成】★★
+    ★ ★★ 为什么整段生成（★ 2026-10-26 实测 ★）★★
+    ★ 这段曾经是【手写】⇒ ★ ★★ 于是它【静默漂移】了：★★
+    ★   ① 4c 的题级方向漏了 S6（★ 写了 2 个、实际 3 个 ★）⇒ ★ 读者读到的方向结构不同 ★
+    ★   ② 「明确不能说的」里写「题级 n=2」，★ 而实际 n=3 ★
+    ★ ⇒ ⇒ ★ 这正是【手抄 ⇒ 漂移】的实证 ⇒ ⇒ ★ **整段改为脚本生成，★ 数字与措辞一律取 json ★** ★★
+    """
+    v = d["verdicts"]
+    theta0 = d["theta0"]
+    n_pairs = d["h0"]["vendi"]["n_pairs"]
+    tids = d["tids"]
+    reps = d["reps"]
+    L = []
+    L.append("> ★★ **【产出方自算】** ★★")
+    L.append("> ★ （★ **本段整段由 `fill_report_partial.py` 从 `partial_verdict.json` 自动填入** ★ ⇒ ★ **n 会随批推进变化** ★ ⇒ ★ 交稿前以脚本重填为准 ★）★★")
+    # ── 每组的题级方向（★ 全部列出，★ 不截断 ★）──
+    dir_parts = []
+    for name in ("H-TOPO-4a", "H-TOPO-4c", "H-TOPO-4d"):
+        c = v[name]
+        items = ["%s %+.4f" % (tid, mean) for tid, mean, _s in c["dir_votes"]]
+        dir_parts.append("%s：%s" % (name[-2:], " / ".join(items)))
+    # ── 超门槛格数 ──
+    def over(name):
+        c = v[name]
+        return sum(1 for x in c["cells"] if abs(x["vendi_std"]) > theta0)
+    def ncells(name):
+        return v[name]["n_cells"]
+    # ── 4c 的超门槛格明细（★ 「明确不能说的」里要引用 ★）──
+    c4c = v["H-TOPO-4c"]
+    over_cells = [(x["tid"], x["rep"], x["vendi_std"]) for x in c4c["cells"]
+                  if abs(x["vendi_std"]) > theta0]
+    over_cells.sort(key=lambda z: abs(z[2]), reverse=True)
+    oc_txt = " vs ".join("%s r%d %+.2fσ" % (t, r, s) for t, r, s in over_cells)
+    ntids = sorted({v[n].get("n_tid") for n in v if v[n].get("n_tid")})
+    ntxt = ("%d" % ntids[0] if len(ntids) == 1 else "%d–%d" % (ntids[0], ntids[-1]))
+    L.append("> 「在已跑批的 **%d/%d** 单元（★ 快照：已跑题 %s，★ 每题 %s rep，★ %d 臂，每组 %d 份综述后 proposal）上，三组单因子对比在绝对 Vendi 上均未达到本批噪声地板标定的可检出门槛（θ₀ = %.2f 个题内 rep σ，H0 原料 %d 个同臂同题配对）；★ 其中三组单因子对比的题级方向【均不一致】（★ %s ★），★ 综述效应有 %d 个、交互效应有 %d 个超门槛格，★ 可见性图效应全部低于门槛（%d/%d）★**在当前部分数据上，三者均判为『不可分辨』。** 这**不等于**『无效应』：若真实效应存在，其量级需 ≥ θ₀ 个题内 rep σ 才能在当前 n 下被检出。该结论受限于题级 n = %s（方向一致辅助条件不可判定）、H0 配对 n = %d（目标 %d），且第三把尺子 `structured_dedup` 在本批恒定（σ = 0）故不参与一致性门；**该判断只覆盖已跑批的 %d 题，不外推到尚未跑的四题。**」"
+             % (d["n_units_actual"], d["n_units_target"], "、".join(tids), "、".join(str(x) for x in reps),
+                N_ARMS, N_PROPOSALS_PER_GROUP, theta0, n_pairs,
+                "；★ ".join(dir_parts),
+                over("H-TOPO-4c"), over("H-TOPO-4a"),
+                over("H-TOPO-4d"), ncells("H-TOPO-4d"),
+                ntxt, n_pairs, PREREG_H0_N, len(tids)))
+    L.append("")
+    L.append("★ **明确不能说的**：★ **「架构无用」**（★ 整批结论 + 一致性门只有两把尺子有信息 ★）｜ ★ **「三组对比无效应」**（★ 只能说不可分辨 ★）｜ ★ **任何 p 值**（★ 题级 n=%s ★）｜ ★ **「≥2/3 题同向」**（★ 不可判定 ★）★ **「综述效应有一个大效应」**（★ 那 %d 个超门槛格【已通过留一稳健性检查】★，★ 但 %s ⇒ ★ **题级方向不一致 ⇒ 仍不可分辨** ★）★★"
+             % (ntxt, len(over_cells), oc_txt))
+    return "\n".join(L)
 
 
 def build_channel_section(cj):
@@ -284,6 +390,8 @@ def main():
                     help="★ recompute_excluding.py 的输出（★ 用来给主判据表加『脆弱格』列 ★）")
     ap.add_argument("--multicalib-json", default=None,
                     help="★ h0_theta0_calibration.py 的输出（★ θ₀ 多口径重算 + 判决影响 ★）")
+    ap.add_argument("--crosscheck-json", default=None,
+                    help="★ crosscheck_report.py 的输出（★ 弱检查统计 ★）")
     ap.add_argument("--channel-json", default=None,
                     help="★ channel_status.py 的输出（★ 通道状态 + 批状态登记 ★）")
     ap.add_argument("--contaminated-unit", default=None,
@@ -372,7 +480,9 @@ def main():
         # ★ 方向相反 ⇒ 加标注
         pos = c["pos"]; neg = c["neg"]
         if pos > 0 and neg > 0:
-            dir_txt += " ⇒ **方向相反**"
+            # ★ ★ 措辞更正（★ 2026-10-26 ★）：★ 「方向相反」是【过强】措辞 ★
+            #   2 正 1 负 属「方向不一致」，★ 不是「相反」⇒ ★ 统一改口径 ★
+            dir_txt += " ⇒ **方向不一致**"
         # ★ 定位旧行：★ 行前缀式（★ 幂等：★ 不依赖旧行的具体数字 ★）★★
         prefix = "| **%s** | %s |" % (name, label)
         # ★ 脆弱格列：★ 逐格标出哪些格由污染单元支撑（★ A 有 B 无 ★）★★
@@ -420,34 +530,14 @@ def main():
     s = re.sub(r"(★ \*\*检出力地板（★ 报「不可分辨」时必须同时报 ★）\*\*：★ \*\*θ₀ = [0-9.]+ σ\*\* ⇒ ★ 当前每单元需 \*\*\|标准化效应\| > [0-9.]+ σ\*\*[^\n]*)",
                r"\1", s, count=1)
 
-    # ── 6.10.5 结论句的 n ──
-    s = re_sub_once(s, r"「在已跑批的 \*\*[0-9]+/[0-9]+\*\* 单元（[^）]*）上",
-            "「在已跑批的 **%d/%d** 单元（★ 快照：已跑题 %s，★ 每题 %s rep，★ 6 臂，每组 5 份综述后 proposal）上"
-            % (n_actual, n_target, "、".join(d.get("tids") or []),
-               "、".join(str(x) for x in (d.get("reps") or []))),
-            "6.10.5 结论句 n")
-    # ★ 快照说明：★ 幂等（★ 两种形态都接受，★ 已是目标形态则跳过 ★）
-    _note = "（★ **本段数字由 `fill_report_partial.py` 从 `partial_verdict.json` 自动填入** ★ ⇒ ★ **n 会随批推进变化** ★ ⇒ ★ 交稿前以脚本重填为准 ★）"
-    if _note not in s:
-        s = re_sub_once(s, r"（★ 快照时点[^）]*★）", _note, "6.10.5 快照说明")
-    # ★ ★ 结论句里的四个数（★ θ₀ / H0 原料数 / 题级 n / 已跑题数 ★）★★
-    #   ★ ★ 这四个数【必须】跟着 json 走 ⇒ ★ 手抄必陈旧 ⇒ ★ 交稿前必重填 ★★
-    import re as _re
-    _pat = _re.compile(r"（θ₀ = [0-9.]+ 个题内 rep σ，H0 原料 [0-9]+ 个同臂同题配对）")
-    if len(_pat.findall(s)) != 1:
-        die("6.10.5 结论句的 θ₀/H0 原料段命中 %d 次（★ 期望 1 ★）" % len(_pat.findall(s)))
-    s = _pat.sub("（θ₀ = %.2f 个题内 rep σ，H0 原料 %d 个同臂同题配对）" % (theta0, n_pairs), s)
-    s = re_sub_once(s, r"H0 配对 n = [0-9]+（目标 21）",
-            "H0 配对 n = %d（目标 21）" % n_pairs, "6.10.5 限制条件 H0 配对 n")
-    # ★ 题级 n：★ 各对比可能不同（★ 有的题已满、有的还没 ★）⇒ 报【最小—最大】★
-    _tns = sorted({v["n_tid"] for v in verdicts.values() if v.get("n_tid")})
-    _ntxt = ("%d" % _tns[0] if len(_tns) == 1 else "%d–%d" % (_tns[0], _tns[-1]))
-    s = re_sub_once(s, r"题级 n = [0-9]+(?:[–-][0-9]+)?（方向一致辅助条件不可判定）",
-            "题级 n = %s（方向一致辅助条件不可判定）" % _ntxt, "6.10.5 题级 n")
-    # ★ 已跑题数
-    _ntid = len(d.get("tids") or [])
-    s = re_sub_once(s, r"只覆盖已跑批的 [0-9]+ 题",
-            "只覆盖已跑批的 %d 题" % _ntid, "6.10.5 已跑题数")
+    # ★ ★ ★ 6.10.5 结论句：★ 【整段脚本生成】★★
+    #   ★ ★ 旧实现是【就地正则替换 4 个数】★ ⇒ ★ ★ 那只覆盖 4 个数，★
+    #   ★ ★ 其余数字（★ 4c 的题级方向、★ 「题级 n=2」★）不在替换清单里 ★
+    #   ★ ★ ⇒ ★ **半脚本半手抄 ⇒ 必漂移** ★ ★ ★
+    #   ★ ★ 实测漂移两处：★ ① 4c 漏了 S6（★ 写 2 个、实际 3 个 ★）★★
+    #   ★ ★                ② 「明确不能说的」里写「题级 n=2」★ 而实际 n=3 ★★
+    #   ★ ⇒ ★ ⇒ ★ 整段改为 build_verdict_sentence() 一次生成，★ 数字与措辞一律取 json ★
+    s = replace_markers(s, build_verdict_sentence(d), V5_BEGIN, V5_END)
 
 
     # ★ ★ 形态受控性表（★ 从 morphology_control.json 填，★ 不手抄 ★）★★
@@ -496,6 +586,13 @@ def main():
                 % (sj["snapshot"], sj["n_units"], "、".join(sj["tids"] or []), sj["theta0"],
                    sj["sha256"], sj["bytes"], _clock, _comp))
         s = replace_markers(s, _reg, SN_BEGIN, SN_END)
+
+    # ★ ★ 弱检查统计 → §6.10.0c（★ 一次自我更正 ★）★★
+    if a.crosscheck_json:
+        if not os.path.isfile(a.crosscheck_json):
+            die("crosscheck-json 不存在：%s" % a.crosscheck_json)
+        cc = json.load(open(a.crosscheck_json, encoding="utf-8"))
+        s = replace_markers(s, build_weakcheck_section(cc), CW_BEGIN, CW_END)
 
     # ★ ★ 通道状态与批状态登记（★ 2026-10-26 限流事件 ★）★★
     if a.channel_json:

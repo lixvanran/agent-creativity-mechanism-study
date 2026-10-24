@@ -33,10 +33,14 @@ def med(v: List[float]):
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
+    import argparse as _ap
+    _apx = _ap.ArgumentParser(add_help=False)
+    _apx.add_argument("--json-out", default=None)
+    _args, _rest = _apx.parse_known_args(sys.argv[1:])
+    if len(_rest) < 1:
         print(__doc__)
         return 1
-    rep = open(sys.argv[1], encoding="utf-8").read().replace("−", "-")
+    rep = open(_rest[0], encoding="utf-8").read().replace("−", "-")
     missing: List[str] = []
     checked = 0
 
@@ -57,17 +61,31 @@ def main() -> int:
         except Exception:                              # noqa: BLE001
             continue
 
+    # ★ ★ 弱检查清单（★ 2026-10-26 新增 · ★ 第 1 层论证线的反面案例逼出来的 ★）★★
+    #   ★ 本检查器是【子串包含】式的 ⇒ ★ 「报告里有这个串」只证明【某处有】★
+    #   ⇒ ★ 若该串在报告里出现 ≥2 次 ⇒ ★ 改一处、别处仍命中 ⇒ ★ **该项抓不到变异** ★
+    #   ⇒ ★ 故：**命中时记录出现次数** ⇒ ★ 出现 ≥2 次的项标为【弱检查】★（★ 不是假绿，★ 但强度不够 ★）
+    weak: List[tuple] = []
+
+    def _note_hit(label, s):
+        _c = rep.count(s)
+        if _c >= 2:
+            weak.append((label, s, _c))
+
     def need(s: str, label: str):
         nonlocal checked
         checked += 1
         if s in rep:
+            _note_hit(label, s)
             return
         try:                                            # ★ 数值容差：把**待查值**舍入后
             f = float(s)                               #   看是否等于报告里出现过的数
             for d in range(5):                         #   （0.2222 ⇒ 0.22 ⇒ 命中「0.22」）
                 if round(f, d) in _nums:
+                    _note_hit(label, s)
                     return
             if any(abs(f - n) < 1e-9 for n in _nums):
+                _note_hit(label, s)
                 return
         except Exception:                              # noqa: BLE001
             pass
@@ -160,12 +178,26 @@ def main() -> int:
 
     print("== 交叉核对：报告 vs 数据 ==")
     print("  检查项：%d" % checked)
+    if weak:
+        print("  ★ ★ 弱检查项：%d / %d（★ 期望串在报告里出现 ≥2 次 ⇒ ★ 只能证明「某处有」⇒ ★ 改一处抓不到 ★）" % (len(weak), checked))
+        print("     ★ ★ ★ 「本检查器全绿」【不是】数字正确性的证据 ★ ★ ★")
+        print("     ★ 本报告的数字正确性由【脚本回填 + 逐格结构化核对 + 幂等】保证，★ 不由本检查器保证 ★")
+        for _lab, _s, _c in weak:
+            print("     - %-34s 期望「%s」出现 %d 次" % (_lab[:34], _s[:36], _c))
+    if _args.json_out:
+        import json as _json
+        _out = {"checked": checked, "n_weak": len(weak),
+                "weak": [{"label": l, "expect": s, "occurrences": c} for l, s, c in weak],
+                "n_missing": len(missing), "missing": missing}
+        with open(_args.json_out, "w", encoding="utf-8") as _f:
+            _json.dump(_out, _f, ensure_ascii=False, indent=1, sort_keys=True)
+        print("✔ 落盘 %s" % _args.json_out)
     if missing:
         print("  ✘ 报告里找不到 %d 项：" % len(missing))
         for m in missing:
             print("     - %s" % m)
         return 1
-    print("  ✔ 全部对得上")
+    print("  ✔ 无缺失（★ 但请看上面的弱检查计数：★ %d / %d 项只是【存在性检查】★）" % (len(weak), checked))
     return 0
 
 
