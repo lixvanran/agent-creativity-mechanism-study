@@ -105,6 +105,38 @@
 ★ ★ **★ 结论：★ 这两条是【两次真正的独立采样】，★ 不是重跑副本**
 ★ ⇒ ⇒ ★ **⇒ σ_new 的自由度、排序改变率 3/9 的分母、三个 Gate 的 9/9 可用数，全部不受影响**
 
+★ ★ **★★ 交付前【同名文件冲突】清查（★ ★ 计数型核验，★ 不是存在型 ★）★★★**
+
+★ **★ 为什么做这个**：★ ★ 打包前发现 `group4_state_driven/` 里有**同名文件出现在两处**
+★ ⇒ ⇒ ★ **★ 而其中一份内容已陈旧** ⇒ ⇒ ★ **★ 若直接打包 ⇒ ⇒ ★ 交付包会出现"同名两内容"
+★ ⇒ ⇒ ★ ⇒ 外部复核者拿到 `WORKPACK3` 会读到【旧 rev1 版】⇒ ⇒ ★ ⇒ 核对链形同虚设**
+
+★ **★ 查出的真冲突（★ 已修）**：
+
+| ★ 文件 | ★ 状态 | ★ 处置 |
+|---|---|---|
+| ★ `WORKPACK3_MIN_ARCHITECTURE.md` | ★★ **两份不同**（★ 根目录版 21 处提 rev2；★ `workpacks/` 版 0 处 ⇒ 冻结在 rev1） | ★ ★ **删 `workpacks/` 整个目录**（★ 该目录是 `296a650` 的初始位置，★ 后续工作包已移到根目录并持续更新 ⇒ ★ 旧目录是陈旧副本） |
+| ★ `WORKPACK2_STATE_PIPELINE.md` | ★ 两份【逐字节一致】 | ★ ★ 同上（随目录一并删） |
+| ★ `REPRO_MINIMAL_SET.md` | ★ 两份【逐字节一致】 | ★ ★ 同上 |
+| ★ `code/workpack3_tests.py` vs `workpack3_tests.py` | ★★ **两份不同**（★ 只差 docstring 的路径说明） | ★ ★ **删 `code/` 那份**（★ 文档 §8 引用的是根目录那份） |
+
+★ **★ 删前留证（★ sha256，★ 便于事后核对"删的是哪一份"）**：
+```
+edccf909d6b3a3cbb75149ea72c3f15063f6f85b54b8eb55a9a5598b2e2fe538  workpacks/REPRO_MINIMAL_SET.md
+6ad724f4a87c6239d5f92d6e9711b59f7a4e71b640d705de905f2f53e91c99fc  workpacks/WORKPACK2_STATE_PIPELINE.md
+ff6ab60060f6e713dfb324eca2576087b1c8e40986342b61348c39c3755c987c  workpacks/WORKPACK3_MIN_ARCHITECTURE.md
+```
+
+★ **★ 复查后仍存在的 2 组（★ 【逐字节一致】⇒ 保留，★ 不删）**：
+★ `code/runs/arch6_stage1_analysis.json` ↔ `data/arch6_stage1_analysis.json`（★ sha 相同）
+★ `code/probe_select_boundary.py` ↔ `probe_select_boundary.py`（★ sha 相同）
+★ ⇒ ⇒ ★ **★ 保留理由：★ 它们是【历史产物位置】⇒ ⇒ ★ 删了会断溯源链；★ ★ 且内容一致 ⇒ ⇒ ★ 不构成"同名两内容"**
+
+★ ★ **★ 同批删除：`creativity_lab/experiments/test_state_layer_rev2_pending.py` ★**
+★ ★ 它是 rev2 落地**之前**的"下一个接口的守门"（★ 当时预期红）⇒ ⇒ ★ **rev2 落地后使命完成**
+★ ⇒ ⇒ ★ **★ 它自己最后一行就写着：★ 「★ rev2 断言全部通过 ⇒ ★ rev2 已落地 ⇒ ★ 可把本文件并入主测试」**
+★ ⇒ ⇒ ★ **★ 其断言已并入主测试 `test7_detect_tie`（★ 8/8 ⇒ exit 0）⇒ ⇒ ★ ⇒ 删掉避免两处维护**
+
 ★ ★ **★ 独立性的判据已写死**（★ `check_independent_samples.py` 的 docstring）：
 ★ **实质字段**（★ 变了 ⇒ 独立采样）：★ `A.text_len` / `state_meta.decisions` / `F_family.picked_idx` / `F_family.per_gate` /
 ★ `D_state_quota.scores` / `B_state_nocost.scores` / `ful_B` / `ful_D` / `ful_F` / `rank_change_quota` / `sel_change_*`

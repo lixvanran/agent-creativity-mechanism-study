@@ -90,7 +90,15 @@ def dig(rec, path):
 def main():
     src = sys.argv[1] if len(sys.argv) > 1 else PRE
     if not os.path.exists(src):
-        print("✘ 找不到 %s" % src)
+        # ★ ★ 不写"找不到"就完事 ⇒ ★ 要说清【它在哪】+【为什么这里没有】+【怎么办】
+        print("✘ 找不到证据文件：%s" % src)
+        print("  ★ 本脚本需要【重标记前】的原始样本（★ 独立采样判据的证据）")
+        print("  ★ 它属于【原始数据】，★ 在 `第四组_原始数据包.zip` 里 ⇒ ⇒ ★ 单独用代码包跑【会缺】")
+        print("  ★ 三个可选解法：")
+        print("    ① 解压数据包到同一目录后再跑")
+        print("    ② 直接指到解包后的路径：python3 -B check_independent_samples.py <路径>")
+        print("    ③ 从仓内取（★ 若你在仓内）：")
+        print("       python3 -B group4_state_driven/check_independent_samples.py <路径>")
         return 2
     rows = [json.loads(l) for l in open(src, encoding="utf-8") if l.strip()]
     print("=" * 78)
