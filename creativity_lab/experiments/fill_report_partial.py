@@ -66,6 +66,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", required=True)
     ap.add_argument("--json", required=True)
+    ap.add_argument("--excl-json", default=None,
+                    help="★ recompute_excluding.py 的输出（★ 用来给主判据表加『脆弱格』列 ★）")
     ap.add_argument("--contaminated-unit", default=None,
                     help="★ 已知污染单元的 basename（★ 用于报告 6.12.2 的单元数与臂 n ★）")
     a = ap.parse_args()
@@ -85,6 +87,17 @@ def main():
     # ★ 找不到对比字典就响亮失败（★ 不许静默跳过 ★）
     if not verdicts:
         die("json 里没有对比结果字典（★ 键：%s ★）" % list(d.keys()))
+
+    # ★ 脆弱格清单（★ 可选 ★）
+    fragile = set()
+    fragile_detail = []
+    if a.excl_json:
+        if not os.path.isfile(a.excl_json):
+            die("excl-json 不存在：%s" % a.excl_json)
+        ej = json.load(open(a.excl_json, encoding="utf-8"))
+        for c in ej.get("fragile_cells", []):
+            fragile.add((c["contrast"], c["tid"], c["rep"]))
+            fragile_detail.append(c)
 
     s = open(a.report, encoding="utf-8").read()
 
@@ -134,16 +147,44 @@ def main():
             dir_txt += " ⇒ **方向相反**"
         # ★ 定位旧行：★ 行前缀式（★ 幂等：★ 不依赖旧行的具体数字 ★）★★
         prefix = "| **%s** | %s |" % (name, label)
-        new_line = ("| **%s** | %s | %d | %s | %d/%d | ★ %s |"
-                    % (name, label, n_cells, cell_txt, n_over, n_cells, dir_txt))
+        # ★ 脆弱格列：★ 逐格标出哪些格由污染单元支撑（★ A 有 B 无 ★）★★
+        n_frag = 0
+        frag_txt = []
+        for c in cells:
+            if (name, c["tid"], c["rep"]) in fragile:
+                n_frag += 1
+                frag_txt.append("%s r%d" % (c["tid"], c["rep"]))
+        frag_col = ("★ **%s** ★" % ("、".join(frag_txt))) if frag_txt else "—"
+        new_line = ("| **%s** | %s | %d | %s | %d/%d | ★ %s | %s |"
+                    % (name, label, n_cells, cell_txt, n_over, n_cells, dir_txt, frag_col))
         s = replace_line(s, prefix, new_line, "6.10.4 %s 行" % name)
+
+    # ★ 6.10.4 的分隔行要跟表头同列数（★ 否则 markdown 表格散架 ★）
+    # ★ 分隔行：★ 按【表头下一行】定位（★ 比正则稳 ★）
+    _L = s.split("\n")
+    _hi = [i for i, ln in enumerate(_L) if ln.startswith("| 对比 | 唯一差 | 可比单元 |")]
+    if len(_hi) != 1:
+        die("6.10.4 表头命中 %d 次（★ 期望 1 ★）" % len(_hi))
+    _L[_hi[0] + 1] = "|---|:-:|---|:-:|:-:|---|:-:|"
+    s = "\n".join(_L)
+
+    # ★ 6.10.4 表头加「脆弱格」列（★ 幂等：★ 先删旧表头再加 ★）
+    _hdr_new = "| 对比 | 唯一差 | 可比单元 | 逐格标准化效应（vendi） | 超 θ₀ | 题级方向 | 脆弱格 |"
+    # ★ ★ 幂等的关键：★ 先把【已有的任意多个「脆弱格」】归一，★ 再替换成唯一形态 ★
+    #   （★ 若直接用 replace，★ 新串含旧串 ⇒ ★ 每次跑都追加一列 ★ ⇒ 表会散架 ★）
+    s = re.sub(r"\| 对比 \| 唯一差 \| 可比单元 \| 逐格标准化效应（vendi） \| 超 θ₀ \| 题级方向 \|(?: \| 脆弱格)* \|",
+               _hdr_new, s, count=1)
 
     s = re_sub_once(s, r"### 6\.10\.4 主判据（★ 标准化效应量 = 差值 ÷ 题内 σ ｜ 门槛 θ₀ = [0-9.]+ σ",
             "### 6.10.4 主判据（★ 标准化效应量 = 差值 ÷ 题内 σ ｜ 门槛 θ₀ = %.2f σ" % theta0,
             "6.10.4 标题")
-    s = re_sub_once(s, r"★ \*\*检出力地板（★ 报「不可分辨」时必须同时报 ★）\*\*：★ \*\*θ₀ = [0-9.]+ σ\*\*",
-            "★ **检出力地板（★ 报「不可分辨」时必须同时报 ★）**：★ **θ₀ = %.2f σ**" % theta0,
+    # ★ 检出力地板：★ 【整行替换】（★ 比正则稳 ★ 且天然幂等 ★）
+    s = replace_line(s, "★ **检出力地板（★ 报「不可分辨」时必须同时报 ★）**：★ **θ₀ =",
+            "★ **检出力地板（★ 报「不可分辨」时必须同时报 ★）**：★ **θ₀ = %.2f σ** ⇒ ★ 当前每单元需 **|标准化效应| > %.2f σ** 才可判『有差异』★★" % (theta0, theta0),
             "6.10.4 检出力地板")
+    # ★ 幂等：★ 先把「才可判『有差异』」的重复尾巴归一，★ 再统一替换 ★
+    s = re.sub(r"(★ \*\*检出力地板（★ 报「不可分辨」时必须同时报 ★）\*\*：★ \*\*θ₀ = [0-9.]+ σ\*\* ⇒ ★ 当前每单元需 \*\*\|标准化效应\| > [0-9.]+ σ\*\*[^\n]*)",
+               r"\1", s, count=1)
 
     # ── 6.10.5 结论句的 n ──
     s = re_sub_once(s, r"「在已跑批的 \*\*[0-9]+/[0-9]+\*\* 单元（[^）]*）上",
@@ -155,6 +196,45 @@ def main():
     _note = "（★ **本段数字由 `fill_report_partial.py` 从 `partial_verdict.json` 自动填入** ★ ⇒ ★ **n 会随批推进变化** ★ ⇒ ★ 交稿前以脚本重填为准 ★）"
     if _note not in s:
         s = re_sub_once(s, r"（★ 快照时点[^）]*★）", _note, "6.10.5 快照说明")
+
+    # ★ ★ 6.12.2 / 6.12.3 的数字也由 excl-json 填（★ 避免报告里两处 n 不一致 ★）★★
+    if a.excl_json:
+        ej = json.load(open(a.excl_json, encoding="utf-8"))
+        cu = ej.get("contaminated_units", [])
+        n_tot = ej.get("n_units_total", n_actual)
+        rate = ej.get("overall_pollution_rate")
+        # 6.12.2 的三行
+        s = replace_line(s, "| 已落盘单元 |",
+                "| 已落盘单元 | **%d**（★ 由脚本填，★ 随批推进变化 ★） |" % n_tot, "6.12.2 单元数")
+        s = replace_line(s, "| **总体污染率** |",
+                "| **总体污染率** | **%.2f%%** |" % (100.0 * rate), "6.12.2 总体污染率")
+        if cu:
+            c0 = cu[0]
+            s = replace_line(s, "| **该臂（`nosel_b3`）已落盘单元** |",
+                    "| **该臂（`%s`）已落盘单元** | **%d**（★ 脚本填 ★） |" % (c0["arm"], c0["arm_units"]), "6.12.2 臂 n")
+            s = replace_line(s, "| ★ **该臂污染率** |",
+                    "| ★ **该臂污染率** | ★ **1/%d = %.1f%%** ★ ⇒ ★ **比总体高 %.1f 倍** ★ |"
+                    % (c0["arm_units"], 100.0 * c0["arm_pollution_rate"],
+                       (c0["arm_pollution_rate"] / rate) if rate else 0), "6.12.2 臂污染率")
+        # 6.12.3 表：可比单元 / 超门槛 / 题级
+        imp = ej.get("verdict_impact", {})
+        frag = ej.get("fragile_cells", [])
+        if frag:
+            fr = frag[0]
+            s = replace_line(s, "| **H-TOPO-4c**（有无综述） | 可比单元 |",
+                    "| **H-TOPO-4c**（有无综述） | 可比单元 |", "6.12.3 占位") if False else s
+        # 题级影响的数字（A→B）
+        for cname, per_tid in imp.items():
+            for tid, d in per_tid.items():
+                if d.get("rel_change") is None:
+                    continue
+                pat = r"\| \*\*题级 %s\*\* \| \*\*[0-9.\-]+\*\* \| \*\*[0-9.\-]+\*\* \|"
+                m = re.search(pat, s)
+                if not m:
+                    continue
+                s = s[:m.start()] + ("| **题级 %s** | **%+.4f** | **%+.4f** |"
+                                     % (tid, d["A"], d["B"])) + s[m.end():]
+                break
 
     # ★ 6.10.6 表里的 θ₀
     s = re_sub_once(s, r"\| 检出力地板 \| θ₀ = \*\*[0-9.]+ σ\*\*",
