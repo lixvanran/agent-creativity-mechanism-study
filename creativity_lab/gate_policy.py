@@ -73,6 +73,64 @@ def gen(topic, arm, rep):
     return Dual("fuse" if arm == "dual_fuse" else "select").run(llm, topic, rep).text
 
 
+# ★★★★ 2026-10-24 · ★ 判官健康度闸门（★ G-judge）★★★★ ★★
+# ★ 起因：★ 第 1 层论证线 2026-10-24 转述 ⇒ ★ 「★ 若 verdicts.json 缺失或为空 ⇒ ★
+# ★   每条断言的判定都落默认「解析失败」⇒ ★ 矛盾分子 = 0 ⇒ ★ 矛盾率显示成 0.0% ★
+# ★   ⇒ ★ 那不是「没有矛盾」，那是【判官没跑】★ ★」
+# ★ ⇒ ★ ★★ 我方同族确认（★ 回源 gate_policy.py:151 ★）：★ `v = verd.get(c, "解析失败")` ★
+# ★   ★ ⇒ ★ 【verd 为空 ⇒ C=0 ⇒ 矛盾率 0.0%、且【支持率也 0.0%】⇒ ★ 看着像「完美」★★ ★★
+# ★ ⇒ ★ ⇒ ★ ★★ 我方比对方多一处【更隐蔽】的形态 ★★ ★★
+# ★   ★ 【只部分臂失败】时（★ 例：A 臂 100% 解析失败、B 臂健康 ★）⇒ ★ A 臂照常输出
+# ★   ★ 「支持 0.0% / 矛盾 0.0%」⇒ ★ ★ 只看【全局】解析失败率会掩盖它 ★★★ ★★★
+# ★ ⇒ ★ ⇒ ★ 落法：★ 闸门【按臂】分别算 + 【全局无任何真实判定】也 fail ★ ★
+# ★ ⇒ ★ ★★ 闸门【不产出任何读数】：★ 它在写 summary.json 之前 exit ⇒ ★
+# ★   ★ summary.json 根本不写出 ⇒ ★ 「矛盾率 0.0%」永远进不了交稿读数 ★★ ★
+MAX_PARSE_FAIL_RATE = 0.10      # ★ 沿用本项目「通道健康度 ≥ 0.9」的既有约定 ★
+GATE_EXIT = 10                   # ★ 专属退出码：★ 与「跑批失败」区分开 ★
+
+
+def judge_health_gate(cl_by_arm, verd):
+    """★ 判官健康度闸门（★ 纯函数 · ★ 不碰网络 · ★ 不读文件 ★）
+
+    ★ 输入：
+    ★   cl_by_arm : {arm: [该臂去重后的断言文本, ...]}   ★ 分母按【臂】给 ★
+    ★   verd      : {断言文本: 判定}   ★ ★ 「未提及」「非主张」都是【合法判定】★★
+    ★   ★ ⇒ ★ 只有「解析失败」才是【没判】⇒ ★ 闸门只锁在它上面 ★★ ★
+    ★ 返回：(ok, rows)
+    ★   ok   : bool   ★ False ⇒ 必须 exit(GATE_EXIT) 且【不产出任何读数】★
+    ★   rows : 每臂一行的绝对数与比率（★ 一切比率必配绝对分母 ★）
+    """
+    rows, total_judged, total_n = [], 0, 0
+    for arm in sorted(cl_by_arm):
+        cs = cl_by_arm[arm]
+        n = len(cs)
+        n_pf = sum(1 for c in cs if verd.get(c, "解析失败") == "解析失败")
+        n_judged = n - n_pf
+        total_n += n
+        total_judged += n_judged
+        rows.append({"arm": arm, "n_claims": n, "n_judged": n_judged,
+                     "n_parse_failed": n_pf,
+                     "parse_fail_rate": (n_pf / n) if n else None,
+                     "n_verd_keys": len(verd)})
+    # ── 闸门三问（★ 逐条可核 · ★ 每条都有绝对分母 ★）──────────────────
+    reasons = []
+    if total_n == 0:
+        reasons.append("★ 无任何断言 ⇒ 判官根本没跑（或断言抽取为空）★")
+    if total_n > 0 and total_judged == 0:
+        reasons.append("★ 无任何判定（★ 全部落「解析失败」★）⇒ 那是【判官没跑】，"
+                        "不是「没有矛盾」★")
+    for r in rows:
+        if r["n_claims"] == 0:
+            reasons.append("★ 臂 %s 断言数为 0 ⇒ 不能报该臂的矛盾率★" % r["arm"])
+        elif r["parse_fail_rate"] > MAX_PARSE_FAIL_RATE:
+            reasons.append("★ 臂 %s 解析失败率 %.1f%% > %.0f%%（★ %d/%d 条 ★）"
+                           % (r["arm"], 100 * r["parse_fail_rate"],
+                              100 * MAX_PARSE_FAIL_RATE, r["n_parse_failed"], r["n_claims"]))
+    return (not reasons), {"rows": rows, "reasons": reasons,
+                            "max_parse_fail_rate": MAX_PARSE_FAIL_RATE,
+                            "total_n_claims": total_n, "total_n_judged": total_judged}
+
+
 def main():
     t0 = time.time()
     print("== 1. 生成 %d 题 × %d 臂 × %d 重复 ==" % (len(TOPICS), len(ARMS), REPS), flush=True)
@@ -138,16 +196,53 @@ def main():
     by = defaultdict(lambda: defaultdict(list))
     for k, cs in claims.items():
         by[k.split("|")[0]][k.split("|")[1]].extend(cs)
+    rc = write_report(texts, claims, verd, sats, by, OUT)
+    print("\n总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
+    return rc
+
+
+def write_report(texts, claims, verd, sats, by, out_dir):
+    """★ 三轴读数 + 落盘（★ ★ 闸门在这里之前 ⇒ 失败则【不产出任何读数】★★）
+
+    ★ 返回：0 = 正常；GATE_EXIT = 判官健康度不达标（★ summary.json 未写出 ★）
+    """
     print("%-13s %8s %8s %9s %9s" % ("arm", "宽度.70", "宽度.75", "支持率", "矛盾率"))
+    # ── ★★ 判官健康度闸门（★ 必须在【任何读数】产出之前 ★）★★ ──────────
+    #   ★ 落法：★ ① 收集各臂去重断言集（★ 只算集合、不算任何率 ★）
+    #   ★        ② 跑闸门 ⇒ 不达标 ⇒ 打印 + return GATE_EXIT（★ summary.json 不写出 ★）
+    #   ★        ③ 通过后才进入读数计算 ★
+    _cl_probe = {}
+    for _a in ARMS:
+        _probe = []
+        for _T in TOPICS:
+            for _c in dedup_n(by[_T["tid"]].get(_a, []), 0.75):
+                _probe.append(_c)
+        _cl_probe[_a] = _probe
+    _ok, _gate = judge_health_gate(_cl_probe, verd)
+    if not _ok:
+        print("\n✘✘ 判官健康度闸门不通过（★ GATE_EXIT=%d ★）⇒ 【不产出任何读数】★★ ★" % GATE_EXIT)
+        for _r in _gate["reasons"]:
+            print("   · %s" % _r)
+        for _r in _gate["rows"]:
+            print("   · %-13s 断言 %d ｜ 已判 %d ｜ 解析失败 %d ｜ 失败率 %s"
+                  % (_r["arm"], _r["n_claims"], _r["n_judged"], _r["n_parse_failed"],
+                     ("%.1f%%" % (100 * _r["parse_fail_rate"])) if _r["parse_fail_rate"] is not None else "n/a"))
+        print("   ⇒ ★ 那不是「没有矛盾」⇒ ★ 那是【判官没跑 / 没判全】★★ ★")
+        return GATE_EXIT
+    print("\n✔ 判官健康度闸门通过（★ 已判 %d / 断言 %d ｜ 各臂解析失败率 ≤ %.0f%% ★）"
+          % (_gate["total_n_judged"], _gate["total_n_claims"], 100 * MAX_PARSE_FAIL_RATE))
+
     _denoms = {}
     for a in ARMS:
         w70, w75, S, C, UN, CL, NM = [], [], 0, 0, 0, 0, 0
+        _cl_arm = []
         for T in TOPICS:
             raw = by[T["tid"]].get(a, [])
             w70.append(len(dedup_n(raw, 0.70)))
             w75.append(len(dedup_n(raw, 0.75)))
             for c in dedup_n(raw, 0.75):
                 CL += 1
+                _cl_arm.append(c)
                 v = verd.get(c, "解析失败")
                 S += v == "支持"; C += v == "矛盾"; UN += v == "未提及"; NM += v == "非主张"
         # ★★★★ 2026-10-24 更正（★ 第 1 层论证线 13:50Z 回源核出 · ★ 我方复核确认 ★★★★）★★
@@ -169,8 +264,11 @@ def main():
         print("%-13s %8.2f %8.2f %8.1f%% %8.1f%%   (★ 断言 %d ｜ A[排除非主张] %d ｜ B[排除未提及] %d ★)"
               % (a, np.mean(w70), np.mean(w75), 100 * S / legal, 100 * C / legal,
                  CL, legal, _legal_B), flush=True)
+        _n_pf = sum(1 for c in _cl_arm if verd.get(c, "解析失败") == "解析失败")
         _denoms.setdefault(a, {"n_claims": CL, "n_support": S, "n_contradiction": C,
                                "n_unmentioned": UN, "n_nonclaim": NM,
+                               "n_parse_failed": _n_pf, "n_judged": CL - _n_pf,
+                               "parse_fail_rate": (_n_pf / CL) if CL else None,
                                "legal_denominator_A": legal, "legal_denominator_B": _legal_B,
                                "denominator_A_spec": "★ 断言数 − 非主张（★ A 篇 §3.7 / DRILL §4c / 预注册 ★）★",
                                "denominator_B_spec": "★ 断言数 − 未提及（★ 旧 gate_policy:152 ★）★",
@@ -181,10 +279,11 @@ def main():
     json.dump(dict(texts=texts, claims=claims, verdicts=verd,
                    saturation=[[t, a, b, c] for t, a, b, c in sats],
                    denominators=_denoms,
+                   judge_health=_gate,
                    denominators_note="★ ★ 两个口径都报：★ A=排除非主张（★ 判决用 ★）｜ ★ B=排除未提及（★ 对照用 ★）★ ★ ⇒ ★ 引用时必须写清用的是哪个 ★★ ★"),
-              open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1)
-    print("\n总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
+              open("%s/summary.json" % out_dir, "w"), ensure_ascii=False, indent=1)
+    return 0            # ★ ★ 0 = 正常产出（★ 闸门通过 ⇒ 有读数 ★）★★
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)
