@@ -196,13 +196,21 @@ def main():
     # ★ ★ owner 行（★ 主会话 ②：★ 机器可读、★ 跟着 commit 走、★ 任何 clone 可见）★★
     msg += "\nowner: %s\n" % a.owner
 
-    # ★ ★ 2026-10-25 · ★ ★ date 必须用【真实推送时间】★★
-    # ★ ★ ⇒ ★ 硬编码 date 会让「回读核对 date」变成【恒等比较 ⇒ 假绿】★★
+    # ★ ★★★ 【★ 路径 A：★ 逐字带本地 commit 的 author/committer（★ 2026-10-25 主会话判据更正）★★★】★★
+    # ★ ★ ⇒ ★ 为什么要改：★ 原实现把 author 设成【我自己给的 owner】★ ⇒ ⇒ ★ ⇒
+    # ★ ★ ⇒ ★ 【★ 那它就落在【路径 B】：★ 远端 author 是【API 默认身份】★★ ⇒ ⇒ ★ ⇒
+    # ★ ★ ⇒ ★ ⇒ ★ **★ ⇒ 【在 API 路径下，★ 用 author 反推归属【完全无效】】★★** ⇒ ⇒ ★ ⇒
+    # ★ ★ ⇒ ★ ⇒ ★ ⇒ 落法：★ ★ 工具【逐字带全部字段】⇒ ⇒ ⇒ 判据就能【一刀切】★★ ★★
+    # ★ ★ ⇒ ★ ⇒ ★ ⇒ 所以这里取【本地 HEAD 那个 commit 的 author/committer】逐字带过去 ★★
+    meta = git("log", "-1", "--format=%an%n%ae%n%aI%n%cn%n%ce%n%cI", lb).splitlines()
+    am, ae, ad, cm, ce, cd = (meta + ["", "", "", "", "", ""])[:6]
+    # ★ ★ 真实推送时间【另记在 body 里】（★ 这样 date 可核 + 推送时间也可查）★★
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    msg += "\n★ 实际推送时间（UTC）：★ %s\n" % now
     nc = gh.post("/git/commits", {
         "message": msg, "tree": t["sha"], "parents": [remote_head],
-        "author": {"name": a.owner, "email": a.email, "date": now},
-        "committer": {"name": a.owner, "email": a.email, "date": now}})
+        "author": {"name": am, "email": ae, "date": ad},
+        "committer": {"name": cm, "email": ce, "date": cd}})
     print("★ 新 commit = %s" % nc["sha"][:12])
 
     # ★ ★ 非 force PATCH（★ 不快进会被 GitHub 直接拒 ⇒ ⇒ 双保险）★★
@@ -226,7 +234,8 @@ def main():
     bad = []
     # ★ ★ 逐字段【显式】核对（★ 不用循环：★ 循环会让"逐字段核对"在源码里不可见 ⇒ ⇒ 不可判）★★
     actual = {"message": rmsg, "author": rauth.get("name"), "date": rauth.get("date")}
-    expect = {"message": msg, "author": a.owner, "date": now}
+    # ★ ★ 期望值 = 【本地 HEAD 那个 commit 的 author/date】（★ 路径 A ⇒ ⇒ 逐字一致可核）★★
+    expect = {"message": msg, "author": am, "date": ad}
     # ★ ★ 逐字段【显式】比较（★ ★ 字段名写在比较里 ⇒ ⇒ 【谁被核对了】在源码里可见 ⇒ ⇒ 可判 ★★）★★
     if _norm_message(actual["message"]) != _norm_message(expect["message"]):
         bad.append("message")

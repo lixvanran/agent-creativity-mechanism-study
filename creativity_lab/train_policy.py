@@ -41,7 +41,7 @@ OUT = os.environ.get("POLICY_OUT", "runs/arch_learn_fixed")
 def ckpt(obj):
     """原子写：先写 .tmp 再 os.replace ⇒ 进程被杀不会留下半个 json。"""
     p = "%s/result.json" % OUT
-    json.dump(obj, open(p + ".tmp", "w"), ensure_ascii=False, indent=1)
+    json.dump(obj, open(p + ".tmp", "w"), ensure_ascii=False, indent=1, sort_keys=True)
     os.replace(p + ".tmp", p)
 os.makedirs(OUT, exist_ok=True)
 DATA = json.load(open("creativity_lab/data/policy_topics.json", encoding="utf-8"))
@@ -362,7 +362,7 @@ def main():
                  np.mean([r["n_verify"] for r in rows]), np.mean([r["hit"] for r in rows]),
                  np.mean([r["fin"] for r in rows])), flush=True)
     json.dump(dict(w=w.tolist(), history=[[x.tolist() for x in v] for v in W]),
-              open("%s/result.json" % OUT, "w"), ensure_ascii=False, indent=1)
+              open("%s/result.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
     print("\n总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
 
 

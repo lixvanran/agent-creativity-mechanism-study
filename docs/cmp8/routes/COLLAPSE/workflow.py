@@ -48,8 +48,6 @@ import json
 import os
 import random
 import re
-import time
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 # ══════════════════════════════════════════════════════════════════════
@@ -184,253 +182,6 @@ ACTION_TEMPLATES: Dict[str, str] = {
 
 FAILURE_KINDS = ("empty", "all_unmentioned", "zero_load_bearing", "fallback",
                  "truncated", "conflict")
-
-# ══════════════════════════════════════════════════════════════════════
-# §2b ★ 层3 的真东西：**可组合的动作空间**（不再是 6 个查表模板）
-# ══════════════════════════════════════════════════════════════════════
-# 2026-10-22 自查发现：原先的「失败类型 → 预写好的动作模板」**本质上是"设计的手段"**
-# ⇒ **那是层2，不是层3**。真正的层3 要求**动作本身可被选择/学习**。
-#
-# ⇒ 动作改成**三个正交因子的组合**：
-#     action = (repair_type, scope, strictness)
-#   · repair_type  改什么（6 种，含 none ⇒ 允许"什么都不改"）
-#   · scope        作用范围（本槽位 / 跨槽位对照）
-#   · strictness   强度（软提示 / 中：只给 3 条 / 硬：必须指到出处）
-# ⇒ 6 × 2 × 3 = **36 个可组合动作**
-# ⇒ ★ 关键：**提示词由这三个因子拼出来**，不是为每种失败预写一段话
-#   ⇒ 于是"选哪个动作"是一个**有有限取值空间的决策问题** ⇒ 可以被策略学出来
-#   （这正是 AgentSquare 模块池的思路在"动作"上的落法）
-
-REPAIR_TYPES: Dict[str, Optional[str]] = {
-    "none": None,                     # 什么都不改（保留 ⇒ 策略可选择"不作为"）
-    "drop_conflicting": "凡是与别的句子、或与依据冲突的，**直接删掉**",
-    "ground_in_evidence": "每一条都必须**能在依据里指到出处**（写���编号）",
-    "name_decision_point": "每一条都要写明「**如果这条信息是假的，答案的哪一句会变**」",
-    "compress": "只写**承重的那一句**——如果这句话不成立，答案会变；其余全删",
-    "keep_all": "**不要删任何内容**",
-}
-
-SCOPES: Dict[str, str] = {
-    "slot": "只针对**你自己这一路**的内容",
-    "cross_slot": "**对照其它各路的内容**一起检查",
-}
-
-STRICTNESS: Dict[int, str] = {
-    0: "（软：按下面的要求调整即可）",
-    1: "（中：**只输出 3 条**，其余一律不写）",
-    2: "（硬：**只输出你能指到依据出处的**，每条标注依据编号）",
-}
-
-ActionSpec = Tuple[str, str, int]          # (repair_type, scope, strictness)
-
-
-def all_action_specs() -> List[ActionSpec]:
-    """**全部可组合动作**（36 个）。顺序稳定 ⇒ 策略下标可复算。"""
-    out: List[ActionSpec] = []
-    for rt in REPAIR_TYPES:
-        for sc in SCOPES:
-            for st in (0, 1, 2):
-                out.append((rt, sc, st))
-    return out
-
-
-ACTION_SPECS: List[ActionSpec] = all_action_specs()
-
-
-def _action_name(a) -> str:
-    """动作的**统一名字**（查表模式是名字，policy 模式是三因子组合）。"""
-    if isinstance(a, tuple):
-        return "act_%s_%s_%d" % a
-    return str(a)
-
-
-def action_prompt(spec: ActionSpec, frame_prompt: str, *, note: str = "") -> str:
-    """由**三个因子拼出**动作提示词（不是为每种失败预写一段话）。"""
-    rt, sc, st = spec
-    parts = ["【视角】%s" % frame_prompt]
-    if REPAIR_TYPES.get(rt):
-        parts.append("【要改什么】%s" % REPAIR_TYPES[rt])
-    parts.append("【作用范围】%s" % SCOPES[sc])
-    parts.append("【强度】%s" % STRICTNESS[st])
-    if note:
-        parts.append("【上一步出了什么问题】%s" % note)
-    parts.append("★ 只输出 3–6 条，每条一行，行首「- 」；每条必须具体（带数字/条件/可核查判断）；"
-                 "不超过 400 字。")
-    return "\n".join(parts)
-
-
-def failure_note(kind: str, detail: str = "") -> str:
-    """把失败类型翻成给模型看的**问题描述**（而不是直接给它修法）。"""
-    base = {
-        "empty": "上一步没能产出任何可用内容。",
-        "all_unmentioned": "上一步写的东西与依据完全对不上。",
-        "zero_load_bearing": "上一步写不出「它改变了哪个决策」。",
-        "fallback": "上一步触发了兜底（内容不完整）。",
-        "truncated": "上一步超长被截断。",
-        "conflict": "★ 上一步的内容里**有互相矛盾的地方**（同一个判断出现了相反的结论）。",
-    }.get(kind, "上一步没有达到要求。")
-    return base + ((" " + detail) if detail else "")
-
-
-# ══════════════════════════════════════════════════════════════════════
-# §2c 层3 的策略：因子化 softmax
-# ══════════════════════════════════════════════════════════════════════
-# ★ 为什么是**因子化**而不是 36 路扁平 softmax：
-#   动作是笛卡尔积 ⇒ 概率也该分解 ⇒ p(type,scope,strict) ∝ exp(u+v+t+m)
-#   ⇒ 参数 47 个（6+2+3+6×6）而不是 36 维权重矩阵 ⇒ 更少参数、更易学、更不易过拟合
-# ★ 为什么**必须**有交互项 m[失败类型][修复类型]：
-#   我们实测过：线性 softmax 里**与 op 无关的状态特征对选择零作用**
-#   （同一 target 换 op 得分差恒定）⇒ 只给因子偏置 ⇒ 策略学不到"什么失败该用什么修法"
-#   ⇒ 交互项是**唯一**能让"当前失败类型"影响动作选择的通道
-#
-# ★ w=0 时：均匀分布（36 个动作等概率）⇒ 那是"未训练"基线，不是"学出来的"。
-
-REPAIR_IDS = list(REPAIR_TYPES.keys())
-SCOPE_IDS = list(SCOPES.keys())
-STRICT_IDS = [0, 1, 2]
-FAILURE_IDS = list(FAILURE_KINDS)
-
-
-class ActionPolicy:
-    """因子化 softmax 策略。**权重可学** ⇒ 这才是层3。"""
-
-    # ★ 仲裁的三个选项（**与修复动作正交**）：0=mark（标注不删）1=keep_pos 2=keep_neg
-    ARB_IDS = ("mark", "keep_pos", "keep_neg")
-    # ★★ 2026-10-24：**架构的两个自由度也交给学习**
-    #   `nf` = 发散程度（用几个认知位置）⇒ ★ 这是"该不该发散"的决策权
-    #   `mm` = 合并方式（机械汇总 / decision-packet / 逐路投票）⇒ ★ 这是"怎么合并"的决策权
-    #   ⇒ A01 实测：四个臂**全部踩坑** ⇒ 写死"每题都发散 3 路"是错的
-    #   ⇒ ⇒ 让**策略自己学**在什么题上该少发散、该怎么合并
-    NF_IDS = (1, 2, 3, 4)
-    MM_IDS = ("mechanical", "packet", "vote")
-
-    def __init__(self, w: Optional[Dict[str, Any]] = None):
-        w = w or {}
-        self.u = list(w.get("u") or [0.0] * len(REPAIR_IDS))     # 修复类型
-        self.v = list(w.get("v") or [0.0] * len(SCOPE_IDS))      # 作用范围
-        self.t = list(w.get("t") or [0.0] * len(STRICT_IDS))     # 强度
-        # m[失败类型][修复类型]
-        self.m = [list(row) for row in
-                   (w.get("m") or [[0.0] * len(REPAIR_IDS) for _ in FAILURE_IDS])]
-        # ★ 仲裁权重（层3 要学的第二件事：冲突时保留哪一侧 / 收不收窄）
-        self.arb = list(w.get("arb") or [0.0] * len(self.ARB_IDS))
-        # ★★ 架构自由度：发散程度 + 合并方式
-        self.nf = list(w.get("nf") or [0.0] * len(self.NF_IDS))
-        self.mm = list(w.get("mm") or [0.0] * len(self.MM_IDS))
-
-    # ---- 打分
-    def score_spec(self, spec: ActionSpec, failure_kind: Optional[str]) -> float:
-        rt, sc, st = spec
-        s = self.u[REPAIR_IDS.index(rt)] + self.v[SCOPE_IDS.index(sc)] \
-            + self.t[STRICT_IDS.index(st)]
-        if failure_kind and failure_kind in FAILURE_IDS:
-            fi = FAILURE_IDS.index(failure_kind)
-            s += self.m[fi][REPAIR_IDS.index(rt)]
-        return s
-
-    def scores(self, failure_kind: Optional[str]) -> List[float]:
-        return [self.score_spec(sp, failure_kind) for sp in ACTION_SPECS]
-
-    def probs(self, failure_kind: Optional[str]) -> List[float]:
-        sc = self.scores(failure_kind)
-        mx = max(sc) if sc else 0.0
-        ex = [pow(2.718281828459045, x - mx) for x in sc]
-        s = sum(ex) or 1.0
-        return [e / s for e in ex]
-
-    def choose(self, failure_kind: Optional[str], rng: random.Random) -> ActionSpec:
-        """按 softmax 采样一个动作（**不是 argmax** ⇒ 保留探索）。"""
-        p = self.probs(failure_kind)
-        r = rng.random()
-        acc = 0.0
-        for sp, pi in zip(ACTION_SPECS, p):
-            acc += pi
-            if r <= acc:
-                return sp
-        return ACTION_SPECS[-1]
-
-    def choose_arbitration(self, failure_kind, rng):
-        """★ 仲裁选择（层3 的第二件事）：0=mark（标注不删）1=keep_pos 2=keep_neg。
-
-        ⇒ **与修复动作正交** ⇒ 两个决策可以分开学
-        ⇒ ★ 层3 学的不是"怎么修"，而是"**冲突时收不收窄搜索空间、留哪一侧**"
-          ⇒ 这正是"优化搜索空间过早闭合"的自修改形态
-        """
-        sc = [self.arb[i] for i in range(len(self.ARB_IDS))]
-        mx = max(sc)
-        ex = [pow(2.718281828459045, x - mx) for x in sc]
-        tot = sum(ex) or 1.0
-        p = [e / tot for e in ex]
-        r = rng.random()
-        acc = 0.0
-        for i, pi in enumerate(p):
-            acc += pi
-            if r <= acc:
-                return i
-        return len(self.ARB_IDS) - 1
-
-    def param_count(self) -> int:
-        return (len(self.u) + len(self.v) + len(self.t)
-                + len(self.m) * len(self.m[0]) + len(self.arb)
-                + len(self.nf) + len(self.mm))
-
-    # ── ★★ 架构自由度：发散程度 + 合并方式（★ 由策略决定，不由人写死）
-    def choose_architecture(self, failure_kind, rng):
-        """★ 采样两个架构决策：(发散程度 n_frames, 合并方式 merge_mode)。
-
-        ⇒ **A01 实测：四个臂全部踩坑** ⇒ 写死"每题都发散 3 路 + 机械汇总"是错的
-        ⇒ ⇒ 让策略自己学：**在什么题上该少发散、该怎么合并**
-        ⇒ ⇒ 三个决策正交：修复动作 × 仲裁方式 × **架构方式**
-        """
-        def _sample(weights):
-            mx = max(weights)
-            ex = [pow(2.718281828459045, w - mx) for w in weights]
-            tot = sum(ex) or 1.0
-            r, acc = rng.random(), 0.0
-            for i, e in enumerate(ex):
-                acc += e / tot
-                if r <= acc:
-                    return i
-            return len(weights) - 1
-        nf = self.NF_IDS[_sample(self.nf)]
-        mm = self.MM_IDS[_sample(self.mm)]
-        return nf, mm
-
-    def export(self) -> Dict[str, Any]:
-        return dict(u=self.u, v=self.v, t=self.t, m=self.m, arb=self.arb,
-                    nf=self.nf, mm=self.mm)
-
-    @staticmethod
-    def load(d: Dict[str, Any]) -> "ActionPolicy":
-        return ActionPolicy(d)
-
-    @staticmethod
-    def from_lookup() -> "ActionPolicy":
-        """★ **查表策略**：把手写的「失败类型 → 修法」映射**编码成因子权重**。
-
-        ⇒ 这样「查表」与「学出来的」在**同一套动作空间**里 ⇒ 可以直接消融。
-        ⇒ 权重是手挑的大数（等价于确定性的查表），**不是学出来的** ⇒ 它属于**层2**。
-        """
-        BIG = 6.0
-        pol = ActionPolicy()
-        # 失败类型 → (修复类型, 范围, 强度) 的手写映射
-        m = {
-            "empty": ("ground_in_evidence", "slot", 1),
-            "all_unmentioned": ("ground_in_evidence", "slot", 2),
-            "zero_load_bearing": ("name_decision_point", "slot", 1),
-            "fallback": ("compress", "slot", 1),
-            "truncated": ("compress", "slot", 2),
-            "conflict": ("drop_conflicting", "cross_slot", 1),
-        }
-        for fk, (rt, sc, st) in m.items():
-            if fk not in FAILURE_IDS:
-                continue
-            fi = FAILURE_IDS.index(fk)
-            pol.m[fi][REPAIR_IDS.index(rt)] += BIG
-        return pol
-
-
-
 
 # ── 矛盾检测（**零判官成本**，纯文本/结构）
 # ① **选项判定冲突**：题面是选择题时（①②③④ / (1)(2) / A. B.），
@@ -614,120 +365,6 @@ def dedup(items: Sequence[str], **kw) -> List[str]:
 
 
 # ══════════════════════════════════════════════════════════════════════
-# §3b ★ 跨槽位冲突的检测与仲裁（**纯文本结构 ⇒ 零判官成本**）
-# ══════════════════════════════════════════════════════════════════════
-# ★ 为什么必须有它（2026-10-22 实测）：
-#   W 臂的矛盾是**跨槽位**的（一个槽位说"①正确"、另一个说"①错误"）
-#   ⇒ ⇒ **槽内的"删掉与依据冲突的"根本不可能生效**（一个槽位删不掉另一个槽位的说法）
-#   ⇒ ⇒ 这解释了为什么 act_conflict 两次都没让矛盾下降 —— **它在架构上就不可能生效**。
-#
-# ★ 仲裁三档（**闭合必须是显式、可控、只在必要时**）：
-#   "none"     —— **冲突容忍**：双方都保留、只标注 ⇒ **不收窄搜索空间**
-#                  （层2 默认：我们的目标是**拓展**思维面，不是消解冲突）
-#   "drop_one" —— 冲突对里丢一个（丢哪个由上游策略决定 ⇒ 层3 可学）
-#   "resolve"  —— 有依据支持的一方胜（需判官 ⇒ 贵）
-_POL_POS = ("正确", "成立", "符合", "满足", "可以", "有效", "无误")
-_POL_NEG = ("错误", "不成立", "不符合", "不满足", "不可以", "无效", "有误", "不对")
-
-
-def _polarity(text):
-    """返回 (极性, 命中词)。极性 ∈ {1, 0, -1}（1 正 / 0 无 / -1 负）。"""
-    t = text or ""
-    best = (0, None)
-    for w in _POL_POS:
-        if w in t and (best[0] == 0 or len(w) > len(best[1] or "")):
-            best = (1, w)
-    for w in _POL_NEG:
-        if w in t and (best[0] == 0 or len(w) > len(best[1] or "")):
-            best = (-1, w)
-    return best
-
-
-def merge_claims(claims: Sequence[str], mode: str = "mechanical") -> Dict[str, Any]:
-    """★ 合并方式（**由策略选，不由人写死**）。
-
-    | mode | 行为 | 依据 |
-    |---|---|---|
-    | `mechanical` | 去冗余后**全部保留**（现状）| —— |
-    | `packet` | **decision packet**：全部保留 + **显式标注未决异议** | DCI (arXiv:2603.11781) *"Disagreements are preserved … not flattened"* |
-    | `vote` | 多数票（plurality）**收窄** | Self-Consistency (arXiv:2203.11171)；⚠️ 概率加权不如 plurality |
-
-    ⇒ ★ **合并是"代价发生的那一步"**（§6.4.4：逐帧投票维度 4.50 vs 机械汇总 2.50）
-    ⇒ ⇒ **所以它必须是学出来的决策，不是写死的。**
-    """
-    cl = [c for c in (claims or []) if (c or "").strip()]
-    pairs = detect_opposite_pairs(cl)
-    if mode == "vote" and cl:
-        from collections import Counter
-        cnt = Counter(cl)
-        top = max(cnt.values())
-        winners = {c for c, v in cnt.items() if v == top}
-        kept, seen = [], set()
-        for c in cl:
-            if c in winners and c not in seen:
-                seen.add(c)
-                kept.append(c)
-        return dict(claims=kept, mode=mode, n_conflicts=len(pairs),
-                    note="多数票收窄")
-    kept = dedup(cl)
-    if mode == "packet":
-        # ★ decision packet：**不删**，但把冲突双方标出来（"未决异议"）
-        marked = []
-        for c in kept:
-            is_conf = any(c == p["pos"] or c == p["neg"] for p in pairs)
-            marked.append(("⚠未决异议：" if is_conf else "") + c)
-        return dict(claims=kept, marked=marked, mode=mode, n_conflicts=len(pairs),
-                    note="保留全部 + 显式标注未决异议（decision packet）")
-    return dict(claims=kept, mode=mode, n_conflicts=len(pairs), note="机械汇总")
-
-
-def detect_opposite_pairs(claims):
-    """找出**互相矛盾**的断言对：同一决策标记 + 相反极性。"""
-    items = []
-    for i, c in enumerate(claims or []):
-        if not (c or "").strip():
-            continue
-        marks = set(m.group(0) for m in _OPT_MARK.finditer(c))
-        pol, w = _polarity(c)
-        if not marks or pol == 0:
-            continue
-        items.append((i, marks, pol, w, c))
-    pairs = []
-    for x in range(len(items)):
-        for y in range(x + 1, len(items)):
-            i1, m1, p1, w1, c1 = items[x]
-            i2, m2, p2, w2, c2 = items[y]
-            if p1 * p2 < 0 and (m1 & m2):
-                pairs.append(dict(i=i1, j=i2, marks=sorted(m1 & m2),
-                                  pos=c1 if p1 > 0 else c2,
-                                  neg=c2 if p1 > 0 else c1))
-    return pairs
-
-
-def arbitrate(claims, mode="none", drop_choice=None):
-    """仲裁。返回 (保留的断言, 仲裁日志)。
-
-    ★ "none"（层2 默认）⇒ **冲突容忍**：**全部保留**，只把冲突对记进日志
-      ⇒ **不收窄搜索空间**（与"拓展思维面"的目标一致）
-    ★ "drop_one" ⇒ 每对丢一个；`drop_choice` 决定丢"正"还是"负"极性那条
-      ⇒ ★ **层3 可以学这个选择**（什么情况下更该保留哪一侧）
-    """
-    pairs = detect_opposite_pairs(claims)
-    log = dict(mode=mode, n_pairs=len(pairs),
-               pairs=[dict(marks=p["marks"], pos=p["pos"][:60], neg=p["neg"][:60])
-                      for p in pairs])
-    if mode == "none" or not pairs:
-        return list(claims), log
-    keep_pos = (drop_choice == "keep_pos")
-    drop = set()
-    for p in pairs:
-        # keep_pos=True ⇒ 保留"正"极性那条 ⇒ 丢"负"那条
-        drop.add(p["i"] if not keep_pos else p["j"])
-    kept = [c for i, c in enumerate(claims) if i not in drop]
-    return kept, log
-
-
-# ══════════════════════════════════════════════════════════════════════
 # §4 行为空间照明（MAP-Elites：行为格，每格留最优）
 # ══════════════════════════════════════════════════════════════════════
 def behavior_key(frame_ids: Sequence[str], ops: Sequence[str]) -> str:
@@ -871,13 +508,8 @@ def _chat(llm, prompt: str, *, purpose: str, model: str, temp: float = 0.7,
     """
     base = max(int(max_tokens or 0), MIN_BUDGET)
     ladder = [base] + [b for b in (12000, 16000) if b > base]
-    # ★★ 2026-10-22 修：**双阶梯嵌套** ⇒ 一次逻辑调用最多 6 次尝试
-    #   旧版：外层 ladder=[8000,12000,16000] × 客户端内层 (mt, +budgets)
-    #        ⇒ 8000 → 它的 12000,16000 → 12000 → 16000 → 16000 ⇒ **6 次**
-    #        ⇒ 36 次/臂 ⇒ 240s 超时叠加 ⇒ **实测跑 18 小时没结束**
-    #   现在：**每次尝试 budgets=()** ⇒ 一次逻辑调用一次尝试，阶梯由我独占控制
     kwargs0 = dict(model=model, temp=temp, max_tokens=base,
-                   budgets=(), min_ok=min_ok, purpose=purpose)
+                   budgets=tuple(ladder[1:]), min_ok=min_ok, purpose=purpose)
 
     def _call(kw):
         try:
@@ -897,7 +529,7 @@ def _chat(llm, prompt: str, *, purpose: str, model: str, temp: float = 0.7,
     for i, mt in enumerate(ladder):
         kw = dict(kwargs0)
         kw["max_tokens"] = mt
-        kw["budgets"] = ()          # ★ 一次尝试 = 一次调用（不交给客户端再套一层）
+        kw["budgets"] = tuple(x for x in ladder[i + 1:])
         text = _call(kw) or ""
         attempts += 1
         rec = getattr(llm, "rec", None)
@@ -946,25 +578,12 @@ class CollapseFixWorkflow:
         #     ⇒ D01 实测 W 臂 dims=0 vs B0 dims=3）
         #   "model" 档保留当**消融臂**。
         aggregate_mode="mechanical",   # "mechanical" | "model"
-        # ★ 冲突仲裁档（**闭合必须是显式、可控、只在必要时**）
-        #   "none"     —— 冲突**容忍**：双方保留只标注 ⇒ **不收窄搜索空间**（层2 默认）
-        #   "drop_one" —— 冲突对丢一个（丢哪边由策略决定 ⇒ 层3 可学）
-        #   "resolve"  —— 有依据支持的一方胜（需判官 ⇒ 贵）
-        arbitrate_mode="none",
         # ★★ **层2 / 层3 的分离开关**（2026-10-22 负责人定的四层结构）
         #   层2「用设计的手段优化」= 架构先验设计好、运行时**不自我修改**
         #   层3「用训练/自迭代的手段优化」= 系统**根据自身经验修改自己**
         # ⇒ `evolve=False` ⇒ 层2（固定动作集）；`evolve=True` ⇒ 层3（动作空间会演化）
         # ⇒ ★ **层2 天然就是层3 的消融臂**（只差"演化"这一个自由度）⇒ 干净的嵌套对照
         evolve=True,
-        parallel_slots=True,   # ★ 槽位并行（3× 提速：MiniMax 单次 ~50-110 秒）
-        # ★ 动作空间两档（★ 这本身是一个消融轴）：
-        #   "lookup" = 6 个**人手写死**的模板（⇒ 属于层2 的"设计的手段"）
-        #   "policy" = **36 个可组合动作**（三因子）+ 策略选（⇒ 层3 的载体）
-        action_mode="lookup",
-        policy=None,           # ActionPolicy 或其 export dict；None ⇒ 用 from_lookup()
-        policy_seed=20261022,
-        wall_clock_s=1800,     # ★ 硬墙钟上限：单臂最多 1800 秒 ⇒ 不许再挂一整夜
         # 层的标签（写进读数，便于归档时区分）
         layer="L3",
     )
@@ -976,21 +595,10 @@ class CollapseFixWorkflow:
         self.chat_stats: Dict[str, Any] = {"calls": []}
 
     # ---------------- 提示词
-    def slot_prompt(self, frame_id: str, action, archive: ActionArchive,
-                    note: str = "") -> str:
-        """按**动作**拼槽位提示。
-
-        ★ 两种动作表示：
-          · `action_mode="lookup"`  ⇒ action 是**动作名**（查表模板，人手写死）
-          · `action_mode="policy"`  ⇒ action 是 **ActionSpec**（三因子组合）
-        """
+    def slot_prompt(self, frame_id: str, action: str, archive: ActionArchive) -> str:
         fr = _FRAME_BY_ID[frame_id]
-        if isinstance(action, tuple):
-            body = action_prompt(action, fr["prompt"], note=note)
-        else:
-            body = archive.template(action).format(frame_prompt=fr["prompt"])
-            if note:
-                body = body + "\n【上一步出了什么问题】" + note
+        tmpl = archive.template(action)
+        body = tmpl.format(frame_prompt=fr["prompt"])
         return "问题：%s\n\n%s\n\n%s" % (self._ask, body, _OUT_SPEC)
 
     def aggregate_prompt(self, drafts: Sequence[str], frame_ids: Sequence[str],
@@ -1004,10 +612,10 @@ class CollapseFixWorkflow:
                 % (len(drafts), pool, _OUT_SPEC))
 
     # ---------------- 单槽位
-    def _run_slot(self, ask: str, frame_id: str, action,
-                  archive: ActionArchive, note: str = "") -> Dict[str, Any]:
+    def _run_slot(self, ask: str, frame_id: str, action: str,
+                  archive: ActionArchive) -> Dict[str, Any]:
         self._ask = ask
-        prompt = self.slot_prompt(frame_id, action, archive, note=note)
+        prompt = self.slot_prompt(frame_id, action, archive)
         out, info = _chat(self.llm, prompt, purpose="W_slot_%s" % frame_id,
                           model=self.C["model"], temp=0.7, max_tokens=0,
                           min_ok=20, stats=self.chat_stats)
@@ -1063,35 +671,9 @@ class CollapseFixWorkflow:
         arm_records: List[Dict[str, Any]] = []
         failures: Dict[str, int] = {}
 
-        # ── 策略先建立（架构自由度要用它选）★ 顺序：policy/_rng 必须在此之前
-        _pol_src = C.get("policy")
-        if _pol_src is None:
-            policy = ActionPolicy.from_lookup()
-        elif isinstance(_pol_src, dict):
-            policy = ActionPolicy.load(_pol_src)
-        else:
-            policy = _pol_src
-        _rng = random.Random(int(C.get("policy_seed", 20261022)) + 7919)
-
-        # ★★ 架构自由度交给策略（"该不该发散" + "怎么合并"是**学出来的**）
-        _arch_pick = None
-        _merge_mode = C.get("merge_mode", "mechanical")
-        if policy is not None and C.get("learn_architecture", True):
-            _nf, _mm = policy.choose_architecture("conflict", _rng)
-            _arch_pick = (int(_nf), str(_mm))
-            C = dict(C)
-            C["n_slots"] = int(_nf)
-            _merge_mode = str(_mm)
-            ops.append("ARCH[%df/%s]" % (int(_nf), _mm))
         frames = select_frames(C["n_slots"], seed=C["seed"])
         # 第 0 轮：基线动作
-        # 初始动作：lookup 模式 ⇒ "base"（无修法）；policy 模式 ⇒ ("none","slot",0)
-        _base_action = ("none", "slot", 0) if C.get("action_mode") == "policy" else "base"
-        cur_actions = {fid: _base_action for fid in frames}
-        slot_notes: Dict[str, str] = {}
-        _arb_meta = None
-        # ★ 策略：lookup 模式 ⇒ **手写映射**（层2 的"设计的手段"）
-        #         policy 模式 ⇒ 传入的权重（w=0 ⇒ 均匀 ⇒ 未训练基线）
+        cur_actions = {fid: "base" for fid in frames}
         n_rounds = max(1, int(C["max_rounds"]))
         slot_claims: List[List[str]] = []
         slot_records: List[Dict[str, Any]] = []
@@ -1105,19 +687,8 @@ class CollapseFixWorkflow:
             slot_ids: List[str] = []
 
             # ── 1) 发散（★ 槽位互不可见：每个槽位只拿题面 + 自己的帧 + 自己的动作）
-            #    ★ 2026-10-22：**并行**跑槽位（互不依赖 ⇒ 天然可并行）
-            #      MiniMax 单次调用 ~50–110 秒 ⇒ 串行 3 槽 = 3× 等待
-            #      ⇒ 并行后 ≈ 1× 等待（**3× 提速**，三天真跑得完的关键）
-            def _one_slot(fid):
-                return self._run_slot(ask, fid, cur_actions[fid], archive,
-                                      note=slot_notes.get(fid, ""))
-
-            if C.get("parallel_slots", True) and len(frames) > 1:
-                with ThreadPoolExecutor(max_workers=min(len(frames), 4)) as _ex:
-                    _slots = list(_ex.map(_one_slot, frames))
-            else:
-                _slots = [_one_slot(f) for f in frames]
-            for fid, slot in zip(frames, _slots):
+            for fid in frames:
+                slot = self._run_slot(ask, fid, cur_actions[fid], archive)
                 slot_ids.append(fid)
                 slot_records.append(slot)
                 drafts.append(slot["draft"])
@@ -1160,20 +731,9 @@ class CollapseFixWorkflow:
                     failures[fk] = failures.get(fk, 0) + 1
                     if not C.get("evolve", True):
                         continue                       # ★ 层2：记失败，但**不改动作**
-                    if C.get("action_mode") == "policy":
-                        # ★ 层3：**策略选动作**（可学）⇒ 动作是三因子组合
-                        spec = policy.choose(fk, _rng)
-                        nm = "act_%s_%s_%d" % spec
-                        archive.add(nm, "", born_from="%s@%s" % (fk, slot["frame_id"]),
-                                    evidence="policy|%s|%s|%d" % spec)
-                        new_actions[slot["frame_id"]] = spec
-                        slot_notes[slot["frame_id"]] = failure_note(fk)
-                    else:
-                        # 查表（人手写死的模板）⇒ 属于"设计的手段"
-                        nm = propose_new_action(fk, slot["frame_id"], archive)
-                        if nm:
-                            new_actions[slot["frame_id"]] = nm
-                            slot_notes[slot["frame_id"]] = failure_note(fk)
+                    nm = propose_new_action(fk, slot["frame_id"], archive)
+                    if nm:
+                        new_actions[slot["frame_id"]] = nm
             if not new_actions:
                 break                       # 没有失败 ⇒ 不演化（★ 不无节制扩动作空间）
 
@@ -1183,9 +743,7 @@ class CollapseFixWorkflow:
             #      ⇒ 第二轮 KeyError。**只有真跑 + 真演化才会触发**。）
             cur_actions = dict(cur_actions)
             cur_actions.update(new_actions)
-            slot_notes = {}                 # 失败描述只在下一轮用一次
-            ops.append("EVOLVE[%s]" % ",".join(
-                sorted({_action_name(v) for v in new_actions.values()})))
+            ops.append("EVOLVE[%s]" % ",".join(sorted(set(new_actions.values()))))
 
         # ── 5) 汇总
         #    ★★ 2026-10-22 **实测修正**：默认改**机械汇总**，不用模型汇总。
@@ -1214,25 +772,8 @@ class CollapseFixWorkflow:
                 final_claims = dedup(all_slot_claims)
         else:
             # ★ 机械汇总：**不丢任何一条**，也不多花一次调用
-            _mg = merge_claims(all_slot_claims, _merge_mode)
-            final_claims = _mg["claims"]
-            ops.append("AGGREGATE(%s)" % _merge_mode)
-            # ★★ 跨槽位冲突仲裁（层2 默认"容忍"⇒ 不收窄搜索空间）
-            _am = C.get("arbitrate_mode", "none")
-            _arb_pick = None
-            if _am == "learned" and policy is not None:
-                # ★ 层3：**仲裁的选择也由策略给出**（mark / keep_pos / keep_neg）
-                _arb_pick = policy.choose_arbitration("conflict", _rng)
-                _am = ("none" if _arb_pick == 0 else "drop_one")
-            _before = len(final_claims)
-            final_claims, _alog = arbitrate(
-                final_claims, _am,
-                drop_choice=("keep_pos" if _arb_pick == 1 else "keep_neg"))
-            if _alog["n_pairs"]:
-                ops.append("ARBITRATE[%s:%d对]" % (_am, _alog["n_pairs"]))
-                _arb_meta = dict(log=_alog, pick=_arb_pick,
-                                 dropped=_before - len(final_claims),
-                                 mode=_am)
+            final_claims = dedup(all_slot_claims)
+            ops.append("AGGREGATE(mechanical)")
             agg = "\n".join("- " + c for c in final_claims)
 
         # ── 6) 装配（机械汇总档已经装配好了 ⇒ 这里**不再二次抽取**）
@@ -1251,19 +792,7 @@ class CollapseFixWorkflow:
                     meta=dict(frames=list(frames), ops=list(ops),
                               n_actions=len(archive.actions)))
 
-        # ★ 记录**每条分支**（每槽位一条）⇒ 供"路径间多样性 / 思维跳跃"用
-        _paths = []
-        for _i, _fr in enumerate(frames):
-            _ops = [o for o in ops if o.startswith("GEN[%s:" % _fr)]
-            _claims = slot_claims[_i] if _i < len(slot_claims) else []
-            _paths.append(dict(kind="frame", frame=_fr, ops=_ops, claims=_claims))
         return dict(
-            paths=_paths,
-            arbitration=(_arb_meta if "_arb_meta" in dir() else None),
-            arch_pick=_arch_pick, merge_mode=_merge_mode,
-            n_conflicts_merge=_mg.get("n_conflicts") if "_mg" in dir() else None,
-            arbitration_pick=(_arb_meta or {}).get("pick"),
-            n_conflicts_final=len(detect_opposite_pairs(final_claims)),
             chat_stats=self.chat_stats,
             layer=C.get("layer"),
             evolve=bool(C.get("evolve", True)),
@@ -1271,9 +800,6 @@ class CollapseFixWorkflow:
             rounds=rounds, archive=archive.stats(), illum=illum.stats(),
             failures=dict(failures),
             n_conflicts=n_conflicts_total,
-            action_mode=C.get("action_mode"),
-            policy_params=policy.export(),
-            policy_param_count=policy.param_count(),
             slot_records=[dict(frame_id=s["frame_id"], action=s["action"],
                                n_claims=len(s["claims"]),
                                n_chars=len(s["draft"])) for s in slot_records],
