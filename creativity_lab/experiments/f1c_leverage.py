@@ -109,6 +109,31 @@ def main():
     def v_of(items):
         return vendi_score([vmap[t] for _i, t in items])
 
+    # ★ ★★ 断言：★ 所有重算的【可比单元数】必须与基线一致（★ 无「整组退出」副作用）★★
+    # ★ 来源：★ 第 1 层论证线 2026-10-26（★ P-1/P-2 ★）：★ 「剔除类结论必须用
+    # ★ 与主分析同口径的独立路径重算，★ 且必须写清剔除后该组是【退出】还是【降级】」
+    # ★ ★ ★ 我方正好踩在「退出」那一侧：★ partial_verdict.py 的 full 只收满
+    # ★ 5 份的组 ⇒ ★ 剔一个文件 ⇒ 该组只剩 4 份 ⇒ 整组被排除 ⇒ ★ ⇒ 那不是
+    # ★ 「单元杠杆」，★ 是「分母规则副作用」★ ★ ⇒ ★ ⇒ 本断言把「没踩到」从
+    # ★ 【运气】变成【被检查过】★★
+    def n_comparable(subset):
+        """★ 该子集下、三个对比各自的【可比单元数】（★ (题,rep) 齐全的臂对数 ★）"""
+        out = {}
+        for cname, (A, B) in CONTRASTS.items():
+            tids = sorted({kk[0] for kk in subset if kk[2] in (A, B)})
+            n = 0
+            for tid in tids:
+                reps = sorted({kk[1] for kk in subset if kk[0] == tid and kk[2] in (A, B)})
+                for rep in reps:
+                    if any(kk[0] == tid and kk[1] == rep and kk[2] == A for kk in subset) and \
+                       any(kk[0] == tid and kk[1] == rep and kk[2] == B for kk in subset):
+                        n += 1
+            out[cname] = n
+        return out
+
+    base_cmp = n_comparable(full)
+    print("★ 基线可比单元数：%s" % base_cmp)
+
     # ── ① 位置基线 ──
     print()
     print("== ① 位置基线（★ 逐个剔 run 索引 i，★ 剩 4 份按普通口径重算 ★）==")
@@ -156,6 +181,19 @@ def main():
                               "★ **不属内容依赖**（★ <2× ⇒ 更像位置/普通噪声 ⇒ 不触发降级 ★）"))
         print("   ★ （★ 同位置其它位置的杠杆：%s ★）"
               % ("、".join("u%d=%.5f" % (i2, pos_mean[i2]) for i2 in sorted(pos_mean))))
+
+    # ★ 断言：对【降级后】的子集，★ 可比单元数必须与基线一致 ★
+    for (k, i, run_idx, ln) in contaminated:
+        sub = {kk: [x for j, x in enumerate(vv) if not (kk == k and j == i)]
+               for kk, vv in full.items()}
+        sub = {kk: vv for kk, vv in sub.items() if len(vv) >= 2}
+        cmp2 = n_comparable(sub)
+        same = (cmp2 == base_cmp)
+        print("   ★ 断言（★ 可比单元数不变 ★）：%s ｜ 降级后 %s ｜ 基线 %s ⇒ %s"
+              % (k, cmp2, base_cmp, "✔ 通过（★ 无『整组退出』副作用 ★）" if same
+                 else "✘ 不一致（★ 有整组退出 ⇒ 读数不可用于杠杆判断 ★）"))
+        if not same:
+            print("   ★ ★ 不一致 ⇒ ★ 本脚本的杠杆结论【不可用】★ ⇒ ★ 请改用『降级重算』路径 ★")
 
     # ── ③ 单组降级重算：★ 剔一个单元后该组【不退出】，★ 用剩下份数算读数 ★─
     print()
