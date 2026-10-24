@@ -116,7 +116,7 @@ _FRAME_BY_ID = {f["id"]: f for f in FRAMES}
 # ══════════════════════════════════════════════════════════════════════
 # §1 选帧（**有 PRNG** ⇒ seed 真可复现）
 # ══════════════════════════════════════════════════════════════════════
-def select_frames(k: int = 4, seed: int = 0) -> List[str]:
+def select_frames(k: int = 4, seed: int = 0, frame_seed: int | None = None) -> List[str]:
     """Fisher-Yates 抽 `k` 个互不重复的帧。
 
     ★ 必含 **1 个 wild 帧**（ADHD 原版的 `wildPick` 逻辑，见 `src/frames.ts:62`）——
@@ -125,7 +125,9 @@ def select_frames(k: int = 4, seed: int = 0) -> List[str]:
     ⚠️ 与 ADHD 原版的差别：原版用 `Math.random()`（**无 PRNG**）⇒ 不可复现；
       文档却声称 "deterministic per-seed"（自相矛盾）。**这里用 `random.Random(seed)`**。
     """
-    rng = random.Random(seed)
+    # ★ 2026-10-25 解耦：frame_seed 独立于 run seed
+    #   （不传 ⇒ 行为与旧版【逐字节一致】⇒ 回归要求）
+    rng = random.Random(seed if frame_seed is None else frame_seed)
     ids = list(FRAME_IDS)
     rng.shuffle(ids)
     picked = ids[:max(0, k)]
@@ -1083,7 +1085,7 @@ class CollapseFixWorkflow:
             C["n_slots"] = int(_nf)
             _merge_mode = str(_mm)
             ops.append("ARCH[%df/%s]" % (int(_nf), _mm))
-        frames = select_frames(C["n_slots"], seed=C["seed"])
+        frames = select_frames(C["n_slots"], seed=C["seed"], frame_seed=self.frame_seed)
         # 第 0 轮：基线动作
         # 初始动作：lookup 模式 ⇒ "base"（无修法）；policy 模式 ⇒ ("none","slot",0)
         _base_action = ("none", "slot", 0) if C.get("action_mode") == "policy" else "base"
