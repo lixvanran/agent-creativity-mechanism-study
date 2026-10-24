@@ -220,6 +220,7 @@ def self_test():
         return 1
     print("   ✔ 基线无错")
     cases = []
+    n_mut = 0          # ★ 变异次数【由计数器累加】★ ⇒ 不得硬编码 ★
     # ② 改 json 的 σ
     m2 = json.loads(json.dumps(d)); m2["h0"]["vendi"]["sigma_rep"] = 9.999
     cases.append(("改 json 的 σ", m2, rep))
@@ -250,6 +251,7 @@ def self_test():
     m6c["verdicts"]["H-TOPO-4c"]["dir_votes"] = m6c["verdicts"]["H-TOPO-4c"]["dir_votes"][:2]
     cases.append(("改 json 去掉 4c 的一个题级方向", m6c, rep))
     for label, mj, rp in cases:
+        n_mut += 1
         e, _c2 = verify(rp, mj)
         print("== 自测：%s ⇒ 应当【被抓】==" % label)
         if e:
@@ -273,6 +275,7 @@ def self_test():
     cells[3] = "｜".join(parts)
     lines[i0] = "| " + " | ".join(cells) + " |"
     mutated = "\n".join(lines)
+    n_mut += 1
     e = verify(mutated, d)
     print("== 自测：改【报告里】主判据表那一格 ⇒ 应当【被抓】==")
     if e:
@@ -286,6 +289,7 @@ def self_test():
     if _hit:
         _k = _hit[0]
         _lines5[_k] = _lines5[_k].replace("S6 +0.3461", "S6 +0.9999", 1)
+        n_mut += 1
         e, _c2 = verify("\n".join(_lines5), d)
         print("== 自测：改【报告里】结论句的那一个方向值 ⇒ 应当【被抓】==")
         if e:
@@ -295,6 +299,7 @@ def self_test():
             return 1
     print()
     print("✔ 自测全过：★ 这个检查会红（★ 不是恒真 ★）★")
+    print("   ★ 本轮共做 ★ %d 次变异注入 ★（★ 由计数器累加 ★）★" % n_mut)
     return 0
 
 
