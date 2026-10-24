@@ -73,6 +73,34 @@ def git(*a, binary=False):
     return r.stdout if binary else r.stdout.decode("utf-8")
 
 
+# ★ ★★★ 状态文件：★ 记住【上次推送的本地 commit】★★ ⇒ ★ 下次能算出【我们改过哪些路径】★★
+STATE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                          ".mavis", "push_state.json")
+
+
+def _read_state(branch):
+    try:
+        with open(STATE_PATH, encoding="utf-8") as f:
+            return (json.load(f) or {}).get(branch, {}) or {}
+    except Exception:
+        return {}
+
+
+def _write_state(branch, local_commit, remote_sha, tree_sha):
+    d = {}
+    try:
+        with open(STATE_PATH, encoding="utf-8") as f:
+            d = json.load(f) or {}
+    except Exception:
+        d = {}
+    d[branch] = {"local_commit": local_commit, "remote_sha": remote_sha, "tree_sha": tree_sha}
+    os.makedirs(os.path.dirname(STATE_PATH), exist_ok=True)
+    tmp = STATE_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False, indent=1, sort_keys=True)
+    os.replace(tmp, STATE_PATH)
+
+
 class Gh:
     def __init__(self, token, repo):
         self.token, self.repo, self.n = token, repo, 0
@@ -125,6 +153,11 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--owner", default="第二组", help="★ owner 行与 commit author 名（★ 机器可读的归属）")
     ap.add_argument("--email", default="mavis@local", help="★ commit author email")
+    ap.add_argument("--base-commit", default=None,
+                    help="★ 上次推送对应的【本地 commit】★ ⇒ 用来算【我们改过哪些路径】★ "
+                         "★ 缺省读状态文件 .mavis/push_state.json ★")
+    ap.add_argument("--allow-conflict", action="store_true",
+                    help="★ 强行覆盖【别人改过、我们没动】的路径（★ 默认拒绝 ★）★")
     a = ap.parse_args()
     os.chdir(a.repo_path)
     lb = a.local_branch or a.branch
@@ -154,8 +187,39 @@ def main():
     print("  远端 blob %d ｜ 本地 blob %d" % (len(rmap), len(lmap)))
     print("  ★ 远端独有 %d（★ ★ 全部保留，★ 不删）" % len(only_remote))
     print("  ★ 本地独有 %d（★ 要叠加）" % len(only_local))
-    print("  ★ 同路径不同内容 %d（★ 要覆盖）" % len(changed))
-    todo = only_local + changed
+    print("  ★ 同路径不同内容 %d（★ ★ 要按【我们是否改过】分流 ★）" % len(changed))
+
+    # ══════ ★★★ 2026-10-25 事故修复：★ 同路径不同内容【不能一律覆盖】★★★ ══════
+    # ★ 事故：三组在【我们的 a0d539ff59 之上】推了 ccccfea02a（改了 31 个共享文件）
+    #   ⇒ 本脚本把本地旧版盖回去 ⇒ ★ 覆盖掉了别人的 31 个文件（其中含他们的论文与判据）
+    # ★ 根因：旧逻辑把【同路径不同内容】一律当作【我们要改】★ ⇒ ★ 不区分【谁改的】
+    # ★ 修法：只覆盖【我们自上次推送以来真正改过的路径】★ ⇒ 别人改过的一律【不碰】
+    #   ⇒ 真的撞上了（我们也改了同一路径）⇒ ★ 报【冲突】★ 并拒绝覆盖（除非显式 --allow-conflict）
+    base_commit = a.base_commit or _read_state(a.branch).get("local_commit")
+    our_changed = set()
+    if base_commit:
+        rec = git("diff", "--name-only", "-z", base_commit, lb, binary=True)
+        our_changed = {x.decode("utf-8") for x in rec.split(b"\x00") if x}
+        print("  ★ 基线 = 上次推送的本地 commit %s（★ 我们改过的路径 %d）"
+              % (base_commit[:10], len(our_changed)))
+    else:
+        print("  ★★ 无基线（★ 找不到上次推送的本地 commit）★★ ⇒ ★★ 无法区分【谁改的】★★")
+
+    conflict = sorted(p for p in changed if p not in our_changed)
+    mine = sorted(p for p in changed if p in our_changed)
+    print("  ★ 其中【我们改过】⇒ 覆盖 %d" % len(mine))
+    print("  ★ 其中【别人改过、我们没动】⇒ ★★ 冲突 %d（★ 不覆盖 ★）★★" % len(conflict))
+    for p in conflict[:20]:
+        print("      ⚠ %s" % p)
+    if len(conflict) > 20:
+        print("      ... 还有 %d 个" % (len(conflict) - 20))
+    if conflict and not a.allow_conflict:
+        print("\n✘✘ 检测到 %d 个【别人改过、我们没动】的路径 ⇒ ★★ 拒绝覆盖 ★★" % len(conflict))
+        print("   ⇒ 先把三方的内容合并到本地（git pull / 手工合并），再重推")
+        print("   ⇒ 确认要强行覆盖请加 --allow-conflict")
+        return 3
+
+    todo = only_local + (changed if a.allow_conflict else mine)
     if a.dry_run:
         print("  ── 将上传 %d 个 blob ──" % len(todo))
         for p in todo[:20]:
@@ -277,6 +341,9 @@ def main():
     print("  ★ 本地独有未落：%d（★ 应 0）" % len(missing))
     print("  ★ 远端总 blob %d" % len(nmap))
     print("★ 本次 API 调用 %d 次" % gh.n)
+    # ★ ★ 写状态文件：★ 记住【这次的本地 commit】★ ⇒ ★ 下次能算【我们改过哪些路径】★★
+    _write_state(a.branch, git("rev-parse", lb).strip(), got, nt["sha"])
+    print("  ★ 状态已记：%s ⇒ 本地 commit %s" % (STATE_PATH, git("rev-parse", lb).strip()[:10]))
     return 0 if not (lost or changed_bad or missing) else 1
 
 

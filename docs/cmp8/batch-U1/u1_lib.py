@@ -91,6 +91,7 @@ class _BaseLLM:
 
     def __init__(self):
         self.rec = []
+        self.errors = []
         self.usage = []
         self._cache = {}
 
@@ -102,6 +103,7 @@ class _BaseLLM:
              max_tokens: int = 8000, budgets=(), min_ok: int = 20,
              purpose: str = "") -> str:
         last = ""
+        last_error = ""
         t0 = time.time()
         for mt in (max_tokens,) + tuple(budgets):
             try:
@@ -110,6 +112,12 @@ class _BaseLLM:
                     "messages": [{"role": "user", "content": prompt}],
                     "temperature": temp, "max_tokens": mt,
                 })
+                if "choices" not in d:
+                    # ★ 供应商可能用 **HTTP 200 + 错误体** 返回（无 choices）
+                    #   ⇒ 旧代码在这里抛 KeyError ⇒ 错误体被吞 ⇒ 只剩 "KeyError: choices"
+                    #   ⇒ 无法诊断（2026-10-23 实测：锚外判官恒 0 就是这么来的）
+                    raise RuntimeError("响应无 choices：%s"
+                                       % json.dumps(d, ensure_ascii=False)[:300])
                 ch = d["choices"][0]
                 raw = ch["message"].get("content") or ""
                 last = self._strip(raw)
@@ -131,10 +139,26 @@ class _BaseLLM:
                     self.rec[-1].ok = True
                     return last
             except Exception as e:
+                # ★ 2026-10-23：**不许把失败吞成空串**
+                #   旧写法：只记 "error:HTTPError" ⇒ 状态码/响应体全丢 ⇒ 事后查不出原因
+                #   ⇒ 且返回空串 ⇒ 上层把"调用失败"读成"这条臂没有承重信息"（dims=0）
+                detail = "%s: %s" % (type(e).__name__, e)
+                try:
+                    _body = getattr(e, "read", lambda: b"")()[:300]
+                    if _body:
+                        detail += " | body=" + _body.decode("utf-8", "ignore")
+                except Exception:
+                    pass
+                self.errors.append(dict(purpose=purpose, model=model or self.MODEL,
+                                         max_tokens=mt, error=detail))
                 self.rec.append(_Call(model or self.MODEL, purpose, max_tokens,
                                        "error:%s" % type(e).__name__, 0, False,
                                        time.time() - t0))
+                last_error = detail
                 time.sleep(2.0)
+        # ★ 全部尝试都失败 ⇒ **抛错**（带原因）⇒ 不许返回空串冒充成功
+        if last_error:
+            raise RuntimeError("LLM 调用全部失败（%s）：%s" % (purpose, last_error))
         return last
 
     @staticmethod

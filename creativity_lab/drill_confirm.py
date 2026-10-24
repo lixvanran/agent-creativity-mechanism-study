@@ -55,7 +55,7 @@ def evaluate(spec, topics, tag):
                n=len(res))
     json.dump(dict(spec=spec, key=spec_key(spec), agg=agg, per=res),
               open("%s/%s_%s.json" % (OUT, tag, spec_key(spec)), "w"),
-              ensure_ascii=False, indent=1, sort_keys=True)
+              ensure_ascii=False, indent=1)
     return agg, res
 
 
@@ -89,7 +89,7 @@ def main():
     json.dump(dict(confirm={k: v[0] for k, v in out.items()},
                    per_topic={k: v[1] for k, v in out.items()},
                    rest_tids=[t["tid"] for t in REST]),
-              open("%s/confirm.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+              open("%s/confirm.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
 
 

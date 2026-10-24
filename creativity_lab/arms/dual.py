@@ -33,11 +33,8 @@ class Dual:
         self.mode, self.select = mode, select
 
     # ---------- 发散层 ----------
-    def _diverge(self, llm, topic, *, produce_article: bool, specs=None):
-        """★ `specs` 可注入（2026-10-23）：分支的模型档位可以指定，
-        用于**剔掉已下架型号**（M2.1 实测 404 ⇒ 5 支静默变 4 支），
-        且把"用哪些模型"记进 manifest（可审计）。"""
-        specs = specs or _branch_specs()
+    def _diverge(self, llm, topic, *, produce_article: bool):
+        specs = _branch_specs()
         outs = []
         for (frame, model, persona) in specs:
             prompt = (BRANCH_ASK.format(
