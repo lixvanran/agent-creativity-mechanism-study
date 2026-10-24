@@ -89,6 +89,17 @@ def main() -> int:
     strict = "--strict" in sys.argv
     if "--write-manifest" in sys.argv:
         return write_manifest()
+    # ★ ★ ★ 显式开关（★ 2026-10-25 修）★★
+    # ★ 起因：★ 原来会拿【工作区快照】比 ⇒ ⇒ ★ 在交付包里跑时它仍去读
+    #   /workspace/第四组论证/...（★ 那是【沙箱的环境状态】，★ 不是【被测对象】）
+    #   ⇒ ⇒ ★ 同一份代码在同一台机器上跑出不同数 ⇒ ⇒ ★ 环境依赖 ★★
+    # ★ ⇒ ⇒ ★ 修法：★ --no-workspace ⇒ 只验仓内自洽（★ 交付包内自检用）★
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--no-workspace", action="store_true",
+                    help="★ 不与工作区快照比（★ 交付包内自检用 ⇒ 消除环境依赖）")
+    ap.add_argument("--workspace", default=EXP, help="★ 工作区快照路径（★ 可显式覆盖）")
+    _a = ap.parse_args()
     ok = True
 
     print("=" * 74)
@@ -109,9 +120,11 @@ def main() -> int:
             print("   · %-12s %3d 个 / %7.2f MB" % (
                 sub, len(fs), sum(os.path.getsize(x) for x in fs) / 1e6))
 
-    # ── ①b 与工作区快照对比 ──
-    if os.path.isdir(EXP):
-        src_runs = os.path.join(EXP, "runs")
+    # ── ①b 与工作区快照对比（★ ★ 环境依赖的唯一入口 ⇒ ★ --no-workspace 时整段跳过）──
+    if _a.no_workspace:
+        print("   · 工作区对比：**已显式关闭**（★ --no-workspace ⇒ ★ 消除环境依赖）")
+    elif os.path.isdir(_a.workspace):
+        src_runs = os.path.join(_a.workspace, "runs")
         if os.path.isdir(src_runs):
             sfiles = walk_files(src_runs)
             sbytes = sum(os.path.getsize(f) for f in sfiles)

@@ -23,13 +23,36 @@ import sys
 _HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(_HERE)
 DATA = os.path.join(REPO, "group4_state_driven", "data")
-REPORTS = [
-    os.path.join(REPO, "group4_state_driven", "REPORT_arch6_stage1.md"),
-    "/workspace/第四组论证/experiment-design/REPORT_arch6_stage1.md",
-]
+# ★ ★ REPORTS 的赋值在下方（★ 必须在 _reports_from_argv 定义之后）★★
 
 d = json.load(open(os.path.join(DATA, "arch6_stage1_analysis.json"), encoding="utf-8"))
 rows = [json.loads(l) for l in open(os.path.join(DATA, "arch6_stage1.jsonl"), encoding="utf-8") if l.strip()]
+
+# ★ ★ ★ ② 校验器必须【只指向固定的被测对象】（★ 2026-10-25 修）★★
+# ★ 起因：★ 原来 REPORTS 硬编码了【仓内报告 + 工作区报告】⇒ ⇒ 同一份代码在同一台机器上
+#   跑出【不同数】（★ 仓内 123 项 / DATA 包里 68 项）⇒ ⇒ ★ 它测的是【工作区状态】
+#   而不是【被测对象】⇒ ⇒ ★ 这比分包缺陷更麻烦：★ 分包修完读数仍不可信 ★★
+# ★ ⇒ ⇒ ★ 修法：★ 默认【只查仓内那一份】（★ 固定路径）；★ --reports 可显式指定；
+#   ★ ★ 绝不再自动把工作区里同名文件扫进去 ★★
+# ★ ★ 判据：★ 同一份包在仓内跑与包内跑【必须得到同一个数】⇒ ⇒ 差一个数 ⇒ 还有环境依赖 ★★
+_DEFAULT_REPORTS = [os.path.join(REPO, "group4_state_driven", "REPORT_arch6_stage1.md")]
+
+
+def _reports_from_argv() -> list:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--reports", nargs="*", default=None,
+                    help="★ 显式指定要校验的报告（★ 默认：只有仓内那一份）")
+    a = ap.parse_args()
+    if a.reports is None:
+        return list(_DEFAULT_REPORTS)
+    if not a.reports:
+        raise SystemExit("✘ --reports 给了空列表 ⇒ 停止（★ 校验 0 份报告等于没校验）")
+    return list(a.reports)
+
+
+# ★ ★ ★ REPORTS 的赋值必须在函数定义之后（★ 否则 NameError）★★
+REPORTS = _reports_from_argv()
 
 checks = []
 

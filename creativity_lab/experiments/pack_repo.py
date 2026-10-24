@@ -94,20 +94,46 @@ def verify(out_zip: str, repo: str, prefix: str, extra_md: List[str]) -> bool:
             ok = False
         else:
             print("  ✔ 无 .git 混入")
-        # ③ 内容 sha：★ 抽 5 个文件比对
-        import random
-        sample = [n for n in names if not n.endswith("/")][:200]
-        random.seed(0)
-        for n in random.sample(sample, min(5, len(sample))):
-            disc = os.path.join(repo, os.path.relpath(n, prefix)) if n.startswith(prefix + "/") else None
-            if disc is None or not os.path.isfile(disc):
-                continue
-            a = hashlib.sha256(z.read(n)).hexdigest()
-            b = hashlib.sha256(open(disc, "rb").read()).hexdigest()
-            if a != b:
-                print("  ✘ 内容 sha 不符：%s" % n)
-                ok = False
-        print("  ✔ 抽样 5 个文件内容 sha 一致" if ok else "  ✘ 抽样内容比对有问题")
+        # ③ 内容 sha：★ ★★ 【全量】核对清单（★ ★ 2026-10-25 修：★ 原先只抽样 5 个
+        # ★ ★ ⇒ ⇒ 漏抓了"清单过期"（★ state_layer.py 升到 rev3 后 SHA256SUMS.txt 没更新
+        # ★ ★ ⇒ ⇒ sha256sum -c 会 FAILED ⇒ ⇒ ★ ★ ⇒ 抽样量不够 ⇒ ⇒ ★ 改全量）
+        # ★ ★ 核对方式：★ 以包内 SHA256SUMS.txt 为准（★ 若存在 ⇒ ⇒ 逐条核）
+        sums_name = "SHA256SUMS.txt"
+        n_checked = 0
+        if sums_name in names:
+            import re as _re
+            entries = []
+            for ln in z.read(sums_name).decode("utf-8").splitlines():
+                m = _re.match(r"^([0-9a-f]{64})\s+\*?(.+)$", ln.strip())
+                if m:
+                    entries.append((m.group(1), m.group(2)))
+            for want, arc in entries:
+                arc = arc.lstrip("./")
+                if arc not in names:
+                    print("  ✘ 清单里的文件不在包内：%s" % arc)
+                    ok = False
+                    continue
+                got = hashlib.sha256(z.read(arc)).hexdigest()
+                if got != want:
+                    print("  ✘ 内容 sha 不符：%s" % arc)
+                    ok = False
+                n_checked += 1
+            print("  ✔ 全量核对 SHA256SUMS.txt：%d 条" % n_checked)
+        else:
+            # ★ 没有清单 ⇒ ⇒ 抽样（★ 且明确说明是抽样）
+            import random
+            sample = [n for n in names if not n.endswith("/")][:200]
+            random.seed(0)
+            for n in random.sample(sample, min(5, len(sample))):
+                disc = os.path.join(repo, os.path.relpath(n, prefix)) if n.startswith(prefix + "/") else None
+                if disc is None or not os.path.isfile(disc):
+                    continue
+                a = hashlib.sha256(z.read(n)).hexdigest()
+                b = hashlib.sha256(open(disc, "rb").read()).hexdigest()
+                if a != b:
+                    print("  ✘ 内容 sha 不符：%s" % n)
+                    ok = False
+            print("  ✔ 抽样 5 个文件内容 sha 一致（★ 无清单 ⇒ 只能抽样）")
     return ok
 
 
