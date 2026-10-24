@@ -11,10 +11,13 @@
 > | 项 | 值 |
 > |---|---|
 > | 文件 | `creativity_lab/state_layer.py` |
-> | **现行版本** | ★ **rev1** sha256 = `69a29c506a4e4ab0`（★ 14055 B） |
-> | 上一版 | rev0 sha256 = `38795bf6adfdee05`（★ 10257 B） |
-> | 核对 | ✅ **rev1 逐字节一致**（★ 由第四组 `apply_state_layer_rev1.py` 应用 ⇒ ★ **sha256 双向校验通过**） |
-> | 差异覆盖 | ★ rev0 的 4 条差异（①②③④）**已由第二组修订并被第四组探针机械确认为「已修复」** ⇒ ★ 新增 1 条待裁决（见 §6.3 ⑤） |
+> | **现行版本** | ★★ **rev2** sha256 = `b70bfb0beb2bd591`（★ **由第二组逐字原文提供**） |
+> | 历史版本 | ★ rev1 sha256 = `69a29c506a4e4ab0`（★ 14055 B）｜★ rev0 sha256 = `38795bf6adfdee05`（★ 10257 B） |
+> | 版本归档 | ★★ **rev0 / rev1 / rev2 三个版本全部固化进仓内**（★ `group4_state_driven/data/state_layer_versions/`）⇒ ⇒ ★ **可复核**（★ ★ rev0 原本只在 `/tmp` ⇒ 沙箱一挂就丢 ⇒ ★ ★ 已抢救） |
+> | 核对 | ✅ **rev2 逐字节一致**（★ 由第四组 `apply_state_layer_rev2.py` 应用 ⇒ ★ **sha256 双向校验通过**） |
+> | 差异覆盖 | ★★ **rev0 的 4 条（①②③④）+ rev1 新增的 1 条（⑤ 中位并列漏检）= 5 条** ★ **全部关闭**（★ 探针三版差分实测：★ **rev0=4 / rev1=1 / rev2=0**） |
+> | ★ rev2 的**返回类型变化** | ★★ **`detect_tie` 改了返回类型**：★ 无并列 `None → []`；★ 有并列 `Dict → List[Dict]`（★ 全部并列簇）⇒ ⇒ ★ **★ 任何按 `is not None` 判"是否检出"的调用方都会在 rev2 上误判**（★ ★ 我们自己的探针就踩了 ⇒ ⇒ ★ 已修） |
+> | ★ rev2 的**已知瑕疵** | ★★ **`tol` 参数是死参数**（★ 实际按 `round(float(v), 12)` 分组）⇒ ⇒ ★ **第二组认领，rev3 再修** ⇒ ⇒ ★ **第四组按 rev2 原样落地，不改写其语义**（★ ★ 测试里照现状断言，★ 不当成 `tol` 语义去测） |
 >
 > ⇒ ⇒ ★ **接口归属归第二组；本文件降级为「实现与读数侧」的配套说明，以 `creativity_lab/state_layer.py` 为准。**
 > ⇒ ⇒ ★ **本文件 §1–§5 的自建接口不再作为实现依据** ⇒ ⇒ ★ **仅保留**：
@@ -204,23 +207,39 @@ class State4:
 ★ **两版测试数不同（6 vs 5）**：★ 第四组多一项 `test6_spec_redlines` ⇒ ⇒
 ★ **因为第二组的三条红线（可序列化 / 纯函数 / 失败不许静默归零）本身也是规格** ⇒ ⇒ 不测就等于漏。
 
-### 6.3 ★★ 四条「规格 ↔ 实现」差异（★ 已机械坐实 · ★ 上报第二组裁决）
+### 6.3 ★★ 五条「规格 ↔ 实现」差异（★ ★ 5 条全部关闭 · ★ 三版差分实测 ★）
 
 > ★ 探针落点：`group4_state_driven/probe_state_layer_spec_gap.py`（★ 零 API · ★ 只读不改）
 > ★ **本探针不改第二组文件** ⇒ ⇒ 差异由第二组裁决 ⇒ ⇒ **第四组不单方面改规则**。
-> ★ ★ **探针已改为【双版本差分】**（★ `--both`）⇒ ⇒ **同时加载 rev0 与 rev1** ⇒ ⇒
-> ★ **对每条差异给出【两版各自判定】** ⇒ ⇒ ★ **「已修复」与「仍存在」一眼分开**
-> ★ ⇒ ⇒ ★ ★ **理由**：★ rev1 修掉了 rev0 的 4 条 ⇒ ⇒ ★ 旧探针会继续报"已修复的 bug"
+> ★ ★ **探针已改为【三版本差分】**（★ `--both`）⇒ ⇒ **同时加载 rev0 / rev1 / rev2** ⇒ ⇒
+> ★ **对每条差异给出【各版各自判定】** ⇒ ⇒ ★ **「已修复」与「仍存在」一眼分开**
+> ★ ⇒ ⇒ ★ ★ **理由**：★ rev1 修掉了 rev0 的 4 条、★ rev2 又修掉了 rev1 的 1 条 ⇒ ⇒ ★ 旧探针会继续报"已修复的 bug"
 > ★ ⇒ ⇒ ★ **★ 那是【过期工具】⇒ ⇒ ★ 比没有更坏**（★ 让人以为还有 bug）⇒ ⇒ ★ **探针必须跟着接口版本走**。
-> ★ **当前实测**：★ rev0 仍存在 **4** 条 ⇒ ★ rev1 仍存在 **1** 条（⑤）⇒ ★ 差 **3** 条（★ 修订覆盖）。
+> ★ ★★ **★ 当前实测（★ 2026-10-25 · exit 0）**：
+> ★ **rev0 仍存在 4 条 / rev1 仍存在 1 条 / rev2 仍存在 0 条** ⇒ ⇒ **★ 5 条差异全部关闭**
+
+> ★ ★ **★★ 【★ 探针自己也踩过的坑（★ 必须留痕）★★★**
+> ★ **rev2 改了 `detect_tie` 的返回类型**（★ 无并列 `None → []`；★ 有并列 `Dict → List[Dict]`）
+> ⇒ ⇒ ★ **我们第一版探针按 `is not None` 判"检出" ⇒ ⇒ ★ 在 rev2 上【误判成"差异仍存在"】**
+> ⇒ ⇒ ★ ★ **教训（★ 跨项目通用）**：★ **接口的【返回类型】也是接口的一部分**
+> ⇒ ⇒ ★ ★ **⇒ 探针的判定逻辑必须跟着返回类型走 ⇒ ⇒ ★ ★ 而不只是跟着【函数名】走**
+> ⇒ ⇒ ★ ★ **⇒ 这与「探针必须跟接口版本走」是同一条纪律的两种形态**（★ ★ 一个盯【行为】，★ 一个盯【签名】）。
 
 | # | 差异 | 后果 | 裁决方 |
 |:-:|---|---|---|
 | **1** | `HYP_SUPPORTED` **定义但不可达**（★ `add_evidence(refutes=False)` 不改状态） ⇒ ⇒ **支持性证据永远把假设留在 `open`** | ⇒ ★ **`check_hypothesis` 分支永久优先于 `connect`** ⇒ ⇒ 实测：连续 10 次支持性证据 + 1 条分歧 ⇒ `choose_action` 仍返回 `('check_hypothesis','h2')` ⇒ ⇒ **分歧连接被无限期阻塞** | 第二组 |
 | **2** | 死路判定写的是 `at.used >= 3`（★ **累计**），规格表写「★ **连续** 3 次无新信息」 ⇒ ⇒ **且 `at.produced_new` 是每次覆盖而非累积** | ⇒ 实测 `(True,True,False)` ⇒ **判死路** ⇒ `switch_method` 提前触发 ⇒ ⇒ **比规格更激进**（★ 成功过的方法也会被判死路） | 第二组 |
 | **3** | 支持性证据**不写 `progress`**（★ 只有反证写 `refuted:<hid>`） | ⇒ ★ 状态回放时**无法区分支持证据与反证证据** ⇒ ⇒ 与「可回放」红线②有张力 | 第二组（★ 若认为该留痕 ⇒ **属规则变更 ⇒ 须重过预注册**） |
-| **4** | 「★ 并列 ⇒ 自动保留分歧」**在代码里没有机制**；只有显式 `preserve_divergence` | ⇒ ★ 第四组 v6 的 `Select(greedy)` **会吃掉并列** ⇒ ⇒ **接线时必须显式补这一步**，★ 否则分歧语义丢失 | 第二组（接口层）+ ★ **第四组（接线层 ⇒ 归第四组实现与读数侧）** |
-| **5** | ★ **rev1 新增**：`detect_tie` **只查【最大值处】**（`best = max(scores)`）⇒ ⇒ **中位并列漏检** | ⇒ 实测：`detect_tie([0.9,0.5,0.5])` ⇒ **`None`**（★ 两个 0.5 是"第二好方案并列"的真实分歧）⇒ ⇒ **分歧语义又丢** | 第二组（★ 接口层语义）|
+| **4** | 「★ 并列 ⇒ 自动保留分歧」**在代码里没有机制**；只有显式 `preserve_divergence` | ⇒ ★ 第四组 v6 的 `Select(greedy)` **会吃掉并列** ⇒ ⇒ **接线时必须显式补这一步**，★ 否则分歧语义丢失 | ★ **✔ rev2 已修**（★ 有了 `detect_tie`）｜★ **接线仍归第四组** |
+| **5** | ★ **rev1 新增**：`detect_tie` **只查【最大值处】**（`best = max(scores)`）⇒ ⇒ **中位并列漏检** | ⇒ 实测（rev1）：`detect_tie([0.9,0.5,0.5])` ⇒ **`None`**（★ 两个 0.5 是"第二好方案并列"的真实分歧）⇒ ⇒ **分歧语义又丢** | ★ **✔ rev2 已修**（★ 能检出中位并列）｜★ **★ 但 rev2 改了返回类型（★ None→[]、Dict→List[Dict]）⇒ ⇒ 调用方须同步改** |
+
+> ★ ★ **★★ 5 条的当前状态（★ 探针实测 · exit 0）★★**
+> ★ **① `HYP_SUPPORTED` 不可达** ⇒ ✔ rev1 修（★ 两条支持 ⇒ supported ⇒ connect）
+> ★ **② 死路判定"累计"而非"连续"** ⇒ ✔ rev1 修（★ 连续 3 次语义）
+> ★ **③ 支持性证据不写 progress** ⇒ ✔ rev1 修（★ progress 留支持证据痕）
+> ★ **④ 并列 ⇒ 自动保留分歧无机制** ⇒ ✔ rev2 修（★ `detect_tie` 落地）
+> ★ **⑤ 中位并列漏检** ⇒ ✔ rev2 修（★ ★ 探针三版矩阵实测 rev0=4 / rev1=1 / rev2=0）
+> ★ ⇒ ⇒ ★ **★ ★ 至此，★ 【规格 ↔ 实现】的 5 条差异全部关闭 ⇒ ⇒ ★ 第四组【不再有接口层待裁决项】**
 
 ★ **★ 为什么第 2 条不会被离线测试抓到**：★ 规格表说「连续 3 次无新信息」，
 ★ 按规格写测试 ⇒ 通过；★ 按实现写测试（`True,True,False`）⇒ 也通过（★ 因为实现的判据更宽）
@@ -271,17 +290,24 @@ class State4:
 # ★ 现行可执行测试（第二组规格表 · 第四组实现）—— 8/8 ⇒ exit 0
 python3 -B creativity_lab/experiments/test_state_layer.py
 
-# ★ 变异注入自检（证明每个测试项是活的）—— 10/10 ⇒ exit 0
+# ★ 变异注入自检（证明每个测试项是活��）—— 11/11 ⇒ exit 0
+# ★ ★ m10 专门守护第 5 条差异：★ 故意改回"只查最大簇" ⇒ ⇒ 必须被抓
 python3 -B creativity_lab/experiments/test_state_layer.py --self-test
 
-# ★ 规格-实现差异探针（零 API · 只读不改第二组文件）—— rev1 仍存在 1 条
+# ★ 规格-实现差异探针（零 API · 只读不改第二组文件）—— rev2 仍存在 0 条
 python3 -B group4_state_driven/probe_state_layer_spec_gap.py
 
-# ★ 双版本差分（rev0 vs rev1）
+# ★ 三版本差分（rev0 / rev1 / rev2）⇒ ⇒ 打印 rev0=4 / rev1=1 / rev2=0
 python3 -B group4_state_driven/probe_state_layer_spec_gap.py --both
 
-# ★ rev0 → rev1 应用脚本（★ 三道自保护：锚点唯一命中 / 应用后 sha 校验 / 幂等）
-python3 -B group4_state_driven/apply_state_layer_rev1.py creativity_lab/state_layer.py
+# ★ rev1 → rev2 应用脚本（★ 三道自保护：锚点唯一命中 / 应用后 sha 校验 / 幂等）
+python3 -B group4_state_driven/apply_state_layer_rev2.py creativity_lab/state_layer.py
+
+# ★ ★ 三个版本的历史归档（★ rev0/rev1 原本不在仓内 ⇒ 沙箱一挂就没了 ⇒ 已抢救）
+ls -la group4_state_driven/data/state_layer_versions/
+
+# ★ ★ Stage-1 独立采样判据（★ 记录数 vs 独立样本数 ⇒ 防止重复计权）
+python3 -B group4_state_driven/check_independent_samples.py
 
 # ★ 第四组自建版测试（★ 历史对照，★ 不是实现依据）—— 5/5
 python3 group4_state_driven/workpack3_tests.py
@@ -293,7 +319,11 @@ python3 group4_state_driven/code/workflow_arch6.py
 ★ **sha256 核对命令（★ 唯一可靠的核对手段）**：
 ```bash
 sha256sum creativity_lab/state_layer.py | cut -c1-16
-# ⇒ 必须输出：69a29c506a4e4ab0   （★ rev1 现行版）
+# ⇒ 必须输出：b70bfb0beb2bd591   （★ ★ rev2 现行版）
+
+# ★ ★ 三个版本一起核（★ 归档的也要核 ⇒ ⇒ 防止历史版本被悄悄改掉）
+sha256sum group4_state_driven/data/state_layer_versions/*.py | cut -c1-16
+# ⇒ rev0: 38795bf6adfdee05  /  rev1: 69a29c506a4e4ab0  /  rev2(现行): b70bfb0beb2bd591
 ```
 
 ★ **★ 双向校验是这套协作的底层机制**：★ 发送方给 sha、接收方应用后核 sha ⇒ ⇒

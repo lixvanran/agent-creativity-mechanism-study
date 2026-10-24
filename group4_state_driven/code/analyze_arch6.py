@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -93,6 +94,99 @@ def main():
     if verdict:
         print("   ⇒ %s" % verdict)
 
+    # ── ★★ ②a-bis 排序改变率的【分母构成】与【Wilson CI】★★
+    #   ★ 为什么必须加这一段：★ 「排序改变率 = 2/7」这个数**极易被误读**为
+    #   ★ 「机制有 28.6% 的效果」⇒ ⇒ ★ 实际上分母里【多数单元的对照端无区分力】
+    #   ★ ⇒ ⇒ 排序改变只可能发生在【有区分力】的单元上 ⇒ ⇒ ★ **分母必须拆开报**。
+    print("\n── ②a-bis ★★ 排序改变率的【分母构成】（★ 防止把改变率误读成效果量）")
+    detail_rows = []
+    n_with_disc = 0          # ★ 对照端（B）有区分力的单元数
+    n_changed = 0
+    for r in ok:
+        bs = (r.get("B_state_nocost") or {}).get("scores") or []
+        ds = (r.get("D_state_quota") or {}).get("scores") or []
+        if not (bs and ds):
+            continue
+        rb, rd = _rank(bs), _rank(ds)
+        changed = bool(rb != rd)
+        # ★ 对照端区分力：B 档三候选的 spread（max-min）与 var
+        spread_b = (max(float(x) for x in bs) - min(float(x) for x in bs)) if bs else 0.0
+        spread_d = (max(float(x) for x in ds) - min(float(x) for x in ds)) if ds else 0.0
+        has_disc = spread_b > 1e-9
+        if has_disc:
+            n_with_disc += 1
+        if changed:
+            n_changed += 1
+        detail_rows.append({"tag": r.get("tag"), "changed": changed,
+                            "spread_B": round(spread_b, 6), "spread_D": round(spread_d, 6),
+                            "control_has_discrimination": has_disc})
+    n_all = len(detail_rows)
+    print("   分母 n=%d   改变 %d   ⇒ 改变率=%.4f" % (n_all, n_changed, (n_changed / n_all) if n_all else 0))
+    if n_all:
+        p = n_changed / n_all
+        z = 1.96
+        den = 1 + z * z / n_all
+        c = (p + z * z / (2 * n_all)) / den
+        h = z * math.sqrt(p * (1 - p) / n_all + z * z / (4 * n_all * n_all)) / den
+        ci = [round(max(0.0, c - h), 4), round(min(1.0, c + h), 4)]
+        print("   Wilson 95%% CI ≈ [%.3f, %.3f]  ⇒ ★ CI 含 0.25 ⇒ ⇒ 【不可分辨】" % (ci[0], ci[1]))
+        print("   ★ 分母构成：对照端（B）**有区分力**的单元 %d/%d（%.4f）" % (
+            n_with_disc, n_all, n_with_disc / n_all))
+        print("   ⇒ ★ ★ 关键：★ 排序改变**只可能发生在有区分力的单元上**")
+        print("   ⇒ ★ ⇒ 改变率 %d/%d 的真实分母应是 **%d**（有区分力的单元）⇒ ⇒ = %.4f" % (
+            n_changed, n_all, n_with_disc, (n_changed / n_with_disc) if n_with_disc else 0))
+        for d in detail_rows:
+            print("      %-8s changed=%-5s spread_B=%.4f spread_D=%.4f 对照端有区分力=%s" % (
+                d["tag"], d["changed"], d["spread_B"], d["spread_D"], d["control_has_discrimination"]))
+        # ── ★★★ 第二个口径：★ 排序改变可以来自【D 端内部重排】⇒ ⇒ 只看 B 端会漏 ★★★
+        #   ★ G01-3 就是这一类：★ B 端全同（spread_B=0）⇒ 但 D 端有区分 ⇒ ⇒ 排序仍变了
+        #   ⇒ ⇒ ★ **「改变」有两个来源**：★ ① B 有区分 ⇒ 代价把 B 的领先者换掉（★ 改变既有排序）
+        #   ⇒ ⇒ ★                       ② B 无区分但 D 有区分 ⇒ 代价【创造】了区分（★ 更强）
+        n_either = sum(1 for d in detail_rows
+                        if d["spread_B"] > 1e-9 or d["spread_D"] > 1e-9)
+        n_changed_with_either = sum(1 for d in detail_rows
+                                    if d["changed"] and (d["spread_B"] > 1e-9 or d["spread_D"] > 1e-9))
+        print("   ⇒ ★ ★ 第二口径（★ 任一端有区分力）：★ %d/%d 单元有区分力" % (n_either, n_all))
+        print("      ★ 排序改变且至少一端有区分力：%d/%d ⇒ = %.4f" % (
+            n_changed_with_either, n_either, (n_changed_with_either / n_either) if n_either else 0))
+        print("      ★ ★ 其中【B 无区分、D 有区分】= 代价【创造】了区分的单元：%s" % (
+            [d["tag"] for d in detail_rows
+             if d["changed"] and d["spread_B"] <= 1e-9 and d["spread_D"] > 1e-9] or "无"))
+        print("      ★ ★ 其中【B 有区分】= 代价【改变】了既有排序的单元：%s" % (
+            [d["tag"] for d in detail_rows
+             if d["changed"] and d["spread_B"] > 1e-9] or "无"))
+        print("   ⇒ ★ ★ 判读口径：★ 改变率【不能单独解读】⇒ ⇒ 必须与「区分力」一起报")
+        print("   ⇒ ★ ⇒ 若无区分力的单元占多数 ⇒ ⇒ 改变率的分母是【被稀释】的 ⇒ ⇒ 不可当作效果量")
+
+    # ── ★★ ②a-ter 三种 0 的分类（★ 仪器层 0 / 内容层 0 / 不可打分 None）★★
+    #   ★ T07-3 出现过 B=D=[0,0,0] ⇒ ⇒ 必须区分它是【内容层真 0】还是【不可打分被归零】
+    #   ★ 判据：★ fulfil > 0 ⇒ 候选有可解析声明且状态目标集非空 ⇒ ⇒ 0 是【真实的 Jaccard=0】= 内容层 0
+    print("\n── ②a-ter ★★ 三种 0 的分类（★ 禁止把 None 当 0）")
+    zero_cls = {"content_zero": [], "unscoreable_none": [], "other": []}
+    for r in ok:
+        bs = (r.get("B_state_nocost") or {}).get("scores") or []
+        ds = (r.get("D_state_quota") or {}).get("scores") or []
+        if not (bs and ds):
+            continue
+        if not all(abs(float(x)) < 1e-12 for x in bs + ds):
+            continue
+        ful = (r.get("ful_B") or {}).get("fulfill")
+        tgt = r.get("target_quota") or {}
+        has_targets = bool(tgt.get("deep") or tgt.get("drop"))
+        if ful is not None and float(ful) > 0 and has_targets:
+            zero_cls["content_zero"].append(r.get("tag"))
+        elif not has_targets:
+            zero_cls["unscoreable_none"].append(r.get("tag"))
+        else:
+            zero_cls["other"].append(r.get("tag"))
+    print("   内容层 0（★ 候选声明与状态决策**真的**不相交 ⇒ Jaccard=0）：%s"
+         % (zero_cls["content_zero"] or "无"))
+    print("   不可打分 None（★ 状态目标集为空 ⇒ 该样本无取舍代价）：%s"
+         % (zero_cls["unscoreable_none"] or "无"))
+    print("   其他：%s" % (zero_cls["other"] or "无"))
+    print("   ⇒ ★ 判据：★ fulfil>0 且 target 非空 ⇒ ⇒ 该 0 是【内容层】⇒ ⇒ 不得归为仪器层")
+    print("   ⇒ ★ ★ 内容层 0 的单元：★ 候选与状态完全不相交 ⇒ ⇒ 对「平移 vs 区分」零信息量 ⇒ ⇒ 须单独标注")
+
     # ── ★★ ②b 机制诊断：代价是「常数平移」还是「区分候选」
     #     若代价对所有候选一视同仁地降低 align ⇒ 它只是常数偏移 ⇒ 排序必然不变
     #     ⇒ ⇒ "排序改变率≈0" 的机制解释就在这里（而不是"模型没接入"）。
@@ -116,10 +210,30 @@ def main():
     print("   逐候选改变量的方差（样本内）n=%d 均值=%s" % (
         len(shift_var), ("%.6f" % (sum(shift_var) / len(shift_var))) if shift_var else "n/a"))
     print("   ⇒ 方差 ≈ 0 ⇒ **代价是常数平移** ⇒ 排序必然不变（机制结论，非『模型没接入』）")
-    print("   状态化尺子区分力：B 档 align 方差均值=%s ／ D 档 align 方差均值=%s" % (
-        ("%.4f" % (sum(bvar) / len(bvar))) if bvar else "n/a",
+    # ★ ALIGN_VAR_IS_SD_FIXED：★ 口径改正 —— 之前字段名 `align_var` 装的其实是**标准差**，
+    #   而「同质率」对应的是**方差 = 0** ⇒ ⇒ 两者必须用同一口径才能互相算出来。
+    #   ⇒ 现在同时报 var（方差）与 sd（标准差），并给"由同质率推出的期望均值"做自洽核对。
+    def _v(xs):
+        n = len(xs)
+        if n < 2: return 0.0
+        m = sum(xs) / n
+        return sum((x - m) ** 2 for x in xs) / (n - 1)
+    bvar_true = [_v([float(x) for x in ((r.get("B_state_nocost") or {}).get("scores") or [])])
+                 for r in ok if len((r.get("B_state_nocost") or {}).get("scores") or []) > 1]
+    dvar_true = [_v([float(x) for x in ((r.get("D_state_quota") or {}).get("scores") or [])])
+                 for r in ok if len((r.get("D_state_quota") or {}).get("scores") or []) > 1]
+    print("   状态化尺子区分力（★ 方差 / 标准差 两个口径都给，避免命名误导）：")
+    print("     B 档：var 均值=%s ／ sd 均值=%s" % (
+        ("%.4f" % (sum(bvar_true) / len(bvar_true))) if bvar_true else "n/a",
+        ("%.4f" % (sum(bvar) / len(bvar))) if bvar else "n/a"))
+    print("     D 档：var 均值=%s ／ sd 均值=%s" % (
+        ("%.4f" % (sum(dvar_true) / len(dvar_true))) if dvar_true else "n/a",
         ("%.4f" % (sum(dvar) / len(dvar))) if dvar else "n/a"))
-    print("   ⇒ 两把尺子的区分力都要 > 0，否则 gap 无从解释")
+    if bvar_true:
+        print("   ⇒ ★ 自洽核对：同质样本 var=0 ⇒ 「var 均值」= (异质样本 var 之和)/n ⇒ %.4f" % (
+            sum(bvar_true) / len(bvar_true)))
+        print("     而 sd 均值 = (异质样本 sd 之和)/n ⇒ %.4f  ⇒ ★ 两个口径**不可混用**" % (
+            sum(bvar) / len(bvar)))
 
     # ── ★★ ②c 候选池同质率：★ "选择层没有东西可选"的直接量化
     #     若同题同批的候选在"自主声明"上高度同质 ⇒ 两个打分器面对的是一批等价候选
@@ -226,8 +340,11 @@ def main():
         "candidate_homogeneity_rate": (homo / len(ok)) if ok else None,
         "align_shift_mean": mean_shift,
         "align_shift_var_mean": (sum(shift_var) / len(shift_var)) if shift_var else None,
-        "align_var_B": (sum(bvar) / len(bvar)) if bvar else None,
-        "align_var_D": (sum(dvar) / len(dvar)) if dvar else None,
+        "align_sd_B": (sum(bvar) / len(bvar)) if bvar else None,
+        "align_sd_D": (sum(dvar) / len(dvar)) if dvar else None,
+        "align_var_B": (sum(bvar_true) / len(bvar_true)) if bvar_true else None,
+        "align_var_D": (sum(dvar_true) / len(dvar_true)) if dvar_true else None,
+        "ALIGN_VAR_IS_SD_FIXED": True,
         "sel_change_quota_rate": rq, "sel_change_nocost_rate": rn,
         "rank_detail_recomputed": rq_detail,
         "RANK_RECOMPUTED": True,
@@ -242,8 +359,25 @@ def main():
         "mde_table": mde_tbl, "fulfillment": ful_tab,
         "quota_natural": nat, "quota_forced": forced,
         "D0_v3": D0_V3,
+        # ── ★★ 排序改变率的分母构成（★ 防止把改变率误读成效果量）★★
+        "rank_change_detail": detail_rows,
+        "rank_change_n": n_all,
+        "rank_change_count": n_changed,
+        "rank_change_rate": (n_changed / n_all) if n_all else None,
+        "rank_change_wilson_ci95": ci if n_all else None,
+        "control_has_discrimination_n": n_with_disc,
+        "control_has_discrimination_rate": (n_with_disc / n_all) if n_all else None,
+        "rank_change_rate_over_discriminating_only": (
+            (n_changed / n_with_disc) if n_with_disc else None),
+        # ── ★★ 三种 0 的分类 ★★
+        "zero_classification": zero_cls,
     }
-    out.write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+    # ── ★★ 落盘：★ 目录必须先建（★ 否则在交付包里跑会 FileNotFoundError）
+    #   ★ 且用【原子写】（★ 临时文件 + os.replace）⇒ ★ 写失败不会把旧结果截断成 0 字节
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_suffix(out.suffix + ".tmp")
+    tmp.write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(tmp, out)
     print("\n✔ 已落盘：%s" % out)
 
 

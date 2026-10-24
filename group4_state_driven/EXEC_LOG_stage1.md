@@ -83,6 +83,36 @@
 ★ ③ ⇒ ★ **每题恰好 3 个重复 ⇒ ★ 臂间 n 相等**
 ★ ④ 留痕：`runs/duplicate_resampling.json`
 
+★ ★ **★★★ 两条是不是【独立采样】？（★ 主会话 2026-10-25 22:3x 追问 ⇒ ★ 已用数据核实）★★★**
+
+| ★ 项 | ★ 值 |
+|---|---|
+| ★ **记录数** | ★ **9** |
+| ★ **独立样本数** | ★ **9**（★ **两者相等 ⇒ 无重复计权**） |
+| ★ **判定依据** | ★ **11 个实质字段不同**（★ 机械核对：`group4_state_driven/check_independent_samples.py`） |
+
+★ **★ 关键证据（★ 逐字段；★ 重标记前的原始记录见 `data/arch6_stage1.pre_dedup.jsonl`）**：
+
+| ★ 实质字段 | ★ 行8 | ★ 行9 |
+|---|---|---|
+| ★ `A.text_len` | **970** | **822** ⇒ ★ **A 臂是独立的一次模型生成** ⇒ ★ 正文不同 |
+| ★ `state_meta.decisions[].note` | 措辞 A | 措辞 B ⇒ ★ **状态链重新推理过** |
+| ★ `F_family.picked_idx` | 1 | **3** |
+| ★ `D_state_quota.scores` | [0.1667 ×3] | **[0.1667, 0.1667, 0.6667]** |
+| ★ `ful_B` / `ful_D` / `ful_F` | fulfill=0.3333 | fulfill=0.0 |
+| ★ `rank_change_quota.changed` | **false** | **true**（★ **τ 从 1.0 变成 −0.3333**） |
+
+★ ★ **★ 结论：★ 这两条是【两次真正的独立采样】，★ 不是重跑副本**
+★ ⇒ ⇒ ★ **⇒ σ_new 的自由度、排序改变率 3/9 的分母、三个 Gate 的 9/9 可用数，全部不受影响**
+
+★ ★ **★ 独立性的判据已写死**（★ `check_independent_samples.py` 的 docstring）：
+★ **实质字段**（★ 变了 ⇒ 独立采样）：★ `A.text_len` / `state_meta.decisions` / `F_family.picked_idx` / `F_family.per_gate` /
+★ `D_state_quota.scores` / `B_state_nocost.scores` / `ful_B` / `ful_D` / `ful_F` / `rank_change_quota` / `sel_change_*`
+★ **非实质字段**（★ 相同也不影响判断）：★ `tag` / `rep` / `batch_id` / `model` / `question` / `seed` / `error` /
+★ `n_cand_ok` / `n_cand_scored` / `cand_errors` / `target_base` / `target_quota` / `target_changed` / `quota_meta` / `calls` / `elapsed`
+★ ★ **★ 特别说明**：★ **`target_base` / `target_quota`【不算实质字段】** —— ★ 它们由**决策的 depth 分布**推导
+★ ⇒ ⇒ ★ 两次采样可能给出【同样的深度分布】⇒ ⇒ ★ **相同不代表副本**（★ ★ 本例正是如此：★ depth 都是"深入/深入/点到为止"，★ 只有 note 措辞不同）
+
 ★ ★ **★ 为什么不能静默处理**：★ **① 静默去重** ⇒ 丢掉一次有效采样 ⇒ **样本量悄悄变小**；
 ★ **② 静默保留两条** ⇒ T10 计权 4 次、G01/T07 各 3 次 ⇒ **臂间 n 不等**；
 ★ ⇒ ⇒ ★ **两种"不吭声"都会把缺口藏起来** ⇒ ⇒ ★ **⇒ 必须显式处置 + 留痕**。

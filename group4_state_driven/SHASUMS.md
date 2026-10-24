@@ -1,6 +1,6 @@
 # 第四组 · 交付物校验台账（sha256 绑 commit）
 
-**校验基准 commit**：`21984e002f209600affcaca5e2307f0d0356218d`（分支 `feature/g4-arch4-state-driven`，`main` 未动）
+**校验基准 commit**：`fecbba12d63634bfd744e20703526f077cd9b5e2`（分支 `feature/g4-arch4-state-driven`，`main` 未动）
 **生成时间**：由 `group4_state_driven/build_shasums.py` 自动生成
 
 > ⚠️ **为什么必须有本文件**：sha256 随文件修改失效。2026-10-24 12:0x 我们把 `REPORT_arch5.md` 的
@@ -11,7 +11,7 @@
 > ★ **外部复核命令**：
 > ```bash
 > git fetch origin feature/g4-arch4-state-driven
-> git checkout 21984e002f20
+> git checkout fecbba12d636
 > sha256sum <路径>   # 与下表比对
 > ```
 
@@ -19,36 +19,41 @@
 
 | 文件 | 仓库路径 | sha256 | 基准 commit |
 |---|---|---|---|
-| Stage-1 报告 | `group4_state_driven/REPORT_arch6_stage1.md` | `c9e27b811f240134f50927615e7d4e99bbeca580d43524067bb30ca2587ceadf` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 EXEC-LOG | `group4_state_driven/EXEC_LOG_stage1.md` | `c3386d47d568411b3fd88695fa463d9d2dfb0d52e32dd68fc625327e9f5d3f83` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 原始样本 | `group4_state_driven/data/arch6_stage1.jsonl` | `ce246afc2849fa1b3ddd87a457f94cae45f0c28c009b7f1bbd899fc96edc8be3` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 分析输出 | `group4_state_driven/data/arch6_stage1_analysis.json` | `867ffc46fb5c6e033deb882263c64606ff61f9148544dc0fb93bac940a20867c` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 calllog（★ 已知不完整） | `group4_state_driven/data/calllog.jsonl` | `0001d2b8f6b77d3c0be593a36dd03aabc74bfcee42feae1cb4e098a4c0381f28` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 环境快照 | `group4_state_driven/data/env_snapshot.json` | `bf60d9aa117d251d1611546d19d0b01b30699671f5e8165a430957f62637ea07` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| 重复采样留痕 | `group4_state_driven/data/duplicate_resampling.json` | `bd2779862a98824c9d43c14cd335286ed3c99df5364de91a2973b9e4e05a8504` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| 状态层接口（★ 第二组 rev1） | `creativity_lab/state_layer.py` | `69a29c506a4e4ab0cd2595a23bfc47596709c0a184e0f833e494d27f0c28b373` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| 状态层规格测试（★ 第四组实现） | `creativity_lab/experiments/test_state_layer.py` | `d4f5da0d96b8b6cd5c8eac6be5585617f83548b254531ade3e2d04fc119c09d4` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| 状态层差异探针（★ 双版本差分） | `group4_state_driven/probe_state_layer_spec_gap.py` | `0d184c1fc8a3922438060409f578587ec99aeee37e874049f72ef2d2bfdd584c` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| rev1 应用脚本 | `group4_state_driven/apply_state_layer_rev1.py` | `0a8253f65a8c81d56c63406f189ddb02fb6f4021a4bedd2aa9d920cf8066552a` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| rev2 应用脚本 | `group4_state_driven/apply_state_layer_rev2.py` | `16becb420c41c3b562ab791249d3d9e1a482edd5ea361c3b16c699e9f51048d7` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 同步脚本 | `group4_state_driven/sync_stage1_data.py` | `5bdcea8229c92b0a56d923eb9f0dfe6d9504d0f68e8a8c3fd1703a970cbef99e` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 重复采样处置 | `group4_state_driven/fix_duplicate_resampling.py` | `cf677e812bb3db17c2100902553fb7446cccf598a48abed416df0f8e92562d25` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 报告填数（§3） | `group4_state_driven/fill_report_stage1.py` | `3b30589132aae398b1aafd7e4ef01d46d3447d35de69d0537f31d48205a0eb79` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 报告填数（§4–§6） | `group4_state_driven/fill_report_stage1_verdict.py` | `9e1b0be03bd1a2b55d647471a6583b713bbc23ca0f00489dd3a76ad7de4e5fc0` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 报告校验器 | `group4_state_driven/verify_report_stage1.py` | `cdf2a9b9d9aae76ef0a45446f9c9c64965fe80e45341a5dfeb6eb6530a67604e` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 逐步打点探针 | `group4_state_driven/probe_stage1_step_timing.py` | `61ecc07b790b0d0c4e3f983fb14d97449d75e454f9eed2dc958db50d498bbf11` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| 工作包三（★ 降级为实现/读数侧） | `group4_state_driven/WORKPACK3_MIN_ARCHITECTURE.md` | `4219984124649b8d3cd09cac911e970a3baa49c8d437b0ae5f350749d642aeb9` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| 状态层边界枚举冒烟 | `group4_state_driven/probe_select_boundary.py` | `268f1bc682743edce9a388262991b08c71e02c4a61effde7c6347bfdf55e60ba` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| v6 机制层实现 | `group4_state_driven/code/workflow_arch6.py` | `902e93861b99060feecc3b3ae1b476376a5225b4b2fd9f7758c9e5c8d9e8acbd` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| v6 Stage-1 runner | `group4_state_driven/code/run_arch6_stage1.py` | `8a17f4277bf1e1ef60ce5faffe27296f3d3eb6fee428f2caf86993f8c8133ea8` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| v6 Stage-1 分析 | `group4_state_driven/code/analyze_arch6.py` | `78f7b359d388219f10733ff65e3d832b9ede536348f80dd855ed0dbc312f1f00` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| v6 预注册 v3 | `group4_state_driven/prereg/PREREG_v6.md` | `31c81dfc8ddf68a3cf8cd777a371683f58e4106935cecaa5cd747757c2befcfb` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| Stage-1 实施规格 | `group4_state_driven/prereg/STAGE1_SPEC.md` | `7d4db8a2705ec07321b411df94c48e5e8a819510d27353523a3fad74f339fb19` | `21984e002f209600affcaca5e2307f0d0356218d` |
-| 论文稿 | `group4_state_driven/paper/PAPER_draft.md` | `a3a0b5e867aa1648c11773a2757d612605d4653f08cfbb7510490b2440582d81` | `21984e002f209600affcaca5e2307f0d0356218d` |
+| Stage-1 报告 | `group4_state_driven/REPORT_arch6_stage1.md` | `c9e27b811f240134f50927615e7d4e99bbeca580d43524067bb30ca2587ceadf` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 EXEC-LOG | `group4_state_driven/EXEC_LOG_stage1.md` | `40c6e1897a926790bc0eb391a6d0613610049449877be4e56044a7859a9bab0a` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 原始样本 | `group4_state_driven/data/arch6_stage1.jsonl` | `ce246afc2849fa1b3ddd87a457f94cae45f0c28c009b7f1bbd899fc96edc8be3` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 分析输出 | `group4_state_driven/data/arch6_stage1_analysis.json` | `c8d1d7f69440c1217407cd732b35f5058b9b8eb3c0fdd02e65e46f749c05fab5` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 calllog（★ 已知不完整） | `group4_state_driven/data/calllog.jsonl` | `0001d2b8f6b77d3c0be593a36dd03aabc74bfcee42feae1cb4e098a4c0381f28` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 环境快照 | `group4_state_driven/data/env_snapshot.json` | `bf60d9aa117d251d1611546d19d0b01b30699671f5e8165a430957f62637ea07` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| 重复采样留痕 | `group4_state_driven/data/duplicate_resampling.json` | `bd2779862a98824c9d43c14cd335286ed3c99df5364de91a2973b9e4e05a8504` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| ★ 重标记前原始样本（★ 独立采样判据的证据） | `group4_state_driven/data/arch6_stage1.pre_dedup.jsonl` | `bdcc36f3f7a6ff5cdbc47674b4d2e1ba66e7eecd6c9f9876f12ba577dbc17935` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| 状态层接口（★ ★ 第二组 rev2 · 现行） | `creativity_lab/state_layer.py` | `b70bfb0beb2bd591dd2795e109788dc85bcf306ef68ed25b64da17e0c5a41d0e` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| ★ 状态层 rev0 归档（★ 历史版） | `group4_state_driven/data/state_layer_versions/state_layer_rev0.py` | `38795bf6adfdee05d5a2588294399d844c6a99cc14d5ce2fa32c1662a6afa37e` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| ★ 状态层 rev1 归档（★ 历史版） | `group4_state_driven/data/state_layer_versions/state_layer_rev1.py` | `69a29c506a4e4ab0cd2595a23bfc47596709c0a184e0f833e494d27f0c28b373` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| 状态层规格测试（★ 第四组实现 · ★ rev2 语义） | `creativity_lab/experiments/test_state_layer.py` | `8eb57ed8e30a49364b915528adff5dcfa2a101c1cc9ab41fb95d9646d1d1c360` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| 状态层差异探针（★ ★ 三版本差分） | `group4_state_driven/probe_state_layer_spec_gap.py` | `7ec4c7b95ccb07c2bab2897aabbcfc50464522f2dbf10c0f357956012fe1bb49` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| ★ Stage-1 独立采样判据 | `group4_state_driven/check_independent_samples.py` | `2b2708f3f99cd456b76e31ae7f9fcaa62f7994e3fd49610941ebb1e05b8f89e7` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| ★ Stage-2 候选分化判据（★ 事前规格） | `group4_state_driven/prereg/STAGE2_CANDIDATE_DIVERSIFICATION_SPEC.md` | `307f8d936331b94b320f0fc75574690b59073f78728222f475946266f34b7719` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| rev1 应用脚本 | `group4_state_driven/apply_state_layer_rev1.py` | `0a8253f65a8c81d56c63406f189ddb02fb6f4021a4bedd2aa9d920cf8066552a` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| rev2 应用脚本 | `group4_state_driven/apply_state_layer_rev2.py` | `7578a00dd94bb8a86dcecc1a35953596eb20d6492eb161b4d32876dc143e1826` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 同步脚本 | `group4_state_driven/sync_stage1_data.py` | `5bdcea8229c92b0a56d923eb9f0dfe6d9504d0f68e8a8c3fd1703a970cbef99e` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 重复采样处置 | `group4_state_driven/fix_duplicate_resampling.py` | `cf677e812bb3db17c2100902553fb7446cccf598a48abed416df0f8e92562d25` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 报告填数（§3） | `group4_state_driven/fill_report_stage1.py` | `3b30589132aae398b1aafd7e4ef01d46d3447d35de69d0537f31d48205a0eb79` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 报告填数（§4–§6） | `group4_state_driven/fill_report_stage1_verdict.py` | `9e1b0be03bd1a2b55d647471a6583b713bbc23ca0f00489dd3a76ad7de4e5fc0` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 报告校验器 | `group4_state_driven/verify_report_stage1.py` | `1746be23f4b3af78c236d1e8c67c19707d46b5111bd84ca0623ec37aeb92f433` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 逐步打点探针 | `group4_state_driven/probe_stage1_step_timing.py` | `61ecc07b790b0d0c4e3f983fb14d97449d75e454f9eed2dc958db50d498bbf11` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| 工作包三（★ 降级为实现/读数侧） | `group4_state_driven/WORKPACK3_MIN_ARCHITECTURE.md` | `78083285565bf452b21828de474cc41e2a5f6f6f5ba15af6c2eae754fddea158` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| 状态层边界枚举冒烟 | `group4_state_driven/probe_select_boundary.py` | `268f1bc682743edce9a388262991b08c71e02c4a61effde7c6347bfdf55e60ba` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| v6 机制层实现 | `group4_state_driven/code/workflow_arch6.py` | `902e93861b99060feecc3b3ae1b476376a5225b4b2fd9f7758c9e5c8d9e8acbd` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| v6 Stage-1 runner | `group4_state_driven/code/run_arch6_stage1.py` | `8a17f4277bf1e1ef60ce5faffe27296f3d3eb6fee428f2caf86993f8c8133ea8` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| v6 Stage-1 分析 | `group4_state_driven/code/analyze_arch6.py` | `10740413dc108f1fd8928aad5d1ced4b91eeddbacb07551adbf0e7d6f3b55d63` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| v6 预注册 v3 | `group4_state_driven/prereg/PREREG_v6.md` | `31c81dfc8ddf68a3cf8cd777a371683f58e4106935cecaa5cd747757c2befcfb` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| Stage-1 实施规格 | `group4_state_driven/prereg/STAGE1_SPEC.md` | `7d4db8a2705ec07321b411df94c48e5e8a819510d27353523a3fad74f339fb19` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
+| 论文稿 | `group4_state_driven/paper/PAPER_draft.md` | `a3a0b5e867aa1648c11773a2757d612605d4653f08cfbb7510490b2440582d81` | `fecbba12d63634bfd744e20703526f077cd9b5e2` |
 
 ---
 
-★ **本表共 26 项**（★ 缺文件会显式标 ⚠️，★ 不会被静默跳过）
+★ **本表共 31 项**（★ 缺文件会显式标 ⚠️，★ 不会被静默跳过）
 
 ## ★ 已知缺口（★ 必须随表一起给，★ 不许只给 sha）
 

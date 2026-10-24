@@ -235,26 +235,37 @@ def record_call(st: State, ok: bool) -> State:
     return s
 
 
-def detect_tie(scores: List[float], tol: float = 1e-9) -> Dict[str, Any]:
+def detect_tie(scores: List[float], tol: float = 1e-9) -> List[Dict[str, Any]]:
     """★ **并列检测**（★ 第四组 2026-10-25 提出 ⇒ ★ 裁决：★ 接口层提供能力，★ 接线由第四组做）
 
     ★ **为什么放在接口层**：★ 「两个候选评分并列 ⇒ 它们是合法分歧」是【规则的一部分】，
     ★ ★ **不该靠调用方记得去调 `preserve_divergence`** ⇒ ⇒ ★ 否则接线时一漏，分歧语义就丢了
     ★ ★（★ 第四组已报告：★ 他们的 `Select(greedy)` 【会吃掉并列】⇒ ⇒ ★ 这正是必须补的一步）
 
-    ★ **返回**：★ 有并列 ⇒ 返回 `{"kind": "tie", "members": [...], "scores": [...]}`；
-    ★ 无并列 ⇒ 返回 `None`
+    ★★★ **★ rev2 修正（★ 第四组 2026-10-25 实测发现 ⇒ ★ ① 只查最大值处漏检中位并列）**：
+    ★ ★ **原实现只找【最高分处】的并列 ⇒ ⇒ `detect_tie([0.9, 0.5, 0.5])` 返回 None**
+    ★ ⇒ ⇒ **⇒ 但「合法分歧」【未必只发生在最高分】⇒ ⇒ 来自不同来源的【第二名并列】也是真实意见分歧**
+    ★ ⇒ ⇒ ★★ **⇒ 改法：★ 返回【所有】并列簇（★ 不只最大簇）★ ⇒ 且返回类型从单个 dict 改成 List**
+
+    ★ **返回**：★ ★ **List of clusters**，每簇 `{"kind": "tie", "members": [...], "scores": [...]}`；
+    ★ 无任何并列 ⇒ 返回 **空列表 `[]`**（★ ★ 不是 None —— ★ 空列表更安全，★ 调用方不必判 None）
     ★ ★ **本函数【不修改状态】** ⇒ ⇒ ★ 接线方式由调用方决定（★ 通常是：
-    ★ `if detect_tie(...) is not None: st = preserve_divergence(st, detect_tie(...))`）
+    ★ `for d in detect_tie(scores): st = preserve_divergence(st, d)`）
     """
     if not scores:
-        return None
-    best = max(scores)
-    members = [i for i, v in enumerate(scores) if abs(v - best) <= tol]
-    if len(members) < 2:
-        return None
-    return {"kind": "tie", "members": members,
-            "scores": [scores[i] for i in members]}
+        return []
+    # ★ ★ 按【分值分组】⇒ ⇒ 找出所有【出现 >=2 次】的分值簇
+    buckets = {}
+    for i, v in enumerate(scores):
+        buckets.setdefault(round(float(v), 12), []).append(i)
+    out = []
+    for key in sorted(buckets, reverse=True):     # ★ 按分值从高到低 ⇒ ⇒ 簇的顺序稳定
+        idxs = buckets[key]
+        if len(idxs) < 2:
+            continue
+        out.append({"kind": "tie", "members": idxs,
+                    "scores": [scores[i] for i in idxs]})
+    return out
 
 
 def preserve_divergence(st: State, d: Dict[str, Any]) -> State:

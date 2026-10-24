@@ -1,5 +1,5 @@
 {
-  "src": "runs/arch6_stage1.jsonl",
+  "src": "group4_state_driven/data/arch6_stage1.jsonl",
   "n_rows": 9,
   "n_ok": 9,
   "n_err": 0,
@@ -129,7 +129,7 @@
       "changed": false
     },
     {
-      "tag": "T10-1",
+      "tag": "T10-2",
       "rank_B": [
         1,
         2,
@@ -289,7 +289,7 @@
       "control_has_discrimination": false
     },
     {
-      "tag": "T10-1",
+      "tag": "T10-2",
       "changed": true,
       "spread_B": 0.0,
       "spread_D": 0.5,

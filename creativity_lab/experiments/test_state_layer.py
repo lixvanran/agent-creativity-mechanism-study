@@ -300,45 +300,57 @@ def test6_spec_redlines(SL):
 
 
 def test7_detect_tie(SL):
-    """★ **⑦ 并列检测（rev1 新增 `detect_tie`）**：★ 无并列 ⇒ `None`；有并列 ⇒ `members`
+    """★ **⑦ 并列检测（rev2）**：★ 返回【所有】并列簇（★ `List[Dict]`）；★ 无并列 ⇒ `[]`
 
     ★ 负向：★ **`detect_tie` 不改状态**（★ 纯函数 ⇒ 接线方式由调用方决定）
     ★ ★ 第二组裁决：「并列 ⇒ 分歧」是【规则的一部分】⇒ ⇒ 接口层提供能力，★ 接线归第四组
+    ★ ★ **rev2 相对 rev1 的关键变化（★ 第 5 条差异）**：★ **中位并列也必须检出**
     """
-    # ── 无并列 ⇒ None ──
-    assert SL.detect_tie([0.1, 0.5, 0.9]) is None, "无并列时 detect_tie 应返回 None"
-    assert SL.detect_tie([]) is None, "空列表应返回 None"
-    assert SL.detect_tie([0.5]) is None, "单元素应返回 None（无并列可言）"
-    # ★ 注意：detect_tie 只检测【最大值处】的并列 ⇒ 中位并列不算（★ 见第五条差异）
-    assert SL.detect_tie([0.5, 0.5, 0.9]) is None, \
-        "★ 0.5 并列不是最大值并列 ⇒ 应返回 None（★ 当前语义：只查最大值处）"
+    # ── 无并列 ⇒ 空列表（★ rev2：不是 None）──
+    assert SL.detect_tie([0.1, 0.5, 0.9]) == [], "无并列时应返回空列表"
+    assert SL.detect_tie([]) == [], "空列表应返回空列表"
+    assert SL.detect_tie([0.5]) == [], "单元素应返回空列表（无并列可言）"
 
     # ── 有并列 ⇒ 返回 members ──
     tie = SL.detect_tie([0.9, 0.9, 0.2])
-    assert tie is not None, "有两个 0.9 时应检出并列"
-    assert tie.get("kind") == "tie", "kind 应为 tie，实际 %r" % (tie.get("kind"),)
-    assert sorted(tie.get("members") or []) == [0, 1], \
-        "members 应为 [0,1]，实际 %r" % (tie.get("members"),)
-    assert sorted(tie.get("scores") or []) == [0.9, 0.9], \
-        "scores 应为并列两者的分数，实际 %r" % (tie.get("scores"),)
+    assert tie is not None and len(tie) >= 1, "有两个 0.9 时应检出并列"
+    clusters = tie if isinstance(tie, list) else [tie]
+    first = clusters[0]
+    assert first.get("kind") == "tie", "kind 应为 tie，实际 %r" % (first.get("kind"),)
+    assert sorted(first.get("members") or []) == [0, 1], \
+        "members 应为 [0,1]，实际 %r" % (first.get("members"),)
+    assert sorted(first.get("scores") or []) == [0.9, 0.9], \
+        "scores 应为并列两者的分数，实际 %r" % (first.get("scores"),)
 
     # ── 三个并列 ──
     tie3 = SL.detect_tie([0.5, 0.5, 0.5])
-    assert tie3 is not None and len(tie3.get("members") or []) == 3, \
-        "三个并列应检出 3 个成员，实际 %r" % (tie3,)
+    assert tie3 is not None and len(tie3) >= 1, "三个并列应检出并列"
+    clusters3 = tie3 if isinstance(tie3, list) else [tie3]
+    assert len(clusters3[0].get("members") or []) == 3, \
+        "三个并列应检出 3 个成员，实际 %r" % (clusters3[0].get("members"),)
+
+    # ── ★★ rev2 关键断言：★ 中位并列【也必须检出】（★ rev1 返回 None）★★
+    mid = SL.detect_tie([0.9, 0.5, 0.5])
+    assert mid is not None and len(mid) >= 1, \
+        "★★ rev2：第二名并列（0.5,0.5）也是合法分歧 ⇒ 必须检出，实际 %r" % (mid,)
+    mid_clusters = mid if isinstance(mid, list) else [mid]
+    members = set()
+    for c in mid_clusters:
+        members.update(c.get("members") or [])
+    assert {1, 2} <= members, \
+        "★★ rev2：中位并列成员 {1,2} 应被检出，实际 %r" % (members,)
 
     # ── 负向：★ 不改状态（★ 纯函数）──
     st = SL.State(budget_remaining=5)
     before = json.dumps(st.to_dict(), ensure_ascii=False, sort_keys=True)
-    SL.detect_tie([0.5, 0.5])
+    SL.detect_tie([0.9, 0.5, 0.5])
     after = json.dumps(st.to_dict(), ensure_ascii=False, sort_keys=True)
     assert before == after, "★ detect_tie 是纯函数 ⇒ 不得修改状态"
 
     # ── ★ 接线语义：检出并列 ⇒ 调用方可写入分歧 ⇒ 动作变 connect ──
     st2 = SL.State(budget_remaining=5)
-    d = SL.detect_tie([0.9, 0.9, 0.2])
-    assert d is not None
-    st2 = SL.preserve_divergence(st2, d)
+    for d in (SL.detect_tie([0.9, 0.9, 0.2]) or []):
+        st2 = SL.preserve_divergence(st2, d)
     act, arg = SL.choose_action(st2)
     assert act == "connect", "写入分歧后动作应为 connect，实际 %r" % (act,)
 
@@ -496,11 +508,16 @@ MUTATIONS = [
      "                pass",
      "test8_rev1_regressions",
      "★ 支持性证据不留痕（★ 旧 bug ③ 复活）"),
-    ("m10_detect_tie_always_none",
-     "    if len(members) < 2:",
-     "    if True:",
+    ("m10_detect_tie_only_max_cluster",
+     "    for key in sorted(buckets, reverse=True):",
+     "    for key in sorted(buckets, reverse=True)[:1]:",
      "test7_detect_tie",
-     "★ detect_tie 永远返回 None（★ 并列检测失效）"),
+     "★★ detect_tie 只查最大簇（★ ★ 复活 rev1 的第 5 条差异 ⇒ 中位并列漏检）★★"),
+    ("m11_detect_tie_always_none",
+     "    return out",
+     "    return []",
+     "test7_detect_tie",
+     "★ detect_tie 永远返回空列表（★ 并列检测完全失效）"),
 ]
 
 

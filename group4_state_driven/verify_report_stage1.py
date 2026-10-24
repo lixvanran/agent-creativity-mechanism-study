@@ -103,6 +103,17 @@ def main():
     ck("无重复 tag", all(v == 1 for v in tags.values()),
        str([t for t, v in tags.items() if v > 1]))
     ck("全部 error 为空", all(not r.get("error") for r in rows))
+    # ★★★ 强校验：★ analysis 里的逐单元明细必须与【当前原始样本】一一对应
+    #   （★ 这条抓的是「派生读数是用另一批数据算的」—— ★ 2026-10-25 实际发生过一次：
+    #    ★ data/ 里的 analysis 是重标记【之前】算的 ⇒ tag 列表里有两个 T10-1）
+    an_tags = [x.get("tag") for x in (d.get("rank_change_detail") or [])]
+    raw_tags = [r.get("tag") for r in rows]
+    ck("analysis 明细 tags == 原始样本 tags", an_tags == raw_tags,
+       "an=%r raw=%r" % (an_tags, raw_tags))
+    ck("analysis 的 src 指向的样本行数 == n_rows", d.get("n_rows") == len(rows))
+    # ★ analysis 落盘时间必须晚于原始样本（★ 防止用旧读数覆盖新数据）
+    ck("analysis 含新键 rank_change_detail", "rank_change_detail" in d)
+    ck("analysis 含新键 zero_classification", "zero_classification" in d)
     ck("全部 batch_id 唯一且一致", len(set(r["batch_id"] for r in rows)) == 1)
 
     for p in REPORTS:
