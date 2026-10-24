@@ -48,7 +48,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 # 复用既有的真实客户端与测量流水线（**不重写**）
-BATCH_U1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge")
+BATCH_U1 = "/workspace/lab/batch-U1"
 sys.path.insert(0, BATCH_U1)
 
 import u1_lib as U            # noqa: E402
@@ -57,7 +57,7 @@ import workflow as W          # noqa: E402
 import anchor_out as AO       # noqa: E402
 import premature_closure as PC  # noqa: E402
 
-DEV = os.environ.get("DEV_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "devset")
+DEV = "/workspace/lab/routes/DEV"
 OUT = os.path.join(HERE, "runs")
 
 
@@ -165,7 +165,7 @@ def arm_direct(llm, task, model):
                 chat_stats=direct_stats)
 
 
-def arm_frames_vote(llm, task, model, slots=3, seed=0):
+def arm_frames_vote(llm, task, model, slots=3, seed=0, frame_seed=None):
     """★ 对照臂 `B0_frames_vote`：**每个认知帧各跑一遍独立答案，再投票**。
 
     ★ 为什么必须有（Self-Discover arXiv:2402.03620 逐字）：
@@ -174,7 +174,7 @@ def arm_frames_vote(llm, task, model, slots=3, seed=0):
     ⇒ ⇒ 没有这个臂，"多帧 ⇒ 多维度"站不住。
     ⇒ ⇒ **用与 W 臂完全相同的帧**（同 seed ⇒ 同帧集合）⇒ 公平比较。
     """
-    frames = W.select_frames(slots, seed=seed)
+    frames = W.select_frames(slots, seed=seed, frame_seed=frame_seed)
     print("      [B0fv] %d 帧各跑一遍 + plurality 投票：%s"
           % (len(frames), frames), flush=True)
     r = AO.frames_vote_baseline(llm, task, model, frames, seed=seed)
@@ -196,9 +196,9 @@ def arm_bestof(llm, task, model, n=3, seed=0):
                 illum=r.get("illum") or {}, rounds=r.get("rounds") or [])
 
 
-def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2,
+def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2, frame_seed=None,
                  evolve=True, layer="L3", action_mode="lookup", policy=None):
-    wf = W.CollapseFixWorkflow(llm, n_slots=n_slots, seed=seed,
+    wf = W.CollapseFixWorkflow(llm, n_slots=n_slots, seed=seed, frame_seed=frame_seed,
                                 model=model, judge_model=model,
                                 max_rounds=max_rounds, evolve=evolve, layer=layer,
                                 action_mode=action_mode, policy=policy)
@@ -223,6 +223,8 @@ def main():
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--dry", action="store_true", help="只跑不落盘")
+    ap.add_argument("--frame-seed", type=int, default=None,
+                    help="★ 帧组合的独立 seed（与 run seed 解耦）；不传 ⇒ 与旧版逐字节一致")
     ap.add_argument("--resume", action="store_true",
                     help="★ 断点续跑：跳过 arms.jsonl 里已完成的 (题,臂,rep)")
     ap.add_argument("--action-mode", default="lookup", choices=["lookup", "policy"],
@@ -297,7 +299,7 @@ def main():
                                                           args.slots, rep),
                 # ★ 层2「用设计的手段」：架构先验设计好、**运行时不自修改**
                 "W_design_L2": lambda: arm_workflow(
-                    llm, task, model, seed=rep, n_slots=args.slots,
+                    llm, task, model, seed=rep, n_slots=args.slots, frame_seed=args.frame_seed,
                     max_rounds=args.rounds, evolve=False, layer="L2",
                     action_mode=args.action_mode, policy=_pol),
                 # ★ 层3「用训练/自迭代的手段」：从失败**构造新动作**、档案累积
