@@ -47,6 +47,19 @@ class FakeLLM:
         self.calls.append(model)
         if model in self.dead:
             return ""                      # ★ 下架：返空
+        # ★ ★ 2026-10-24：★ 假对象必须【满足真实规格】★★ ★
+        #   ★ `SELECT_ASK` 的规格是「★ 先写理由、★ 再【原样贴出被选篇全文】★」⇒ ★
+        #   ★   ★ ★ 【不满足规格 ⇒ 结构判据会判它无效】⇒ ★ ⇒ branches=0 ⇒ ★
+        #   ★   ★ ★ 而【这不是结构判据的错】★ ⇒ ★ ⇒ ★ 【是假对象不真实】★★ ★
+        #   ★ ⇒ ★ 修法：★ select 分支【原样贴出被选篇】★★ ★
+        #   ★ ⇒ ★ 判别用【真实 prompt 开头】（★ 不造自造 marker ★）★★ ★
+        if "同一个问题下有若干份" in prompt:
+            _art = ""
+            for _b in prompt.split("====="):
+                if "[第1篇]" in _b:
+                    _art = _b.split("[第1篇]", 1)[1].split("要求：")[0].strip()
+                    break
+            return "理由：这篇最直接。\n" + _art
         return "答复正文 for %s" % (model,)
 
 

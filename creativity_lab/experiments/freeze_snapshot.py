@@ -183,7 +183,16 @@ def main():
     if prev_top:
         # ★ 同名覆盖时【不】推进 history（★ 否则 history 里会出现同名不同内容的条目 ★）
         if prev_top.get("snapshot") == entries[0]["snapshot"] and a.replace:
-            print("★ --replace：★ 顶层同名快照被替换（★ history 不推进 ★）")
+            # ★ ★ 2026-10-24 修：★ 原来【同名覆盖不推进 history】⇒ ★ ⇒ ★
+            #   ★ ★ 旧条目【被丢掉】⇒ ★ ⇒ 【旧版本无法追溯】★★ ★
+            #   ★ ★ ⇒ ★ 【同名但内容不同】⇒ ★ ⇒ 【必须】推进 history（★ 否则就是丢证据 ★）★★ ★
+            #   ★ ★ ⇒ ★ 规则改为：★ 同名 + 【sha 相同】⇒ ★ 不推进（★ 只是重复登记 ★）
+            #   ★ ★ ★　　　同名 + 【sha 不同】⇒ ★ 推进（★ 旧版本必须留痕 ★）★★ ★
+            if prev_top.get("sha256") == entries[0]["sha256"]:
+                print("★ --replace：★ 顶层同名快照被替换（★ sha 相同 ⇒ 不推进 history ★）")
+            else:
+                print("★ --replace：★ 顶层同名快照被替换（★ ★ sha 变了 ⇒ ★ 旧条目推进 history ★）★")
+                history.append(prev_top)
         else:
             history.append(prev_top)
 

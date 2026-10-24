@@ -1,161 +1,32 @@
 {
- "bytes": 7971,
+ "bytes": 8144,
  "clock_note": "★ frozen_at = 机器 UTC 时钟；★ label_date = 叙事日期（★ 二者可能不同 ★）★",
- "companions": [
-  {
-   "bytes": 596,
-   "sha256": "1d931bc7c628e1c79d1d43da30804d85914f8571e83017211c07bd9b7e7dfba0",
-   "snapshot": "SNAPSHOT-MANIFEST-post-hoc-n151-2026-10-24.json",
-   "src": "MANIFEST-post-hoc.json"
-  },
-  {
-   "bytes": 3374,
-   "sha256": "a3f19d3550d902575ce913db0f644554411037bae40958d3520514c2a80fc1ee",
-   "snapshot": "SNAPSHOT-n151-2026-10-24.json",
-   "src": "UNITS-n151.txt"
-  },
-  {
-   "bytes": 1435,
-   "sha256": "66c689404184f44a34d9522658cfe12b38f89f4c75db099144dd3853aa65fa08",
-   "snapshot": "SNAPSHOT-channel_status-n151-2026-10-24.json",
-   "src": "channel_status.json"
-  },
-  {
-   "bytes": 407,
-   "sha256": "77b9fcdf126085ab2c98d56c87436a57e2bae44b67eb8880289e848623431c61",
-   "snapshot": "SNAPSHOT-f1c_leverage-n151-2026-10-24.json",
-   "src": "f1c_leverage.json"
-  },
-  {
-   "bytes": 15052,
-   "sha256": "26c4e349628ba576626c483b928b27d9ffd8d7bfb5fca8ef428af653b78f0716",
-   "snapshot": "SNAPSHOT-h0_theta0_multicalib-n151-2026-10-24.json",
-   "src": "h0_theta0_multicalib.json"
-  },
-  {
-   "bytes": 1854,
-   "sha256": "7e74e92e3636e7ef69d40246ab6e0ece670e06e913ce22b72c0dd588dd1d3d3c",
-   "snapshot": "SNAPSHOT-min_ok_audit-n151-2026-10-24.json",
-   "src": "min_ok_audit.json"
-  },
-  {
-   "bytes": 1741,
-   "sha256": "2ea04a698ad3b61127fda74162870cfa43afe957c89b09c4f42653951b9c0aa8",
-   "snapshot": "SNAPSHOT-morphology_control-n151-2026-10-24.json",
-   "src": "morphology_control.json"
-  },
-  {
-   "bytes": 365,
-   "sha256": "6d808f1e07e141aa390dd65630cc972b1ccca50783431646d687491a2db44f6a",
-   "snapshot": "SNAPSHOT-offline_equivalence-n151-2026-10-24.json",
-   "src": "offline_equivalence.json"
-  },
-  {
-   "bytes": 825,
-   "sha256": "d58a5814db5ac3a74ec862f44856c0a46aaa1651b3b6a37809ba3828de668cfc",
-   "snapshot": "SNAPSHOT-offline_proof_wrong_key-n151-2026-10-24.json",
-   "src": "offline_proof_wrong_key.json"
-  },
-  {
-   "bytes": 3304,
-   "sha256": "1873f1b2b507774e723fe01dc4ca687ad9a91d013c1dc4ef0ba185e24dc8d389",
-   "snapshot": "SNAPSHOT-recompute_excluding-n151-2026-10-24.json",
-   "src": "recompute_excluding.json"
-  }
- ],
- "companions_history": [
-  {
-   "bytes": 638,
-   "note": "★ 被 --replace-companion 替换的旧值 ★",
-   "sha256": "3d6bc3f37161fb047edd11ae1286a1185955190053007e2ab78cd8731ab96e7d",
-   "src": "offline_proof_wrong_key.json"
-  }
- ],
- "companions_note": "★ 本表用 --companions-only 扩充（★ 不改顶层条目 ★）；★ 顶层 sha256 为 a412f4ac0416a441 ★",
  "entries": [
+  {
+   "bytes": 8144,
+   "frozen_at": "2026-10-24T14:06Z",
+   "sha256": "50b54ff7f2b822d3cec990d612697ec91e26440fada1be07474d4d8ad6587425",
+   "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-24.json",
+   "src": "partial_verdict.json"
+  }
+ ],
+ "frozen_at": "2026-10-24T14:06Z",
+ "history": [
   {
    "bytes": 7971,
    "frozen_at": "2026-10-24T10:09Z",
+   "label_date": "2026-10-24",
+   "note": "★ ★ 旧顶层（★ 本次因加 arm_units 而重冻 ★）⇒ ★ 旧条目【曾因「同名覆盖不推进 history」被丢掉】★★ ★ 现补回留痕 ★",
    "sha256": "a412f4ac0416a441e7a9df9fc21f6de8648e7ce2550b7ed26e4d04560baae61a",
    "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-24.json",
    "src": "partial_verdict.json"
-  },
-  {
-   "bytes": 596,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "1d931bc7c628e1c79d1d43da30804d85914f8571e83017211c07bd9b7e7dfba0",
-   "snapshot": "SNAPSHOT-MANIFEST-post-hoc-n151-2026-10-24.json",
-   "src": "MANIFEST-post-hoc.json"
-  },
-  {
-   "bytes": 3374,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "a3f19d3550d902575ce913db0f644554411037bae40958d3520514c2a80fc1ee",
-   "snapshot": "SNAPSHOT-n151-2026-10-24.json",
-   "src": "UNITS-n151.txt"
-  },
-  {
-   "bytes": 1435,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "66c689404184f44a34d9522658cfe12b38f89f4c75db099144dd3853aa65fa08",
-   "snapshot": "SNAPSHOT-channel_status-n151-2026-10-24.json",
-   "src": "channel_status.json"
-  },
-  {
-   "bytes": 407,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "77b9fcdf126085ab2c98d56c87436a57e2bae44b67eb8880289e848623431c61",
-   "snapshot": "SNAPSHOT-f1c_leverage-n151-2026-10-24.json",
-   "src": "f1c_leverage.json"
-  },
-  {
-   "bytes": 15052,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "26c4e349628ba576626c483b928b27d9ffd8d7bfb5fca8ef428af653b78f0716",
-   "snapshot": "SNAPSHOT-h0_theta0_multicalib-n151-2026-10-24.json",
-   "src": "h0_theta0_multicalib.json"
-  },
-  {
-   "bytes": 1854,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "7e74e92e3636e7ef69d40246ab6e0ece670e06e913ce22b72c0dd588dd1d3d3c",
-   "snapshot": "SNAPSHOT-min_ok_audit-n151-2026-10-24.json",
-   "src": "min_ok_audit.json"
-  },
-  {
-   "bytes": 1741,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "2ea04a698ad3b61127fda74162870cfa43afe957c89b09c4f42653951b9c0aa8",
-   "snapshot": "SNAPSHOT-morphology_control-n151-2026-10-24.json",
-   "src": "morphology_control.json"
-  },
-  {
-   "bytes": 365,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "6d808f1e07e141aa390dd65630cc972b1ccca50783431646d687491a2db44f6a",
-   "snapshot": "SNAPSHOT-offline_equivalence-n151-2026-10-24.json",
-   "src": "offline_equivalence.json"
-  },
-  {
-   "bytes": 825,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "d58a5814db5ac3a74ec862f44856c0a46aaa1651b3b6a37809ba3828de668cfc",
-   "snapshot": "SNAPSHOT-offline_proof_wrong_key-n151-2026-10-24.json",
-   "src": "offline_proof_wrong_key.json"
-  },
-  {
-   "bytes": 3304,
-   "frozen_at": "2026-10-24T13:00Z",
-   "sha256": "1873f1b2b507774e723fe01dc4ca687ad9a91d013c1dc4ef0ba185e24dc8d389",
-   "snapshot": "SNAPSHOT-recompute_excluding-n151-2026-10-24.json",
-   "src": "recompute_excluding.json"
   }
  ],
- "frozen_at": "2026-10-24T10:09Z",
+ "history_note": "★ ★ history 里的条目是【旧版本】★ ⇒ ★ 用途：★ 「同名但内容不同」的留痕 ★★ ★",
  "label_date": "2026-10-24",
  "n_units": 151,
  "note": "★ 本批仍在跑；★ 交稿文献引用的部分预判决以本快照为准（★ 副本+sha256+条数 ★）★",
- "sha256": "a412f4ac0416a441e7a9df9fc21f6de8648e7ce2550b7ed26e4d04560baae61a",
+ "sha256": "50b54ff7f2b822d3cec990d612697ec91e26440fada1be07474d4d8ad6587425",
  "snapshot": "SNAPSHOT-partial_verdict-n151-2026-10-24.json",
  "src": "partial_verdict.json",
  "theta0": 1.339,

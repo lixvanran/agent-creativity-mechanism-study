@@ -140,7 +140,7 @@ def main():
         by[k.split("|")[0]][k.split("|")[1]].extend(cs)
     print("%-13s %8s %8s %9s %9s" % ("arm", "宽度.70", "宽度.75", "支持率", "矛盾率"))
     for a in ARMS:
-        w70, w75, S, C, UN, CL = [], [], 0, 0, 0, 0
+        w70, w75, S, C, UN, CL, NM = [], [], 0, 0, 0, 0, 0
         for T in TOPICS:
             raw = by[T["tid"]].get(a, [])
             w70.append(len(dedup_n(raw, 0.70)))
@@ -148,10 +148,20 @@ def main():
             for c in dedup_n(raw, 0.75):
                 CL += 1
                 v = verd.get(c, "解析失败")
-                S += v == "支持"; C += v == "矛盾"; UN += v == "未提及"
-        legal = max(CL - UN, 1)
-        print("%-13s %8.2f %8.2f %8.1f%% %8.1f%%"
-              % (a, np.mean(w70), np.mean(w75), 100 * S / legal, 100 * C / legal), flush=True)
+                S += v == "支持"; C += v == "矛盾"; UN += v == "未提及"; NM += v == "非主张"
+        # ★★★★ 2026-10-24 更正（★ 第 1 层论证线 13:50Z 回源核出 · ★ 我方复核确认 ★★★★）★★
+        # ★ 【分母口径】：★ 原来 `legal = max(CL - UN, 1)` ⇒ ★ 【排除「未提及」】★
+        #   ★ ⇒ ★ 而我方【预注册 / A 篇正文 §3.7 / REPORT-DRILL-2026-10-18 第 90 行】用的
+        #   ★   ★ 是【排除「非主张」】：★ `| direct | 324 | 117 | 1 | 39 | 0.4% |` ⇒ ★ 39 = 非主张数
+        #   ★   ★ ⇒ 324 − 39 = 285 ⇒ ★ 1/285 = 0.35% ≈ 【0.4%】★ ★
+        #   ★ ⇒ ★ 而【排除未提及】= 324 − 167 = 157 ⇒ ★ 1/157 = 0.64% ⇒ ★ ★ 【两者分母差 1.8 倍】★★ ★
+        # ★ ⇒ ★ ★ 修正：★ 改为排除【非主张】⇒ ★ 与预注册与 A 篇正文【同口径】⇒ ★ 恢复跨组可比 ★★
+        #   ★ ⇒ ★ ★ 【「未提及」不排除】★：★ 它是【判官没提到该断言】⇒ ★ 不在分母里【会虚高矛盾率】★★ ★
+        legal = max(CL - NM, 1)
+        _legal_un = max(CL - UN, 1)      # ★ 旧口径（★ 排除「未提及」）★ —— ★ 保留以便对照、★ 但【不用于判决】★★
+        print("%-13s %8.2f %8.2f %8.1f%% %8.1f%%   (★ 断言 %d ｜ 分母[排除非主张] %d ｜ 旧口径[排除未提及] %d ★)"
+              % (a, np.mean(w70), np.mean(w75), 100 * S / legal, 100 * C / legal,
+                 CL, legal, _legal_un), flush=True)
 
     json.dump(dict(texts=texts, claims=claims, verdicts=verd,
                    saturation=[[t, a, b, c] for t, a, b, c in sats]),

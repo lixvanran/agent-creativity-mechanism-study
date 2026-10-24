@@ -338,8 +338,17 @@ def main() -> int:
               % (name, v["n_cells"], theta0, theta0))
         print("               ⇒ ★ 若实际 |标准化效应| 落在 θ₀ 以下 ⇒ 结论只能是【不可分辨】★")
 
+    # ★ ★ 臂级 n（★ 2026-10-24 · 第 1 层论证线 13:50Z 那条「★ 臂间 n 不等 ⇒ 臂间比较必须按各自 n 读 ★」）★★ ★
+    arm_units = {}
+    for k in full:
+        arm_units[k[2]] = arm_units.get(k[2], 0) + 1
+    arm_units_equal = (len(set(arm_units.values())) <= 1) if arm_units else False
+    if arm_units and not arm_units_equal:
+        print("\n★ ★ ★ 【臂级 n 不等】%s ★" % json.dumps(arm_units, ensure_ascii=False, sort_keys=True))
+        print("   ⇒ ★ ★ 臂间比较【必须按各自 n 读】★ ⇒ ★ 不许把各臂汇总成单一分母 ★★ ★")
     out = {"n_units_actual": n_units, "n_units_target": a.target_units,
            "n_groups_full": len(full), "tids": tids, "reps": reps,
+           "arm_units": arm_units, "arm_units_equal": arm_units_equal,
            "h0_pairs": len(pairs), "h0": h0, "theta0": theta0,
            "sigma_rep": sigma, "verdicts": verdicts,
            "status": "★ 已跑批·部分 n=%d/%d（★ 不得当作整批结论 ★）" % (n_units, a.target_units),

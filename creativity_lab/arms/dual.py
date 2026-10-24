@@ -104,6 +104,21 @@ class Dual:
 
     # ---------- 臂4：只选不融 ----------
     def _select(self, llm, topic, arts):
+        out = self._select_raw(llm, topic, arts)
+        # ★ ★ 结构判据（★ 2026-10-24 · 第 1 层论证线 12:55Z 那条 · ★ 他们实测抓到 4 例 ★）★★ ★
+        #   ★ `SELECT_ASK` 的规格是「★ 先写 60–120 字理由、★ 再【原样贴出被选篇全文】★」
+        #   ★ ⇒ ★ 【原样贴出】是【结构要求】⇒ ★ 光看长度【挡不住】★ ⇒ ★ 必须核【子串包含】★★ ★
+        #   ★ ★ ⇒ ★ 实现：★ 找出【是输出子串的分支】里最长的那篇 ⇒ ★ 其长度 > 0 ⇒ 结构符合 ★★★ ★
+        #   ★ ★ ⇒ ★ 关键：★ `sel_len == 0` ⇒ 【一律无效】（★ 哪怕输出很长 ★）★★ ★
+        best = 0
+        for a in (arts or []):
+            if a and a in out:
+                best = max(best, len(a))
+        self.last_sel_len = best
+        self.last_sel_n_arts = len(arts or [])
+        return out
+
+    def _select_raw(self, llm, topic, arts):
         return llm.chat(SELECT_ASK.format(
             n=len(arts),
             arts="\n\n=====\n\n".join(f"[第{i+1}篇]\n{a}" for i, a in enumerate(arts)),
@@ -123,12 +138,18 @@ class Dual:
         · `models_failed` = 返空的型号（★ **失败路径不许静默归零** ★）
         ⇒ ★ 「计划 5 / 实际 4」这个差额在 notes 里**一眼可见** ★
         """
+        _struct_bad = False
         if self.mode == "fuse":
             frags = self._diverge(llm, topic, produce_article=False, specs=specs)
             text = self._fuse(llm, topic, frags) if frags else ""
         else:
             arts = self._diverge(llm, topic, produce_article=True, specs=specs)
             text = self._select(llm, topic, arts) if arts else ""
+            # ★ ★ 结构判据：★ `sel_len == 0` ⇒ 【一律无效】★★ ★
+            #   ★ ★ ⇒ ★ 【不采信「输出非空」】★ ⇒ ★ 型号可能被改写了被选篇（★ 违反 SELECT_ASK 规格 ★）★★ ★
+            #   ★ ★ ⇒ ★ 无效 ⇒ ★ 置空 text（★ 语义：没有有效产出 ★）+ notes 登记（★ 失败不许静默 ★）★★ ★
+            _sel_len = int(getattr(self, "last_sel_len", 0) or 0)
+            _struct_bad = bool(text) and _sel_len == 0
         used, failed = [], list(getattr(self, "last_failed", []) or [])
         for (_f, m, _p) in (specs or _branch_specs()):
             if m not in failed and m not in used:
@@ -136,6 +157,13 @@ class Dual:
         notes = {"n_specs": len(specs or _branch_specs()),
                  "models_used": used,
                  "models_failed": failed}
+        if self.mode != "fuse":
+            notes["sel_len"] = int(getattr(self, "last_sel_len", 0) or 0)
+            notes["n_arts"] = int(getattr(self, "last_sel_n_arts", 0) or 0)
+            if _struct_bad:
+                notes["structure_mismatch_no_selected_branch"] = True
+                notes["invalid_reason"] = "structure_mismatch_no_selected_branch"
+                text = ""          # ★ ★ 置空 ⇒ 无效（★ 不进任何读数的分子/分母 ★）★★ ★
         return ArmResult(self.name, topic["tid"], rep, text,
                          len(frags if self.mode == "fuse" else arts) if text else 0,
                          notes=notes)

@@ -1,4 +1,13 @@
 {
+ "arm_units": {
+  "nosel_b3": 5,
+  "nosel_b3_synth": 5,
+  "topo_gs_homo": 5,
+  "topo_ngt_hetero": 5,
+  "topo_ngt_homo": 5,
+  "topo_sg_homo": 5
+ },
+ "arm_units_equal": true,
  "h0": {
   "distinct_2": {
    "X0_q95_over_sqrt2": 0.0301,
