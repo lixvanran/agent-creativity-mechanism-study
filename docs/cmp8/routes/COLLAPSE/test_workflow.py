@@ -85,6 +85,13 @@ class StubLLM:
                            "- 若保修条款为五年，则在第 36 个月内仍然有效\n"
                            "- 当并发写入超过 1000 IOPS 时，延迟会超过 1 毫秒")
             return self._last
+        if p.startswith("B0_multi"):
+            # ★ 等预算臂的生成 ⇒ 也要回填 `_last`，否则抽取拿到空串
+            #   ⇒ 空抽取会**触发 3 次阶梯重试** ⇒ 调用数虚高 3 倍
+            self._last = ("- 依据 EV-03 写明的条件成立时，顺序读取为 7450 MB/s\n"
+                           "- 若保修条款为五年，则在第 36 个月内仍然有效\n"
+                           "- 当并发写入超过 1000 IOPS 时，延迟会超过 1 毫秒")
+            return self._last
         if p == "W_extract":
             # ⚠️ 必须**回显本槽位的产出** ⇒ 否则所有槽位抽出的断言都一样
             #    ⇒ **跨槽位矛盾被抹平** ⇒ 矛盾检测根本测不到
@@ -277,7 +284,8 @@ def run_checks():
     def c10():
         llm = StubLLM()
         wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
-                                   judge_model="stub", max_rounds=1)
+                                   judge_model="stub", max_rounds=1,
+                                   merge_mode="mechanical", learn_architecture=False)
         r = wf.run("990 PRO 1TB 的哪些参数成立？")
         if "AGGREGATE(mechanical)" not in r["ops"]:
             return False, "默认没走机械汇总：ops=%r" % (r["ops"],)
@@ -363,6 +371,161 @@ def run_checks():
         return True, "矛盾 %d 处 → 演化出 %s" % (r["n_conflicts"],
                                                 r["archive"].get("names"))
 
+    # ── 14. ★ 动作空间是**可组合的一族**（不是 6 个查表模板）
+    def c14():
+        specs = W.all_action_specs()
+        if len(specs) != 36:
+            return False, "动作数 %d（应 36 = 6 修复型 × 2 范围 × 3 强度）" % len(specs)
+        if len(set(specs)) != len(specs):
+            return False, "有重复动作"
+        # 不同 spec ⇒ 不同提示词（否则"可组合"是假的）
+        ps = {W.action_prompt(sp, "F") for sp in specs}
+        if len(ps) != len(specs):
+            return False, "不同动作生成了相同提示词（%d/%d）" % (len(ps), len(specs))
+        # 每个 spec 都必须真的改变提示词的某一部分
+        a = W.action_prompt(("none", "slot", 0), "F")
+        b = W.action_prompt(("drop_conflicting", "cross_slot", 2), "F")
+        if a == b:
+            return False, "两端动作生成相同提示"
+        return True, "%d 个可组合动作，提示词全不同" % len(specs)
+
+    # ── 15. ★ 策略：可学、且查表策略是它的特例
+    def c15():
+        p0 = W.ActionPolicy()
+        # 6 修复型 + 2 范围 + 3 强度 + 36 交互 + 3 仲裁 + 4 发散度 + 3 合并方式 = 57
+        if p0.param_count() != 57:
+            return False, "参数量 %d（应 57 = 6+2+3+36+3仲裁+4发散度+3合并方式）" % p0.param_count()
+        probs = p0.probs("conflict")
+        if abs(sum(probs) - 1.0) > 1e-6:
+            return False, "概率没归一：%r" % sum(probs)
+        if max(probs) - min(probs) > 1e-9:
+            return False, "w=0 时应当均匀（未训练基线）"
+        # 查表策略 ⇒ 每个失败类型都指向映射的修复型
+        pl = W.ActionPolicy.from_lookup()
+        import random as _r
+        for fk, want in (("conflict", "drop_conflicting"),
+                         ("empty", "ground_in_evidence"),
+                         ("truncated", "compress")):
+            sp = pl.choose(fk, _r.Random(0))
+            if sp[0] != want:
+                return False, "查表策略在 %s 上选了 %s（应 %s）" % (fk, sp[0], want)
+        return True, "47 参数；w=0 均匀；查表策略命中映射"
+
+    # ── 16. ★ policy 模式真能产出**组合动作**
+    def c16():
+        frames = W.select_frames(3, seed=5)
+        llm = StubLLM(empty_slots={frames[0]})
+        wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
+                                   judge_model="stub", max_rounds=2,
+                                   action_mode="policy")
+        r = wf.run("990 PRO 1TB 的哪些参数成立？")
+        names = r["archive"].get("names") or []
+        # 合法组合动作名 = "act_<rt>_<sc>_<st>"（因子名本身可能含下划线 ⇒ 不用 count 判断）
+        legal = {"act_%s_%s_%d" % sp for sp in W.ACTION_SPECS}
+        if not (set(names) & legal):
+            return False, "policy 模式没产出组合动作名：%r（合法集合大小 %d）" % (names, len(legal))
+        if r.get("action_mode") != "policy":
+            return False, "读数里没记 action_mode"
+        return True, "组合动作 %s（参数 %d 个）" % (names, r.get("policy_param_count"))
+
+    # ── 17. ★ 锚外判定：机械、零 embedding，且**必须**区分锚内/锚外/写不出岔口
+    def c17():
+        import anchor_out as AO
+        ct = [{"id": "C1", "text": "①成立：官方标称顺序读取 7450 MB/s"},
+              {"id": "C2", "text": "②成立：官方标称随机读取 140 万 IOPS"}]
+        cards = [
+            {"claim": "①正确", "verdict": "支持", "load_bearing": True,
+             "decision_changed": "确认①成立，顺序读取为 7450 MB/s"},
+            {"claim": "运维监控", "verdict": "支持", "load_bearing": True,
+             "decision_changed": "建议每 5 分钟采集 SMART，异常即摘盘"},
+            {"claim": "免责", "verdict": "支持", "load_bearing": False,
+             "decision_changed": None},
+            {"claim": "说不清", "verdict": "支持", "load_bearing": True,
+             "decision_changed": None},
+        ]
+        d = AO.decide_anchor_out(cards, ct)
+        if d["n_anchored"] != 1 or d["n_anchor_out"] != 1 or d["n_unknown"] != 1:
+            return False, "判定错：%r" % d
+        if AO.decide_anchor_out(cards[:1], ct)["n_anchor_out"] != 0:
+            return False, "锚内条目被误判成锚外"
+        return True, "锚内1 锚外1 写不出岔口1；锚内不误判"
+
+    # ── 18. ★ 等预算对照臂：调用数与 W 同量（否则"增益"可能只是"多花了钱"）
+    def c18():
+        import anchor_out as AO
+        llm = StubLLM()
+        task = {"ask": "990 PRO 1TB 的哪些参数成立？", "evidence": []}
+        r = AO.best_of_n_direct(llm, task, "stub", n=3)
+        n_gen = sum(1 for p in llm.calls if str(p).startswith("B0_multi"))
+        n_ex = sum(1 for p in llm.calls if p == "W_extract")
+        if n_gen != 3:
+            return False, "生成调用 %d（应 3）" % n_gen
+        if n_ex != 3:
+            return False, "抽取调用 %d（应 3 = 每路一次）" % n_ex
+        if not r["claims"]:
+            return False, "没抽出断言"
+        return True, "3 次生成 + 3 次抽取（与 W 的 6 次同量）"
+
+    # ── 19. ★ 跨槽位冲突的**检测 + 仲裁三档**（架构侧，不是度量侧）
+    def c19():
+        claims = ["①正确：顺序读取 7450 MB/s", "②正确：保修 5 年",
+                  "①错误：顺序读取不是 7450", "③正确：耐久 600 TBW"]
+        ps = W.detect_opposite_pairs(claims)
+        if len(ps) != 1:
+            return False, "应检出 1 对冲突，实得 %d" % len(ps)
+        if ps[0]["marks"] != ["①"]:
+            return False, "标记应含 ①，实得 %r" % ps[0]["marks"]
+        # ★ "none" = 冲突容忍 ⇒ **一条都不许丢**（不收窄搜索空间）
+        kept, log = W.arbitrate(claims, "none")
+        if len(kept) != len(claims):
+            return False, "★ 'none' 丢了断言（%d→%d）⇒ 收窄了搜索空间" % (len(claims), len(kept))
+        if log["n_pairs"] != 1:
+            return False, "日志没记冲突对数"
+        # ★ "drop_one" = 收窄 ⇒ 恰好丢一条，且丢的是被指定的那一侧
+        kept2, _ = W.arbitrate(claims, "drop_one", drop_choice="keep_pos")
+        if len(kept2) != len(claims) - 1:
+            return False, "'drop_one' 应丢 1 条，实丢 %d" % (len(claims) - len(kept2))
+        kept3, _ = W.arbitrate(claims, "drop_one", drop_choice="keep_neg")
+        if kept2 == kept3:
+            return False, "★ keep_pos 与 keep_neg 结果相同 ⇒ 仲裁没起作用"
+        # 一致的内容不该误报
+        if W.detect_opposite_pairs(["①正确：7450 MB/s", "②正确：保修 5 年"]):
+            return False, "一致内容被误报成冲突"
+        return True, "检出 1 对；none 容忍(丢0) drop_one 丢1 且两向不同"
+
+    # ── 20. ★★ 架构自由度（发散程度 + 合并方式）**由策略决定**，且真的被用上
+    def c20():
+        import random as _r
+        # ① 策略能采样出 (n_frames, merge_mode)
+        pol = W.ActionPolicy()
+        nf, mm = pol.choose_architecture("conflict", _r.Random(0))
+        if nf not in W.ActionPolicy.NF_IDS or mm not in W.ActionPolicy.MM_IDS:
+            return False, "采样出非法架构决策：(%r, %r)" % (nf, mm)
+        # ② 推高某个发散度 ⇒ 采样应偏向它
+        pol.nf[W.ActionPolicy.NF_IDS.index(2)] = 8.0
+        picks = [pol.choose_architecture("conflict", _r.Random(i))[0] for i in range(20)]
+        if picks.count(2) < 15:
+            return False, "推高发散度=2 后，采样仍不集中：%r" % picks
+        # ③ run() 里策略的选择**真的生效**（arch_pick 落进读数 + ops 里有 ARCH 标记）
+        llm = StubLLM()
+        wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
+                                   judge_model="stub", max_rounds=1,
+                                   policy=pol, learn_architecture=True)
+        r = wf.run("990 PRO 1TB 的哪些参数成立？")
+        if not r.get("arch_pick"):
+            return False, "读数里没有 arch_pick ⇒ 策略的选择没落地"
+        if r.get("merge_mode") not in W.ActionPolicy.MM_IDS:
+            return False, "merge_mode 非法：%r" % r.get("merge_mode")
+        if not any(o.startswith("ARCH[") for o in r.get("ops") or []):
+            return False, "ops 里没有 ARCH 标记：%r" % (r.get("ops"),)
+        # ④ 三种合并方式都能跑
+        for m in W.ActionPolicy.MM_IDS:
+            mg = W.merge_claims(["①正确：7450 MB/s", "①错误：7450 MB/s", "②正确：保修5年"], m)
+            if not mg.get("claims"):
+                return False, "合并方式 %s 没产出断言" % m
+        return True, ("策略选的架构生效：nf=%s mm=%s；三种合并都可用"
+                      % (r.get("arch_pick"), r.get("merge_mode")))
+
     add("frames_seed_reproducible", c1)
     add("frames_vary_by_seed", c2)
     add("dedup_removes_redundant", c3)
@@ -376,6 +539,13 @@ def run_checks():
     add("layer2_layer3_separated", c11)
     add("conflict_detected_zero_judge_cost", c12)
     add("conflict_drives_evolution", c13)
+    add("action_space_is_composable", c14)
+    add("policy_is_learnable", c15)
+    add("policy_mode_produces_composed_action", c16)
+    add("anchor_out_decision_is_mechanical", c17)
+    add("equal_budget_control_arm", c18)
+    add("conflict_arbitration_modes", c19)
+    add("architecture_freedom_is_learned", c20)
     return checks
 
 
@@ -416,6 +586,20 @@ MUTATIONS = [
     ("矛盾不再优先于其它失败", "workflow.py",
      "        if has_conflict:\n            return \"conflict\"",
      "        if False:\n            return \"conflict\""),
+
+    ("交互项被去掉（失败类型不再影响选择）", "workflow.py",
+     """        if failure_kind and failure_kind in FAILURE_IDS:
+            fi = FAILURE_IDS.index(failure_kind)
+            s += self.m[fi][REPAIR_IDS.index(rt)]""",
+     "        pass"),
+
+    ("动作空间塌成 6 个（丢掉组合维度）", "workflow.py",
+     """    for rt in REPAIR_TYPES:
+        for sc in SCOPES:
+            for st in (0, 1, 2):
+                out.append((rt, sc, st))""",
+     """    for rt in REPAIR_TYPES:
+        out.append((rt, "slot", 0))"""),
 
     ("行为档案总是覆盖（不留最优）", "workflow.py",
      """        cell = self.cells.get(key)

@@ -45,7 +45,13 @@ def local_blob_sha(path):
 
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
-    msg = sys.argv[2] if len(sys.argv) > 2 else "update"
+    # ★ 2026-10-25：缺 message 直接报错 —— 【禁止 update】由工具强制，不靠自觉
+    #   （此前默认 "update" ⇒ 远端叠加层全叫 update ⇒ 归属不可查）
+    if len(sys.argv) <= 2 or not sys.argv[2].strip():
+        raise SystemExit("✘ 必须提供 commit message：python3 push_via_api.py <ref-or-branch> \"<message>\"")
+    msg = sys.argv[2].strip()
+    if msg.lower() in ("update", "update.", "wip", "tmp", "commit", "fix"):
+        raise SystemExit("✘ 无信息量的 message 不允许：%r（格式：[组名] 一句话说明做了什么）" % msg)
     os.chdir(root)
 
     ref = req("GET", "/repos/%s/git/ref/heads/%s" % (REPO, BRANCH))

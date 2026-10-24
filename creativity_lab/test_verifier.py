@@ -142,7 +142,7 @@ def main():
     else:
         print("✅ 核验器能判矛盾，「矛盾 0 条」是可解释的观察，不是仪器假象。")
         print("   下一步可进入：修 direct 偏置 + 扩依据包。")
-    json.dump(rows, open("%s/verifier_test.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+    json.dump(rows, open("%s/verifier_test.json" % OUT, "w"), ensure_ascii=False, indent=1)
 
 
 if __name__ == "__main__":

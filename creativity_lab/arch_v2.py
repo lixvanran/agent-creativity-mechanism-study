@@ -205,7 +205,7 @@ def main():
             else:
                 print("  %-14s 全部失败" % name, flush=True)
         json.dump(res, open("%s/%s.json" % (OUT, "search" if label == "搜索题" else "hold"),
-                            "w"), ensure_ascii=False, indent=1, sort_keys=True)
+                            "w"), ensure_ascii=False, indent=1)
     print("\n总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
 
 
