@@ -81,6 +81,48 @@ def run_for(path):
     ck("[%s] 重复采样留痕" % tag, "duplicate_resampling.json" in s)
     ck("[%s] calllog 缺口" % tag, "EXEC_LOG_stage1.md" in s)
 
+    # ★★★ ⑧ 计数型核验（★ 2026-10-25 主会话要求）★★
+    #   ★ 存在型检查只证「有」；★ ⇒ ⇒ 【重复出现】与【漏掉一节】都抓不住
+    #   ★ ⇒ ⇒ 补「每个主要区块恰好出现 1 次」★ ★
+    #   ★ ★ 豁免清单（★ 透明上报，★ 不静默跳过）：★
+    #   ★   ① `## 4. 判决` —— 报告里另有「§4 判决」形式？★ 见下方实际计数
+    MAJOR_BLOCKS = [
+        "## 1. 实验概述", "## 2. 方法与机制", "## 3. 结果", "## 4. 判决",
+        "## 5. 对 v3–v5 的影响", "## 6. 局限与未闭合", "## 7. 复现",
+        "### 3.1", "### 3.2", "### 3.3", "### 3.4", "### 3.5", "### 3.6", "### 3.7",
+        "**⑤ ★ 降级记录",
+        "**★ 各 Gate 批内区分力",
+        "**★ 状态化 align 的区分力",
+        "**★ 标准化效应量",
+    ]
+    for b in MAJOR_BLOCKS:
+        ck("[%s] 区块恰好 1 次: %s" % (tag, b), s.count(b) == 1, "count=%d" % s.count(b))
+    # ★ 成品报告里【不许残留块标记】（★ FILL 标记是给脚本用的）
+    ck("[%s] 无残留 FILL 块标记" % tag, s.count("<!-- FILL:") == 0,
+       "count=%d" % s.count("<!-- FILL:"))
+    ck("[%s] 无残留 /FILL 块尾" % tag, s.count("<!-- /FILL:") == 0,
+       "count=%d" % s.count("<!-- /FILL:"))
+
+    # ★ ⑨ §3.5 新增内容：★ Gate 语义表 + 家族最优读数（★ 与 arch6_gate_semantics.json 一致）
+    _gsp = os.path.join(DATA, "arch6_gate_semantics.json")
+    if os.path.exists(_gsp):
+        _gs = json.load(open(_gsp, encoding="utf-8"))
+        _fw = _gs["③_家族最优选尺分布"]["各 Gate 被选中次数"]
+        _fn = _gs["③_家族最优选尺分布"]["★ n"]
+        ck("[%s] §3.5 有 Gate 语义表" % tag, "**最大化**" in s and "score 的定义" in s)
+        ck("[%s] §3.5 家族最优 escape 计数" % tag,
+           "escape %d/%d" % (_fw.get("escape", 0), _fn) in s,
+           "escape=%d n=%d" % (_fw.get("escape", 0), _fn))
+        ck("[%s] §3.5 家族最优 length 计数" % tag,
+           "length **%d/%d**" % (_fw.get("length", 0), _fn) in s,
+           "length=%d n=%d" % (_fw.get("length", 0), _fn))
+        _c1 = _gs["①_len_corr_零信息性验证"]["★ 证据 A（★ 构造性，★ 与本批数据无关）"]["Pearson"]
+        ck("[%s] §0 降级1 构造性 Pearson" % tag, "%.1f" % _c1 in s, str(_c1))
+        ck("[%s] §0 降级1 提到「零信息量」" % tag, "零信息量" in s)
+        ck("[%s] §0 降级2 说 escape 的 r 不报告" % tag, "不报告" in s)
+    else:
+        ck("[%s] arch6_gate_semantics.json 存在" % tag, False)
+
 
 def main():
     print("=" * 78)

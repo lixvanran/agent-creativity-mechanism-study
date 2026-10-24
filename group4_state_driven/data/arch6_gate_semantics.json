@@ -1,0 +1,199 @@
+{
+  "src": "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/mech-study/group4_state_driven/data/arch6_stage1.jsonl",
+  "n_rows": 9,
+  "★ 本脚本只做派生统计，★ 不改原始样本": true,
+  "①_len_corr_零信息性验证": {
+    "★ 论断": "★ length Gate 的 score = len_i/max_len（★ 分母是批内常数）⇒ 是绝对长度的严格单调变换 ⇒ ⇒ Pearson(相对, 绝对) 恒 = 1",
+    "实现指针": "group4_state_driven/code/workflow_arch6.py:167-180",
+    "★ 证据 A（★ 构造性，★ 与本批数据无关）": {
+      "★ 说明": "★ 造 10 个长度各异的候选 ⇒ 算相对长度 vs 绝对长度的 Pearson",
+      "Pearson": 1.0,
+      "★ 恒等于 1": true
+    },
+    "★ 证据 B（★ 观测性，★ 本批 9 个样本）": {
+      "len_corr 实测值": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "n": 9,
+      "★ 全部等于 1.0": true
+    },
+    "★ 反例对照（★ v6 修掉的那个封顶口径）": {
+      "★ 说明": "★ 换成 min(1.0, len/900) ⇒ 分数被截断 ⇒ Pearson 必然 ≠ 1",
+      "Pearson": 0.978932,
+      "★ ⇒ 结论": "★ 正因如此，★ 旧口径下 len_corr 才有信息量；★ 改成批内相对后它【必然恒为 1】⇒ ★ 变成零信息量"
+    },
+    "★ ⇒ 结论": "★ len_corr 对 length Gate 是【定义使然】，★ 零信息量，★ **不可作退化证据**"
+  },
+  "②_gate_语义": {
+    "escape": {
+      "score_定义": "max(0.0, 1.0 - max_cos(cand, refs))",
+      "方向": "最大化 score（★ greedy 取 top-1）",
+      "高分意味着": "离参照文本更远（『逃逸』）",
+      "实现指针": "creativity_lab/gates/base.py:39-45（EscapeGate.score）",
+      "是否读状态": false
+    },
+    "spread": {
+      "score_定义": "ds[len(ds)//2] * len(candidates)",
+      "方向": "最大化 score（★ 但分数按定义恒定 ⇒ top-1 落回原序）",
+      "高分意味着": "（★ 按定义无区分力）",
+      "实现指针": "creativity_lab/gates/base.py:48-61（LexicalSpreadGate.score）",
+      "是否读状态": false
+    },
+    "length": {
+      "score_定义": "len_i / max_len（★ 批内相对长度）",
+      "方向": "最大化 score（★ ⇒ top-1 = 批内最长）",
+      "高分意味着": "★ **更长**（★ 定义即长度的单调代理）",
+      "实现指针": "group4_state_driven/code/workflow_arch6.py:167-180（_length）",
+      "是否读状态": false
+    }
+  },
+  "③_家族最优选尺分布": {
+    "各 Gate 被选中次数": {
+      "escape": 9
+    },
+    "★ length 赢的次数": 0,
+    "★ n": 9
+  },
+  "④_对照端是否选最长": {
+    "★ ★ 状态": "★ 存疑 ⇒ ★ 本轮【不报告】为结论 ★",
+    "★ 为什么存疑": "★ 它依赖 `per_gate.escape.rank`（★ 家族最优选中的那只）⇒ ⇒ ★ 而 escape.rank 在 4/9 个样本上与 escape.len_corr 【不自洽】⇒ ⇒ ★ **排名与 len_corr 至少有一个不可信**（★ 见 KNOWN_ISSUES KI-01）⇒ ⇒ ★ ★ 排名若不可信，★ 本项的『选中即最长』也就不可信 ★★",
+    "★ 若仅作参考": {
+      "逐样本": [
+        {
+          "tag": "G01-1",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 1,
+          "★ length Gate 的 rank[0]（=批内最长）": 1,
+          "★ escape Gate 的 rank[0]": 1,
+          "★ 对照端选的是否就是最长的": true
+        },
+        {
+          "tag": "G01-2",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 1,
+          "★ length Gate 的 rank[0]（=批内最长）": 1,
+          "★ escape Gate 的 rank[0]": 1,
+          "★ 对照端选的是否就是最长的": true
+        },
+        {
+          "tag": "G01-3",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 1,
+          "★ length Gate 的 rank[0]（=批内最长）": 1,
+          "★ escape Gate 的 rank[0]": 1,
+          "★ 对照端选的是否就是最长的": true
+        },
+        {
+          "tag": "T07-1",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 1,
+          "★ length Gate 的 rank[0]（=批内最长）": 1,
+          "★ escape Gate 的 rank[0]": 1,
+          "★ 对照端选的是否就是最长的": true
+        },
+        {
+          "tag": "T07-2",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 1,
+          "★ length Gate 的 rank[0]（=批内最长）": 1,
+          "★ escape Gate 的 rank[0]": 1,
+          "★ 对照端选的是否就是最长的": true
+        },
+        {
+          "tag": "T07-3",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 1,
+          "★ length Gate 的 rank[0]（=批内最长）": 3,
+          "★ escape Gate 的 rank[0]": 1,
+          "★ 对照端选的是否就是最长的": false
+        },
+        {
+          "tag": "T10-3",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 3,
+          "★ length Gate 的 rank[0]（=批内最长）": 3,
+          "★ escape Gate 的 rank[0]": 3,
+          "★ 对照端选的是否就是最长的": true
+        },
+        {
+          "tag": "T10-1",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 1,
+          "★ length Gate 的 rank[0]（=批内最长）": 3,
+          "★ escape Gate 的 rank[0]": 1,
+          "★ 对照端选的是否就是最长的": false
+        },
+        {
+          "tag": "T10-2",
+          "★ 家族最优选中的 Gate": "escape",
+          "picked_idx": 3,
+          "★ length Gate 的 rank[0]（=批内最长）": 2,
+          "★ escape Gate 的 rank[0]": 3,
+          "★ 对照端选的是否就是最长的": false
+        }
+      ],
+      "选中即最长": 6,
+      "可核对样本数": 9,
+      "比例": 0.6667
+    },
+    "★ ★ 结论": "★ ★ **本批【不用】这一项支撑任何结论** ⇒ ★ ★ 「对照端退化为选最长的」已由降级 1 作废，★ 且实测家族最优 9/9 由 escape 赢"
+  },
+  "⑤_各 Gate 与长度的关系": {
+    "escape": {
+      "len_corr_逐样本": [
+        -0.982,
+        -0.9989,
+        -0.7282,
+        -0.5521,
+        0.9953,
+        -0.96,
+        0.9107,
+        -0.2761,
+        -0.7183
+      ],
+      "均值": -0.3677,
+      "★ 按定义即常量的样本数": 0
+    },
+    "length": {
+      "len_corr_逐样本": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "均值": 1.0,
+      "★ 按定义即常量的样本数": 0
+    }
+  },
+  "⑥_门b_两两秩相关（★ PREREG v4 §16.2 门 b）": {
+    "★ 状态": "不可算",
+    "★ 原因": "★ 原始样本【未落盘逐候选分数与候选长度】⇒ ⇒ 门 (b)/(c)-1 **本批不可算**⇒ ⇒ **Stage-2 必须落盘这两项**（★ PREREG v4 §16.3 硬规定）",
+    "★ 阈值": "|ρ| ≤ 0.95 ⇒ 判为非单调变换（★ PREREG v4 §16.2 门 b）",
+    "★ ★ 处置": "★ Stage-2 启动前必须补算（★ 需落盘逐候选分数）"
+  },
+  "⑦_门c1_偏相关（★ PREREG v4 §16.2 门 (c)-1）": {
+    "★ 状态": "不可算",
+    "★ 原因": "★ 原始样本【未落盘逐候选分数与候选长度】⇒ ⇒ 门 (b)/(c)-1 **本批不可算**⇒ ⇒ **Stage-2 必须落盘这两项**（★ PREREG v4 §16.3 硬规定）",
+    "★ 阈值": "|ρ_partial| ≤ 0.9（★ PREREG v4 §16.2 门 (c)-1）",
+    "★ ★ 注意": "★ 门 (c)-0（★ 实现级）★ 不受此影响 ⇒ ★ `length` 恒被排除 ★★"
+  },
+  "★ 结构性观察": {
+    "★ 家族三把尺子": "escape / spread / length（★ 全都不读状态）",
+    "★ 有区分力的": "escape（var>0）与 length（var>0）；★ spread 按定义常量",
+    "★ ★ 关键": "★ length 本身就是长度的单调代理（定义使然）；★ escape 的 len_corr 亦达 -0.98 量级⇒ ⇒ ★ 家族「多样性」在长度轴上只有【一个】自由度",
+    "★ ⇒ 对照端的能力上限": "★ 家族最优并非「多把独立尺子取优」，★ 而是「在长度轴上选一个」⇒ ⇒ ★ ★ 它与状态化选择器【共享长度轴】，★ 比较时须扣除长度这一共同因子"
+  }
+}
