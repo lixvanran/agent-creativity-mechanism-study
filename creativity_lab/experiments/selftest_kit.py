@@ -118,7 +118,21 @@ class suite:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool:
-        return False  # ★ 不吞异常 ⇒ ★ 让 traceback 打出来（★ 变异侧要分类它）★★
+        # ★ ★★ 2026-10-26 修：★ 统一退出码 ★★
+        #   ★ 原实现只收集失败、★ 但【不决定退出码】⇒ ⇒ ★ 调用方普遍写
+        #   `return 0` ⇒ ⇒ ★ **任何失败都 exit 0** ⇒ ⇒ ★ **退出码在撒谎** ★
+        #   ⇒ ⇒ ★ 本仓 10 个测试文件全都犯了这一条（★ 2026-10-26 实测 ★）
+        #   ⇒ ⇒ ★ 修法（★ 在工具里一次修好，★ 10 个文件零改动 ★）：
+        #   ★ 退出前先打印汇总；★ 有失败 ⇒ ★ `sys.exit(1)`。
+        #   ★ 为何用 `sys.exit` 而不是 raise：★ raise 会打出 traceback ⇒
+        #   ★ 变异侧要靠 traceback 最后一帧分类 ⇒ ★ 而 SystemExit 不打 traceback ⇒
+        #   ★ ★ 且分类器的第一条规则是「有 ✘ 前缀行 ⇒ assertion」⇒ ⇒ ★ 不受影响 ★★
+        if exc_type is not None:
+            return False  # ★ 不吞异常 ⇒ ★ 让 traceback 打出来（★ 变异侧要分类它）★★
+        code = self.report()
+        if code:
+            sys.exit(code)
+        return False
 
     def group(self, name: str) -> None:
         self._stack.append(name)

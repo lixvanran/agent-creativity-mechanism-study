@@ -35,7 +35,9 @@ def t_three_rulers_one_constant():
     check("恒定尺子被剔除出 info", "structured_dedup" not in info, repr(info))
     check("有信息的尺子数 = 2", n_info == 2, str(n_info))
     check("两把有信息的尺子方向一致 ⇒ consistent=True", consistent is True, repr(consistent))
-    check("verdict 文本含『有信息的 2 把』", "有信息的 2 把" in verdict, verdict)
+    # ★ 注意：★ 「有信息的 N 把」只出现在【不足 2 把】那个分支的文案里；
+    #   ★ 本例 n_info == 2 ⇒ 走【一致】分支 ⇒ verdict 就是「是」。★★
+    check("★ 本例 verdict = 是（★ n_info==2 走一致分支 ★）", verdict.strip() == "是", verdict)
 
 
 def t_two_rulers_opposite():
@@ -55,6 +57,7 @@ def t_only_one_informative():
     check("有信息的尺子数 = 1", n_info == 1, str(n_info))
     check("consistent 必须是 None（★ 不可判定 ★）", consistent is None, repr(consistent))
     check("verdict 含『不可判定』", "不可判定" in verdict, verdict)
+    check("★ verdict 文案点明『有信息的尺子只有 1 把』", "有信息的尺子只有 1 把" in verdict, verdict)
 
 
 def t_all_constant():
