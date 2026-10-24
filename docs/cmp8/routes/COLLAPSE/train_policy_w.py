@@ -237,7 +237,7 @@ def reinforce(pol: W.ActionPolicy, spec: W.ActionSpec, failure_kind: str,
 # ══════════════════════════════════════════════════════════════════════
 # 主循环
 # ══════════════════════════════════════════════════════════════════════
-def load_tasks(n=None, mixed=True):
+def load_tasks(n=None, mixed=True, exclude=None):
     """训练题集：**DEV 9 题 + 诱导钻牛角尖 6 题**（混合）。
 
     ★ 必须混合：陷阱命中（钻牛角尖的代价）**只在带 trap_fingerprints 的题上可测**
@@ -251,6 +251,13 @@ def load_tasks(n=None, mixed=True):
         with open(adv_path, encoding="utf-8") as f:
             ad = json.load(f)
         tasks = tasks + list(ad["tasks"] if isinstance(ad, dict) and "tasks" in ad else ad)
+    # ★ 2026-10-24 留出集协议：把留出题从训练题集里**排除**（默认空 ⇒ 行为不变）
+    if exclude:
+        ex = set(exclude)
+        before = len(tasks)
+        tasks = [t for t in tasks if t.get("task_id") not in ex]
+        print("  [exclude] 训练题集排除 %s ⇒ %d 题（原 %d 题）" % (sorted(ex), len(tasks), before))
+
     return tasks[:n] if n else tasks
 
 
@@ -272,6 +279,7 @@ def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tasks", type=int, default=3)
+    ap.add_argument("--exclude", default="", help="★ 逗号分隔的 task_id，从训练题集排除（留出集用）；默认空=全部保留")
     ap.add_argument("--rounds", type=int, default=8, help="训练轮数")
     ap.add_argument("--samples", type=int, default=4, help="每轮样本数")
     ap.add_argument("--slots", type=int, default=3)
@@ -287,7 +295,8 @@ def main():
                     help="用本地 stub LLM（零 API 成本）跑冒烟；★ 读数不代表真实效果")
     args = ap.parse_args()
 
-    tasks = load_tasks(args.tasks)
+    excl = [x.strip() for x in (args.exclude or "").split(",") if x.strip()]
+    tasks = load_tasks(args.tasks, exclude=excl)
     model = os.environ.get("MM_MODEL", "MiniMax-M3.1-Flash-Preview")
     if args.stub:
         from test_workflow import StubLLM
