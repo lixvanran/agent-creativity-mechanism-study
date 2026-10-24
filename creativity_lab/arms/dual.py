@@ -17,6 +17,22 @@ from creativity_lab.prompts import (FRAMES, PERSONAS, OUT_SPEC, PREMISE_Q,
 
 N_BRANCH = 5
 
+# ★ ★ ★ min_ok 定版表（★ 2026-10-26 · 全部【回源真实 prompt 的输出规格】★★ ★
+# ★   ★ 依据：★ client.chat 的 min_ok 是【内容长度下限】★ 默认 200 ⇒ ★
+# ★   ★   ★ 【统一 200 会把【一批正常输出】判成失败】⇒ ★ 阈值必须与规格【一起定版】★★ ★
+# ★   ★ 依据表：★
+# ★   ★   步骤        prompt        输出规格                          min_ok
+# ★   ★   diverge     BRANCH_ASK   OUT_SPEC「400 字以内」             120
+# ★   ★   premise     PREMISE_Q    【150–250 字】                     120
+# ★   ★   fuse        FUSE_ASK     OUT_SPEC「400 字以内」             120
+# ★   ★   select      SELECT_ASK   理由 60–120 字 + 原样贴被选篇全文   20（★ 结构判据兜底 ★）
+# ★   ★ ★ ⇒ 统一 120 也不行：★ 120 落在 diverge/fuse 的正常分布（200–500）内 ⇒ ★ 短返回污染
+# ★   ★ ★ ⇒ 所以【按臂分别定版】+【select 另用结构判据】⇒ ★ 两件事都要做 ★★★ ★
+MIN_OK_DIVERGE = 120
+MIN_OK_PREMISE = 120
+MIN_OK_FUSE = 120
+MIN_OK_SELECT = 20
+
 
 def _branch_specs(alive=None):
     """轴A × 轴B 的联合扇出：框架/模型/persona 三者错位绑定。
@@ -62,7 +78,11 @@ class Dual:
                 persona=persona, spec=OUT_SPEC,
                 extra="\n直接写出**完整的答复本身**，不要写判断片段。" if produce_article
                      else "\n写出这个位置上会看到的**判断与依据**，不要写成文。"))
-            out = llm.chat(prompt, model=model, purpose=f"diverge:{model}")
+            # ★ ★ min_ok 按【本步骤的输出规格】定版（★ 2026-10-26 · 第 1 层论证线那条 ★）★★
+            #   ★ BRANCH_ASK ⇒ OUT_SPEC「控制在 400 字以内」⇒ ★ 正常分布 200–500
+            #   ★ ⇒ ★ 不传则吃 client.chat 的默认 200 ⇒ ★ 【误杀正常短输出】★★ ★
+            out = llm.chat(prompt, model=model, purpose=f"diverge:{model}",
+                           min_ok=MIN_OK_DIVERGE)
             if out and out.strip():
                 outs.append(out)
             else:
@@ -73,17 +93,25 @@ class Dual:
     # ---------- 臂3：融合门 ----------
     def _fuse(self, llm, topic, frags):
         pre = llm.chat(PREMISE_Q.format(n=len(frags), cands="\n\n".join(
-            f"[{i+1}] {c[:400]}" for i, c in enumerate(frags))), purpose="premise")
+            f"[{i+1}] {c[:400]}" for i, c in enumerate(frags))), purpose="premise",
+            # ★ PREMISE_Q 的规格是【150–250 字】⇒ ★ 默认 200 ⇒ ★ 【150–200 的正常输出被误杀】★★ ★
+            min_ok=MIN_OK_PREMISE)
         return llm.chat(FUSE_ASK.format(topic=topic["ask"],
                                         frags="\n\n".join(f"[{i+1}] {c[:400]}" for i, c in enumerate(frags)),
-                                        pre=pre[:700], spec=OUT_SPEC), purpose="fuse")
+                                        pre=pre[:700], spec=OUT_SPEC), purpose="fuse",
+                                        # ★ FUSE_ASK ⇒ OUT_SPEC「400 字以内」★
+                                        min_ok=MIN_OK_FUSE)
 
     # ---------- 臂4：只选不融 ----------
     def _select(self, llm, topic, arts):
         return llm.chat(SELECT_ASK.format(
             n=len(arts),
             arts="\n\n=====\n\n".join(f"[第{i+1}篇]\n{a}" for i, a in enumerate(arts)),
-            spec=OUT_SPEC), purpose="select")
+            spec=OUT_SPEC), purpose="select",
+            # ★ ★ SELECT_ASK 的输出 = 【理由 60–120 字】+【原样贴出被选篇全文】★
+            #   ★ ⇒ ★ 被选篇本身短时【总长可以 < 200】⇒ ★ 默认 200 ⇒ ★ 【会把一批正常输出判成失败】★★ ★
+            #   ★ ⇒ ★ ⇒ ★ 20 只挡空串/截断；★ ★ 有效性另用【结构判据】（★ 见 run() ★）★★ ★
+            min_ok=MIN_OK_SELECT)
 
     def run(self, llm, topic, rep, specs=None):
         """★ `specs`（2026-10-26）★ **对外暴露**型号池注入 ★

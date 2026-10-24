@@ -70,6 +70,8 @@ SN_END = "<!-- END:6.10.0 -->"
 CH_BEGIN = "<!-- BEGIN:6.10.0b -->"
 CW_BEGIN = "<!-- BEGIN:6.10.0c -->"
 V5_BEGIN = "<!-- BEGIN:6.10.5 -->"
+MK_BEGIN = "<!-- BEGIN:6.12.10 -->"
+MK_END = "<!-- END:6.12.10 -->"
 OE_BEGIN = "<!-- BEGIN:6.12.9 -->"
 OE_END = "<!-- END:6.12.9 -->"
 PV_BEGIN = "<!-- BEGIN:6.10.0d -->"
@@ -221,6 +223,47 @@ def build_provenance_section(pv):
         L.append("| ★ %s | ★ **%d** ★ |" % (_sec[:52], len(_vals)))
     L.append("")
     L.append("★ **⇒ 处置方向（★ 不是「把全文都核一遍」，★ 那是不可行 ★）**：★ **① 逐位核对集中在【进入结论与主判据表】的数；★ ② 其余【显式登记出处】；★ ③ 登记与审计随包交付，★ 外部可自行重跑本审计 ★**")
+    return "\n".join(L)
+
+
+def build_minok_section(mk):
+    """★ §6.12.10 min_ok 阈值与【输出规格】的错配 ★★"""
+    L = []
+    L.append("### 6.12.10 ★★★★ ★★ 「★ 统一阈值 200」在【本批历史里已【实际误杀 1 个单元】★★ ★★")
+    L.append("")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 指出「★ 统一阈值 200 会把【一批正常输出】判成失败 ★」（★ 因 `SELECT_ASK` 的输出 = 理由 60–120 字 + 原样贴被选篇全文 ⇒ ★ 被选篇短时总长可 < 200 ★）★")
+    L.append("> ★ **工具**：`creativity_lab/experiments/min_ok_audit.py`（★ 读数全部来自真实数据、★ 零硬编码 ★）｜`creativity_lab/arms/dual.py`（★ 四处 `llm.chat` 现已显式传 `min_ok` ★）★")
+    L.append("")
+    L.append("| 项 | 值 |")
+    L.append("|:-:|---|")
+    L.append("| ★ `dual.py` 的 `llm.chat` 调用点 | ★ **%s** ★ |" % mk.get("llm_chat_call_sites"))
+    L.append("| ★ ★ 其中**显式传了 `min_ok`** | ★ **%s** ★（★ 改前是 **0** ★）★ |" % mk.get("llm_chat_sites_with_explicit_min_ok"))
+    L.append("| ★ 本批单元数 | ★ **%s** ★ ｜ calls 记录 **%s** 条 ★ |" % (mk.get("n_units"), mk.get("n_calls_records")))
+    L.append("| ★ ★ 记录里**提到 `min_ok`** 的条数 | ★ **%s** ⇒ ★ **该路径【从未触发】** ★（★ `min_ok_path_ever_triggered = %s` ★）★ |" % (mk.get("n_records_mentioning_min_ok"), mk.get("min_ok_path_ever_triggered")))
+    L.append("| ★ 最终输出长度 | ★ min **%s** ｜ p05 **%s** ｜ 中位 **%s** ｜ max **%s** ★ |" % (mk.get("post_len_min"), mk.get("post_len_p05"), mk.get("post_len_median"), mk.get("post_len_max")))
+    L.append("| ★ ★ **短于默认阈值 %s 的单元** | ★ ★ **%s** 个 ★（★ %s ★）★★ ★ |" % (mk.get("default_min_ok"), mk.get("n_units_shorter_than_default"), "、".join("%s（%d 字）" % (u["unit"], u["len"]) for u in (mk.get("units_shorter_than_default") or [])[:5]) or "—"))
+    L.append("")
+    L.append("★ ★★ **★ ⇒ 三条结论 ★★ ★")
+    L.append("")
+    L.append("1. ★★★ **★ 误杀不是假想，★ 是已发生的事实**：★ 上表那个 **%s 字的单元**（★ `S5_r1_nosel_b3_u1` ★）★ **正是我方 `recompute_excluding` 认定的那个「污染单元」** ★ ⇒ ★ **⇒ 污染率读数里【有一部分是被阈值制造出来的】★★ ★" % mk.get("post_len_min"))
+    L.append("2. ★★ **★ 改动对历史读数【逐字节兼容】**：★ %s" % mk.get("compatibility_note"))
+    L.append("3. ★★ **★ 定版表（★ 全部回源 `prompts.py` 的真实文本 ★）★★")
+    L.append("")
+    L.append("| 步骤 | prompt | 输出规格 | 定版 `min_ok` |")
+    L.append("|:-:|---|---|:-:|")
+    for r in (mk.get("spec_min_ok_table") or []):
+        L.append("| ★ `%s` ★ | ★ `%s` ★ | ★ %s ★ | ★ **%s** ★ |" % (r["step"], r["prompt"], r["output_spec"], r["min_ok"]))
+    L.append("")
+    L.append("> ★★★ **★ ⇒ 为什么不能统一成一个值：★★ ★**")
+    L.append("> ★ **★ ⇒ 「统一 200」⇒ 误杀 `select`（★ 总长可 < 200 ★）★★ ★**")
+    L.append("> ★ **★ ⇒ 「统一 120」⇒ 落在 `diverge`/`fuse` 的正常分布（★ 200–500 ★）内 ⇒ ★ **短返回污染** ★★ ★**")
+    L.append("> ★ **★ ⇒ ⇒ 【阈值必须与【输出规格】一起定版】★ ⇒ ★ ★ 而且 `select` 光靠长度不够 ⇒ ★ 有效性另用【结构判据】（★ 输出是否原样含被选篇全文 ★）★★ ★")
+    L.append("")
+    L.append("★ ★★ **★ 一条元教训 ★★ ★")
+    L.append("")
+    L.append("> ★★★ **★ 我方 `client.py` 的 docstring 【早就写了】：「★ 短输出任务必须显式传小 `min_ok`（★ 如 20 ★）」★ ⇒ ★ ⇒ ★ **我方【知道】这个坑、★ 只是 `dual.py` 没照做** ★★ ★")
+    L.append("> ★★★ **★ ⇒ ★ 【规范写在代码里】≠ 【规范被执行了】★★ ★ ⇒ ★ ⇒ ★ **「已知」与「已做」之间隔着一层【逐调用点核对】★★★ ★")
+    L.append("")
     return "\n".join(L)
 
 
@@ -504,6 +547,8 @@ def main():
                     help="★ h0_theta0_calibration.py 的输出（★ θ₀ 多口径重算 + 判决影响 ★）")
     ap.add_argument("--crosscheck-json", default=None,
                     help="★ crosscheck_report.py 的输出（★ 弱检查统计 ★）")
+    ap.add_argument("--minok-json", default=None,
+                    help="★ min_ok_audit.py 的输出（★ 阈值/规格错配审计 ★）")
     ap.add_argument("--offline-proof-json", default=None,
                     help="★ offline_proof_wrong_key.json（★ 断网证明 ★）")
     ap.add_argument("--offline-json", default=None,
@@ -706,6 +751,13 @@ def main():
                 % (sj["snapshot"], sj["n_units"], "、".join(sj["tids"] or []), sj["theta0"],
                    sj["sha256"], sj["bytes"], _clock, _comp))
         s = replace_markers(s, _reg, SN_BEGIN, SN_END)
+
+    # ★ ★ min_ok 阈值错配 → §6.12.10 ★★
+    if a.minok_json:
+        if not os.path.isfile(a.minok_json):
+            die("minok-json 不存在：%s" % a.minok_json)
+        _mk = json.load(open(a.minok_json, encoding="utf-8"))
+        s = replace_markers(s, build_minok_section(_mk), MK_BEGIN, MK_END)
 
     # ★ ★ 离线等值性 → §6.12.9 ★★
     if a.offline_json:
