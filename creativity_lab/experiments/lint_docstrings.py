@@ -33,8 +33,12 @@ def check(path):
     """返回问题列表（空 = 通过）。"""
     try:
         src = open(path, encoding="utf-8").read()
-    except Exception:
-        return []
+    except Exception as e:
+        # ★ ★ 2026-10-26 修：★ 原来读不了 ⇒ return [] ⇒ ★ ⇒ 【被当成「无问题」⇒ 报绿】★★
+        #   ★ ⇒ ★ ★ 这正是我方 KI-16「★ 跳过检查并报绿是最阴的假绿 ★」的同族 ★★
+        #   ★ ⇒ ★ 读不到输入时【必须响亮失败】，★ 不得静默跳过 ★★★ ★
+        return ["%s: 读不了（★ 不许当成「无问题」★ ⇒ ★ 否则就是「跳过检查并报绿」★）：%s: %s"
+                % (path, type(e).__name__, e)]
     issues = []
     try:
         tree = ast.parse(src)
