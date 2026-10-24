@@ -16,7 +16,7 @@ REPO = "lixvanran/agent-creativity-mechanism-study"
 BRANCH = "cmp8-handover-2026-10-20"
 TOK = os.environ.get("GITHUB_TOKEN_LIXVANRAN", "")
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))   # cmp8repo/
+REPO_ROOT = os.path.abspath(os.path.join(HERE, ".."))   # cmp8repo/
 
 GROUPS = ("三组", "第二组", "层2", "第四组", "论文簇", "multi-mind")
 
