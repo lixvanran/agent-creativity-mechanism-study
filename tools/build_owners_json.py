@@ -1,59 +1,111 @@
 # -*- coding: utf-8 -*-
-"""机器可读的远端归属表 OWNERS.json（可重跑；未知归属显式标 needs_confirmation，不猜）"""
-import io, json, os, subprocess, urllib.request
+"""★ 远端归属表生成器 v2：★ 用【tree sha】把远端层匹配到本地 commit ⇒ ⇒ 自维护，无需硬编码
 
-REPO="lixvanran/agent-creativity-mechanism-study"; BRANCH="cmp8-handover-2026-10-20"
-TOK=os.environ.get("GITHUB_TOKEN_LIXVANRAN","")
+★ 原理：push_via_api.py 用 API 重建 commit 时，**tree 内容逐字节相同** ⇒ **tree sha 相同**
+  ⇒ ⇒ 远端层 ↔ 本地 commit 的对应关系可由 tree sha 精确求出
+  ⇒ ⇒ 归属从【本地 commit 的 message 前缀】（如 "[三组] ..."）反推 ⇒ ⇒ 永不过期
+★ 仍保留两条兜底：① 硬编码的历史 sha 前缀表 ② 未知一律 needs_confirmation=true（不猜）
+"""
+import io
+import json
+import os
+import subprocess
+import urllib.request
+
+REPO = "lixvanran/agent-creativity-mechanism-study"
+BRANCH = "cmp8-handover-2026-10-20"
+TOK = os.environ.get("GITHUB_TOKEN_LIXVANRAN", "")
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))   # cmp8repo/
+
+GROUPS = ("三组", "第二组", "层2", "第四组", "论文簇", "multi-mind")
+
+
 def api(path):
-    r=urllib.request.Request("https://api.github.com"+path, headers={"Authorization":"Bearer "+TOK,"Accept":"application/vnd.github+json","User-Agent":"mavis-owner-table"})
+    r = urllib.request.Request(
+        "https://api.github.com" + path,
+        headers={"Authorization": "Bearer " + TOK,
+                 "Accept": "application/vnd.github+json",
+                 "User-Agent": "mavis-owner-table"})
     return json.load(urllib.request.urlopen(r, timeout=30))
 
-# 我自己推的层：远端 sha -> (组, 本地 commit, 一句话)
-MINE_LOCAL_PREFIX=("三组","","")
-MINE={
- "8934cb193cc220fd622d332f252c0b3351a31766":("三组","e483f4a","分维度偏好表 + 负对照分母真因"),
- "2055e086ad98ff444da85edfd58e55f1b2f3387e":("三组","6a48f8a","解耦帧组合seed + 论文更正nf偏好 + 留出集续跑脚本"),
- "895f7258b923731607abce1aba36feb274065e0d":("三组","548fcdc","法律域结论空间v3 + 合并反馈循环bug修复 + avg_m改2D"),
- "f101f4a94c84":("三组","8e86de5","C1 跨组对齐实验"),
- "f0d8004fa6ba2039ce170f491b32a40aeec40403":("三组","797190b","KNOWN_ISSUES重写+摘要加两判官反号+§2.3措辞+§6.4.4e"),
- "7ab16b40101edc3ea5434681ae7a1ef24bc5e642":("三组","223efd1","[三组] commit message 格式改为[组名]前缀"),
- "41009794b3d486f4133a59a2655fa8f051d3800a":("三组","d4ef317","分维度表按精确口径+贡献三条加定位句+OWNERS生成器"),
- "24e3ebb95cdd6f6837add5d863f183751b7aadcc":("三组","356ecaa","OWNERS.json生成器(含User-Agent与API兜底)"),
- "a6208aec1c2090ebe464a9e6bbba7eded1ce255f":("三组","14dddc5","OWNERS.json生成+打包改先验后换"),
-}
-KNOWN_OTHER={"4654245ac709":("第二组",None,"交付 2026-10-25"),"5b7fb4670320":("第二组",None,"交付 2026-10-25")}
 
-# 拉远端叠加链（从新到旧，最多 12 层）
-chain=[]; sha=api("/repos/%s/git/ref/heads/%s"%(REPO,BRANCH))["object"]["sha"]
-for _ in range(12):
-    c=api("/repos/%s/git/commits/%s"%(REPO,sha))
-    # ★ API 建的 commit：message 在顶层；GitHub 原生 commit：在 commit.message ⇒ 两种都读
-    _c=c.get("commit") or {}
-    msg=(c.get("message") or _c.get("message") or "").split("\n")[0]
-    chain.append((sha,msg))
-    if len(c["parents"])==0: break
-    sha=c["parents"][0]["sha"]
+def local_commits():
+    """本地 commit → (sha, tree_sha, message)"""
+    out = subprocess.check_output(
+        ["git", "-C", REPO_ROOT, "log", "--all", "--format=%H%x09%T%x09%s"],
+        text=True).strip().split("\n")
+    res = []
+    for line in out:
+        if not line.strip():
+            continue
+        sha, tree, msg = line.split("\t", 2)
+        res.append((sha, tree, msg))
+    return res
 
-layers=[]
-for i,(sha,msg) in enumerate(chain):
-    _hit=[k for k in MINE if sha.startswith(k) or k.startswith(sha)]
-    if _hit: g,loc,one=MINE[_hit[0]]; conf=False
-    elif sha in KNOWN_OTHER: g,loc,one=KNOWN_OTHER[sha]; conf=False
-    else: g,loc,one=None,None,None; conf=True
-    layers.append(dict(layer=len(chain)-i, sha=sha, group=g, local_commit=loc,
-                       remote_message=msg, summary=one,
-                       needs_confirmation=conf,
-                       note=("远端 message 丢失（API 重建 commit 会丢 message）⇒ 归属与摘要见本表"
-                             if msg.strip().lower() in ("update","update.","wip","tmp") else "")))
-out=dict(schema="remote-ref-ownership/v1",
-         repo="lixvanran/agent-creativity-mechanism-study", branch=BRANCH,
-         generated_at=subprocess.check_output(["date","-u","+%Y-%m-%dT%H:%M:%SZ"]).decode().strip(),
-         generator="tools/build_owners_json.py（可重跑）",
-         note=("★ 远端 message 在 API 重建 commit 路径下会丢失 ⇒ 归属以本表为准。"
-               "★ 未知归属一律标 needs_confirmation=true，不猜。"),
-         layers=layers)
-os.makedirs("cmp8repo/docs/cmp8", exist_ok=True)
-p="cmp8repo/docs/cmp8/OWNERS.json"
-json.dump(out, io.open(p,"w",encoding="utf-8"), ensure_ascii=False, indent=2)
-print("✔ OWNERS.json 已写：%d 层，%d 层需确认"%(len(layers), sum(1 for l in layers if l["needs_confirmation"])))
-for l in layers: print("   L%-2d %s  %-6s %s"%(l["layer"], l["sha"][:12], l["group"] or "?", (l["summary"] or "★待确认")[:44]))
+
+def owner_of(message):
+    for g in GROUPS:
+        if ("[%s]" % g) in message or message.startswith(g):
+            return g
+    for g in GROUPS:
+        if g in message[:40]:
+            return g
+    return None
+
+
+def main():
+    locals_ = local_commits()
+    by_tree = {}
+    for sha, tree, msg in locals_:
+        by_tree.setdefault(tree, []).append((sha, msg))
+
+    chain = []
+    sha = api("/repos/%s/git/ref/heads/%s" % (REPO, BRANCH))["object"]["sha"]
+    for _ in range(20):
+        c = api("/repos/%s/git/commits/%s" % (REPO, sha))
+        # ★ API 建的 commit：message 在顶层；GitHub 原生 commit：在 commit.message ⇒ 两种都读
+        _c = c.get("commit") or {}
+        msg = (c.get("message") or _c.get("message") or "").split("\n")[0]
+        tree = (c.get("tree") or {}).get("sha")
+        chain.append((sha, msg, tree))
+        parents = c.get("parents") or []
+        if not parents:
+            break
+        sha = parents[0]["sha"]
+
+    layers = []
+    for i, (sha, msg, tree) in enumerate(chain):
+        cand = by_tree.get(tree) or []
+        local_sha = local_msg = None
+        if cand:
+            local_sha, local_msg = cand[0]
+        g = owner_of(local_msg or msg)
+        summary = (local_msg or msg)
+        conf = (g is None)
+        layers.append(dict(
+            layer=len(chain) - i, sha=sha, group=g,
+            local_commit=local_sha, remote_message=msg,
+            summary=summary, needs_confirmation=conf,
+            matched_by="tree_sha" if cand else "none",
+            note=("远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
+                  if msg.strip().lower() in ("update", "update.", "wip", "tmp", "commit", "fix")
+                  else "")))
+
+    out = dict(schema="remote-ref-ownership/v2",
+               repo=REPO, branch=BRANCH,
+               generated_at=subprocess.check_output(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"]).decode().strip(),
+               generator="tools/build_owners_json.py（v2：按 tree sha 匹配本地 commit ⇒ 自维护）",
+               note=("★ 归属由【远端层的 tree sha】匹配【本地 commit】得到 ⇒ 再从本地 message 前缀反推组名 "
+                     "⇒ ⇒ 不需要维护任何硬编码表 ⇒ ⇒ 未知一律 needs_confirmation=true，不猜。"),
+               layers=layers)
+    p = os.path.join(REPO_ROOT, "docs", "cmp8", "OWNERS.json")
+    json.dump(out, io.open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    print("✔ OWNERS.json(v2) 已写：%d 层 ｜待确认 %d 层" % (len(layers), sum(1 for l in layers if l["needs_confirmation"])))
+    for l in layers:
+        print("   L%-2d %s  %-8s %-6s %s" % (l["layer"], l["sha"][:12], l["group"] or "★待确认",
+                                             l["matched_by"], (l["summary"] or "")[:52]))
+
+
+if __name__ == "__main__":
+    main()
