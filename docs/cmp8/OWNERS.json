@@ -2,12 +2,23 @@
   "schema": "remote-ref-ownership/v2",
   "repo": "lixvanran/agent-creativity-mechanism-study",
   "branch": "cmp8-handover-2026-10-20",
-  "generated_at": "2026-10-24T07:57:30Z",
+  "generated_at": "2026-10-24T07:58:54Z",
   "generator": "tools/build_owners_json.py（v2：按 tree sha 匹配本地 commit ⇒ 自维护）",
   "note": "★ 归属由【远端层的 tree sha】匹配【本地 commit】得到 ⇒ 再从本地 message 前缀反推组名 ⇒ ⇒ 不需要维护任何硬编码表 ⇒ ⇒ 未知一律 needs_confirmation=true，不猜。",
   "layers": [
     {
       "layer": 20,
+      "sha": "e30dd8e6db763544c210380616532c3c61c184b5",
+      "group": "三组",
+      "local_commit": null,
+      "remote_message": "[三组] 修归属表生成器的仓库根路径；归属表改为按 tree sha 自维护匹配",
+      "summary": "[三组] 修归属表生成器的仓库根路径；归属表改为按 tree sha 自维护匹配",
+      "needs_confirmation": false,
+      "matched_by": "none",
+      "note": ""
+    },
+    {
+      "layer": 19,
       "sha": "27c12dd3ec507a5027e6e1df07187c8446f81b31",
       "group": "三组",
       "local_commit": null,
@@ -18,7 +29,7 @@
       "note": ""
     },
     {
-      "layer": 19,
+      "layer": 18,
       "sha": "78ab8b49bdb8e798940409e64bfdd0b013e6bf8a",
       "group": null,
       "local_commit": null,
@@ -29,7 +40,7 @@
       "note": ""
     },
     {
-      "layer": 18,
+      "layer": 17,
       "sha": "d9b0286f9f77cdaced02fc137abcf099b42c07c6",
       "group": "第二组",
       "local_commit": null,
@@ -40,7 +51,7 @@
       "note": ""
     },
     {
-      "layer": 17,
+      "layer": 16,
       "sha": "e09492d3050a002e34bc1a7427f54e6f1bade083",
       "group": "三组",
       "local_commit": null,
@@ -51,7 +62,7 @@
       "note": ""
     },
     {
-      "layer": 16,
+      "layer": 15,
       "sha": "6ce6251b2f71cfb0f63feb16130ae927ba2d893e",
       "group": "三组",
       "local_commit": null,
@@ -62,7 +73,7 @@
       "note": ""
     },
     {
-      "layer": 15,
+      "layer": 14,
       "sha": "44f41f4a3492a4bd808f7b95ab3f0847b30d29fa",
       "group": "三组",
       "local_commit": null,
@@ -73,51 +84,51 @@
       "note": ""
     },
     {
-      "layer": 14,
-      "sha": "a6208aec1c2090ebe464a9e6bbba7eded1ce255f",
-      "group": null,
-      "local_commit": null,
-      "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
-      "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
-    },
-    {
       "layer": 13,
-      "sha": "24e3ebb95cdd6f6837add5d863f183751b7aadcc",
-      "group": null,
-      "local_commit": null,
+      "sha": "a6208aec1c2090ebe464a9e6bbba7eded1ce255f",
+      "group": "三组",
+      "local_commit": "14dddc5",
       "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
+      "summary": "OWNERS.json 生成 + 打包改先验后换",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
       "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
     },
     {
       "layer": 12,
-      "sha": "41009794b3d486f4133a59a2655fa8f051d3800a",
-      "group": null,
-      "local_commit": null,
+      "sha": "24e3ebb95cdd6f6837add5d863f183751b7aadcc",
+      "group": "三组",
+      "local_commit": "356ecaa",
       "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
+      "summary": "OWNERS.json 生成器（含 User-Agent 与 API 兜底）",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
       "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
     },
     {
       "layer": 11,
-      "sha": "7ab16b40101edc3ea5434681ae7a1ef24bc5e642",
-      "group": null,
-      "local_commit": null,
+      "sha": "41009794b3d486f4133a59a2655fa8f051d3800a",
+      "group": "三组",
+      "local_commit": "d4ef317",
       "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
+      "summary": "分维度表按精确口径 + 贡献三条加定位句 + OWNERS 生成器",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
       "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
     },
     {
       "layer": 10,
+      "sha": "7ab16b40101edc3ea5434681ae7a1ef24bc5e642",
+      "group": "三组",
+      "local_commit": "223efd1",
+      "remote_message": "update",
+      "summary": "[三组] commit message 格式改为 [组名] 前缀",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
+      "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
+    },
+    {
+      "layer": 9,
       "sha": "9e7af45adb04fcb2233cb48728631b73b5883c75",
       "group": "第二组",
       "local_commit": null,
@@ -128,18 +139,18 @@
       "note": ""
     },
     {
-      "layer": 9,
+      "layer": 8,
       "sha": "f0d8004fa6ba2039ce170f491b32a40aeec40403",
-      "group": null,
-      "local_commit": null,
+      "group": "三组",
+      "local_commit": "797190b",
       "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
+      "summary": "KNOWN_ISSUES 重写 + 摘要加两判官反号 + §2.3 措辞 + §6.4.4e",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
       "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
     },
     {
-      "layer": 8,
+      "layer": 7,
       "sha": "4654245ac709a4a7a6a19482934476b58aea4b0c",
       "group": "第二组",
       "local_commit": null,
@@ -150,7 +161,7 @@
       "note": ""
     },
     {
-      "layer": 7,
+      "layer": 6,
       "sha": "5b7fb46703201b47e6a66721c3cf71c9916b2e5c",
       "group": "第二组",
       "local_commit": null,
@@ -161,40 +172,40 @@
       "note": ""
     },
     {
-      "layer": 6,
-      "sha": "8934cb193cc220fd622d332f252c0b3351a31766",
-      "group": null,
-      "local_commit": null,
-      "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
-      "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
-    },
-    {
       "layer": 5,
-      "sha": "2055e086ad98ff444da85edfd58e55f1b2f3387e",
-      "group": null,
-      "local_commit": null,
+      "sha": "8934cb193cc220fd622d332f252c0b3351a31766",
+      "group": "三组",
+      "local_commit": "e483f4a",
       "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
+      "summary": "分维度偏好表 + 负对照分母真因",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
       "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
     },
     {
       "layer": 4,
-      "sha": "895f7258b923731607abce1aba36feb274065e0d",
-      "group": null,
-      "local_commit": null,
+      "sha": "2055e086ad98ff444da85edfd58e55f1b2f3387e",
+      "group": "三组",
+      "local_commit": "6a48f8a",
       "remote_message": "update",
-      "summary": "update",
-      "needs_confirmation": true,
-      "matched_by": "none",
+      "summary": "解耦帧组合 seed + 论文更正 nf 偏好 + 留出集续跑脚本",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
       "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
     },
     {
       "layer": 3,
+      "sha": "895f7258b923731607abce1aba36feb274065e0d",
+      "group": "三组",
+      "local_commit": "548fcdc",
+      "remote_message": "update",
+      "summary": "法律域结论空间 v3 + 合并反馈循环 bug 修复 + avg_m 改 2D",
+      "needs_confirmation": false,
+      "matched_by": "fallback(历史update层)",
+      "note": "远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
+    },
+    {
+      "layer": 2,
       "sha": "f101f4a94c84e14cdbc555f9acf52433475edbd1",
       "group": null,
       "local_commit": null,
@@ -205,23 +216,12 @@
       "note": ""
     },
     {
-      "layer": 2,
+      "layer": 1,
       "sha": "0267b0864be36a389aaff98849fe40867cb78904",
       "group": null,
       "local_commit": null,
       "remote_message": "feat(COLLAPSE): ★★ 重新训练 —— 奖励函数对齐「局部不钻牛角尖 + 整体思维面更宽」",
       "summary": "feat(COLLAPSE): ★★ 重新训练 —— 奖励函数对齐「局部不钻牛角尖 + 整体思维面更宽」",
-      "needs_confirmation": true,
-      "matched_by": "none",
-      "note": ""
-    },
-    {
-      "layer": 1,
-      "sha": "180f5dc91cf9062978c9ccf6917b1af76155cff0",
-      "group": null,
-      "local_commit": null,
-      "remote_message": "feat(COLLAPSE): ★★ 架构优化 —— 把三个写死的自由度交给策略学习",
-      "summary": "feat(COLLAPSE): ★★ 架构优化 —— 把三个写死的自由度交给策略学习",
       "needs_confirmation": true,
       "matched_by": "none",
       "note": ""
