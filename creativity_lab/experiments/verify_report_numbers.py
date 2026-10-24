@@ -224,21 +224,21 @@ def self_test():
     n_inline = 0       # ★ inline 变异块计数（★ 用于「各块之和 == 总数」自检 ★）
     # ② 改 json 的 σ
     m2 = json.loads(json.dumps(d)); m2["h0"]["vendi"]["sigma_rep"] = 9.999
-    cases.append(("改 json 的 σ", m2, rep))
+    cases.append(("改 json 的 σ", m2, rep, ("vendi σ",)))
     # ③ 改 json 的 θ₀
     m3 = json.loads(json.dumps(d)); m3["theta0"] = 9.99
-    cases.append(("改 json 的 θ₀", m3, rep))
+    cases.append(("改 json 的 θ₀", m3, rep, ("θ₀",)))
     # ④ 改 json 的逐格标准化效应量
     m4 = json.loads(json.dumps(d))
     m4["verdicts"]["H-TOPO-4a"]["cells"][0]["vendi_std"] = 9.99
-    cases.append(("改 json 的逐格效应量", m4, rep))
+    cases.append(("改 json 的逐格效应量", m4, rep, ("逐格标准化效应",)))
     # ⑤ 改 json 的题级方向
     m5 = json.loads(json.dumps(d))
     m5["verdicts"]["H-TOPO-4c"]["dir_votes"][0][1] = 9.99
-    cases.append(("改 json 的题级方向", m5, rep))
+    cases.append(("改 json 的题级方向", m5, rep, ("题级方向",)))
     # ⑥ 改 json 的 H0 配对 n
     m6 = json.loads(json.dumps(d)); m6["h0"]["vendi"]["n_pairs"] = 999
-    cases.append(("改 json 的 H0 配对 n", m6, rep))
+    cases.append(("改 json 的 H0 配对 n", m6, rep, ("n_pairs", "配对")))
     # ⑥′ 改 json 使超门槛格数变化（★ 靠改一个格值让它跨过门槛 ★）
     m6b = json.loads(json.dumps(d))
     _th0 = d["theta0"]
@@ -246,19 +246,31 @@ def self_test():
         if abs(_x["vendi_std"]) < _th0:
             _x["vendi_std"] = _th0 + 0.5
             break
-    cases.append(("改 json 使超门槛格数变化", m6b, rep))
+    cases.append(("改 json 使超门槛格数变化", m6b, rep, ("超门槛",)))
     # ⑥″ 改 json 的题级方向【去掉一个题】（★ 专门抓「漏一个」★★）
     m6c = json.loads(json.dumps(d))
     m6c["verdicts"]["H-TOPO-4c"]["dir_votes"] = m6c["verdicts"]["H-TOPO-4c"]["dir_votes"][:2]
-    cases.append(("改 json 去掉 4c 的一个题级方向", m6c, rep))
-    for label, mj, rp in cases:
+    cases.append(("改 json 去掉 4c 的一个题级方向", m6c, rep, ("题级方向",)))
+    # ★ ★★★ 2026-10-24 改：★ 判据从「有红就行」升级为「★ 必须点名【预期的那一处】★★ ★」
+    #   ★ 起因：★ 第 1 层论证线 14:20Z ⇒ ★ 「★ 必须为每道闸门设计一个【只有它能抓】的场景 ★」
+    #   ★ ⇒ ★ 若变异体被【另一道挡】截住（★ 也红了、★ 但红的是别处 ★）⇒ ★
+    #   ★   ★ 那个变异【不能单独证伪被测物】★★ ★ ⇒ ★ ★ 本判据会把这种情况【暴露成失败】★★ ★
+    for label, mj, rp, expect_kw in cases:
         n_mut += 1
         e, _c2 = verify(rp, mj)
         print("== 自测：%s ⇒ 应当【被抓】==" % label)
-        if e:
-            print("   ✔ 抓到 %d 处：%s" % (len(e), e[0]))
-        else:
+        if not e:
             print("   ✘ 没抓到 ⇒ 这个检查是假绿")
+            return 1
+        _hit = [x for x in e if any(kw in x for kw in expect_kw)]
+        if _hit:
+            print("   ✔ 抓到 %d 处（★ 其中【预期的】%d 处：%s ★）" % (len(e), len(_hit), _hit[0]))
+        else:
+            print("   ✘✘ 抓到了、★ 但【没有一处是预期的那个检查】（★ 期望含 %s ★）★★ ★"
+                  % (" / ".join(expect_kw)))
+            print("      实际第一处：%s" % e[0])
+            print("   ⇒ ★ ★ 【变异体被【另一道挡】截住了】★★ ★ ⇒ ★ "
+                  "★ 这个变异【不能单独证伪被测物】★★ ★")
             return 1
     # ⑦ 改【报告里】那一格（★ 只改一处 ⇒ 专门抓「命中≠这一处对」★）
     # ★ ★ 变异必须打在【正确的那一行】★ ⇒ ★ 不能用全文 replace（★ 否则改的是别处的同串 ★）
@@ -278,12 +290,22 @@ def self_test():
     mutated = "\n".join(lines)
     n_mut += 1
     n_inline += 1
-    e = verify(mutated, d)
+    # ★ ★★★ 2026-10-24 修（★ 一个【空转的真 bug】★）：★ verify 返回 (errs, covered) ★
+    #   ★ ⇒ ★ 原来写 `e = verify(...)` ⇒ ★ ★ e 是【元组】⇒ ★ ⇒ ★ `if e` 【恒真】★★ ★
+    #   ★ ⇒ ★ ★ 【这两次 inline 变异自测一直在空转】★★ ★ ⇒ ★ ⇒ ★ 升级成「点名」判据后才暴露 ★★★ ★
+    #   ★ ⇒ ★ ★ ★ 【★ 「变异自测全绿」本身也可能是假的 ★ ⇒ ★ 判据写错 ⇒ ★ 恒真 ⇒ ★ 绿 ★】★★ ★ ★
+    e, _cov1 = verify(mutated, d)
     print("== 自测：改【报告里】主判据表那一格 ⇒ 应当【被抓】==")
-    if e:
-        print("   ✔ 抓到 %d 处：%s" % (len(e), e[0]))
-    else:
+    _kw1 = ("逐格标准化效应",)
+    if e and any(kw in x for x in e for kw in _kw1):
+        print("   ✔ 抓到 %d 处（★ 其中【预期的】%d 处：%s ★）"
+              % (len(e), len([x for x in e if any(kw in x for kw in _kw1)]),
+                 [x for x in e if any(kw in x for kw in _kw1)][0]))
+    elif not e:
         print("   ✘ 没抓到")
+        return 1
+    else:
+        print("   ✘✘ 抓到了、★ 但红的是别处（★ 期望含 %s ★）★★ ★" % (" / ".join(_kw1)))
         return 1
     # ⑧ 改【报告里】§6.10.5 结论句的那一个方向值（★ 只改那一处 ★）
     _lines5 = rep.split("\n")
@@ -293,12 +315,18 @@ def self_test():
         _lines5[_k] = _lines5[_k].replace("S6 +0.3461", "S6 +0.9999", 1)
         n_mut += 1
         n_inline += 1
-        e, _c2 = verify("\n".join(_lines5), d)
+        e, _c2 = verify("\n".join(_lines5), d)   # ★ ★ 这里本来就是双解包（★ 对 ★）★★
         print("== 自测：改【报告里】结论句的那一个方向值 ⇒ 应当【被抓】==")
-        if e:
-            print("   ✔ 抓到 %d 处：%s" % (len(e), e[0]))
-        else:
+        _kw2 = ("题级方向",)
+        if e and any(kw in x for x in e for kw in _kw2):
+            print("   ✔ 抓到 %d 处（★ 其中【预期的】%d 处：%s ★）"
+                  % (len(e), len([x for x in e if any(kw in x for kw in _kw2)]),
+                     [x for x in e if any(kw in x for kw in _kw2)][0]))
+        elif not e:
             print("   ✘ 没抓到")
+            return 1
+        else:
+            print("   ✘✘ 抓到了、★ 但红的是别处（★ 期望含 %s ★）★★ ★" % (" / ".join(_kw2)))
             return 1
     print()
     print("✔ 自测全过：★ 这个检查会红（★ 不是恒真 ★）★")

@@ -117,10 +117,16 @@ def main():
     #   ★ ⇒ ★ 而是「★ 实际被分析的单元集 == 【冻结单元清单】给出的集合 ★」⇒ ★ ★ 不多不少 ★★
     #   ★ ⇒ ★ 因为【预期】只能来自【预期登记】★ ⇒ ★ raw 只能告诉你「有多少」★
     #   ★ ⇒ ★ 告诉你不了「本该有多少」★★★ ★
+    # ★ ★★★ 2026-10-24 改：★ 覆盖度闸门问【三问】、★ 三类【互斥且穷尽】★★★ ★
+    #   ★ ① 【已登记的失败】（★ 文件在、★ 但产出失败且已记账 ★）⇒ ★ ★ 【算覆盖】★★ ★
+    #   ★ ② 【静默消失】（★ 清单里有、★ 文件不在 ★）⇒ ★ ★ 【不算覆盖】⇒ ★ 响亮失败 ★★ ★
+    #   ★ ③ 【落盘了但内容空、★ 且【无失败登记】】（★ ⇒ 可能是「跑完但没写出来」★）★★
+    #   ★      ⇒ ★ ★ 【显式登记 + 计数】★★ ★ ⇒ ★ 不许静默 ★★ ★
+    # ★ 依据：★ 第 1 层论证线 2026-10-24 14:20Z 的三问 + 我方自身的「躲过是巧合」教训 ★
     if allowed is not None:
         _avail = set(fn[:-5] for fn in os.listdir(unit_dir)
                      if fn.endswith(".json") and fn[:-5] in allowed)
-        _missing = sorted(allowed - _avail)
+        _missing = sorted(allowed - _avail)         # ★ ② 静默消失 ★
         if _missing:
             print("✘✘ 覆盖度不足：★ 单元清单登记 %d 个、★ units/ 下实际可读 %d 个 ★"
                   % (len(allowed), len(_avail)))
@@ -129,6 +135,29 @@ def main():
             die("★ 【数据不覆盖预期】⇒ ★ 响亮失败、不落盘（★ exit 7 ★）★"
                 " ⇒ ★ 空 summary 与正常 summary 在输出层【完全同形】★"
                 " ⇒ ★ 只能靠覆盖度断言区分 ★★", code=7)
+        # ★ ① 与 ③ 的分类计数（★ 逐个单元读一次、★ 只读元数据字段 ★）★★
+        _n_ok = _n_fail_reg = _n_empty_noreg = 0
+        _empty_noreg_list = []
+        for _u in sorted(allowed):
+            try:
+                _d = json.load(open(os.path.join(unit_dir, _u + ".json"), encoding="utf-8"))
+            except Exception as e:                                   # noqa: BLE001
+                die("读不了单元 %s：%s" % (_u, e), code=7)
+            if (_d.get("post") or "").strip():
+                _n_ok += 1
+            elif int(_d.get("n_failed") or 0) > 0:
+                _n_fail_reg += 1                          # ★ ① 已登记的失败 ★
+            else:
+                _n_empty_noreg += 1                       # ★ ③ 落盘但内容空、★ 无失败登记 ★
+                _empty_noreg_list.append(_u)
+        print("★ 覆盖度分类（★ 三类互斥且穷尽 ★）："
+              "成功 **%d** ｜ 已登记失败 **%d**（★ 算覆盖 ★）｜ 落盘但内容空且无失败登记 **%d**"
+              % (_n_ok, _n_fail_reg, _n_empty_noreg))
+        if _empty_noreg_list:
+            print("   ★ ★ 落盘但内容空、★ 且【无失败登记】（★ 不许静默 ★）：%s"
+                  % "、".join(_empty_noreg_list[:20]))
+            print("   ⇒ ★ ★ 这一类是【既不是成功、★ 也不是已登记失败】★ ⇒ ★ "
+                  "★ 【可能】是「跑完但没写出来」★ ⇒ ★ ★ 显式登记、★ 不进读数分子/分母 ★★ ★")
     _n_avail = len([fn for fn in os.listdir(unit_dir)
                     if fn.endswith(".json") and (allowed is None or fn[:-5] in allowed)])
     if _n_avail == 0:

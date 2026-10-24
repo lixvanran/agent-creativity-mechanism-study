@@ -139,6 +139,7 @@ def main():
     for k, cs in claims.items():
         by[k.split("|")[0]][k.split("|")[1]].extend(cs)
     print("%-13s %8s %8s %9s %9s" % ("arm", "宽度.70", "宽度.75", "支持率", "矛盾率"))
+    _denoms = {}
     for a in ARMS:
         w70, w75, S, C, UN, CL, NM = [], [], 0, 0, 0, 0, 0
         for T in TOPICS:
@@ -158,13 +159,29 @@ def main():
         # ★ ⇒ ★ ★ 修正：★ 改为排除【非主张】⇒ ★ 与预注册与 A 篇正文【同口径】⇒ ★ 恢复跨组可比 ★★
         #   ★ ⇒ ★ ★ 【「未提及」不排除】★：★ 它是【判官没提到该断言】⇒ ★ 不在分母里【会虚高矛盾率】★★ ★
         legal = max(CL - NM, 1)
-        _legal_un = max(CL - UN, 1)      # ★ 旧口径（★ 排除「未提及」）★ —— ★ 保留以便对照、★ 但【不用于判决】★★
-        print("%-13s %8.2f %8.2f %8.1f%% %8.1f%%   (★ 断言 %d ｜ 分母[排除非主张] %d ｜ 旧口径[排除未提及] %d ★)"
+        # ★ ★★★ 2026-10-24 · 改成【两个口径都报 + 各自标注】★★ ★★★
+        #   ★ 起因：★ 第 1 层论证线 14:20Z ⇒ ★ 「★ 口径修正本身【也是一次口径变更】★ ⇒ ★
+        #   ★   ★ 若只报一个数，★ 读者【无法判断用的是哪个】⇒ ★ ⇒ 那个数【无法被复核】★★ ★
+        #   ★   ★ ⇒ ★ ★ 两个都报，★ 读者【至少能自己判断这个数来自哪个口径】★★ ★★
+        # ★ 口径 A = 断言数 − 非主张（★ A 篇 §3.7 / DRILL §4c / 预注册 ★）⇒ ★ 【判决用、★ 外部可比】★★
+        # ★ 口径 B = 断言数 − 未提及（★ 旧 gate_policy:152 ★）⇒ ★ 【对照用、★ 与历史批连续】★★
+        _legal_B = max(CL - UN, 1)
+        print("%-13s %8.2f %8.2f %8.1f%% %8.1f%%   (★ 断言 %d ｜ A[排除非主张] %d ｜ B[排除未提及] %d ★)"
               % (a, np.mean(w70), np.mean(w75), 100 * S / legal, 100 * C / legal,
-                 CL, legal, _legal_un), flush=True)
+                 CL, legal, _legal_B), flush=True)
+        _denoms.setdefault(a, {"n_claims": CL, "n_support": S, "n_contradiction": C,
+                               "n_unmentioned": UN, "n_nonclaim": NM,
+                               "legal_denominator_A": legal, "legal_denominator_B": _legal_B,
+                               "denominator_A_spec": "★ 断言数 − 非主张（★ A 篇 §3.7 / DRILL §4c / 预注册 ★）★",
+                               "denominator_B_spec": "★ 断言数 − 未提及（★ 旧 gate_policy:152 ★）★",
+                               "support_rate_A": 100 * S / legal, "contradiction_rate_A": 100 * C / legal,
+                               "support_rate_B": 100 * S / _legal_B, "contradiction_rate_B": 100 * C / _legal_B,
+                               "caveat": "★ 二者差 ~1.8 倍 ⇒ ★ 引用时【必须写清用的是哪个】★ ⇒ ★ 判决用 A ★"})
 
     json.dump(dict(texts=texts, claims=claims, verdicts=verd,
-                   saturation=[[t, a, b, c] for t, a, b, c in sats]),
+                   saturation=[[t, a, b, c] for t, a, b, c in sats],
+                   denominators=_denoms,
+                   denominators_note="★ ★ 两个口径都报：★ A=排除非主张（★ 判决用 ★）｜ ★ B=排除未提及（★ 对照用 ★）★ ★ ⇒ ★ 引用时必须写清用的是哪个 ★★ ★"),
               open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("\n总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
 
