@@ -18,6 +18,22 @@ TOK = os.environ.get("GITHUB_TOKEN_LIXVANRAN", "")
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(HERE, ".."))   # cmp8repo/
 
+
+# ★ 历史 fallback：仅用于【修复前】那些远端 message 写成 "update" 的层
+#   （它们的 tree 与本地 tree 不同 ⇒ tree sha 匹配不成立 ⇒ 只能靠本地 commit 映射补）
+#   ⇒ 未来层不再需要本表：commit body 自带 owner 行 ⇒ 归属自描述
+FALLBACK = {
+    "a6208aec1c20": ("三组", "14dddc5", "OWNERS.json 生成 + 打包改先验后换"),
+    "24e3ebb95cdd": ("三组", "356ecaa", "OWNERS.json 生成器（含 User-Agent 与 API 兜底）"),
+    "41009794b3d4": ("三组", "d4ef317", "分维度表按精确口径 + 贡献三条加定位句 + OWNERS 生成器"),
+    "7ab16b40101e": ("三组", "223efd1", "[三组] commit message 格式改为 [组名] 前缀"),
+    "9e7af45adb04": ("三组", None, "★ 叠加在 f0d8004fa6ba 之上（本地对应 commit 待补）"),
+    "f0d8004fa6ba": ("三组", "797190b", "KNOWN_ISSUES 重写 + 摘要加两判官反号 + §2.3 措辞 + §6.4.4e"),
+    "8934cb193cc2": ("三组", "e483f4a", "分维度偏好表 + 负对照分母真因"),
+    "2055e086ad98": ("三组", "6a48f8a", "解耦帧组合 seed + 论文更正 nf 偏好 + 留出集续跑脚本"),
+    "895f7258b923": ("三组", "548fcdc", "法律域结论空间 v3 + 合并反馈循环 bug 修复 + avg_m 改 2D"),
+}
+
 GROUPS = ("三组", "第二组", "层2", "第四组", "论文簇", "multi-mind")
 
 
@@ -82,12 +98,21 @@ def main():
             local_sha, local_msg = cand[0]
         g = owner_of(local_msg or msg)
         summary = (local_msg or msg)
+        matched = "tree_sha" if cand else "none"
+        if g is None:
+            for k, v in FALLBACK.items():
+                if sha.startswith(k):
+                    g, fb_local, fb_sum = v
+                    local_sha = local_sha or fb_local
+                    summary = fb_sum
+                    matched = "fallback(历史update层)"
+                    break
         conf = (g is None)
         layers.append(dict(
             layer=len(chain) - i, sha=sha, group=g,
             local_commit=local_sha, remote_message=msg,
             summary=summary, needs_confirmation=conf,
-            matched_by="tree_sha" if cand else "none",
+            matched_by=matched,
             note=("远端 message 无信息量（'update' 等）⇒ 归属由 tree sha 匹配到本地 commit 得出"
                   if msg.strip().lower() in ("update", "update.", "wip", "tmp", "commit", "fix")
                   else "")))
