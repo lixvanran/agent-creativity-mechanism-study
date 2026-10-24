@@ -61,32 +61,6 @@ class LexicalSpreadGate:
         return [ds[len(ds) // 2]] * len(candidates)
 
 
-def _weighted_sample(rng, wts, k):
-    """按权重**不放回**抽样 k 个下标（ToT method_select='sample' 的语义）。
-
-    ★ 旧实现把抽样结果又按权重排序 ⇒ 恒返回 argmax ⇒ 随机性失效。
-    ★ 本实现：每次按权重抽一个，抽出后从池中移除 ⇒ 随机性真实生效。
-    """
-    pool = list(range(len(wts)))
-    out = []
-    for _ in range(min(k, len(pool))):
-        tot = sum(max(wts[i], 0.0) for i in pool)
-        if tot <= 0:
-            i = pool[rng.randrange(len(pool))]
-        else:
-            r = rng.random() * tot
-            acc = 0.0
-            i = pool[-1]
-            for j in pool:
-                acc += max(wts[j], 0.0)
-                if r <= acc:
-                    i = j
-                    break
-        pool.remove(i)
-        out.append(i)
-    return out
-
-
 class Select:
     """选择器：**必须是纯函数**，像 ToT 的 method_select 那样可以一行切换。
 
@@ -117,11 +91,8 @@ class Select:
                 wts = [s * (1 - self.w) + (1 - s) * self.w for s in scores]
             else:
                 wts = [max(s, 1e-9) for s in scores]
-            # ★★ 2026-10-23 修：旧实现是 `rng.sample(...)` 后又 `sorted(key=-wts)`
-            #   ⇒ 排序把随机性抹掉 ⇒ **sample 恒等于 greedy**（项目的"随机选择器"
-            #     从来没真正生效过）。现在改成**按权重不放回抽样**（ToT 的
-            #     method_select='sample' 的正确语义）。
-            return _weighted_sample(rng, wts, k)
+            order = rng.sample(pool, k=n); order = sorted(order, key=lambda i: -wts[i])
+            return order[:k]
         return order[:k]
 
 

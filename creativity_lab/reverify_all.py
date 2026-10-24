@@ -97,8 +97,8 @@ def main():
             if n % 20 == 0:
                 print("  %d/%d" % (n, len(futs)), flush=True)
                 json.dump(verd, open("%s/verdicts_v4_full.json" % OUT, "w"),
-                          ensure_ascii=False, indent=1, sort_keys=True)
-    json.dump(verd, open("%s/verdicts_v4_full.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+                          ensure_ascii=False, indent=1)
+    json.dump(verd, open("%s/verdicts_v4_full.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("  完成，判定 %d 条" % len(verd), flush=True)
 
     # ---- 按臂统计 ----
@@ -117,7 +117,7 @@ def main():
         print("%-14s %6d %6d %6d %6d %7.1f%% %7.1f%%"
               % (arm, cl, su, co, nm, 100 * co / legal, 100 * su / legal))
 
-    json.dump(verd, open("%s/verdicts_v4_full.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+    json.dump(verd, open("%s/verdicts_v4_full.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("\n已存 %s/verdicts_v4_full.json" % OUT)
 
 

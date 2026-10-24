@@ -88,8 +88,8 @@ def main():
                 print("  ERR %s %s" % (k, str(e)[:50]), flush=True)
             if n % 8 == 0:
                 print("  %d/%d (%.0fs)" % (n, len(futs), time.time() - t0), flush=True)
-                json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
-    json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+                json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1)
 
     print("\n== 2. 断言抽取 ==", flush=True)
     claims = {}
@@ -97,7 +97,7 @@ def main():
         futs = {ex.submit(extract_claims, LLM(), v): k for k, v in texts.items()}
         for n, f in enumerate(as_completed(futs), 1):
             claims[futs[f]] = f.result()
-    json.dump(claims, open("%s/claims.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+    json.dump(claims, open("%s/claims.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("  断言 %d 条，空抽取 %d 份" % (sum(len(v) for v in claims.values()),
                                        sum(1 for v in claims.values() if not v)), flush=True)
 
@@ -112,7 +112,7 @@ def main():
         n = {x: sum(1 for y in v.values() if y == x) for x in ("支持", "矛盾", "未提及", "非主张")}
         print("  %s 断言 %2d → 支持 %2d / 矛盾 %2d / 未提及 %2d / 非主张 %2d"
               % (T["tid"], len(pool), n["支持"], n["矛盾"], n["未提及"], n["非主张"]), flush=True)
-    json.dump(verd, open("%s/verdicts.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+    json.dump(verd, open("%s/verdicts.json" % OUT, "w"), ensure_ascii=False, indent=1)
 
     print("\n== 4. 饱和度（扣题域地板）==", flush=True)
     sats = []
@@ -155,7 +155,7 @@ def main():
 
     json.dump(dict(texts=texts, claims=claims, verdicts=verd,
                    saturation=[[t, a, b, c] for t, a, b, c in sats]),
-              open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+              open("%s/summary.json" % OUT, "w"), ensure_ascii=False, indent=1)
     print("\n总耗时 %.0f 分钟" % ((time.time() - t0) / 60))
 
 

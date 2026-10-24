@@ -86,7 +86,7 @@ for k, txt in texts.items():
         net=(round((len(new) - len(lost)) / max(len(txt), 1) * 100, 4)
              if lost is not None else None),
     ))
-json.dump(recs, open("%s/records3c.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+json.dump(recs, open("%s/records3c.json" % OUT, "w"), ensure_ascii=False, indent=1)
 
 print("%-22s %5s %5s %5s %5s %5s %8s" % ("key", "len", "clm", "sup", "new", "lost", "net"))
 for r in sorted(recs, key=lambda x: -(x["net"] if x["net"] is not None else -9e9)):
