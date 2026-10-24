@@ -53,10 +53,28 @@ def think_unclosed(raw: str) -> bool:
 
 
 # ---------------------------------------------------------------- 底层 POST
-def _post(url: str, key: str, payload: dict, timeout: int = 120, retries: int = 3) -> dict:
+#: 每次调用的流水（供成本与审计）
+TRACE: list = []
+
+#: ★★ 完整调用日志（**含失败调用**）—— 通道健康度的正确分母。
+#: 一条记录 = 一次**逻辑调用**（内部重试折叠在 attempts/errors 里）。
+#: ⚠️ TRACE 只在成功时 append ⇒ 失败调用完全没进账 ⇒ 健康度会被高估
+#:    （"失败漏记"是"静默归零"里最隐蔽的形态：分母变小，看起来像"通道天生不好"）。
+CALL_LOG: list = []
+
+
+SOCKET_TIMEOUT = 90   # ★ 单次调用硬上限（实测：某次调用挂住 30 分钟未超时）
+
+
+def _post(url: str, key: str, payload: dict, timeout: int = 90, retries: int = 3,
+          meta: dict | None = None) -> dict:
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     last = None
+    attempts = 0
+    errors: list = []
+    t0 = time.time()
     for attempt in range(retries):
+        attempts += 1
         req = urllib.request.Request(
             url, data=data,
             headers={"Authorization": "Bearer %s" % key,
@@ -65,10 +83,25 @@ def _post(url: str, key: str, payload: dict, timeout: int = 120, retries: int = 
                      "X-Title": "G4-agent-creativity"})
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return json.loads(resp.read().decode("utf-8"))
+                raw = json.loads(resp.read().decode("utf-8"))
+                _c = (raw.get("choices") or [{}])[0]
+                CALL_LOG.append({
+                    "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "url": url, "model": (meta or {}).get("model") or payload.get("model"),
+                    "base_url": (meta or {}).get("base_url"),
+                    "kind": (meta or {}).get("kind"),
+                    "prompt_chars": len(str(payload.get("messages") or "")),
+                    "max_tokens": payload.get("max_tokens"),
+                    "attempts": attempts, "errors": list(errors), "ok": True,
+                    "latency": round(time.time() - t0, 2),
+                    "finish_reason": _c.get("finish_reason"),
+                    "usage": raw.get("usage"),
+                })
+                return raw
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", "replace")[:300]
             last = "HTTP %d: %s" % (e.code, body)
+            errors.append(last)
             if e.code in (400, 401, 403, 404, 422):
                 break
             if e.code == 429:
@@ -76,8 +109,20 @@ def _post(url: str, key: str, payload: dict, timeout: int = 120, retries: int = 
                 continue
         except Exception as e:
             last = "%s: %s" % (type(e).__name__, e)
+            errors.append(last)
         if attempt < retries - 1:
             time.sleep(2 ** (attempt + 1))
+    CALL_LOG.append({
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "url": url, "model": (meta or {}).get("model") or payload.get("model"),
+        "base_url": (meta or {}).get("base_url"),
+        "kind": (meta or {}).get("kind"),
+        "prompt_chars": len(str(payload.get("messages") or "")),
+        "max_tokens": payload.get("max_tokens"),
+        "attempts": attempts, "errors": list(errors), "ok": False,
+        "latency": round(time.time() - t0, 2),
+        "finish_reason": None, "usage": None,
+    })
     raise APIError("调用失败：%s" % last)
 
 
@@ -116,7 +161,8 @@ def chat(messages, model, base=None, key_env=None, max_tokens=4000,
             # ★ 结构化中间态（自然语言但有格式约束）⇒ 关 thinking
             payload["thinking"] = {"type": "disabled"}
         t0 = time.time()
-        raw = _post(url, key, payload)
+        raw = _post(url, key, payload, meta={"model": model, "base_url": base,
+                                             "kind": "json" if json_mode else "text"})
         dt = time.time() - t0
         ch = (raw.get("choices") or [{}])[0]
         msg = ch.get("message") or {}
@@ -138,6 +184,26 @@ def chat(messages, model, base=None, key_env=None, max_tokens=4000,
         return strip_think(content) if not json_mode else content.strip()
 
     raise APIError("不可达")
+
+
+def dump_calllog(path) -> dict:
+    """把 CALL_LOG 落成 jsonl（**含失败调用**）⇒ 事后可独立重算通道健康度。
+
+    返回健康度摘要：attempts（含重试）/ ok / failed / 成功率。
+    ⚠️ 分母 = **全部逻辑调用**（失败也在内）⇒ 不用成功数当分母。
+    """
+    import pathlib as _pl
+    p = _pl.Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("w", encoding="utf-8") as f:
+        for rec in CALL_LOG:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    tot = len(CALL_LOG)
+    ok = sum(1 for r in CALL_LOG if r.get("ok"))
+    attempts = sum(int(r.get("attempts") or 1) for r in CALL_LOG)
+    return {"path": str(p), "calls_logical": tot, "ok": ok, "failed": tot - ok,
+            "http_attempts": attempts,
+            "success_rate": round(ok / tot, 4) if tot else None}
 
 
 def cost_estimate(trace=None) -> dict:

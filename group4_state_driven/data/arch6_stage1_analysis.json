@@ -1,0 +1,102 @@
+{
+  "src": "runs/arch6_stage1.jsonl",
+  "n_rows": 5,
+  "n_ok": 5,
+  "n_err": 0,
+  "errors": [],
+  "target_change_rate": 1.0,
+  "candidate_homogeneity_rate": 0.8,
+  "align_shift_mean": -0.09441333333333332,
+  "align_shift_var_mean": 0.2010041063160659,
+  "align_var_B": 0.06939153550686136,
+  "align_var_D": 0.15741666911655444,
+  "sel_change_quota_rate": 0.0,
+  "sel_change_nocost_rate": 0.0,
+  "verdict_mechanism": "≈0 ⇒ 代价未接入选择器 ⇒ H1c 机制上不可测 ⇒ ★ 主动终止并报「代价未接入选择器」（不是『无效应』）",
+  "gate_diag": {
+    "escape": {
+      "ok": 5,
+      "n": 5,
+      "constant": 0,
+      "var_mean": 0.0016069999999999997,
+      "len_corr_mean": -0.45318000000000014
+    },
+    "spread": {
+      "ok": 5,
+      "n": 5,
+      "constant": 5,
+      "var_mean": 0.0,
+      "len_corr_mean": null
+    },
+    "length": {
+      "ok": 5,
+      "n": 5,
+      "constant": 0,
+      "var_mean": 0.007968,
+      "len_corr_mean": 1.0
+    }
+  },
+  "family_gate_counts": {
+    "escape": 5
+  },
+  "sigma_new": 0.2356786965340737,
+  "sigma_v5_extrapolated": 0.2186,
+  "gap_mean": 4.00000000000067e-05,
+  "mde_table": [
+    {
+      "n_per_cell": 3,
+      "mde80": 0.7624,
+      "power_delta015": 0.085
+    },
+    {
+      "n_per_cell": 5,
+      "mde80": 0.5906,
+      "power_delta015": 0.11
+    },
+    {
+      "n_per_cell": 8,
+      "mde80": 0.4669,
+      "power_delta015": 0.147
+    },
+    {
+      "n_per_cell": 10,
+      "mde80": 0.4176,
+      "power_delta015": 0.172
+    },
+    {
+      "n_per_cell": 15,
+      "mde80": 0.341,
+      "power_delta015": 0.234
+    },
+    {
+      "n_per_cell": 20,
+      "mde80": 0.2953,
+      "power_delta015": 0.296
+    },
+    {
+      "n_per_cell": 25,
+      "mde80": 0.2641,
+      "power_delta015": 0.356
+    }
+  ],
+  "fulfillment": {
+    "ful_B": {
+      "n": 5,
+      "fulfill_lower": 0.35,
+      "violation_upper": 0.5
+    },
+    "ful_D": {
+      "n": 5,
+      "fulfill_lower": 0.35,
+      "violation_upper": 0.5
+    },
+    "ful_F": {
+      "n": 5,
+      "fulfill_lower": 0.35,
+      "violation_upper": 0.5
+    }
+  },
+  "quota_natural": 1,
+  "quota_forced": 4,
+  "D0_v3": 0.072
+}
