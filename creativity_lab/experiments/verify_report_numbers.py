@@ -35,12 +35,20 @@ CONTRASTS = [("H-TOPO-4a", "有无交互"), ("H-TOPO-4c", "有无综述"), ("H-T
 
 
 def section(rep: str, start: str, end: str) -> str:
-    i = rep.find(start)
-    if i < 0:
-        raise RuntimeError("找不到段 %s" % start)
-    j = rep.find(end, i)
-    if j < 0:
-        raise RuntimeError("找不到段尾 %s" % end)
+    """★ 取两个【章节标题】之间的内容 ★
+    ★ ★ 定位必须用【行首唯一锚点】★★
+    ★   ★ 裸标题字符串会命中【表格里引用的标题】⇒ ★ 实测踩过两次：
+    ★   ★ 「### 6.10.2 H0 标定」在 §6.10.0d 的 C 档表里也出现 ⇒ ★ 取到的是那一行 ★
+    ★ ★ ⇒ ★ 一律要求标题出现在【行首】（★ 前一个字符是换行 ★）★ 且【唯一命中】★★
+    """
+    _s, _e = "\n" + start, "\n" + end
+    n_s = rep.count(_s)
+    if n_s != 1:
+        raise RuntimeError("段首 %r 行首命中 %d 次（★ 必须恰好 1 次 ★）" % (start, n_s))
+    if rep.count(_e) < 1:
+        raise RuntimeError("找不到段尾 %r" % end)
+    i = rep.index(_s) + 1
+    j = rep.index(_e, i)
     return rep[i:j]
 
 
@@ -62,8 +70,12 @@ def table_rows(sec: str, prefix: str):
     return out
 
 
-def verify(rep: str, d: dict):
+def verify(rep: str, d: dict, covered=None):
+    """★ covered：★ 可选的集合，★ 记录本检查【实际核对过】的期望值字符串 ★
+    ★ ⇒ ★ 覆盖率审计用它算 A 档，★ 而不是「按段名猜」★（★ 段名会骗人 ★）"""
     errs = []
+    if covered is None:
+        covered = set()
     h0 = d["h0"]
     verd = d["verdicts"]
     theta0 = d["theta0"]
@@ -77,6 +89,7 @@ def verify(rep: str, d: dict):
                         ("%.4f" % v["q95_linear"], "vendi q95(lin)"),
                         ("%.4f" % v["X0_q95_over_sqrt2"], "vendi X₀"),
                         ("%.2f" % v["theta0_standardized"], "vendi θ₀")):
+        covered.add(want)
         if want not in s2:
             errs.append("§6.10.2 缺 %s = %s" % (label, want))
     for want, label in (("%.4f" % h0["modes"]["sigma_rep"], "modes σ"),
@@ -101,12 +114,15 @@ def verify(rep: str, d: dict):
             errs.append("%s 可比单元：报告=%s，json=%s" % (name, norm(cells[2]), c["n_cells"]))
         got = [norm(x) for x in re.split(r"｜|\|", cells[3]) if norm(x)]
         want = ["%.2f" % abs(x["vendi_std"]) for x in c["cells"]]
+        covered.update(want)
         if got != want:
             errs.append("%s 逐格标准化效应：报告=%s，json=%s" % (name, got, want))
+        covered.add("%d/%d" % (sum(1 for x in c["cells"] if abs(x["vendi_std"]) > theta0), c["n_cells"]))
         n_over = sum(1 for x in c["cells"] if abs(x["vendi_std"]) > theta0)
         if norm(cells[4]) != ("%d/%d" % (n_over, c["n_cells"])):
             errs.append("%s 超门槛：报告=%s，json=%d/%d" % (name, norm(cells[4]), n_over, c["n_cells"]))
         want_dir = ["%s%s" % (t, ("%+.4f" % m)) for t, m, _s in c["dir_votes"]]
+        covered.update(want_dir)
         got_dir = [norm(x) for x in re.split(r"｜", cells[5])]
         # ★ 剥掉方向判定后缀（★ 如「⇒ 方向不一致」★）★
         got_dir = [x.split("⇒")[0] for x in got_dir]
@@ -128,6 +144,7 @@ def verify(rep: str, d: dict):
                         ("H0 原料 %d 个同臂同题配对" % n_pairs, "结论句 H0 原料数"),
                         ("题级 n = %s" % ntxt, "结论句题级 n"),
                         ("只覆盖已跑批的 %d 题" % ntid, "结论句已跑题数")):
+        covered.add(norm(want))
         if norm(want) not in s5n:
             errs.append("§6.10.5 缺 %s（期望含「%s」）" % (label, want))
     # ★ ★ 逐组逐题：★ 必须【恰好相等 + 项数相等】★★
@@ -156,6 +173,7 @@ def verify(rep: str, d: dict):
         nc = verd[nm]["n_cells"]
         # ★ 括号用全角：★ 与报告里的写法一致（★ norm() 只去排版装饰、★ 不去括号 ★）★
         pat = ("%s有%d个" % (label, o)) if nm != "H-TOPO-4d" else ("低于门槛（%d/%d）" % (o, nc))
+        covered.add(norm(pat))
         if norm(pat) not in s5n:
             errs.append("§6.10.5 %s 超门槛格数不符（期望含「%s」）" % (label, pat))
     # ★ ★ 「明确不能说的」里的题级 n 与超门槛格明细 ★★
@@ -166,6 +184,7 @@ def verify(rep: str, d: dict):
                  if abs(x["vendi_std"]) > theta0], key=lambda z: -abs(z[2]))
     for t, r, sv in oc:
         want = "%s r%d %+.2fσ" % (t, r, sv)
+        covered.add(norm(want))
         if norm(want) not in s5n:
             errs.append("§6.10.5「明确不能说的」缺超门槛格 %s" % want)
 
@@ -181,7 +200,7 @@ def verify(rep: str, d: dict):
             errs.append("§6.10.6 H0 配对 n：报告=%s，json=%d" % (_got, n_pairs))
     if norm("θ₀ = **%.2f σ**" % theta0) not in norm(s6):
         errs.append("§6.10.6 θ₀ ≠ %.2f" % theta0)
-    return errs
+    return errs, covered
 
 
 def self_test():
@@ -192,7 +211,7 @@ def self_test():
         return 1
     rep = open(rep_p, encoding="utf-8").read()
     d = json.load(open(js_p, encoding="utf-8"))
-    base = verify(rep, d)
+    base, _cov = verify(rep, d)
     print("== 自测 ① 基线：★ 应当【无错】==")
     if base:
         print("   ✘ 基线就有 %d 处不符：" % len(base))
@@ -231,7 +250,7 @@ def self_test():
     m6c["verdicts"]["H-TOPO-4c"]["dir_votes"] = m6c["verdicts"]["H-TOPO-4c"]["dir_votes"][:2]
     cases.append(("改 json 去掉 4c 的一个题级方向", m6c, rep))
     for label, mj, rp in cases:
-        e = verify(rp, mj)
+        e, _c2 = verify(rp, mj)
         print("== 自测：%s ⇒ 应当【被抓】==" % label)
         if e:
             print("   ✔ 抓到 %d 处：%s" % (len(e), e[0]))
@@ -267,7 +286,7 @@ def self_test():
     if _hit:
         _k = _hit[0]
         _lines5[_k] = _lines5[_k].replace("S6 +0.3461", "S6 +0.9999", 1)
-        e = verify("\n".join(_lines5), d)
+        e, _c2 = verify("\n".join(_lines5), d)
         print("== 自测：改【报告里】结论句的那一个方向值 ⇒ 应当【被抓】==")
         if e:
             print("   ✔ 抓到 %d 处：%s" % (len(e), e[0]))
@@ -284,6 +303,8 @@ def main():
     ap.add_argument("--report", default=None)
     ap.add_argument("--json", default=None)
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--json-out", default=None,
+                    help="★ 落盘本检查【实际核对过】的期望值集合（★ 供覆盖率审计算 A 档 ★）")
     a = ap.parse_args()
     if a.self_test:
         return self_test()
@@ -292,13 +313,18 @@ def main():
         return 1
     rep = open(a.report, encoding="utf-8").read()
     d = json.load(open(a.json, encoding="utf-8"))
-    errs = verify(rep, d)
+    errs, covered = verify(rep, d)
     if errs:
         print("✘ 报告与 json 不符（★ %d 处 ★）：" % len(errs))
         for e in errs:
             print("   - %s" % e)
         return 2
     print("✔ 报告关键数逐位逐格核对全对（★ §6.10.0/6.10.2/6.10.4/6.10.5/6.10.6 ★）")
+    if a.json_out:
+        with open(a.json_out, "w", encoding="utf-8") as _f:
+            json.dump({"n_covered": len(covered),
+                       "covered": sorted(covered)}, _f, ensure_ascii=False, indent=1, sort_keys=True)
+        print("✔ 落盘核对覆盖集合（%d 个期望值）→ %s" % (len(covered), a.json_out))
     return 0
 
 

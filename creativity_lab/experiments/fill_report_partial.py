@@ -70,6 +70,8 @@ SN_END = "<!-- END:6.10.0 -->"
 CH_BEGIN = "<!-- BEGIN:6.10.0b -->"
 CW_BEGIN = "<!-- BEGIN:6.10.0c -->"
 V5_BEGIN = "<!-- BEGIN:6.10.5 -->"
+PV_BEGIN = "<!-- BEGIN:6.10.0d -->"
+PV_END = "<!-- END:6.10.0d -->"
 V5_END = "<!-- END:6.10.5 -->"
 CW_END = "<!-- END:6.10.0c -->"
 CH_END = "<!-- END:6.10.0b -->"
@@ -177,6 +179,49 @@ def build_verdict_sentence(d):
     return "\n".join(L)
 
 
+def build_provenance_section(pv):
+    """★ §6.10.0d 读数出处覆盖率（★ 2026-10-26 ★）★★
+    ★ ★ 数字全部来自 provenance_audit.json（★ 零手抄 ★）★★
+    ★ ★ 这节回答的是：★「48/48 全绿」到底覆盖了全文多少 ★"""
+    c = pv.get("counts", {})
+    tot = pv.get("total", 0)
+    nv = pv.get("n_verified_values", 0)
+    gap = pv.get("gap_C", {})
+    L = []
+    L.append("### 6.10.0d ★★★ ★★ 读数出处覆盖率：★ 「全绿」覆盖了全文多少 ★★★")
+    L.append("")
+    L.append("> ★ **触发**：★ 第 1 层论证线 2026-10-26 报「43/43 全绿的覆盖率只有 54.8%」⇒ ★ **「全绿」只证明【被覆盖的那部分对】，★ 绝不等于【全文每个数都验过】** ★")
+    L.append("> ★ **工具**：`creativity_lab/experiments/provenance_audit.py`（★ 覆盖率 + 未核对区清单 ★）｜`verify_report_numbers.py --json-out`（★ 落盘【实际核对过】的期望值集合 ★）")
+    L.append("")
+    L.append("| 口径 | 值 |")
+    L.append("|:-:|---|")
+    L.append("| ★ **精确口径：★ verify 实际逐位核对的期望值个数** | ★ **%d** ★ |" % nv)
+    L.append("| ★ 全文数值 token（★ 章节号/日期已按【显式登记】排除 ★） | ★ **%d** ★ |" % tot)
+    L.append("| ★ A 档（★ 逐位核对覆盖；★ 值级口径，★ **上界** ★） | ★ %d （%.1f%%）★ |" % (c.get("A", 0), 100.0 * c.get("A", 0) / max(tot, 1)))
+    L.append("| ★ B 档（★ 构造性覆盖：★ 生成段与生成器片段**逐字节**一致 ★） | ★ %d （%.1f%%）★ |" % (c.get("B", 0), 100.0 * c.get("B", 0) / max(tot, 1)))
+    L.append("| ★ ★ **C 档（★ 未核对区 ★）** | ★ ★ **%d （%.1f%%）** ★ ★ |" % (c.get("C", 0), 100.0 * c.get("C", 0) / max(tot, 1)))
+    L.append("")
+    L.append("★ ★★ **⇒ 三句话一起说，才是诚实的**：★★")
+    L.append("")
+    L.append("1. ★ **「48/48 全绿」是事实**（★ 报告里没有缺该有的数 ★）；")
+    L.append("2. ★ ★ **但它覆盖的是【被核对的那部分】**（★ 精确 %d 个期望值 ★）⇒ ★ **全文 %d 个数值 token 里有 %d 个仍在【未核对区】** ★；" % (nv, tot, c.get("C", 0)))
+    L.append("3. ★ ★ **未核对区不是被隐藏**（★ 每次跑审计都打印出来 ★）⇒ ★ 出处须**由人显式登记**，★ 工具**不推断** ★")
+    L.append("")
+    L.append("★ ★★ **一条元教训（★ 我方当场踩了 ★）★★：")
+    L.append("")
+    L.append("> ★★★ **★ 「靠数值出现去推断某个数来自哪个数据源」不可靠 ★**：★ 我方第一版覆盖率工具按【值】判定 A 档 ⇒ ★ 报「A 档 338 个」，★ 而 verify 其实只核了 **42** 个 ⇒ ★ 因为报告里所有 `0.05` 都被算命中 ⇒ ★ ★ **同值 ≠ 同源** ⇒ ★ 这正是第 1 层论证线实证过的那个坑 ⇒ ★ **我方在被提醒的同一轮里又犯了一次** ⇒ ★ ⇒ ★ 落法：★ **主指标用【verify 实际核对的期望值个数】（★ 唯一精确 ★），★ 值级只作上界并明确标注** ★ ★★")
+    L.append("")
+    L.append("★ **C 档按段的分布（★ 前 12 段 · ★ 完整清单见 `provenance_audit.json` ★）**：")
+    L.append("")
+    L.append("| 段 | C 档数值个数（★ 去重 ★） |")
+    L.append("|:-:|---|")
+    for _sec, _vals in list(gap.items())[:12]:
+        L.append("| ★ %s | ★ **%d** ★ |" % (_sec[:52], len(_vals)))
+    L.append("")
+    L.append("★ **⇒ 处置方向（★ 不是「把全文都核一遍」，★ 那是不可行 ★）**：★ **① 逐位核对集中在【进入结论与主判据表】的数；★ ② 其余【显式登记出处】；★ ③ 登记与审计随包交付，★ 外部可自行重跑本审计 ★**")
+    return "\n".join(L)
+
+
 def build_channel_section(cj):
     """★ 从 channel_status.json 生成「通道状态与批状态」登记段 ★"""
     q = cj.get("quota") or {}
@@ -257,14 +302,33 @@ CALIB_LABEL = {
 CONTRAST_ORDER = ["H-TOPO-4a", "H-TOPO-4c", "H-TOPO-4d"]
 
 
+# ★ ★ 生成片段登记簿（★ 供 provenance_audit.py 做【逐字节】比对 ★）★★
+#   ★ ★ 为什么要落盘：★ 只写在报告里、★ 就无法证明「报告里的那段 == 生成器产出」★
+#   ★ ★ ⇒ ★ 人直接改【产物】也能被抓（★ 对方的「反向盲区」★）★★
+GENERATED = {}
+
+
+def _mark_key(begin: str) -> str:
+    m = re.search(r"BEGIN:([0-9.]+[a-z]?)", begin)
+    return m.group(1) if m else begin.strip("<!-- BEGIN:").strip(" -->")
+
+
 def replace_markers(s, body, begin=MC_BEGIN, end=MC_END):
     """★ 把 BEGIN/END 标记之间的内容整体换成 body（★ 天然幂等 ★）"""
     if begin not in s or end not in s:
         die("报告里找不到标记 %s / %s（★ 先插占位 ★）" % (begin, end))
+    # ★ ★ 标记必须【唯一】：★ 否则 s.index() 取第一处 ⇒ ★ 替换到错的地方 ★
+    #   ★ ★ 实测踩过：★ 「### 6.10.1」先出现在【表格里】⇒ ★ marker 插进了表格中间 ★
+    #   ★ ★ ⇒ ★ 这里断言「各出现 1 次」⇒ ★ 多一次就响亮失败 ★
+    _nb, _ne = s.count(begin), s.count(end)
+    if _nb != 1 or _ne != 1:
+        die("标记 %s / %s 出现 %d / %d 次（★ 必须各 1 次 ⇒ ★ 否则会替换到错的位置 ★）"
+            % (begin, end, _nb, _ne))
     i = s.index(begin)
     j = s.index(end)
     if j < i:
         die("6.10.2b 标记顺序反了")
+    GENERATED[_mark_key(begin)] = body.rstrip("\n")
     return s[:i] + begin + "\n" + body.rstrip() + "\n" + s[j:]
 
 
@@ -392,6 +456,10 @@ def main():
                     help="★ h0_theta0_calibration.py 的输出（★ θ₀ 多口径重算 + 判决影响 ★）")
     ap.add_argument("--crosscheck-json", default=None,
                     help="★ crosscheck_report.py 的输出（★ 弱检查统计 ★）")
+    ap.add_argument("--provenance-json", default=None,
+                    help="★ provenance_audit.py 的输出（★ 读数出处覆盖率 ★）")
+    ap.add_argument("--dump-generated", default=None,
+                    help="★ 把每个生成段的文本落盘到该目录（★ 供 provenance_audit 逐字节比对 ★）")
     ap.add_argument("--channel-json", default=None,
                     help="★ channel_status.py 的输出（★ 通道状态 + 批状态登记 ★）")
     ap.add_argument("--contaminated-unit", default=None,
@@ -587,6 +655,13 @@ def main():
                    sj["sha256"], sj["bytes"], _clock, _comp))
         s = replace_markers(s, _reg, SN_BEGIN, SN_END)
 
+    # ★ ★ 读数出处覆盖率 → §6.10.0d ★★
+    if a.provenance_json:
+        if not os.path.isfile(a.provenance_json):
+            die("provenance-json 不存在：%s" % a.provenance_json)
+        _pv = json.load(open(a.provenance_json, encoding="utf-8"))
+        s = replace_markers(s, build_provenance_section(_pv), PV_BEGIN, PV_END)
+
     # ★ ★ 弱检查统计 → §6.10.0c（★ 一次自我更正 ★）★★
     if a.crosscheck_json:
         if not os.path.isfile(a.crosscheck_json):
@@ -673,6 +748,14 @@ def main():
     # ★ 6.10.6 表里的 θ₀
     s = re_sub_once(s, r"\| 检出力地板 \| θ₀ = \*\*[0-9.]+ σ\*\*",
             "| 检出力地板 | θ₀ = **%.2f σ**" % theta0, "6.10.6 检出力地板")
+
+    # ★ ★ 落盘生成片段（★ 供 provenance_audit.py 逐字节比对 ★）★★
+    if a.dump_generated:
+        os.makedirs(a.dump_generated, exist_ok=True)
+        for _k, _v in sorted(GENERATED.items()):
+            with open(os.path.join(a.dump_generated, "%s.md" % _k), "w", encoding="utf-8") as _f:
+                _f.write(_v + "\n")
+        print("✔ 生成片段落盘 %d 个 → %s" % (len(GENERATED), a.dump_generated))
 
     open(a.report, "w", encoding="utf-8").write(s)
     print("✔ 已填：n=%d/%d ｜ θ₀=%.2fσ ｜ vendi σ=%s ｜ n_pairs=%d"

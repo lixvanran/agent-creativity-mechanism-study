@@ -44,10 +44,13 @@ VERDICT_SHORT = {
 
 
 def extract_section(rep: str) -> str:
-    i = rep.find("### 6.10.2b")
-    if i < 0:
-        raise RuntimeError("报告里找不到 6.10.2b 段")
-    j = rep.find("### 6.10.3", i)
+    # ★ ★ 定位必须用【行首唯一锚点】★★
+    #   ★ 裸标题字符串会命中【表格里引用的标题】⇒ ★ 本轮实测踩过 ★
+    _a, _b = "\n### 6.10.2b", "\n### 6.10.3"
+    if rep.count(_a) != 1:
+        raise RuntimeError("6.10.2b 行首命中 %d 次（★ 必须恰好 1 次 ★）" % rep.count(_a))
+    i = rep.index(_a) + 1
+    j = rep.index(_b, i)
     if j < 0:
         raise RuntimeError("报告里找不到 6.10.3 段（★ 6.10.2b 无法定位边界 ★）")
     return rep[i:j]
