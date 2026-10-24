@@ -31,6 +31,7 @@ FALLBACK = {
     "f0d8004fa6ba": ("三组", "797190b", "KNOWN_ISSUES 重写 + 摘要加两判官反号 + §2.3 措辞 + §6.4.4e"),
     "8934cb193cc2": ("三组", "e483f4a", "分维度偏好表 + 负对照分母真因"),
     "2055e086ad98": ("三组", "6a48f8a", "解耦帧组合 seed + 论文更正 nf 偏好 + 留出集续跑脚本"),
+    "78ab8b49bdb8": ("第二组", None, "push_overlay：message 归一化 + 核对失败时响亮报错（第二组的推送工具修复）"),
     "895f7258b923": ("三组", "548fcdc", "法律域结论空间 v3 + 合并反馈循环 bug 修复 + avg_m 改 2D"),
 }
 
@@ -73,8 +74,10 @@ def owner_of(message):
 def main():
     locals_ = local_commits()
     by_tree = {}
+    by_subject = {}
     for sha, tree, msg in locals_:
         by_tree.setdefault(tree, []).append((sha, msg))
+        by_subject.setdefault(msg, (sha, msg))
 
     chain = []
     sha = api("/repos/%s/git/ref/heads/%s" % (REPO, BRANCH))["object"]["sha"]
@@ -96,9 +99,15 @@ def main():
         local_sha = local_msg = None
         if cand:
             local_sha, local_msg = cand[0]
+        matched = "tree_sha" if cand else "none"
         g = owner_of(local_msg or msg)
         summary = (local_msg or msg)
-        matched = "tree_sha" if cand else "none"
+        # 规则 2：★ 远端 message 命中本仓某个 commit 的 subject ⇒ ★ 归属即本仓（三组）
+        if g is None and msg in by_subject:
+            local_sha, local_msg = by_subject[msg]
+            g = owner_of(local_msg) or "三组"
+            summary = local_msg
+            matched = "subject(本仓)"
         if g is None:
             for k, v in FALLBACK.items():
                 if sha.startswith(k):
