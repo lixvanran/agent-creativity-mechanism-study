@@ -214,6 +214,25 @@ def main():
     _note = "（★ **本段数字由 `fill_report_partial.py` 从 `partial_verdict.json` 自动填入** ★ ⇒ ★ **n 会随批推进变化** ★ ⇒ ★ 交稿前以脚本重填为准 ★）"
     if _note not in s:
         s = re_sub_once(s, r"（★ 快照时点[^）]*★）", _note, "6.10.5 快照说明")
+    # ★ ★ 结论句里的四个数（★ θ₀ / H0 原料数 / 题级 n / 已跑题数 ★）★★
+    #   ★ ★ 这四个数【必须】跟着 json 走 ⇒ ★ 手抄必陈旧 ⇒ ★ 交稿前必重填 ★★
+    import re as _re
+    _pat = _re.compile(r"（θ₀ = [0-9.]+ 个题内 rep σ，H0 原料 [0-9]+ 个同臂同题配对）")
+    if len(_pat.findall(s)) != 1:
+        die("6.10.5 结论句的 θ₀/H0 原料段命中 %d 次（★ 期望 1 ★）" % len(_pat.findall(s)))
+    s = _pat.sub("（θ₀ = %.2f 个题内 rep σ，H0 原料 %d 个同臂同题配对）" % (theta0, n_pairs), s)
+    s = re_sub_once(s, r"H0 配对 n = [0-9]+（目标 21）",
+            "H0 配对 n = %d（目标 21）" % n_pairs, "6.10.5 限制条件 H0 配对 n")
+    # ★ 题级 n：★ 各对比可能不同（★ 有的题已满、有的还没 ★）⇒ 报【最小—最大】★
+    _tns = sorted({v["n_tid"] for v in verdicts.values() if v.get("n_tid")})
+    _ntxt = ("%d" % _tns[0] if len(_tns) == 1 else "%d–%d" % (_tns[0], _tns[-1]))
+    s = re_sub_once(s, r"题级 n = [0-9]+(?:[–-][0-9]+)?（方向一致辅助条件不可判定）",
+            "题级 n = %s（方向一致辅助条件不可判定）" % _ntxt, "6.10.5 题级 n")
+    # ★ 已跑题数
+    _ntid = len(d.get("tids") or [])
+    s = re_sub_once(s, r"只覆盖已跑批的 [0-9]+ 题",
+            "只覆盖已跑批的 %d 题" % _ntid, "6.10.5 已跑题数")
+
 
     # ★ ★ 6.12.2 / 6.12.3 的数字也由 excl-json 填（★ 避免报告里两处 n 不一致 ★）★★
     if a.excl_json:
