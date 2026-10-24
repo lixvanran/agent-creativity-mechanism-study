@@ -170,6 +170,15 @@ def main():
             for uid in ids:
                 failures.append({"unit": uid, "why": "嵌入失败：%s" % e})
             continue
+        # ★★★★ 断长守卫：★ zip 会【静默截断】（★ 返回少于请求数 ⇒ 后面的 uid
+        #   ★ 既不在 successes 也不在 failures ⇒ ⇒ exit 0、★ manifest 正常、★
+        #   ★ 失败清单为空 ⇒ ⇒ 【一切自检全绿】而那批单元的向量【根本没落盘】★★ ★
+        #   ★ ⇒ ★ 离线重算时它们会【被跳过或算错】⇒ ⇒ ★ 必须在 zip【之前】拦住 ★★★★
+        if not isinstance(vecs, list) or len(vecs) != len(ids):
+            _got = len(vecs) if isinstance(vecs, list) else "非list"
+            print("   ✘✘ 第 %d 批返回条数不符：★ 请求 %d ⇒ 实得 %s ★ ⇒ ★ 【zip 会静默截断】★"
+                  % (i, len(ids), _got))
+            raise SystemExit(3)
         for uid, v in zip(ids, vecs):
             if not isinstance(v, list) or len(v) != dim:
                 failures.append({"unit": uid, "why": "维度不符（%s ≠ %d）" % (len(v) if isinstance(v, list) else "?", dim)})
@@ -207,7 +216,14 @@ def main():
            "dim": dim, "normalized": False,
            "note": "★ 事后补录件，★ 与采集端原生落盘件【不可混为一谈】★ ★ "
                    "★ 谱熵依赖完整谱 ⇒ ★ 本目录内【未做任何降维】★",
+           "n_units_missing": 0,
            "failures": failures}
+    # ★ 计数自检（★ 「各块之和 == N」的形态 ★）：★ 每个 uid 要么成功、要么进 failures
+    #   ★ ⇒ ★ 二者之和必须等于 todo 的长度 ★ ⇒ ★ 否则有单元被【静默吞掉】★★ ★
+    if n_done + len(failures) != len(todo):
+        print("   ✘✘ 计数自检失败：★ 成功 %d + 失败 %d = %d ≠ 待补 %d ★ ⇒ ★ 【有单元被静默吞掉】★"
+              % (n_done, len(failures), n_done + len(failures), len(todo)))
+        raise SystemExit(3)
     mp = os.path.join(a.out_dir, "MANIFEST-%s.json" % PROVENANCE)
     tmp = mp + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:

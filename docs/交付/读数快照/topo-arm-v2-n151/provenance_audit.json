@@ -2,10 +2,10 @@
  "caveat": "★ A/B 计数是上界（★ 同值 ≠ 同源 ★）★ 精确口径见 n_verified_values",
  "counts": {
   "A": 7,
-  "B": 504,
+  "B": 506,
   "C": 2887
  },
- "coverage_upper_pct": 15.038257798705121,
+ "coverage_upper_pct": 15.088235294117647,
  "errors": [],
  "gap_C": {
   "### 6.10.0 ★★ 冻结快照登记": [
@@ -1708,5 +1708,5 @@
   ]
  },
  "n_verified_values": 42,
- "total": 3398
+ "total": 3400
 }

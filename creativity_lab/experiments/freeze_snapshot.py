@@ -57,6 +57,9 @@ def main():
                     help="★ 叙事日期（★ 写进 registry 的 label_date 字段 ★）；★ "
                          "frozen_at 一律用【机器 UTC 时钟】⇒ ★ 不与叙事日期混用 ★")
     ap.add_argument("--note", default=None)
+    ap.add_argument("--replace-companion", action="store_true",
+                    help="★ 显式允许【某个 companion 的 sha 变化】（★ 证据格式升级时用 ★）★ "
+                         "★ 旧 sha 记入 companions_history ★ ★ 【不许静默替换】★★")
     ap.add_argument("--companions-only", action="store_true",
                     help="★ 只把 --src 追加进【顶层 companions】★：★ 不动顶层条目（★ frozen_at/label_date/sha 保持原样 ★）★、★ 不推进 history ★")
     ap.add_argument("--replace", action="store_true",
@@ -131,6 +134,7 @@ def main():
             die("companions-only：★ registry 里没有可追加的顶层条目 ★")
         _old_comp = list(prev_top.get("companions") or [])
         _by_src = {c.get("src"): c for c in _old_comp}
+        _hist = list(prev_top.get("companions_history") or [])
         for e in entries:
             if e["src"] == prev_top.get("src"):
                 continue                       # ★ 顶层自己的 src 不重复登记 ★
@@ -138,8 +142,15 @@ def main():
                   "sha256": e["sha256"], "bytes": e["bytes"]}
             _prev = _by_src.get(e["src"])
             if _prev and _prev.get("sha256") != _c["sha256"]:
-                die("companions-only：★ 同一 src 的 sha 变了（★ %s：★ %s ⇒ %s ★）★ ⇒ ★ "
-                    "【不许静默替换】★" % (e["src"], _prev.get("sha256", "")[:12], _c["sha256"][:12]))
+                if not a.replace_companion:
+                    die("companions-only：★ 同一 src 的 sha 变了（★ %s：★ %s ⇒ %s ★）★ ⇒ ★ "
+                        "【不许静默替换】★ ★ ⇒ 确需替换（★ 证据格式升级 ★）请显式加 "
+                        "--replace-companion ★" % (e["src"], _prev.get("sha256", "")[:12], _c["sha256"][:12]))
+                print("★ ★★ --replace-companion：★ companion 的 sha 变了：★ %s：★ %s ⇒ %s ★★"
+                      % (e["src"], _prev.get("sha256", "")[:12], _c["sha256"][:12]))
+                print("   ⇒ 旧值记入 companions_history（★ 便于追溯 ★）★")
+                _hist.append({"src": e["src"], "sha256": _prev.get("sha256"),
+                              "bytes": _prev.get("bytes"), "note": "★ 被 --replace-companion 替换的旧值 ★"})
             _by_src[e["src"]] = _c
         _new_comp = sorted(_by_src.values(), key=lambda c: c.get("src") or "")
         # ★ ★ entries 也要同步（★ fill_report 读的是 entries ★）★ ⇒ ★ 两个字段必须一致 ★
@@ -150,6 +161,8 @@ def main():
         top = dict(prev_top)
         top["entries"] = _new_entries
         top["companions"] = _new_comp
+        if _hist:
+            top["companions_history"] = _hist
         top["companions_note"] = ("★ 本表用 --companions-only 扩充（★ 不改顶层条目 ★）；★ "
                                   "顶层 sha256 为 %s ★" % prev_top.get("sha256", "")[:16])
         tmp = reg_path + ".tmp"

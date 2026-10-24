@@ -139,9 +139,20 @@ class suite:
         print("-- ★ %s --" % name)
 
     def run(self, name: str, fn: Callable[[], bool]) -> bool:
+        """★ ★★★ 2026-10-26 修：★ 【返回值也必须被判定】★★★ ★
+        ★ 原实现只【调用】fn、★ 完全【忽略它的返回值】⇒ ★ ⇒ 凡是
+        ★   ★ `s.run(name, lambda: cond)` 形式、★ 且 cond 为 False 的
+        ★   ★ ⇒ 【照样记通过】⇒ ★ ⇒ 【恒绿】★★ ★
+        ★ ⇒ ★ 这与 `check(name, cond)` 传 lambda 的坑是【同款、但形状不同】：
+        ★   ★ 那条是【bool(函数对象) 恒为 True】；★ 这条是【返回值被丢弃】★★ ★
+        ★ ⇒ ★ ⇒ ★ 【判据的载体不对 ⇒ 判据从没被求值过】的第三种形态 ★★★ ★
+        ★ ⇒ ★ 修法：★ fn 返回 False ⇒ 判失败；★ 返回 None ⇒ 视为通过
+        ★   （★ 兼容「fn 只做副作用、不返回值」的既有用法 ★）
+        ★ ⇒ ★ ★ ⇒ ★ 凡本仓已有测试因此变红的，★ 那是【真问题浮出来了】，★ 不是回归 ★★★
+        """
         full = " / ".join(self._stack + [name])
         try:
-            fn()
+            r = fn()
         except AssertionFailure as e:
             self.failed.append(full)
             print("  %s %s" % (FAIL_MARK, full))
@@ -150,6 +161,10 @@ class suite:
             self.failed.append(full)
             print("  %s %s  ★ 崩溃：%s: %s" % (FAIL_MARK, full, type(e).__name__, e))
             traceback.print_exc()
+            return False
+        if r is False:  # ★ ★ 返回 False ⇒ 判失败 ★★
+            self.failed.append(full)
+            print("  %s %s  ★ 返回 False（★ 判据不成立 ★）" % (FAIL_MARK, full))
             return False
         self.passed += 1
         return True
