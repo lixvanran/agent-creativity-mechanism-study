@@ -76,7 +76,7 @@ def main() -> int:
     ap.add_argument("--branch", required=True)
     ap.add_argument("--local-repo", default="/workspace/lab")
     ap.add_argument("--token", default=os.environ.get("GITHUB_TOKEN_LIXVANRAN", ""))
-    ap.add_argument("--expect-commit", default="", help="★ 推送工具报的 commit sha（★ 可选 ★）")
+    ap.add_argument("--expect-commit", default="", help="★ 本地 commit sha（★ 可选 ★）★ ★ 注意：★ overlay 推送的远端 sha【天然≠】本地 sha（★ parent 不同 ★）⇒ ★ 本参数只做【提示】，★ 不做失败判据 ★")
     a = ap.parse_args()
     if not a.token:
         print("✘ 没 token")
@@ -87,8 +87,19 @@ def main() -> int:
     ref = api("/repos/%s/git/ref/heads/%s" % (a.repo, a.branch), a.token)
     head = ref["object"]["sha"]
     print("★ 远端 %s head = %s" % (a.branch, head[:12]))
-    if a.expect_commit and not head.startswith(a.expect_commit[:12]):
-        bad.append("① 远端 ref 与 --expect-commit 不符：★ %s ≠ %s" % (head[:12], a.expect_commit[:12]))
+    # ★ ★★ 2026-10-26 修：★ --expect-commit 传的是【本地 commit sha】★★
+    # ★ overlay 推送是【用 REST API 在远端当前 head 之上新建 commit】⇒ ★ parent
+    # ★ 与本地 commit 的 parent 不同 ⇒ ★ ⇒ 【远端 sha 天然 ≠ 本地 sha】★★
+    # ★ ⇒ ★ 所以【不能】用 sha 相等做判据（★ 本人已被这条顶过一次 ★）★★
+    # ★ ⇒ ★ 正确的判据是【树内容一致】+【commit 字段逐字一致】（★ 下面已在查 ★）★★
+    if a.expect_commit:
+        if head == a.expect_commit:
+            print("  ✔ 远端 ref 与 --expect-commit 逐字一致（★ 罕见：★ parent 与 tree 全同 ★）")
+        else:
+            print("  ★ --expect-commit = %s（★ 本地 commit sha ★）" % a.expect_commit[:12])
+            print("    ★ 远端 ref     = %s（★ overlay 在远端 head 之上新建的 commit ★）" % head[:12])
+            print("    ★ ★ 两者【本来就不相等】★ ★ ⇒ ★ overlay 的 parent 与本地 parent 不同 ⇒ ★")
+            print("    ★ ⇒ ★ 正确判据是【树内容一致】+【commit 字段逐字一致】（★ 下面在查 ★），★ 不是 sha 相等 ★")
 
     # ── ② 树内容一致（★ overlay 语义 ★）──
     tree = api("/repos/%s/git/trees/%s?recursive=1"
