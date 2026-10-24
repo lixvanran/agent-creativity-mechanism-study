@@ -1,102 +1,316 @@
 {
   "src": "runs/arch6_stage1.jsonl",
-  "n_rows": 5,
-  "n_ok": 5,
+  "n_rows": 9,
+  "n_ok": 9,
   "n_err": 0,
   "errors": [],
   "target_change_rate": 1.0,
-  "candidate_homogeneity_rate": 0.8,
-  "align_shift_mean": -0.09441333333333332,
-  "align_shift_var_mean": 0.2010041063160659,
-  "align_var_B": 0.06939153550686136,
-  "align_var_D": 0.15741666911655444,
-  "sel_change_quota_rate": 0.0,
-  "sel_change_nocost_rate": 0.0,
-  "verdict_mechanism": "≈0 ⇒ 代价未接入选择器 ⇒ H1c 机制上不可测 ⇒ ★ 主动终止并报「代价未接入选择器」（不是『无效应』）",
+  "candidate_homogeneity_rate": 0.8888888888888888,
+  "align_shift_mean": -0.09873333333333333,
+  "align_shift_var_mean": 0.14374396290834915,
+  "align_sd_B": 0.038550853059367424,
+  "align_sd_D": 0.11952872001973167,
+  "align_var_B": 0.013375514444444445,
+  "align_var_D": 0.03266532925925926,
+  "ALIGN_VAR_IS_SD_FIXED": true,
+  "sel_change_quota_rate": 0.3333333333333333,
+  "sel_change_nocost_rate": 0.4444444444444444,
+  "rank_detail_recomputed": [
+    {
+      "tag": "G01-1",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        1,
+        2,
+        3
+      ],
+      "changed": false
+    },
+    {
+      "tag": "G01-2",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        1,
+        2,
+        3
+      ],
+      "changed": false
+    },
+    {
+      "tag": "G01-3",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        2,
+        3,
+        1
+      ],
+      "changed": true
+    },
+    {
+      "tag": "T07-1",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        1,
+        2,
+        3
+      ],
+      "changed": false
+    },
+    {
+      "tag": "T07-2",
+      "rank_B": [
+        2,
+        3,
+        1
+      ],
+      "rank_D": [
+        1,
+        2,
+        3
+      ],
+      "changed": true
+    },
+    {
+      "tag": "T07-3",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        1,
+        2,
+        3
+      ],
+      "changed": false
+    },
+    {
+      "tag": "T10-3",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        1,
+        2,
+        3
+      ],
+      "changed": false
+    },
+    {
+      "tag": "T10-1",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        1,
+        2,
+        3
+      ],
+      "changed": false
+    },
+    {
+      "tag": "T10-1",
+      "rank_B": [
+        1,
+        2,
+        3
+      ],
+      "rank_D": [
+        3,
+        1,
+        2
+      ],
+      "changed": true
+    }
+  ],
+  "RANK_RECOMPUTED": true,
+  "verdict_mechanism": "改变率低 ⇒ 代价接入有限 ⇒ H1c 检出力极低 ⇒ 结论降级为『不可分辨』",
   "gate_diag": {
     "escape": {
-      "ok": 5,
-      "n": 5,
+      "ok": 9,
+      "n": 9,
       "constant": 0,
-      "var_mean": 0.0016069999999999997,
-      "len_corr_mean": -0.45318000000000014
+      "var_mean": 0.004251333333333333,
+      "len_corr_mean": -0.36773333333333347
     },
     "spread": {
-      "ok": 5,
-      "n": 5,
-      "constant": 5,
+      "ok": 9,
+      "n": 9,
+      "constant": 9,
       "var_mean": 0.0,
       "len_corr_mean": null
     },
     "length": {
-      "ok": 5,
-      "n": 5,
+      "ok": 9,
+      "n": 9,
       "constant": 0,
-      "var_mean": 0.007968,
+      "var_mean": 0.007274999999999999,
       "len_corr_mean": 1.0
     }
   },
   "family_gate_counts": {
-    "escape": 5
+    "escape": 9
   },
-  "sigma_new": 0.2356786965340737,
+  "sigma_new": 0.229897660806813,
   "sigma_v5_extrapolated": 0.2186,
-  "gap_mean": 4.00000000000067e-05,
+  "gap_mean": -0.009222222222222224,
   "mde_table": [
     {
       "n_per_cell": 3,
-      "mde80": 0.7624,
-      "power_delta015": 0.085
+      "mde80": 0.7437,
+      "power_delta015": 0.087
     },
     {
       "n_per_cell": 5,
-      "mde80": 0.5906,
-      "power_delta015": 0.11
+      "mde80": 0.5761,
+      "power_delta015": 0.113
     },
     {
       "n_per_cell": 8,
-      "mde80": 0.4669,
-      "power_delta015": 0.147
+      "mde80": 0.4554,
+      "power_delta015": 0.152
     },
     {
       "n_per_cell": 10,
-      "mde80": 0.4176,
-      "power_delta015": 0.172
+      "mde80": 0.4074,
+      "power_delta015": 0.178
     },
     {
       "n_per_cell": 15,
-      "mde80": 0.341,
-      "power_delta015": 0.234
+      "mde80": 0.3326,
+      "power_delta015": 0.244
     },
     {
       "n_per_cell": 20,
-      "mde80": 0.2953,
-      "power_delta015": 0.296
+      "mde80": 0.288,
+      "power_delta015": 0.308
     },
     {
       "n_per_cell": 25,
-      "mde80": 0.2641,
-      "power_delta015": 0.356
+      "mde80": 0.2576,
+      "power_delta015": 0.371
     }
   ],
   "fulfillment": {
     "ful_B": {
-      "n": 5,
-      "fulfill_lower": 0.35,
-      "violation_upper": 0.5
+      "n": 9,
+      "fulfill_lower": 0.3426,
+      "violation_upper": 0.3333
     },
     "ful_D": {
-      "n": 5,
-      "fulfill_lower": 0.35,
-      "violation_upper": 0.5
+      "n": 9,
+      "fulfill_lower": 0.3426,
+      "violation_upper": 0.3333
     },
     "ful_F": {
-      "n": 5,
-      "fulfill_lower": 0.35,
-      "violation_upper": 0.5
+      "n": 9,
+      "fulfill_lower": 0.3426,
+      "violation_upper": 0.3889
     }
   },
-  "quota_natural": 1,
-  "quota_forced": 4,
-  "D0_v3": 0.072
+  "quota_natural": 3,
+  "quota_forced": 6,
+  "D0_v3": 0.072,
+  "rank_change_detail": [
+    {
+      "tag": "G01-1",
+      "changed": false,
+      "spread_B": 0.0,
+      "spread_D": 0.5,
+      "control_has_discrimination": false
+    },
+    {
+      "tag": "G01-2",
+      "changed": false,
+      "spread_B": 0.0,
+      "spread_D": 0.0,
+      "control_has_discrimination": false
+    },
+    {
+      "tag": "G01-3",
+      "changed": true,
+      "spread_B": 0.0,
+      "spread_D": 0.5,
+      "control_has_discrimination": false
+    },
+    {
+      "tag": "T07-1",
+      "changed": false,
+      "spread_B": 0.0,
+      "spread_D": 0.0,
+      "control_has_discrimination": false
+    },
+    {
+      "tag": "T07-2",
+      "changed": true,
+      "spread_B": 0.6667,
+      "spread_D": 0.4167,
+      "control_has_discrimination": true
+    },
+    {
+      "tag": "T07-3",
+      "changed": false,
+      "spread_B": 0.0,
+      "spread_D": 0.0,
+      "control_has_discrimination": false
+    },
+    {
+      "tag": "T10-3",
+      "changed": false,
+      "spread_B": 0.0,
+      "spread_D": 0.0,
+      "control_has_discrimination": false
+    },
+    {
+      "tag": "T10-1",
+      "changed": false,
+      "spread_B": 0.0,
+      "spread_D": 0.0,
+      "control_has_discrimination": false
+    },
+    {
+      "tag": "T10-1",
+      "changed": true,
+      "spread_B": 0.0,
+      "spread_D": 0.5,
+      "control_has_discrimination": false
+    }
+  ],
+  "rank_change_n": 9,
+  "rank_change_count": 3,
+  "rank_change_rate": 0.3333333333333333,
+  "rank_change_wilson_ci95": [
+    0.1206,
+    0.6458
+  ],
+  "control_has_discrimination_n": 1,
+  "control_has_discrimination_rate": 0.1111111111111111,
+  "rank_change_rate_over_discriminating_only": 3.0,
+  "zero_classification": {
+    "content_zero": [
+      "T07-3"
+    ],
+    "unscoreable_none": [],
+    "other": []
+  }
 }
