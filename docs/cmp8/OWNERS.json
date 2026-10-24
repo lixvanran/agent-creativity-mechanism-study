@@ -1,0 +1,20 @@
+{
+  "schema": "remote-ref-ownership/v1",
+  "repo": "lixvanran/agent-creativity-mechanism-study",
+  "branch": "cmp8-handover-2026-10-20",
+  "generated_at": "2026-10-24T07:47:05Z",
+  "generator": "tools/build_owners_json.py（可重跑）",
+  "note": "★ 远端 message 在 API 重建 commit 路径下会丢失 ⇒ 归属以本表为准。★ 未知归属一律标 needs_confirmation=true，不猜。",
+  "layers": [
+    {
+      "layer": 1,
+      "sha": "24e3ebb95cdd6f6837add5d863f183751b7aadcc",
+      "group": null,
+      "local_commit": null,
+      "remote_message": "★ API 未返回 commit 字段: {'sha': '24e3ebb95cdd6f6837add5d863f183751b7aadcc', 'node_id': 'C_kwDOVMZhzdoAKD",
+      "summary": null,
+      "needs_confirmation": true,
+      "note": ""
+    }
+  ]
+}
