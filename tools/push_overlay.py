@@ -74,8 +74,13 @@ def git(*a, binary=False):
 
 
 # ★ ★★★ 状态文件：★ 记住【上次推送的本地 commit】★★ ⇒ ★ 下次能算出【我们改过哪些路径】★★
+# ★ ★ 2026-10-25：★ 状态文件【换名避让】★★
+# ★ 三组在同一 branch 上也维护了 `.mavis/push_state.json`（★ 他们的 tools/push_guard.py 用的 ★）
+# ★ ★ 两者格式不同（本组按 branch 分键、他们单 branch + tree_files 映射）★★
+# ★ ⇒ ★ 写同一个文件会互相冲掉 ⇒ ★ 本组用独立文件名 ★ ★
+# ★ ⇒ ★ 顺带：本组不用他们那个文件名，★ 所以【不与三组的已提交文件产生路径冲突】★★
 STATE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                          ".mavis", "push_state.json")
+                          ".mavis", "push_state.secondgroup.json")
 
 
 def _read_state(branch):
