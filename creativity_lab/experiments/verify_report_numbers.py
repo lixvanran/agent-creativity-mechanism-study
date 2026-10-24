@@ -221,6 +221,7 @@ def self_test():
     print("   ✔ 基线无错")
     cases = []
     n_mut = 0          # ★ 变异次数【由计数器累加】★ ⇒ 不得硬编码 ★
+    n_inline = 0       # ★ inline 变异块计数（★ 用于「各块之和 == 总数」自检 ★）
     # ② 改 json 的 σ
     m2 = json.loads(json.dumps(d)); m2["h0"]["vendi"]["sigma_rep"] = 9.999
     cases.append(("改 json 的 σ", m2, rep))
@@ -276,6 +277,7 @@ def self_test():
     lines[i0] = "| " + " | ".join(cells) + " |"
     mutated = "\n".join(lines)
     n_mut += 1
+    n_inline += 1
     e = verify(mutated, d)
     print("== 自测：改【报告里】主判据表那一格 ⇒ 应当【被抓】==")
     if e:
@@ -290,6 +292,7 @@ def self_test():
         _k = _hit[0]
         _lines5[_k] = _lines5[_k].replace("S6 +0.3461", "S6 +0.9999", 1)
         n_mut += 1
+        n_inline += 1
         e, _c2 = verify("\n".join(_lines5), d)
         print("== 自测：改【报告里】结论句的那一个方向值 ⇒ 应当【被抓】==")
         if e:
@@ -299,7 +302,26 @@ def self_test():
             return 1
     print()
     print("✔ 自测全过：★ 这个检查会红（★ 不是恒真 ★）★")
+    # ★ ★ 计数自检（★ 第 1 层论证线 2026-10-26：★ 【累加本身也会漏加一块】★★）
+    #   ★ 「各块之和 == 报告的总数」⇒ ★ 将来加了新块忘插计数器 ⇒ ★ 这里立刻报红 ★
+    n_cases = len(cases)
+    if n_mut != n_cases + n_inline:
+        print("   ✘✘ 计数自检失败：★ 总数 %d ≠ cases %d + inline %d ⇒ ★ **有块漏加计数器** ★"
+              % (n_mut, n_cases, n_inline))
+        return 1
     print("   ★ 本轮共做 ★ %d 次变异注入 ★（★ 由计数器累加 ★）★" % n_mut)
+    print("   ★ 计数自检：★ %d = cases %d + inline %d ✔" % (n_mut, n_cases, n_inline))
+    # ★ ★★ 诚实登记一个【结构性局限】★★
+    #   ★ ★ 若有人新增一个变异块、★ 却【同时】忘了 n_mut += 1 和 n_inline += 1 ⇒
+    #   ★ ★ 等式【两边都少 1】⇒ ★ ⇒ **这个等式抓不到** ★ ★
+    #   ★ ★ ⇒ ★ 「各块之和 == 总数」只能抓「只漏一处」⇒ ★ 根治需要【wrapper 自动计数】★★
+    print("   ★ ★ 已知局限（★ 诚实登记 ★）：★ 漏加的块若【同时】漏了 n_mut 与 n_inline ⇒")
+    print("   ★ ★   ⇒ 等式两边都少 1 ⇒ ★ **本自检抓不到** ⇒ ★ 根治需【wrapper 自动计数】★★")
+    print("   ★ ★   ⇒ ⇒ ★ 所以【块清单】必须同时打印出来供人核对（★ 见下 ★）★★")
+    print("   ★ 块清单：★ cases %d 项 + inline %d 项 ⇒ 共 %d 块"
+          % (n_cases, n_inline, n_cases + n_inline))
+    for _i, _lab in enumerate(cases):
+        print("      · cases[%d] %s" % (_i, _lab[0][:64]))
     return 0
 
 
