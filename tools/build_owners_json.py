@@ -5,7 +5,7 @@ import json, os, subprocess, urllib.request
 REPO="lixvanran/agent-creativity-mechanism-study"; BRANCH="cmp8-handover-2026-10-20"
 TOK=os.environ.get("GITHUB_TOKEN_LIXVANRAN","")
 def api(path):
-    r=urllib.request.Request("https://api.github.com"+path, headers={"Authorization":"Bearer "+TOK,"Accept":"application/vnd.github+json"})
+    r=urllib.request.Request("https://api.github.com"+path, headers={"Authorization":"Bearer "+TOK,"Accept":"application/vnd.github+json","User-Agent":"mavis-owner-table"})
     return json.load(urllib.request.urlopen(r, timeout=30))
 
 # 我自己推的层：远端 sha -> (组, 本地 commit, 一句话)
@@ -21,6 +21,8 @@ KNOWN_OTHER={"4654245ac709":("第二组",None,"交付 2026-10-25"),"5b7fb4670320
 chain=[]; sha=api("/repos/%s/git/ref/heads/%s"%(REPO,BRANCH))["object"]["sha"]
 for _ in range(12):
     c=api("/repos/%s/git/commits/%s"%(REPO,sha))
+    if "commit" not in c:
+        chain.append((sha,"★ API 未返回 commit 字段: %s"%str(c)[:80])); break
     msg=c["commit"]["message"].split("\n")[0]
     chain.append((sha,msg))
     if len(c["parents"])==0: break
