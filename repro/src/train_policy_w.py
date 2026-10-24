@@ -79,8 +79,12 @@ DEV = os.environ.get("DEV_DIR") or os.path.join(os.path.dirname(os.path.dirname(
 OUT_DEFAULT = os.path.join(HERE, "runs", "policy_train")
 
 # 代理奖励权重（**事前写死**，不调）
+# ★★ 奖励权重（事前写死）：★ trap 与 width 是**新加的两项**
+#    —— 对齐负责人的两个目标："局部不钻牛角尖" + "整体思维面更宽"
 LAMBDA = dict(conflict=1.0, empty=0.5, fallback=0.5, cover=0.30, cost=0.02,
-              conflict_pairs=0.8)
+              conflict_pairs=0.8,
+              trap=6.0,      # ★ 踩一次陷阱的代价（很大 ⇒ 策略会避开）
+              width=4.0)     # ★ 分支分散度的收益（⇒ 策略会想要更宽）
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -90,9 +94,12 @@ class ForcedPolicy(W.ActionPolicy):
     """始终返回指定动作（其余参数照常打分，只是不参与选择）。"""
 
     def __init__(self, spec, base: Optional[W.ActionPolicy] = None,
-                 forced_arb: Optional[int] = None):
+                 forced_arb: Optional[int] = None,
+                 forced_arch: Optional[tuple] = None):
         super().__init__(base.export() if base else None)
         self._forced = spec
+        self._forced_arch = forced_arch
+        self.used_arch = None
         # ★ 固定仲裁选择（层3 的第二件事：训练时试某个仲裁档，看收益）
         self._forced_arb = forced_arb
         self.used_arb = None
@@ -106,6 +113,15 @@ class ForcedPolicy(W.ActionPolicy):
             return self._forced_arb
         v = super().choose_arbitration(failure_kind, rng)
         self.used_arb = v
+        return v
+
+    def choose_architecture(self, failure_kind, rng):
+        """★ 固定架构决策（发散度 + 合并方式）⇒ 训练时能"试某种架构、看收益"。"""
+        if self._forced_arch is not None:
+            self.used_arch = self._forced_arch
+            return self._forced_arch
+        v = super().choose_architecture(failure_kind, rng)
+        self.used_arch = v
         return v
 
 
@@ -130,13 +146,16 @@ def population_diversity(claims: Sequence[str], history: Sequence[Sequence[str]]
     return 1.0 - (sum(sims) / len(sims))
 
 
-def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
+def proxy_reward(res: Dict[str, Any], task: Optional[Dict[str, Any]] = None
+                 ) -> Dict[str, Any]:
     """从一次运行的读数里算**代理奖励**（零判官成本）。
 
-    ★★ 同一个样本同时给出两种形式，**这是受控对照的关键**：
-      · `scalar`  = 加权和（标量）⇒ argmax ⇒ **必然收敛到一点（中庸）**
-      · `(quality, diversity)` = 二元向量 ⇒ 非支配排序 ⇒ **保留不可比的多个解**
-    ⇒ 两者用**同一份代码、同一批样本、同一套更新规则**，**唯一差别是选择规则**。
+    ★★ 2026-10-24 重写奖励项以**对齐负责人给的两个目标**：
+      ① **局部不钻牛角尖** ⇒ `−λ_trap × 陷阱命中数`
+         （★ 这一项**之前完全没有** ⇒ 上一轮训练"没学出偏好"的根因就在这）
+      ② **整体思维面更宽** ⇒ `+λ_width × 分支分散度`（**集合级**，在训练循环里算）
+      ③ 闭合的代价 ⇒ `−λ_conflict_pairs × 跨槽位冲突对数`
+      ④ 成本 ⇒ `−λ_cost × 调用数`
     """
     conflicts = int(res.get("n_conflicts") or 0)
     failures = res.get("failures") or {}
@@ -157,13 +176,33 @@ def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
     # ★★ 冲突项（**本地检测 ⇒ 零判官成本**）：跨槽位矛盾的对数
     #   ⇒ 层3 的目标函数里**必须有"闭合的代价"**，否则策略只会一味发散
     n_conf = len(W.detect_opposite_pairs(res.get("claims") or []))
+    # ★★ 陷阱命中（**钻牛角尖的直接代价**）：只在带 trap_fingerprints 的题上可测
+    n_trap = 0
+    if task and task.get("trap_fingerprints"):
+        try:
+            import premature_closure as _PC
+            _pc = _PC.premature_closure(task, res.get("answer") or "")
+            n_trap = 1 if _pc.get("hit") else 0
+        except Exception:
+            n_trap = 0
     quality = -(LAMBDA["conflict"] * conflicts + LAMBDA["empty"] * n_empty
                 + LAMBDA["fallback"] * n_fb + LAMBDA["cost"] * calls
-                + LAMBDA["conflict_pairs"] * n_conf)
+                + LAMBDA["conflict_pairs"] * n_conf
+                + LAMBDA["trap"] * n_trap)
+    # ★★ **思维面宽度**（样本内：各分支彼此有多分散）⇒ 越高越宽
+    #    零 embedding、纯文本（Self-Sim 原口径，Lake et al. NAACL'25）
+    _paths = [p for p in (res.get("paths") or []) if p.get("claims")]
+    if len(_paths) >= 2:
+        _cl = [list(p["claims"]) for p in _paths]
+        _sim = MP.self_sim(_cl, mode="bigram") or 0.0
+        width = max(0.0, 1.0 - _sim)
+    else:
+        width = 0.0
+    r = (quality + LAMBDA["width"] * width)      # ★ 奖励 = 质量代价 + 宽度收益
     diversity = float(cover)
-    return dict(r=r, quality=quality, diversity=diversity,
+    return dict(r=r, quality=quality, diversity=diversity, width=width,
                 conflicts=conflicts, n_empty=n_empty, n_fallback=n_fb,
-                n_conflict_pairs=n_conf,
+                n_conflict_pairs=n_conf, n_trap_hits=n_trap,
                 cover=cover, calls=calls, claims=claims)
 
 
@@ -198,16 +237,34 @@ def reinforce(pol: W.ActionPolicy, spec: W.ActionSpec, failure_kind: str,
 # ══════════════════════════════════════════════════════════════════════
 # 主循环
 # ══════════════════════════════════════════════════════════════════════
-def load_tasks(n=None):
+def load_tasks(n=None, mixed=True, exclude=None):
+    """训练题集：**DEV 9 题 + 诱导钻牛角尖 6 题**（混合）。
+
+    ★ 必须混合：陷阱命中（钻牛角尖的代价）**只在带 trap_fingerprints 的题上可测**
+    ⇒ ⇒ 只用原来的 9 道核对型题 ⇒ **"局部不钻牛角尖"这一项永远测不到** ⇒ 策略学不到。
+    """
     with open(os.path.join(DEV, "devset.json"), encoding="utf-8") as f:
         d = json.load(f)
-    tasks = d["tasks"] if isinstance(d, dict) and "tasks" in d else d
+    tasks = list(d["tasks"] if isinstance(d, dict) and "tasks" in d else d)
+    adv_path = os.path.join(DEV, "DEV-ADV-2026-10-24.json")
+    if mixed and os.path.exists(adv_path):
+        with open(adv_path, encoding="utf-8") as f:
+            ad = json.load(f)
+        tasks = tasks + list(ad["tasks"] if isinstance(ad, dict) and "tasks" in ad else ad)
+    # ★ 2026-10-24 留出集协议：把留出题从训练题集里**排除**（默认空 ⇒ 行为不变）
+    if exclude:
+        ex = set(exclude)
+        before = len(tasks)
+        tasks = [t for t in tasks if t.get("task_id") not in ex]
+        print("  [exclude] 训练题集排除 %s ⇒ %d 题（原 %d 题）" % (sorted(ex), len(tasks), before))
+
     return tasks[:n] if n else tasks
 
 
-def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None):
+def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None,
+            forced_arch=None):
     """用**指定动作 + 指定仲裁档**跑一遍，返回读数（★ 不做判官评估 ⇒ 便宜）。"""
-    pol = ForcedPolicy(spec, forced_arb=forced_arb)
+    pol = ForcedPolicy(spec, forced_arb=forced_arb, forced_arch=forced_arch)
     wf = W.CollapseFixWorkflow(
         llm, n_slots=slots, seed=seed, model=os.environ.get("MM_MODEL",
                                                             "MiniMax-M3.1-Flash-Preview"),
@@ -215,12 +272,14 @@ def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None):
         policy=pol, policy_seed=seed, arbitrate_mode="learned")
     r = wf.run(task["ask"])
     r["_arb_used"] = pol.used_arb
+    r["_arch_used"] = pol.used_arch
     return r
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tasks", type=int, default=3)
+    ap.add_argument("--exclude", default="", help="★ 逗号分隔的 task_id，从训练题集排除（留出集用）；默认空=全部保留")
     ap.add_argument("--rounds", type=int, default=8, help="训练轮数")
     ap.add_argument("--samples", type=int, default=4, help="每轮样本数")
     ap.add_argument("--slots", type=int, default=3)
@@ -236,7 +295,8 @@ def main():
                     help="用本地 stub LLM（零 API 成本）跑冒烟；★ 读数不代表真实效果")
     args = ap.parse_args()
 
-    tasks = load_tasks(args.tasks)
+    excl = [x.strip() for x in (args.exclude or "").split(",") if x.strip()]
+    tasks = load_tasks(args.tasks, exclude=excl)
     model = os.environ.get("MM_MODEL", "MiniMax-M3.1-Flash-Preview")
     if args.stub:
         from test_workflow import StubLLM
@@ -274,14 +334,17 @@ def main():
             spec = pol.choose("conflict", rng)
             # ★ 同时抽一个**仲裁档**（mark / keep_pos / keep_neg）⇒ 一起学
             _arb = pol.choose_arbitration("conflict", rng)
+            # ★ 同时抽**架构决策**（发散度 + 合并方式）⇒ 一起学
+            _nf, _mm = pol.choose_architecture("conflict", rng)
+            _arch = (int(_nf), str(_mm))
             # ② 用它跑一遍（观测实际失败类型）
             try:
                 res = run_one(llm, task, spec, seed, args.slots, args.rounds_per_run,
-                              forced_arb=_arb)
+                              forced_arb=_arb, forced_arch=_arch)
             except Exception as e:
                 print("  ⚠️ 样本失败（计入，不重试）：%s: %s" % (type(e).__name__, e), flush=True)
                 continue
-            pr = proxy_reward(res)
+            pr = proxy_reward(res, task)
             # ③ 实际发生的失败类型（用于交互项）
             fk = None
             for k in ("conflict", "empty", "all_unmentioned", "zero_load_bearing",
@@ -317,10 +380,18 @@ def main():
             # ★ 更新**仲裁权重**（层3 的第二件事）
             if _arb is not None:
                 pol.arb[_arb] += 0.5 * adv_scalar
+            # ★ 更新**架构权重**（发散度 + 合并方式）⇒ 让"该不该发散/怎么合并"被学出来
+            if _arch is not None:
+                _nfi = W.ActionPolicy.NF_IDS.index(_arch[0]) if _arch[0] in W.ActionPolicy.NF_IDS else None
+                _mmi = W.ActionPolicy.MM_IDS.index(_arch[1]) if _arch[1] in W.ActionPolicy.MM_IDS else None
+                if _nfi is not None:
+                    pol.nf[_nfi] += 0.5 * adv_scalar
+                if _mmi is not None:
+                    pol.mm[_mmi] += 0.5 * adv_scalar
             rec = dict(round=rnd, sample=si, task=task.get("task_id"),
                        spec=list(spec), failure_kind=fk, r=pr["r"], base=base,
                        kept=kept, archive_n=len(archive.items),
-                       arb=_arb, n_conflict_pairs=pr.get("n_conflict_pairs", 0),
+                       arb=_arb, arch=_arch,
                        # ★ 只把标量化的分量进日志（claims 太长，另存档案）
                        **{k: v for k, v in pr.items() if k not in ("r", "claims")},
                        grad=g["grad"])

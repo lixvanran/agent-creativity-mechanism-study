@@ -284,7 +284,8 @@ def run_checks():
     def c10():
         llm = StubLLM()
         wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
-                                   judge_model="stub", max_rounds=1)
+                                   judge_model="stub", max_rounds=1,
+                                   merge_mode="mechanical", learn_architecture=False)
         r = wf.run("990 PRO 1TB 的哪些参数成立？")
         if "AGGREGATE(mechanical)" not in r["ops"]:
             return False, "默认没走机械汇总：ops=%r" % (r["ops"],)
@@ -391,9 +392,9 @@ def run_checks():
     # ── 15. ★ 策略：可学、且查表策略是它的特例
     def c15():
         p0 = W.ActionPolicy()
-        # 6 修复型 + 2 范围 + 3 强度 + 36 交互 + **3 仲裁** = 50
-        if p0.param_count() != 50:
-            return False, "参数量 %d（应 50 = 6+2+3+36+3仲裁）" % p0.param_count()
+        # 6 修复型 + 2 范围 + 3 强度 + 36 交互 + 3 仲裁 + 4 发散度 + 3 合并方式 = 57
+        if p0.param_count() != 57:
+            return False, "参数量 %d（应 57 = 6+2+3+36+3仲裁+4发散度+3合并方式）" % p0.param_count()
         probs = p0.probs("conflict")
         if abs(sum(probs) - 1.0) > 1e-6:
             return False, "概率没归一：%r" % sum(probs)
@@ -492,6 +493,39 @@ def run_checks():
             return False, "一致内容被误报成冲突"
         return True, "检出 1 对；none 容忍(丢0) drop_one 丢1 且两向不同"
 
+    # ── 20. ★★ 架构自由度（发散程度 + 合并方式）**由策略决定**，且真的被用上
+    def c20():
+        import random as _r
+        # ① 策略能采样出 (n_frames, merge_mode)
+        pol = W.ActionPolicy()
+        nf, mm = pol.choose_architecture("conflict", _r.Random(0))
+        if nf not in W.ActionPolicy.NF_IDS or mm not in W.ActionPolicy.MM_IDS:
+            return False, "采样出非法架构决策：(%r, %r)" % (nf, mm)
+        # ② 推高某个发散度 ⇒ 采样应偏向它
+        pol.nf[W.ActionPolicy.NF_IDS.index(2)] = 8.0
+        picks = [pol.choose_architecture("conflict", _r.Random(i))[0] for i in range(20)]
+        if picks.count(2) < 15:
+            return False, "推高发散度=2 后，采样仍不集中：%r" % picks
+        # ③ run() 里策略的选择**真的生效**（arch_pick 落进读数 + ops 里有 ARCH 标记）
+        llm = StubLLM()
+        wf = W.CollapseFixWorkflow(llm, n_slots=3, seed=5, model="stub",
+                                   judge_model="stub", max_rounds=1,
+                                   policy=pol, learn_architecture=True)
+        r = wf.run("990 PRO 1TB 的哪些参数成立？")
+        if not r.get("arch_pick"):
+            return False, "读数里没有 arch_pick ⇒ 策略的选择没落地"
+        if r.get("merge_mode") not in W.ActionPolicy.MM_IDS:
+            return False, "merge_mode 非法：%r" % r.get("merge_mode")
+        if not any(o.startswith("ARCH[") for o in r.get("ops") or []):
+            return False, "ops 里没有 ARCH 标记：%r" % (r.get("ops"),)
+        # ④ 三种合并方式都能跑
+        for m in W.ActionPolicy.MM_IDS:
+            mg = W.merge_claims(["①正确：7450 MB/s", "①错误：7450 MB/s", "②正确：保修5年"], m)
+            if not mg.get("claims"):
+                return False, "合并方式 %s 没产出断言" % m
+        return True, ("策略选的架构生效：nf=%s mm=%s；三种合并都可用"
+                      % (r.get("arch_pick"), r.get("merge_mode")))
+
     add("frames_seed_reproducible", c1)
     add("frames_vary_by_seed", c2)
     add("dedup_removes_redundant", c3)
@@ -511,6 +545,7 @@ def run_checks():
     add("anchor_out_decision_is_mechanical", c17)
     add("equal_budget_control_arm", c18)
     add("conflict_arbitration_modes", c19)
+    add("architecture_freedom_is_learned", c20)
     return checks
 
 
