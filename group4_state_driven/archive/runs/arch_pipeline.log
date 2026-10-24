@@ -1,0 +1,41 @@
+=== START 2026-10-21 01:17:15 ===
+--- main experiment ---
+  [arch-20261021-011715-minimax] A #1  1043字 ok
+  [arch-20261021-011715-minimax] A #2  1192字 ok
+  [arch-20261021-011715-minimax] A #3  1228字 ok
+  [arch-20261021-011715-minimax] S #2  1538字 ok
+  [arch-20261021-011715-minimax] S #3  2306字 ok
+  [arch-20261021-011715-minimax] S #1  2863字 ok
+  [arch-20261021-011715-minimax] WF-p #2  1644字 ok
+  [arch-20261021-011715-minimax] WF-a #1  2350字 ok
+  [arch-20261021-011715-minimax] WF-p #1  3198字 ok
+  [arch-20261021-011715-minimax] WF-a #2  2064字 ok
+  [arch-20261021-011715-minimax] WF-a #3  3032字 ok
+  [arch-20261021-011715-minimax] WF-p #3  3346字 ok
+  [arch-20261021-011715-minimax] WF-a-R #3  5084字 ok
+  [arch-20261021-011715-minimax] WF-a-NO #1  1148字 ok
+  [arch-20261021-011715-minimax] WF-a-R #2  2263字 ok
+  [arch-20261021-011715-minimax] WF-a-NO #2  1874字 ok
+  [arch-20261021-011715-minimax] WF-a-NO #3  2092字 ok
+  [arch-20261021-011715-minimax] WF-a-R #1  4247字 ok
+
+[out] runs/arch_compare.jsonl
+[batch] arch-20261021-011715-minimax | 调用 72 次
+[token] prompt=57348 completion=192704
+MAIN_EXIT=0
+--- swap probe ---
+WF-a 可用样本：3
+Traceback (most recent call last):
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/probe_arch.py", line 105, in <module>
+    main()
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/probe_arch.py", line 86, in main
+    for kind, i, fu in as_completed(futs):
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 222, in as_completed
+    with _AcquireFutures(fs):
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 149, in __enter__
+    future._condition.acquire()
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'tuple' object has no attribute '_condition'
+PROBE_EXIT=1
+=== DONE 2026-10-21 01:33:10 ===
+PIPELINE_DONE

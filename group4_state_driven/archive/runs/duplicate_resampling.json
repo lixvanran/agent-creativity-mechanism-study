@@ -1,0 +1,16 @@
+{
+  "duplicate_resampling": [
+    {
+      "topic_id": "T10",
+      "original_tag": "T10-1",
+      "original_rep": 1,
+      "new_tag": "T10-2",
+      "new_rep": 2,
+      "source_line": 9,
+      "elapsed": 210.74,
+      "n_calls": 9,
+      "evidence": "两条均为完整独立采样（决策 note 措辞不同 ⇒ 非重复写盘）"
+    }
+  ],
+  "rule": "同一 (题,rep) 出现两条完整独立采样 ⇒ 保留两条 ⇒ 后写入者重标记为该题缺失的 rep ⇒ ⇒ 每题恰好 3 个重复 ⇒ 臂间 n 相等 ⇒ ★ 显式留痕，不静默去重、不静默重复计权"
+}

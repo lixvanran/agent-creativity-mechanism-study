@@ -1,0 +1,15 @@
+  [arch2-20261021-071025] A          #2   1291字  闸门通过=-  ok
+  [arch2-20261021-071025] A          #3   1005字  闸门通过=-  ok
+  [arch2-20261021-071025] A          #1   1194字  闸门通过=-  ok
+  [arch2-20261021-071025] WF-p       #1   1881字  闸门通过=-  ok
+  [arch2-20261021-071025] WF-a2      #2   3029字  闸门通过=True  ok
+  [arch2-20261021-071025] WF-p       #2   2920字  闸门通过=-  ok
+  [arch2-20261021-071025] WF-p       #3   2598字  闸门通过=-  ok
+  [arch2-20261021-071025] WF-a2      #3   1892字  闸门通过=True  ok
+  [arch2-20261021-071025] WF-a2-NO   #1   1643字  闸门通过=True  ok
+  [arch2-20261021-071025] WF-a2-NO   #3   1195字  闸门通过=True  ok
+  [arch2-20261021-071025] WF-a2      #1   2975字  闸门通过=True  ok
+  [arch2-20261021-071025] WF-a2-NO   #2   1832字  闸门通过=True  ERR:hard_gate_failed
+
+[out] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/runs/arch2_compare.jsonl
+[batch] arch2-20261021-071025 ｜ 调用 42 次 ｜ prompt=32100 completion=69617

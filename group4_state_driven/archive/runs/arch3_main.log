@@ -1,0 +1,18 @@
+  [arch3-20261021-221648] A          #3  1013字 ok
+  [arch3-20261021-221648] A          #1  1265字 ok
+  [arch3-20261021-221648] A          #2  1170字 ok
+  [arch3-20261021-221648] S-self     #1  1281字 ok
+  [arch3-20261021-221648] WF-p       #3  2866字 ok
+  [arch3-20261021-221648] WF-p       #2  1689字 ok
+  [arch3-20261021-221648] S-self     #3  2197字 ok
+  [arch3-20261021-221648] WF-p       #1  2385字 ok
+  [arch3-20261021-221648] S-self     #2  3803字 ok
+  [arch3-20261021-221648] WF-a3      #3  2042字 ok
+  [arch3-20261021-221648] WF-a3-NO   #1  1653字 ok
+  [arch3-20261021-221648] WF-a3-NO   #2  1135字 ok
+  [arch3-20261021-221648] WF-a3-NO   #3  1466字 ok
+  [arch3-20261021-221648] WF-a3      #2  2469字 ERR:hard_gate_failed
+  [arch3-20261021-221648] WF-a3      #1  4133字 ERR:hard_gate_failed
+
+[out] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/runs/arch3_compare.jsonl
+[batch] arch3-20261021-221648 ｜ 调用 67 次 ｜ prompt=57501 completion=151446

@@ -1,0 +1,8 @@
+[batch] batch_id=20261020-135500-6448（所有臂必须同批）
+  [ERR] 档案 C0/T01: API 调用失败：HTTP 503: DNS cache overflow
+[run] 作品 3 条，并发 4
+  [skip] C0/T01 无档案
+  [skip] C1/T01 无档案
+  [skip] C2/T01 无档案
+
+[done] 调用 1 次  错误 1  token in=0 out=0  批=20261020-135500-6448

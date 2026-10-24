@@ -1,0 +1,15 @@
+── G0-1 环境快照 → runs/env_snapshot.json
+   OPENROUTER_BASE_URL_before       None
+   OPENROUTER_BASE_URL_pinned       https://api.minimaxi.com/v1
+   MINIMAX_SUBSCRIPTION_KEY_set     True
+   G4_REF_DIR                       /workspace/g4_ref
+   PYTHON                           3.11.2
+   ts                               2026-10-24T13:10:51
+   ★ 实际生效 OPENROUTER_BASE_URL = https://api.minimaxi.com/v1
+
+===== G01 | batch=v6s1-smoke-003 =====
+   G01-1      err=None  cand_ok=3  F=1  B=1  D=1  Δq=False
+   ── G0-4 门活性：{"escape": {"ok": true, "n": 3, "var": 4e-05, "min": 0.0563, "max": 0.0688, "spread_range": 0.012532, "constant": false, "len_corr": 0.2849}, "spread": {"ok": true, "n": 3, "var": 0.0, "min": 0.0027, "max": 0.0027, "spread_range": 0.0, "constant": true, "len_corr": null}, "length": {"ok": true, "n": 3, "var": 0.009492, "min": 0.8062, "max": 1.0, "spread_range": 0.193756, "constant": false, "len_corr": 1.0}}
+
+── 通道健康度（分母含失败调用）：{"path": "runs/calllog.jsonl", "calls_logical": 10, "ok": 10, "failed": 0, "http_attempts": 10, "success_rate": 1.0}
+── 输出：runs/v6s1_smoke.jsonl

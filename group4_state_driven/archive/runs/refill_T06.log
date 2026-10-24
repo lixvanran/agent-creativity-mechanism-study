@@ -1,0 +1,14 @@
+
+===== T06 | batch=mt-T06-20261023-221256 =====
+  题面: 女儿在父亲的葬礼上读一篇悼词。父亲与女儿决裂三年，最后也没有和好。这篇悼词该怎么写？
+  [mt-T06-20261023-221256] S-self    #1     0字 ERR:调用失败：TimeoutError: The read operation timed out
+  [mt-T06-20261023-221256] S-self    #2  1430字 ok
+  [mt-T06-20261023-221256] S-self    #3   822字 ok
+  [mt-T06-20261023-221256] WF-a3-NL  #1  3612字 ok
+  [mt-T06-20261023-221256] WF-a3-NL  #2  1850字 ok
+  [mt-T06-20261023-221256] WF-a3-NL  #3     0字 ERR:调用失败：TimeoutError: The read operation timed out
+  [mt-T06-20261023-221256] WF-a3     #1  1698字 ok
+  [mt-T06-20261023-221256] WF-a3     #2  2373字 ok
+  [mt-T06-20261023-221256] WF-a3     #3     0字 ERR:调用失败：TimeoutError: The read operation timed out
+
+[done] runs/refill_T06

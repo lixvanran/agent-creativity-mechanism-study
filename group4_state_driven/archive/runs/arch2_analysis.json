@@ -1,0 +1,564 @@
+{
+  "meta": {
+    "batch_ids": [
+      "arch2-20261021-071025"
+    ],
+    "model": "MiniMax-M3",
+    "n_questions": 1,
+    "reps": 3,
+    "★分析单元=题，只有 1 题 ⇒ 全部为本例描述": true
+  },
+  "Q1_封闭率": {
+    "v1_全部决策": 0.5,
+    "v1_驱动相关(4个)": 0.25,
+    "v2_全部决策": 0.7,
+    "v2_决策点": [
+      {
+        "name": "驱动内容（取舍陈述）",
+        "who": "模型",
+        "closed": false,
+        "why": "取舍的**措辞**仍由模型生成（认知活动）"
+      },
+      {
+        "name": "观测（缺口描述）",
+        "who": "模型",
+        "closed": false,
+        "why": "gaps 的措辞仍由模型生成"
+      },
+      {
+        "name": "新约束（这一轮写什么）",
+        "who": "模型",
+        "closed": false,
+        "why": "模型改写，代码只校验 gap_index 指向"
+      },
+      {
+        "name": "★离散实体（要写进文章的具体东西）",
+        "who": "代码",
+        "closed": true,
+        "why": "取值 ⊆ 初稿字面子串（代码逐字校验）"
+      },
+      {
+        "name": "★必含实体（选哪些）",
+        "who": "代码",
+        "closed": true,
+        "why": "代码按与缺口的 n-gram 关联度排序选出"
+      },
+      {
+        "name": "★禁含措辞（不要写什么）",
+        "who": "代码",
+        "closed": true,
+        "why": "代码从观测抽 + 逐字校验 + 长度上限"
+      },
+      {
+        "name": "已排除（哪些路走过）",
+        "who": "代码",
+        "closed": true,
+        "why": "同上"
+      },
+      {
+        "name": "绑定（约束↔缺口）",
+        "who": "代码",
+        "closed": true,
+        "why": "gap_index 结构声明"
+      },
+      {
+        "name": "补齐",
+        "who": "代码",
+        "closed": true,
+        "why": "确定性规则"
+      },
+      {
+        "name": "★输出语言与长度",
+        "who": "代码",
+        "closed": true,
+        "why": "产出闸门：不合格 ⇒ 代码重试"
+      }
+    ]
+  },
+  "Q2_语言闸门": {
+    "A": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 0.9925,
+          "draft": null,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1194
+        },
+        {
+          "tag": 2,
+          "final": 0.0,
+          "draft": null,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 1291
+        },
+        {
+          "tag": 3,
+          "final": 1.0,
+          "draft": null,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1005
+        }
+      ],
+      "n_drifted_final": 1,
+      "n_drifted_draft": 0,
+      "n": 3
+    },
+    "WF-p": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 1.0,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1881
+        },
+        {
+          "tag": 2,
+          "final": 0.8332,
+          "draft": 1.0,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 2920
+        },
+        {
+          "tag": 3,
+          "final": 0.756,
+          "draft": 1.0,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 2598
+        }
+      ],
+      "n_drifted_final": 2,
+      "n_drifted_draft": 0,
+      "n": 3
+    },
+    "WF-a2": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 1.0,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2975
+        },
+        {
+          "tag": 2,
+          "final": 0.9646,
+          "draft": 0.9895,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 3029
+        },
+        {
+          "tag": 3,
+          "final": 0.9721,
+          "draft": 0.9538,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1892
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3
+    },
+    "WF-a2-NO": {
+      "rows": [
+        {
+          "tag": 1,
+          "final": 1.0,
+          "draft": 0.9932,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1643
+        },
+        {
+          "tag": 2,
+          "final": 1.0,
+          "draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1832
+        },
+        {
+          "tag": 3,
+          "final": 0.9312,
+          "draft": 0.9217,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1195
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3
+    }
+  },
+  "Q3_候选集": {
+    "WF-a2": {
+      "rows": [
+        {
+          "tag": 1,
+          "n_entities": 6,
+          "n_must": 3,
+          "must": [
+            "评分标准",
+            "邮件",
+            "项目"
+          ],
+          "n_forbidden": 3,
+          "forbidden": [
+            "说清楚",
+            "不言而喻",
+            "我如何表达"
+          ],
+          "must_hit": 1.0,
+          "must_n": 3,
+          "forbidden_hits": [],
+          "n_gate_attempts": 2,
+          "n_retry": 0,
+          "len": 2975,
+          "lang": 1.0,
+          "entities_in_final": [
+            "高考英语作文",
+            "评分标准",
+            "模板",
+            "邮件",
+            "项目"
+          ]
+        },
+        {
+          "tag": 2,
+          "n_entities": 5,
+          "n_must": 3,
+          "must": [
+            "家长",
+            "高考英语作文",
+            "评分标准"
+          ],
+          "n_forbidden": 3,
+          "forbidden": [
+            "拼装",
+            "让我们共同努力",
+            "远胜于"
+          ],
+          "must_hit": 1.0,
+          "must_n": 3,
+          "forbidden_hits": [],
+          "n_gate_attempts": 2,
+          "n_retry": 0,
+          "len": 3029,
+          "lang": 0.9646,
+          "entities_in_final": [
+            "高考英语作文",
+            "评分标准",
+            "句式",
+            "家长"
+          ]
+        },
+        {
+          "tag": 3,
+          "n_entities": 5,
+          "n_must": 3,
+          "must": [
+            "评分标准",
+            "模板",
+            "阅卷者"
+          ],
+          "n_forbidden": 1,
+          "forbidden": [
+            "堆砌高级词汇"
+          ],
+          "must_hit": 1.0,
+          "must_n": 3,
+          "forbidden_hits": [],
+          "n_gate_attempts": 2,
+          "n_retry": 0,
+          "len": 1892,
+          "lang": 0.9721,
+          "entities_in_final": [
+            "评分标准",
+            "模板",
+            "阅卷者",
+            "词汇",
+            "家庭"
+          ]
+        }
+      ],
+      "must_summary": {
+        "n_must": 9,
+        "n_hit": 9,
+        "rate": 1.0
+      },
+      "forbidden_summary": {
+        "n_forbidden": 7,
+        "n_hit": 0,
+        "rate": 0.0
+      },
+      "gate_summary": {
+        "n_samples": 3,
+        "n_retry": 0,
+        "retry_rate": 0.0,
+        "len_mean": 2632.0
+      }
+    },
+    "WF-a2-NO": {
+      "rows": [
+        {
+          "tag": 1,
+          "n_entities": 0,
+          "n_must": 0,
+          "must": [],
+          "n_forbidden": 0,
+          "forbidden": [],
+          "must_hit": null,
+          "must_n": 0,
+          "forbidden_hits": [],
+          "n_gate_attempts": 2,
+          "n_retry": 0,
+          "len": 1643,
+          "lang": 1.0,
+          "entities_in_final": []
+        },
+        {
+          "tag": 2,
+          "n_entities": 0,
+          "n_must": 0,
+          "must": [],
+          "n_forbidden": 0,
+          "forbidden": [],
+          "must_hit": null,
+          "must_n": 0,
+          "forbidden_hits": [],
+          "n_gate_attempts": 3,
+          "n_retry": 1,
+          "len": 1832,
+          "lang": 1.0,
+          "entities_in_final": []
+        },
+        {
+          "tag": 3,
+          "n_entities": 0,
+          "n_must": 0,
+          "must": [],
+          "n_forbidden": 0,
+          "forbidden": [],
+          "must_hit": null,
+          "must_n": 0,
+          "forbidden_hits": [],
+          "n_gate_attempts": 2,
+          "n_retry": 0,
+          "len": 1195,
+          "lang": 0.9312,
+          "entities_in_final": []
+        }
+      ],
+      "must_summary": {
+        "n_must": 0,
+        "n_hit": 0,
+        "rate": null
+      },
+      "forbidden_summary": {
+        "n_forbidden": 0,
+        "n_hit": 0,
+        "rate": null
+      },
+      "gate_summary": {
+        "n_samples": 3,
+        "n_retry": 1,
+        "retry_rate": 0.1429,
+        "len_mean": 1556.6667
+      }
+    }
+  },
+  "Q5_闸门代价": {
+    "WF-a2": {
+      "n_samples": 3,
+      "n_retry": 0,
+      "retry_rate": 0.0,
+      "len_mean": 2632.0
+    },
+    "WF-a2-NO": {
+      "n_samples": 3,
+      "n_retry": 1,
+      "retry_rate": 0.1429,
+      "len_mean": 1556.6667
+    }
+  },
+  "Q4_D4_候选集换源": {
+    "rows": [
+      {
+        "tag": 1,
+        "必含实体逐字在【换入初稿】": 3,
+        "必含实体逐字在【原初稿】": 3,
+        "n_must": 3,
+        "禁含措辞逐字在【换入初稿】": 3,
+        "禁含措辞逐字在【原初稿】": 0,
+        "n_forb": 3
+      },
+      {
+        "tag": 3,
+        "必含实体逐字在【换入初稿】": 3,
+        "必含实体逐字在【原初稿】": 3,
+        "n_must": 3,
+        "禁含措辞逐字在【换入初稿】": 3,
+        "禁含措辞逐字在【原初稿】": 0,
+        "n_forb": 3
+      },
+      {
+        "tag": 2,
+        "必含实体逐字在【换入初稿】": 3,
+        "必含实体逐字在【原初稿】": 3,
+        "n_must": 3,
+        "禁含措辞逐字在【换入初稿】": 2,
+        "禁含措辞逐字在【原初稿】": 0,
+        "n_forb": 2
+      }
+    ],
+    "合计_必含_在换入": 9,
+    "合计_必含_在原": 9,
+    "合计_禁含_在换入": 8,
+    "合计_禁含_在原": 0
+  },
+  "Q4_探针": {
+    "rows": [
+      {
+        "tag": 1,
+        "variant": "D3_offtopic",
+        "J": 0.079,
+        "lang": 1.0,
+        "topic": 1.862,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 1,
+        "variant": "D4_swapsource",
+        "J": 0.0951,
+        "lang": 1.0,
+        "topic": 2.362,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 1,
+        "variant": "D1_nocandidate",
+        "J": 0.1008,
+        "lang": 0.994,
+        "topic": 1.119,
+        "must_hit": 0.6667,
+        "n_must": 3
+      },
+      {
+        "tag": 2,
+        "variant": "D1_nocandidate",
+        "J": 0.1002,
+        "lang": 1.0,
+        "topic": 1.332,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 2,
+        "variant": "D2_reversed",
+        "J": 0.064,
+        "lang": 0.9554,
+        "topic": 1.497,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 1,
+        "variant": "D2_reversed",
+        "J": 0.0768,
+        "lang": 0.9961,
+        "topic": 1.706,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 2,
+        "variant": "D3_offtopic",
+        "J": 0.0673,
+        "lang": 1.0,
+        "topic": 2.139,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 3,
+        "variant": "D1_nocandidate",
+        "J": 0.2243,
+        "lang": 0.931,
+        "topic": 1.825,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 3,
+        "variant": "D3_offtopic",
+        "J": 0.0646,
+        "lang": 0.9907,
+        "topic": 2.276,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 3,
+        "variant": "D2_reversed",
+        "J": 0.0744,
+        "lang": 0.9033,
+        "topic": 1.27,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 3,
+        "variant": "D4_swapsource",
+        "J": 0.1003,
+        "lang": 0.7483,
+        "topic": 0.811,
+        "must_hit": 1.0,
+        "n_must": 3
+      },
+      {
+        "tag": 2,
+        "variant": "D4_swapsource",
+        "J": 0.0801,
+        "lang": 1.0,
+        "topic": 0.857,
+        "must_hit": 1.0,
+        "n_must": 3
+      }
+    ],
+    "by_variant": {
+      "D1_nocandidate": {
+        "n": 3,
+        "J_mean": 0.1418,
+        "topic_mean": 1.4253
+      },
+      "D2_reversed": {
+        "n": 3,
+        "J_mean": 0.0717,
+        "topic_mean": 1.491
+      },
+      "D3_offtopic": {
+        "n": 3,
+        "J_mean": 0.0703,
+        "topic_mean": 2.0923
+      },
+      "D4_swapsource": {
+        "n": 3,
+        "J_mean": 0.0918,
+        "topic_mean": 1.3433
+      }
+    }
+  }
+}

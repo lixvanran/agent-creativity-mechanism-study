@@ -1,0 +1,163 @@
+{
+  "run": "arch_compare.jsonl",
+  "arms": [
+    "A",
+    "S",
+    "WF-a",
+    "WF-a-NO",
+    "WF-a-R",
+    "WF-p"
+  ],
+  "n_runs": 18,
+  "Q1_决策权归属": {
+    "decisions": [
+      {
+        "name": "驱动内容（这一轮要守住的取舍）",
+        "who": "模型",
+        "space_closed": false,
+        "code_ref": "run_arch_compare.py:step_stance (keeps = d['不能牺牲'])",
+        "why": "取值是模型自由生成的 3 条自然语言；代码只截断到 3 条，不限定内容",
+        "slot": "keeps"
+      },
+      {
+        "name": "观测（初稿哪些地方没展开）",
+        "who": "模型",
+        "space_closed": false,
+        "code_ref": "run_arch_compare.py:step_observe",
+        "why": "gaps 是模型自由生成的描述",
+        "slot": "gaps"
+      },
+      {
+        "name": "新约束（这一轮具体写什么）",
+        "who": "模型",
+        "space_closed": false,
+        "code_ref": "workflow_arch.py:transfer ③ (rewriter 返回模型产物)",
+        "why": "代码只校验 gap_index 指向对不对，**不限定约束内容本身**",
+        "slot": "keeps(S1)"
+      },
+      {
+        "name": "已排除（哪些路已经走过）",
+        "who": "代码",
+        "space_closed": true,
+        "code_ref": "workflow_arch.py:build_excluded",
+        "why": "取值 ⊆ 观测里出现过的引号内容 ⇒ 取值空间封闭 ⇒ 可逐字归属",
+        "slot": "excluded"
+      },
+      {
+        "name": "绑定（约束↔缺口的对应）",
+        "who": "代码",
+        "space_closed": true,
+        "code_ref": "workflow_arch.py:resolve_binding (gap_index)",
+        "why": "结构声明 ⇒ 零阈值；旧版措辞相似度有假阴性（实测 2/9）",
+        "slot": "binding"
+      },
+      {
+        "name": "补齐（不足 3 条时沿用上一轮）",
+        "who": "代码",
+        "space_closed": true,
+        "code_ref": "workflow_arch.py:transfer 补齐",
+        "why": "确定性规则，trace 里显式标注 filler_from_prev",
+        "slot": "keeps"
+      }
+    ],
+    "n_code_closed(干净)": 3,
+    "n_model_free(不干净)": 3,
+    "★与驱动直接相关且不封闭的决策数": 3,
+    "★驱动相关决策总数": 4,
+    "★驱动决策的代码封闭率": 0.25
+  },
+  "Q3_提示词污染度": {
+    "A": {
+      "n": 3,
+      "state_ratio_mean": null,
+      "meta_markers_mean": 7.0,
+      "has_state_block": true
+    },
+    "S": {
+      "n": 3,
+      "state_ratio_mean": null,
+      "meta_markers_mean": 7.0,
+      "has_state_block": true
+    },
+    "WF-a": {
+      "n": 3,
+      "state_ratio_mean": 0.1329,
+      "meta_markers_mean": 9.67,
+      "has_state_block": true
+    },
+    "WF-a-NO": {
+      "n": 3,
+      "state_ratio_mean": 0.0733,
+      "meta_markers_mean": 7.0,
+      "has_state_block": true
+    },
+    "WF-a-R": {
+      "n": 3,
+      "state_ratio_mean": 0.1589,
+      "meta_markers_mean": 8.33,
+      "has_state_block": true
+    },
+    "WF-p": {
+      "n": 3,
+      "state_ratio_mean": null,
+      "meta_markers_mean": 7.0,
+      "has_state_block": true
+    }
+  },
+  "Q3b_驱动内容传导率": [
+    {
+      "arm": "WF-a",
+      "tag": 1,
+      "cons_hit": 0.6126,
+      "ngrams": 191
+    },
+    {
+      "arm": "WF-a",
+      "tag": 2,
+      "cons_hit": 0.4706,
+      "ngrams": 170
+    },
+    {
+      "arm": "WF-a",
+      "tag": 3,
+      "cons_hit": 0.0,
+      "ngrams": 224
+    },
+    {
+      "arm": "WF-a-NO",
+      "tag": 1,
+      "cons_hit": 0.4423,
+      "ngrams": 104
+    },
+    {
+      "arm": "WF-a-NO",
+      "tag": 2,
+      "cons_hit": 0.5714,
+      "ngrams": 98
+    },
+    {
+      "arm": "WF-a-NO",
+      "tag": 3,
+      "cons_hit": 0.5333,
+      "ngrams": 90
+    },
+    {
+      "arm": "WF-a-R",
+      "tag": 1,
+      "cons_hit": 0.4248,
+      "ngrams": 226
+    },
+    {
+      "arm": "WF-a-R",
+      "tag": 2,
+      "cons_hit": 0.5942,
+      "ngrams": 276
+    },
+    {
+      "arm": "WF-a-R",
+      "tag": 3,
+      "cons_hit": 0.0,
+      "ngrams": 197
+    }
+  ]
+}

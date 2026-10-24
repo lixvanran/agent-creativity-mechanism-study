@@ -1,0 +1,34 @@
+
+===== G01 | batch=arch4-G01-20261023-232438 =====
+  [arch4-G01-20261023-232438] A        #2  1318字 ok
+  [arch4-G01-20261023-232438] A        #3  1416字 ok
+  [arch4-G01-20261023-232438] A        #1  1405字 ok
+  [arch4-G01-20261023-232438] WF-v4    #3  1200字 ok | state_pick=1 generic_pick=3 align(state)=1.0 align(generic)=1.0
+  [arch4-G01-20261023-232438] WF-v4    #2  1294字 ok | state_pick=3 generic_pick=2 align(state)=0.75 align(generic)=0.25
+  [arch4-G01-20261023-232438] WF-v4    #1   945字 ok | state_pick=1 generic_pick=2 align(state)=1.0 align(generic)=0.75
+  [arch4-G01-20261023-232438] WF-v4-blind #1   916字 ok | state_pick=2 generic_pick=2 align(state)=0.0 align(generic)=0.0
+  [arch4-G01-20261023-232438] WF-v4-blind #3  1336字 ok | state_pick=2 generic_pick=2 align(state)=0.5 align(generic)=0.5
+  [arch4-G01-20261023-232438] WF-v4-blind #2   963字 ok | state_pick=1 generic_pick=3 align(state)=0.0 align(generic)=0.0
+
+===== T07 | batch=arch4-T07-20261023-232850 =====
+  [arch4-T07-20261023-232850] A        #2  2159字 ok
+  [arch4-T07-20261023-232850] A        #1  3661字 ok
+  [arch4-T07-20261023-232850] A        #3  2835字 ok
+  [arch4-T07-20261023-232850] WF-v4    #2  1113字 ok | state_pick=2 generic_pick=2 align(state)=0.75 align(generic)=0.75
+  [arch4-T07-20261023-232850] WF-v4    #1  1109字 ok | state_pick=1 generic_pick=1 align(state)=1.0 align(generic)=1.0
+  [arch4-T07-20261023-232850] WF-v4-blind #1  1039字 ok | state_pick=2 generic_pick=2 align(state)=0.75 align(generic)=0.75
+  [arch4-T07-20261023-232850] WF-v4-blind #2  1152字 ok | state_pick=3 generic_pick=3 align(state)=0.75 align(generic)=0.75
+  [arch4-T07-20261023-232850] WF-v4    #3  1199字 ok | state_pick=2 generic_pick=2 align(state)=1.0 align(generic)=1.0
+  [arch4-T07-20261023-232850] WF-v4-blind #3  1474字 ok | state_pick=1 generic_pick=3 align(state)=0.0 align(generic)=0.0
+
+===== T10 | batch=arch4-T10-20261023-233248 =====
+  [arch4-T10-20261023-233248] A        #3  1202字 ok
+  [arch4-T10-20261023-233248] A        #2  1398字 ok
+  [arch4-T10-20261023-233248] A        #1  1452字 ok
+  [arch4-T10-20261023-233248] WF-v4    #1   960字 ok | state_pick=1 generic_pick=3 align(state)=1.0 align(generic)=1.0
+  [arch4-T10-20261023-233248] WF-v4    #2  1184字 ok | state_pick=1 generic_pick=1 align(state)=1.0 align(generic)=1.0
+  [arch4-T10-20261023-233248] WF-v4    #3  1147字 ok | state_pick=2 generic_pick=3 align(state)=1.0 align(generic)=0.5
+  [arch4-T10-20261023-233248] WF-v4-blind #2  1037字 ok | state_pick=1 generic_pick=1 align(state)=0.0 align(generic)=0.0
+  [arch4-T10-20261023-233248] WF-v4-blind #1   905字 ok | state_pick=2 generic_pick=3 align(state)=0.5 align(generic)=0.5
+  [arch4-T10-20261023-233248] WF-v4-blind #3  1236字 ok | state_pick=2 generic_pick=2 align(state)=0.3333 align(generic)=0.3333
+[total] 调用 144 次 ｜ prompt=80567 completion=149129

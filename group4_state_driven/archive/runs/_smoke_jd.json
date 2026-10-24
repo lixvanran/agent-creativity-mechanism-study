@@ -1,0 +1,95 @@
+{
+ "meta": {
+  "judges": [
+   "x-ai/grok-4.20",
+   "x-ai/grok-4.3"
+  ],
+  "dims": [
+   "D1_取舍明确度",
+   "D2_观点驱动力",
+   "D3_人类似然感"
+  ],
+  "n_samples": 1,
+  "n_results": 6,
+  "n_errors": 0,
+  "srcs": [
+   "runs/multitopic_T06/mt_T06.jsonl"
+  ],
+  "generated_at": "2026-10-23 06:57:48"
+ },
+ "逐条": [
+  {
+   "arm": "A",
+   "tag": "3",
+   "topic": "T06",
+   "src": "mt_T06.jsonl",
+   "batch": "mt-T06-20261023-065642",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“悼词应允许复杂情感、不必强求和解”这一尖锐主张贯穿，明确舍弃了大团圆叙事。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": "3",
+   "topic": "T06",
+   "src": "mt_T06.jsonl",
+   "batch": "mt-T06-20261023-065642",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：坚持写真实矛盾（爱与伤害并存），放弃强行和解与圆满结局，理由具体且反复强调。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": "3",
+   "topic": "T06",
+   "src": "mt_T06.jsonl",
+   "batch": "mt-T06-20261023-065642",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "强烈个人立场与情感主张，清晰表达对复杂亲情的真实看法，像在为自己的理念写作。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": "3",
+   "topic": "T06",
+   "src": "mt_T06.jsonl",
+   "batch": "mt-T06-20261023-065642",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "明确放弃大团圆和解，保留复杂情感与具体细节，并给出理由",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": "3",
+   "topic": "T06",
+   "src": "mt_T06.jsonl",
+   "batch": "mt-T06-20261023-065642",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文紧扣‘悼词不必强求和解，可同时承认爱与伤害’展开并取舍",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": "3",
+   "topic": "T06",
+   "src": "mt_T06.jsonl",
+   "batch": "mt-T06-20261023-065642",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "有清晰立场，强调真实复杂情感而非强求和解",
+   "error": null
+  }
+ ],
+ "题内分析": {}
+}

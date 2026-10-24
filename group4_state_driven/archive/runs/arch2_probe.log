@@ -1,0 +1,16 @@
+WF-a2 可用样本：3
+无关驱动：['不能牺牲夜班馆员的身心健康与合理休息。', '不能牺牲低收入读者免受高额私人学习成本挤压的权利。', '不能牺牲公共财政优先用于基本馆藏和基层服务的原则。']
+  [a2probe-20261021-072026] D3_offtopic      #1  2578字 中文100%
+  [a2probe-20261021-072026] D4_swapsource    #1  2159字 中文100%
+  [a2probe-20261021-072026] D1_nocandidate   #1  4109字 中文99%
+  [a2probe-20261021-072026] D1_nocandidate   #2  2852字 中文100%
+  [a2probe-20261021-072026] D2_reversed      #2  2606字 中文96%
+  [a2probe-20261021-072026] D2_reversed      #1  3869字 中文100%
+  [a2probe-20261021-072026] D3_offtopic      #2  2291字 中文100%
+  [a2probe-20261021-072026] D1_nocandidate   #3  1699字 中文93%
+  [a2probe-20261021-072026] D3_offtopic      #3  1450字 中文99%
+  [a2probe-20261021-072026] D2_reversed      #3  4489字 中文90%
+  [a2probe-20261021-072026] D4_swapsource    #3  2837字 中文75%
+  [a2probe-20261021-072026] D4_swapsource    #2  2683字 中文100%
+
+[out] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/runs/arch2_probe.jsonl ｜ 调用 55 次

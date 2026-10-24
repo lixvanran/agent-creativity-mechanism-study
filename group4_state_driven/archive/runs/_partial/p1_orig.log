@@ -1,0 +1,170 @@
+[batch] batch_id=20261020-141025-6629（所有臂必须同批）
+  [stance] C0/T01 ok  极性=pole_a
+  [stance] C0/T02 ok  极性=pole_a
+  [stance] C0/T04 ok  极性=pole_a
+  [stance] C0/T05 ok  极性=pole_a
+  [stance] C0/T09 ok  极性=pole_b
+  [stance] R1/T01 ok  极性=pole_b
+  [stance] R1/T02 ok  极性=pole_b
+  [stance] R1/T04 ok  极性=pole_b
+  [stance] R1/T05 ok  极性=pole_b
+  [stance] R1/T09 ok  极性=pole_a
+[run] 作品 120 条，并发 8
+  [gen] C0/T01#3 ok  1801字
+  [gen] C0/T01#2 ok  1279字
+  [gen] C0/T01#1 ok  1710字
+  [gen] C0/T01#4 ok  2008字
+  [gen] C1/T01#2 ok  1993字
+  [gen] A/T01#1 ok  2090字
+  [gen] A/T01#4 ok  2139字
+  [gen] C1/T01#4 ok  1321字
+  [gen] A/T01#2 ok  2196字
+  [gen] C1/T01#1 ok  1838字
+  [gen] C1/T01#3 ok  1767字
+  [gen] A/T01#3 ok  2198字
+  [gen] C2/T01#3 ok  1754字
+  [gen] S/T01#3 ok  941字
+  [gen] C2/T01#2 ok  1120字
+  [gen] S/T01#2 ok  1680字
+  [gen] S/T01#1 ok  1443字
+  [gen] C2/T01#1 ok  1419字
+  [gen] A/T02#1 ok  1238字
+  [gen] S/T01#4 ok  1333字
+  [gen] R1/T01#2 ok  1941字
+  [gen] A/T02#4 ok  1238字
+  [gen] R1/T01#3 ok  1402字
+  [gen] C2/T01#4 ok  1590字
+  [gen] A/T02#2 ok  941字
+  [gen] A/T02#3 ok  884字
+  [gen] C0/T02#1 ok  1153字
+  [gen] R1/T01#4 ok  1304字
+  [gen] C0/T02#2 ok  1270字
+  [gen] C0/T02#3 ok  1481字
+  [gen] C0/T02#4 ok  1232字
+  [gen] R1/T01#1 ok  2074字
+  [gen] C1/T02#2 ok  1635字
+  [gen] C2/T02#2 ok  1522字
+  [gen] C1/T02#4 ok  1435字
+  [gen] C1/T02#3 ok  982字
+  [gen] C2/T02#3 ok  1325字
+  [gen] C1/T02#1 ok  1002字
+  [gen] C2/T02#4 ok  2054字
+  [gen] S/T02#2 ok  1340字
+  [gen] C2/T02#1 ok  933字
+  [gen] R1/T02#1 ok  1228字
+  [gen] R1/T02#2 ok  1164字
+  [gen] S/T02#3 ok  1304字
+  [gen] S/T02#1 ok  965字
+  [gen] S/T02#4 ok  995字
+  [gen] R1/T02#3 ok  1426字
+  [gen] R1/T02#4 ok  1197字
+  [gen] C0/T04#1 ok  1501字
+  [gen] A/T04#1 ok  1683字
+  [gen] A/T04#3 ok  1545字
+  [gen] A/T04#2 ok  1737字
+  [gen] A/T04#4 ok  1780字
+  [gen] C0/T04#3 ok  1432字
+  [gen] C0/T04#2 ok  1579字
+  [gen] C0/T04#4 ok  1706字
+  [gen] C2/T04#3 ok  0字
+  [gen] C1/T04#3 ok  1503字
+  [gen] C1/T04#1 ok  1976字
+  [gen] C1/T04#4 ok  2252字
+  [gen] C2/T04#1 ok  1847字
+  [gen] C1/T04#2 ok  2209字
+  [gen] S/T04#1 ok  1394字
+  [gen] C2/T04#4 ok  1450字
+  [gen] C2/T04#2 ok  2062字
+  [gen] S/T04#2 ok  1418字
+  [gen] A/T05#1 ok  465字
+  [gen] S/T04#3 ok  1829字
+  [gen] A/T05#2 ok  523字
+  [gen] A/T05#3 ok  407字
+  [gen] A/T05#4 ok  428字
+  [gen] C0/T05#1 ok  868字
+  [gen] R1/T04#1 ok  1544字
+  [gen] C0/T05#3 ok  482字
+  [gen] C0/T05#4 ok  389字
+  [gen] C0/T05#2 ok  402字
+  [ERR] C1/T05#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aa917ac6dbe78472eb865df51d2"}
+
+  [ERR] R1/T04#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aa9648cb8b976a061c8928b6e34"}
+
+  [ERR] R1/T04#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aaa98bde63805e8dafc39f21f6d"}
+
+  [ERR] C1/T05#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aabe068244266010c7ea610b326"}
+
+  [ERR] C1/T05#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aad287cc591028a72e3cc14b6bb"}
+
+  [ERR] C1/T05#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aaefe2ff53c58bd79ba26485bf9"}
+
+  [ERR] C2/T05#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aaf84ee6f6e8026cc2ec3953b1e"}
+
+  [ERR] R1/T04#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab024b1921b8535daef3be5fbae"}
+
+  [ERR] C2/T05#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab08d20692af24217d1c5449c48"}
+
+  [ERR] C2/T05#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab04d5205e7f283ddb2813995a3"}
+
+  [ERR] C2/T05#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab1ec95ba8c2af4b6cc29e25bdb"}
+
+  [ERR] S/T04#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab290f1434892491250f1b238e1"}
+
+  [ERR] S/T05#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab47eeb463f2c2a7ce331cea4eb"}
+
+  [ERR] S/T05#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab512c6a43aa0e2baf29f1a34c9"}
+
+  [ERR] S/T05#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab57fbc614ebb66c25db6712f83"}
+
+  [ERR] R1/T05#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab6315a14d0e68802eb71e88fd5"}
+
+  [ERR] R1/T05#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab7b0160ce2e6c9e5244c306d7e"}
+
+  [ERR] S/T05#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab7f6251f098776d3cb4a161daa"}
+
+  [ERR] R1/T05#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab8beb1e631cba81053164bb556"}
+
+  [ERR] R1/T05#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ab9794266fece115652b6ac224d"}
+
+  [ERR] A/T09#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aba47801ee76566af528d7a0fa0"}
+
+  [ERR] A/T09#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263abbd445777500d9a96e02767378"}
+
+  [ERR] A/T09#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263abca687f1b8369101a8a759925f"}
+
+  [ERR] A/T09#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263abdbbd5b25febc9244ba9ebbebf"}
+
+  [ERR] C0/T09#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263abdced670931f9ff0e79ab6bdb5"}
+
+  [ERR] C0/T09#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263abd54b9df909285dc9d3b8b6419"}
+
+  [gen] C0/T09#4 ok  1018字
+  [gen] C0/T09#3 ok  719字
+  [gen] C1/T09#2 ok  686字
+  [gen] C1/T09#1 ok  691字
+  [gen] C1/T09#4 ok  1721字
+  [ERR] S/T09#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ae62808bf483607716fa5b8225a"}
+
+  [ERR] S/T09#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263ae60f731ab52fb7f686ac3b593e"}
+
+  [gen] C2/T09#2 ok  1183字
+  [gen] C1/T09#3 ok  1060字
+  [gen] C2/T09#3 ok  1093字
+  [ERR] S/T09#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aebfcf2cd3c5e3be93c0da74e5a"}
+
+  [ERR] C2/T09#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aedeb55385a04670a774e0cad3b"}
+
+  [ERR] S/T09#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aed6bed6abf3e64a3f3f3390e90"}
+
+  [ERR] R1/T09#1: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aedff87334aaa6a46bd0e436b42"}
+
+  [ERR] R1/T09#2: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aed848a60d2f164dcd9cecaca97"}
+
+  [ERR] R1/T09#3: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aeed011b6f3895cda8286384145"}
+
+  [ERR] R1/T09#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263aeec2906acea4bce59cb3fdac7d"}
+
+  [ERR] C2/T09#4: API 调用失败：HTTP 429: {"type":"error","error":{"type":"rate_limit_error","message":"已达到 Token Plan 速率限制：请升级 Token Plan 套餐或切换为按量付费 API 使用。 (2062)","http_code":"429"},"request_id":"07263af8e24394a902e836c56e90542d"}
+
+
+[done] 调用 290 次  错误 36  token in=242028 out=133978  批=20261020-141025-6629

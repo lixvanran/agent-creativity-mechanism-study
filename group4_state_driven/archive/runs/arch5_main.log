@@ -1,0 +1,35 @@
+
+===== G01 | batch=arch5-G01-20261024-004558 =====
+  [arch5-G01-20261024-004558] A             #2  1282字 ok
+  [arch5-G01-20261024-004558] A             #1  1389字 ok
+  [arch5-G01-20261024-004558] A             #3  1343字 ok
+  [arch5-G01-20261024-004558] WF-v5         #2  1077字 ok | state_pick=1 generic_pick=1 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+  [arch5-G01-20261024-004558] WF-v5         #3   910字 ok | state_pick=1 generic_pick=1 align(s)=0.25 align(g)=0.25 decl_ok=3/3
+  [arch5-G01-20261024-004558] WF-v5         #1  1353字 ok | state_pick=1 generic_pick=1 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+  [arch5-G01-20261024-004558] WF-v5-blind   #3  1064字 ok | state_pick=1 generic_pick=1 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+  [arch5-G01-20261024-004558] WF-v5-blind   #1   841字 ok | state_pick=1 generic_pick=2 align(s)=0.25 align(g)=0.0 decl_ok=3/3
+  [arch5-G01-20261024-004558] WF-v5-blind   #2   883字 ok | state_pick=1 generic_pick=2 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+
+===== T07 | batch=arch5-T07-20261024-005605 =====
+  [arch5-T07-20261024-005605] A             #1  1690字 ok
+  [arch5-T07-20261024-005605] A             #2  2201字 ok
+  [arch5-T07-20261024-005605] A             #3  3150字 ok
+  [arch5-T07-20261024-005605] WF-v5         #3  1008字 ok | state_pick=2 generic_pick=2 align(s)=1.0 align(g)=1.0 decl_ok=3/3
+  [arch5-T07-20261024-005605] WF-v5         #2   856字 ok | state_pick=1 generic_pick=2 align(s)=0.1667 align(g)=0.1667 decl_ok=3/3
+  [arch5-T07-20261024-005605] WF-v5         #1   851字 ok | state_pick=1 generic_pick=3 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+  [arch5-T07-20261024-005605] WF-v5-blind   #1  1015字 ok | state_pick=1 generic_pick=1 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+  [arch5-T07-20261024-005605] WF-v5-blind   #3   859字 ok | state_pick=1 generic_pick=3 align(s)=0.6667 align(g)=0.6667 decl_ok=3/3
+  [arch5-T07-20261024-005605] WF-v5-blind   #2   789字 ok | state_pick=1 generic_pick=2 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+
+===== T10 | batch=arch5-T10-20261024-010750 =====
+  [arch5-T10-20261024-010750] A             #3  1693字 ok
+  [arch5-T10-20261024-010750] A             #1  1298字 ok
+  [arch5-T10-20261024-010750] A             #2  1004字 ok
+  [arch5-T10-20261024-010750] WF-v5         #2   862字 ok | state_pick=1 generic_pick=1 align(s)=1.0 align(g)=1.0 decl_ok=3/3
+  [arch5-T10-20261024-010750] WF-v5         #3   963字 ok | state_pick=1 generic_pick=3 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+  [arch5-T10-20261024-010750] WF-v5-blind   #2   883字 ok | state_pick=1 generic_pick=1 align(s)=0.6667 align(g)=0.6667 decl_ok=3/3
+  [arch5-T10-20261024-010750] WF-v5-blind   #1   881字 ok | state_pick=1 generic_pick=1 align(s)=0.3333 align(g)=0.3333 decl_ok=3/3
+  [arch5-T10-20261024-010750] WF-v5         #1   903字 ok | state_pick=2 generic_pick=1 align(s)=1.0 align(g)=0.3333 decl_ok=3/3
+  [arch5-T10-20261024-010750] WF-v5-blind   #3   795字 ok | state_pick=2 generic_pick=1 align(s)=1.0 align(g)=0.3333 decl_ok=3/3
+
+[total] 调用 149 次 ｜ prompt=92000 completion=360417

@@ -1,0 +1,2097 @@
+{
+ "meta": {
+  "judges": [
+   "x-ai/grok-4.20",
+   "x-ai/grok-4.3"
+  ],
+  "dims": [
+   "D1_取舍明确度",
+   "D2_观点驱动力",
+   "D3_人类似然感"
+  ],
+  "n_samples": 24,
+  "n_results": 144,
+  "n_errors": 0,
+  "srcs": [
+   "runs/arch3_compare.jsonl",
+   "runs/min_compare.jsonl"
+  ],
+  "generated_at": "2026-10-23 07:01:36"
+ },
+ "逐条": [
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：放弃“高级词汇”“模板套用”，保留准确性、连贯性、真实思想性，并说明理由。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文不应只是一场模板考试”这一尖锐主张贯穿，明确取舍，舍弃对模板的机械依赖，聚焦真实表达与思想性。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场和逻辑推进，语言自然流畅，体现出作者对高考英语教学的独立思考与主张。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "列三方面评价却平行展开多点，未明示放弃理由",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 2,
+   "evidence": "有取舍倾向（如反对过度依赖模板、强调切题真实），但通篇平行论述多维度，未明确说清放弃什么及具体理由。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由反对模板化、强调准确连贯与思想性的核心主张贯穿，并明确取舍教学建议",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "全文围绕“高考英语作文不应只依赖模板”这一明确主张展开，批判依赖模板的弊端并提出替代路径，但未做明显取舍。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "有‘我认为’等明确立场，逻辑连贯，针对模板问题提出改革建议。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "文章有明确立场，反对过度依赖模板，主张独立思考与真实表达，整体像有主张的人在写作，但中英混杂处稍显不自然。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 2,
+   "evidence": "有取舍倾向（如放弃模板、堆砌词汇），但通篇平行论述多个方面，未明确说清保留什么、放弃什么及具体理由。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "全文围绕反对模板依赖、强调独立思考与真实表达展开",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 0,
+   "evidence": "通篇平行铺陈多点，未明确声明任何取舍或放弃",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "全文围绕“高考英语作文是能力与思维的检验，而非仅分数”这一主张展开，结构清晰，但未做明显取舍。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "立场清晰、逻辑连贯，英文插入略显突兀但不影响整体人味",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "文章有明确个人立场和反思，逻辑连贯，像有主张的人在写作，而非无主拼贴。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 1,
+   "evidence": "通篇平行列举多点，未明确取舍或放弃",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：放弃模板与炫技，保留真实思考、具体理由与逻辑清晰，并说明理由。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文不应成为模板展示”这一尖锐主张贯穿，明确取舍：反对模板化，聚焦真实思考与逻辑，不写纯语言炫技细节。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "多次用‘我认为’表达立场，提出具体建议，反对模板堆砌",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确反对模板化、主张真实思考的立场，逻辑连贯，个人态度鲜明，像为自己的想法写作。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "有核心主张但多点平行罗列，缺乏尖锐聚焦与取舍",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由反对模板化、主张清晰表达与逻辑的尖锐观点贯穿，并明确取舍内容",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 1,
+   "evidence": "文章多点并列论述，未明确说明保留或放弃的具体内容与理由",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：坚持真实思考、具体内容与个人表达，放弃模板化、泛泛理由和唯语法评价，理由具体且反复对比说明。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文不应只作为升学通行证，而应训练真实思考与表达”这一尖锐主张贯穿，舍弃了纯技巧教学内容，聚焦评价与教学改革。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有鲜明立场、个人反思和连贯主张，强烈像一个人为自己的教育理念写作。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文立场鲜明，层层论证个人主张，真实思考痕迹明显",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：放弃模板、范文背诵、追求高级句式和标新立异，坚持清晰思考、准确表达、具体理由与判断过程，说清了保留核心。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由‘英语作文应表达真实思想而非仅为得分’这一尖锐主张贯穿，并明确取舍模板与语法评价。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文立场鲜明，层层论证个人观点，非拼凑。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "明确保留真实思考、个人经验，放弃模板替代与语法唯一标准，理由具体",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“标准化应针对条件而非思想内容”这一尖锐主张贯穿，明确取舍，舍弃了模板、范文背诵和华丽句式追求。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场、逻辑推进和个人判断，强烈体现作者在为自己的教育理念写作，而非拼贴语料。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 2,
+   "evidence": "有取舍倾向（如优先思想准确、真实细节），但三部分平行铺陈改进方向，未明确说清放弃什么及具体理由。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "明确区分命题条件与内容，放弃模板与标新立异，保留逻辑清晰与准确表达，并说明理由",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文需在准确、真实、沟通三维度突破应试模板”这一尖锐主张贯穿，舍弃了空泛赞美与中立描述，集中批判并提出具体改进。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由区分标准化条件与内容的主张贯穿，明确排除模板、原创性等",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "文章有鲜明立场、清晰逻辑和个人洞见，强烈像一个人为自己的教育主张写作，而非模板拼贴。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文立场清晰连贯，系统论证反对模板与过度标准化，体现作者独立思考",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确聚焦“拒绝空洞”，放弃面面俱到地讲词汇句式或模板优劣，集中阐述观点紧扣、细节支撑、结构组织与真实表达，理由具体。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 1,
+   "evidence": "通篇平行讨论三维度，未明确表示放弃或不展开任何一点",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“拒绝空洞、让思想在纸上落地”这一尖锐主张贯穿，舍弃了词汇句式崇拜和模板迷信，始终围绕具体、充实、有逻辑的回应题目展开。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "立场鲜明，具体批评与改进建议连贯如个人写作",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场，反复批判空洞模板，提出具体写作流程与判断标准，强烈体现个人思考与主张。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由高考英语作文需平衡准确、真实、沟通的主张贯穿，聚焦三维度并提出针对性改进，明确舍弃模板化路径。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文以‘拒绝空洞’为核心主张，紧扣题目、细节支撑判断，并明确舍弃模板与泛泛而谈。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：坚持模板作为支架而非万能范文，放弃面面俱到的文化抒发和高端句式，聚焦任务回应与读者意识，理由具体。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "全文围绕“模板应作为支架而非唯一路径，写作需真正回应任务与读者”这一主张展开，结构清晰，但未做明显取舍。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 1,
+   "evidence": "通篇平行展开多点，未明确说明保留或放弃某方面及理由。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "文章有明确立场，反对模板成为唯一路径，主张支架服务于真实表达，结构清晰且层层推进，明显是一个有主张的人在写作。",
+   "error": null
+  },
+  {
+   "arm": "WF-p",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "观点鲜明连贯，针对性强，有明确个人主张",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：优先清晰准确而非华丽，学范文重结构而非背诵，警惕模板与套话，强调独立思考与具体理由。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "明确保留模板支架功能，放弃万能范文套用，并详述理由与改革路径",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文核心是思想、内容、语言三者平衡，而非华丽模板”这一尖锐主张贯穿，明确取舍，舍弃对高级表达的过度追求。",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "全文围绕模板应服务真实表达而非替代判断的主张组织论述",
+   "error": null
+  },
+  {
+   "arm": "S-self",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "立场鲜明，逻辑连贯，针对模板提出具体改革，像有主张的作者撰写",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有鲜明立场、连贯逻辑和个人洞见，强烈像一个人为自己的教育理念写作，而非拼贴。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：坚持真实表达、独立思考与诚实写作，放弃模板化、套话、空洞形式，并说明理由。但未逐一明确点出“这一轮放弃展开某具体点”。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由思想内容语言三层面主张贯穿，明确反对模板与华丽表达",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "立场鲜明连贯，批判模板、倡导思考，体现作者个人判断",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "明确优先清晰度而非华丽表达，区分举例与堆砌，但未放弃其他层面展开。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文应回归真实表达而非模板套用”这一尖锐主张贯穿，明确取舍，舍弃空洞模板与高级词汇炫耀，始终围绕真实、思考与诚实展开。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "有反对模板、保留标准的倾向，但多点平行展开，未明确说明放弃理由",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场、逻辑连贯、反复强调真实表达与独立思考，强烈体现作者个人主张。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "文章明确取舍：坚持真实表达、思想清晰、交流实用，放弃模板拼装、高级词汇堆砌、空洞套话，并说明理由。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“反对模板化、强调真实交流与清晰思想”这一尖锐主张贯穿，舍弃了纯技巧教学内容，始终围绕核心观点展开。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由高考英语作文应回归真实表达的主张贯穿，明确取舍模板与公平标准",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "有模板 vs 真实的对比倾向，但多点平行展开，未明确说明放弃与保留",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "观点鲜明连贯，强烈主张真实表达而非模板",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场和逻辑推进，强烈体现作者对英语写作教育的独立思考与主张。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：坚持语言准确、自然、逻辑清晰，放弃模板堆砌、虚构经历和复杂难句，并说明理由。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "全文围绕反对模板依赖、强调真实沟通的主张展开论述",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“在规则之内清楚表达自己”这一尖锐主张贯穿，明确取舍：反对机械模板、堆砌难词，优先准确自然。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确个人立场和逻辑递进，持续表达对高考作文的独立思考与价值判断，像一个人在为自己的主张写作。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "论点连贯，立场鲜明，层层推进真实表达的重要性",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 1,
+   "evidence": "通篇多点并列，未明确说明保留或放弃的具体理由",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：坚持必要的句型与真实内容，放弃万能句式；说清保留逻辑关系与细节，放弃空洞套话，理由具体。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文需必要句型而非万能句式”这一尖锐主张贯穿，明确取舍，舍弃空洞套话，聚焦审题、修改与真实细节。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文立场明确、逻辑连贯，像作者在为自己的观点写作",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NO",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "全文围绕“高考英语作文应自然清楚表达观点而非模板堆砌”展开论述",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场，反复区分必要句型与万能句式，提出具体修改方法，逻辑连贯且服务于“内容真实优先”的核心主张。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：聚焦读后续写课堂全流程，放弃面面俱到讲所有题型；详述训练步骤，略过语言细节打磨，理由具体。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由必要句型服务内容的主张贯穿，明确区分并取舍万能句式",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "文章详述必要句型与修改步骤，未明确声明放弃或保留某点，铺陈较全面",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文应注重有目的、有逻辑的表达而非华丽句式”这一尖锐主张贯穿，舍弃了单纯语言炫技的内容，聚焦任务、过程与多维度评价。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "作者立场鲜明，系统区分必要句型与万能句式，提供具体修改方法",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场、教学主张和逻辑推进，强烈体现作者对写作教学的独立思考与实践经验。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：重点展开“准确”“思考路径”“评分机制”三点，放弃面面俱到地谈语言形式或思想内容，理由具体。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "明确优先一个问题、容忍局部失误，放弃全面修改与完美细节",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由‘写作重清晰表达与完整过程而非华丽句式’这一尖锐主张贯穿，并做了具体取舍",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文需在准确、思考路径与针对性评分间平衡”这一尖锐主张贯穿，舍弃了空洞套话与纯语言炫技内容，聚焦三层具体机制。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "观点明确，方法具体，体现作者教学立场",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "文章有鲜明立场，结构清晰，针对高考作文提出具体改进路径，体现独立思考与主张。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "全文围绕准确、思考路径与针对性评分机制的平衡主张展开",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "明确指出规范化与考试时间的取舍，优先保证任务完成、观点明确和基本准确，再处理复杂句式，并说明理由。但未在其他维度明确放弃某点。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文应回归清楚、连贯、诚实的交流本质”这一尖锐主张贯穿，舍弃了词汇句式崇拜和模板依赖，聚焦取舍、流程与教学导向。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "结构分四层展开，未明确说明放弃或不展开的内容，仅倾向聚焦三要点。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确核心主张，反复强调写作本质是清晰表达立场与逻辑，强烈体现作者独立思考与教学导向意图。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 2,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "立场清晰，论证自成体系，非拼贴",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由‘清晰表达立场而非语言装饰’的尖锐主张贯穿，并明确取舍。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确聚焦高考英语作文的约束与评价，放弃面面俱到的写作教学细节，集中于评分维度、阅卷差异、时间影响及练习转向，理由具体。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文是约束下的有限测试，评分需细化五维度并改革阅卷”这一尖锐主张贯穿，舍弃了应试技巧与模板教学内容。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "明确指出规范化与考试时间的取舍，优先保证任务完成、观点明确而非冒险用复杂句式",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文有明确立场、逻辑推进和针对性批判，强烈体现作者对高考英语写作评价的独立思考与主张。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 1,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文立场鲜明，系统论证写作本质与流程，体现个人主张",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 1,
+   "evidence": "通篇平行展开五个维度与多环节，未见明确取舍声明或放弃理由。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：坚持高考英语作文的历史功绩与升级方向，放弃模板化训练、取悦考官思维及固定句型，理由具体且说清保留与放弃。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文是双刃剑，需彻底升级为表达力测试”这一尖锐主张贯穿，舍弃了中立描述，聚焦弊端与改革路径。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文立场明确、论证系统且有独立见解，非拼贴",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由‘高考英语作文需升级为真实表达’这一尖锐主张贯穿，并明确取舍改革方向",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "强烈个人立场、清晰主张、连贯反思与呼吁，明显是一个有独立思考的人在为自己的教育理念写作。",
+   "error": null
+  },
+  {
+   "arm": "WF-a3-NL",
+   "tag": 3,
+   "topic": "G01",
+   "src": "arch3_compare.jsonl",
+   "batch": "arch3-20261021-221648-minimax",
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "有中心主张（评分需具体化并考虑约束），但各节平行展开，未严格围绕单一主张取舍组织",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：详写感激其“指挥棒”价值与异化后的“假写作”危害，放弃展开理想中作文的具体改革路径，仅点到为止。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“感激却痛恨高考英语作文的异化”这一尖锐主张贯穿，舍弃中性描述，聚焦批判模板化与假写作。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 1,
+   "evidence": "通篇论述历史功绩、弊端与改革建议，无明确取舍声明",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "强烈个人立场、复杂情感、独特比喻（如‘表演性写作’、‘无菌作文’），明显是一个有主张的人在为自己的观察和批判写作。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文以“我”为主，立场鲜明，经验与主张贯穿始终",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：重点批判模板化与应试伤害，同时说清理解其公平必要性，放弃彻底否定，提出理想设计方向。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由批判高考英语作文异化为模板表演的尖锐主张贯穿，并明确取舍。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文是反语言的牢笼”这一尖锐主张贯穿，明确取舍，批判模板化、呼吁真实表达。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "有感激与异化两部分对比，但未明确说明放弃或聚焦的具体取舍",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "强烈个人立场鲜明，情感层层递进，观点自洽且有现实洞察，像一个人为自己的教育批判主张写作。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "立场鲜明，个人反思深刻，语言连贯有主见",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 3,
+   "evidence": "作者明确取舍：聚焦高考英语作文的“自我阉割”与认知驯化，放弃面面俱到分析考试其他方面，理由具体指向人文代价。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 2,
+   "evidence": "兼顾痛点、愤怒、理解与理想，但未明确说明放弃何处以聚焦某点",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文是制度化的自我阉割”这一尖锐主张贯穿，舍弃中性分析，集中批判其驯化本质与人文代价。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "全文围绕批判高考英语作文标准化弊端并主张重新定义展开",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由高考英语作文是制度化自我阉割这一尖锐主张贯穿，并为它做了取舍",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "强烈个人立场、愤怒与反思贯穿全文，语言有鲜明情感温度和批判主张，非模板拼贴。",
+   "error": null
+  },
+  {
+   "arm": "A",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文立场鲜明，情感真挚，个人观点贯穿始终",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "作者明确取舍：聚焦高考英语作文对真实表达的驯化伤害，放弃面面俱到分析考试优缺点，理由具体且贯穿全文。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文是自我驯化”这一尖锐主张贯穿，明确取舍，舍弃中性分析，集中批判其对真实表达的消解。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 0,
+   "evidence": "通篇多角度平行批判，无任何取舍声明或放弃说明",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "强烈个人立场、批判锋芒与内在逻辑一致，明显为自己的深刻洞见而写，非模板拼贴。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 1,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "观点鲜明犀利，论证连贯有力，充满个人批判立场。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "作者明确取舍：聚焦高考英语作文的系统代价与思维扭曲，放弃面面俱到，清晰说明保留技术分析、放弃应试技巧展开，理由具体。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由尖锐主张贯穿：高考英语作文系统性消解真实表达与个体经验",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "明确声明并非反对作文存在，而是聚焦评价体系结构性错位",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "全文由“高考英语作文系统技术胜利却造成思维代价”的尖锐主张贯穿，明确取舍，舍弃中性描述而聚焦批判与替代愿景。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.20",
+   "score": 4,
+   "evidence": "强烈个人立场鲜明，批判逻辑自洽，语言带有鲜明情感温度和价值判断，像一个人为自己的深刻主张写作。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 2,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "立场鲜明，论证连贯，强烈个人批判视角",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D2_观点驱动力",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "全文由高考英语作文扭曲思维的尖锐主张贯穿，明确取舍了技术优势的论述。",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D3_人类似然感",
+   "judge": "x-ai/grok-4.3",
+   "score": 4,
+   "evidence": "观点鲜明深刻，逻辑自洽，充满个人立场与洞见",
+   "error": null
+  },
+  {
+   "arm": "WF",
+   "tag": 3,
+   "topic": "G01",
+   "src": "min_compare.jsonl",
+   "batch": null,
+   "dim": "D1_取舍明确度",
+   "judge": "x-ai/grok-4.3",
+   "score": 3,
+   "evidence": "承认标准化必要性，但明确聚焦其极致导致的思维扭曲代价，未面面俱到",
+   "error": null
+  }
+ ],
+ "题内分析": {
+  "G01": {
+   "D1_取舍明确度": {
+    "x-ai/grok-4.20": {
+     "A": {
+      "mean": 3.0,
+      "vals": [
+       3,
+       3,
+       3
+      ],
+      "n": 3
+     },
+     "S-self": {
+      "mean": 2.6667,
+      "vals": [
+       3,
+       2,
+       3
+      ],
+      "n": 3
+     },
+     "WF-a3-NL": {
+      "mean": 3.0,
+      "vals": [
+       3,
+       3,
+       3
+      ],
+      "n": 3
+     },
+     "WF-a3": {
+      "mean": 3.0,
+      "vals": [
+       3,
+       3,
+       3
+      ],
+      "n": 3
+     },
+     "WF-p": {
+      "mean": 3.0,
+      "vals": [
+       3,
+       3,
+       3
+      ],
+      "n": 3
+     },
+     "WF-a3-NO": {
+      "mean": 3.0,
+      "vals": [
+       3,
+       3,
+       3
+      ],
+      "n": 3
+     }
+    },
+    "x-ai/grok-4.3": {
+     "A": {
+      "mean": 1.6667,
+      "vals": [
+       2,
+       1,
+       2
+      ],
+      "n": 3
+     },
+     "S-self": {
+      "mean": 2.0,
+      "vals": [
+       1,
+       1,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3-NL": {
+      "mean": 2.3333,
+      "vals": [
+       2,
+       4,
+       1
+      ],
+      "n": 3
+     },
+     "WF-a3": {
+      "mean": 2.6667,
+      "vals": [
+       3,
+       2,
+       3
+      ],
+      "n": 3
+     },
+     "WF-p": {
+      "mean": 2.6667,
+      "vals": [
+       4,
+       3,
+       1
+      ],
+      "n": 3
+     },
+     "WF-a3-NO": {
+      "mean": 1.6667,
+      "vals": [
+       2,
+       2,
+       1
+      ],
+      "n": 3
+     }
+    }
+   },
+   "D2_观点驱动力": {
+    "x-ai/grok-4.20": {
+     "A": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "S-self": {
+      "mean": 3.6667,
+      "vals": [
+       4,
+       4,
+       3
+      ],
+      "n": 3
+     },
+     "WF-a3-NL": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-p": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3-NO": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     }
+    },
+    "x-ai/grok-4.3": {
+     "A": {
+      "mean": 3.6667,
+      "vals": [
+       3,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "S-self": {
+      "mean": 3.6667,
+      "vals": [
+       4,
+       4,
+       3
+      ],
+      "n": 3
+     },
+     "WF-a3-NL": {
+      "mean": 3.0,
+      "vals": [
+       3,
+       4,
+       2
+      ],
+      "n": 3
+     },
+     "WF-a3": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-p": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3-NO": {
+      "mean": 3.3333,
+      "vals": [
+       4,
+       3,
+       3
+      ],
+      "n": 3
+     }
+    }
+   },
+   "D3_人类似然感": {
+    "x-ai/grok-4.20": {
+     "A": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "S-self": {
+      "mean": 3.6667,
+      "vals": [
+       4,
+       4,
+       3
+      ],
+      "n": 3
+     },
+     "WF-a3-NL": {
+      "mean": 3.6667,
+      "vals": [
+       3,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-p": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3-NO": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     }
+    },
+    "x-ai/grok-4.3": {
+     "A": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "S-self": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3-NL": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-p": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     },
+     "WF-a3-NO": {
+      "mean": 4.0,
+      "vals": [
+       4,
+       4,
+       4
+      ],
+      "n": 3
+     }
+    }
+   }
+  }
+ }
+}

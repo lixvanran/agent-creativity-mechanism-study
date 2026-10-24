@@ -5,4 +5,9 @@ build/
 dist/
 .env
 runs/
+# ★ ★ 例外：★ 第四组的历史批次原始产物归档（★ 沙箱一挂就没 ⇒ 必须入 git）
+# ★ ★ 缘由：★ 通用 `runs/` 规则会【静默吃掉】这个目录 ⇒ ⇒ ★ 备份了但没真进仓库
+# ★ ★ ⇒ ⇒ 所以必须有这条例外，★ 且备份后必须用 `git ls-files` 核【真的进去了】
+!group4_state_driven/archive/runs/
+!group4_state_driven/archive/runs/**
 *.onnx

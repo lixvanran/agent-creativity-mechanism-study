@@ -43,6 +43,9 @@ FILES = [
     ("★ 第二组 pack_repo（★ 底层打包器）", "creativity_lab/experiments/pack_repo.py"),
     ("★ 第二组 unit_store", "creativity_lab/experiments/unit_store.py"),
     ("★ 第二组 check_batch_progress", "creativity_lab/experiments/check_batch_progress.py"),
+    ("★ ★ 归档清单（★ 177 项全量 sha，★ 不抽样）", "group4_state_driven/archive/MANIFEST.sha256"),
+    ("★ ★ 归档说明（★ 含三个坑）", "group4_state_driven/archive/README.md"),
+    ("★ ★ 归档校验器", "group4_state_driven/verify_archive.py"),
     ("状态层规格测试（★ 第四组实现 · ★ rev2 语义）", "creativity_lab/experiments/test_state_layer.py"),
     ("状态层差异探针（★ ★ 三版本差分）", "group4_state_driven/probe_state_layer_spec_gap.py"),
     ("★ Stage-1 独立采样判据", "group4_state_driven/check_independent_samples.py"),
@@ -133,6 +136,7 @@ def main():
     lines.append("| ★ **重复采样已处置** | ★ T10-1 出现两次（★ 两个进程并发写）⇒ ★ 后写入者重标记为 T10-2 ⇒ ★ **每题恰好 3 个重复** ⇒ ★ 留痕 `data/duplicate_resampling.json` |")
     lines.append("| ★ **状态层接口 = rev3** | ★ sha `c1c9224a1ed59fa8…`（★ **第二组 2026-10-25 落地**；★ 由 `creativity_lab/experiments/apply_state_layer_rev3.py` 应用 ⇒ ★ **sha 双向校验通过**）；★ rev0/rev1/rev2 全部归档在 `data/state_layer_versions/`（★ sha 绑 commit） |")
     lines.append("| ★ **rev3 的 `tol` 是必填** | ★ `detect_tie(scores, *, tol)` ⇒ ★ **所有调用点必须显式传 `tol=`** ⇒ ★ 漏传【立刻 TypeError】⇒ ★ 不会静默用默认值 ⇒ ★ 读数不会漂 |")
+    lines.append("| ★ **历史批次原始产物已归档** | ★ v1–v5 的全部 `runs/`（★ 177 个文件 / 12.4 MB）★ **已入 git**（★ `group4_state_driven/archive/`）⇒ ★ 沙箱挂掉不再丢证据链；★ 全量清单见 `archive/MANIFEST.sha256`（★ **不抽样**）⇒ ★ 校验：`python3 -B group4_state_driven/verify_archive.py` |")
     lines.append("| ★ **`REPORT_arch6_stage1.md` 的数字** | ★ 全部由 `fill_report_stage1*.py` 从 `arch6_stage1_analysis.json` 填入 ⇒ ★ **不许手改** ⇒ ★ 改完必跑 `verify_report_stage1.py`（★ 71 项机械校验） |")
     lines.append("")
 

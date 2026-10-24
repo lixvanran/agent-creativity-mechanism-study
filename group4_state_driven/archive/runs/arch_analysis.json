@@ -1,0 +1,1012 @@
+{
+  "meta": {
+    "src": "arch_compare.jsonl",
+    "batch_ids": [
+      "arch-20261021-011715-minimax"
+    ],
+    "n_questions": 1,
+    "reps_per_arm": 3,
+    "★ 分析单元=题，本轮只有 1 题 ⇒ 全部读数为本例描述，不构成一般化统计结论": true
+  },
+  "basic": {
+    "A": [
+      {
+        "tag": 1,
+        "len": 1043,
+        "n_calls": 1,
+        "title": "如何看待高考英语作文",
+        "n_sent": 29,
+        "error": null,
+        "elapsed": 9.5
+      },
+      {
+        "tag": 2,
+        "len": 1192,
+        "n_calls": 1,
+        "title": "高考英语作文：分数之外，更应看见成长",
+        "n_sent": 32,
+        "error": null,
+        "elapsed": 12.5
+      },
+      {
+        "tag": 3,
+        "len": 1228,
+        "n_calls": 1,
+        "title": "我看高考英语作文",
+        "n_sent": 34,
+        "error": null,
+        "elapsed": 13.4
+      }
+    ],
+    "S": [
+      {
+        "tag": 1,
+        "len": 2863,
+        "n_calls": 4,
+        "title": "如何看待高考英语作文",
+        "n_sent": 86,
+        "error": null,
+        "elapsed": 95.1
+      },
+      {
+        "tag": 2,
+        "len": 1538,
+        "n_calls": 4,
+        "title": "如何看待高考英语作文",
+        "n_sent": 41,
+        "error": null,
+        "elapsed": 43.6
+      },
+      {
+        "tag": 3,
+        "len": 2306,
+        "n_calls": 4,
+        "title": "高考英语作文的综合评价与训练价值",
+        "n_sent": 56,
+        "error": null,
+        "elapsed": 80.3
+      }
+    ],
+    "WF-p": [
+      {
+        "tag": 1,
+        "len": 3198,
+        "n_calls": 4,
+        "title": "我更愿意把高考英语作文看作一次有明确对象的沟通，而不是展示英语词汇的橱窗。考生并不是面对一张白纸任意抒情，而是在题目已经规定了身份、场景、读者和写作目的的情况下，把一个意思准确地传出去。因此，当任务回应、语言准确和个人表达发生冲突时，我的取舍是：首先完成任务，其次保证语言可靠，最后才追求有特色的表达。这个顺序不是把三者人为分成高低贵贱，而是因为它们承担着不同的作用：题目决定写什么，语言规范决定读者能否正确理解，个人表达则决定读者能否看出作者自己的选择。",
+        "n_sent": 60,
+        "error": null,
+        "elapsed": 264.2
+      },
+      {
+        "tag": 2,
+        "len": 1644,
+        "n_calls": 4,
+        "title": "我对高考英语作文的看法，可能始于一张并不漂亮的模拟试卷。",
+        "n_sent": 33,
+        "error": null,
+        "elapsed": 81.4
+      },
+      {
+        "tag": 3,
+        "len": 3346,
+        "n_calls": 4,
+        "title": "我看待高考英语作文，首先会把它看成一次有明确边界和目的的语言任务，而不是一篇脱离考试条件、可以无限延长的自由抒怀。考生要在规定时间内，面对特定的身份和读者，根据题目要求选择材料、组织段落，并用英语把意思表达出来。脱离时间、篇幅和评分要求谈“英语能力”，很容易把“写得像不像范文”误当成能力本身。",
+        "n_sent": 57,
+        "error": null,
+        "elapsed": 283.1
+      }
+    ],
+    "WF-a": [
+      {
+        "tag": 1,
+        "len": 2350,
+        "n_calls": 4,
+        "title": "高考英语作文：准确性、统一性与真实表达的平衡",
+        "n_sent": 56,
+        "error": null,
+        "elapsed": 169.1
+      },
+      {
+        "tag": 2,
+        "len": 2064,
+        "n_calls": 4,
+        "title": "如何看待高考英语作文",
+        "n_sent": 52,
+        "error": null,
+        "elapsed": 153.9
+      },
+      {
+        "tag": 3,
+        "len": 3032,
+        "n_calls": 4,
+        "title": "The Gaokao English composition is valuable, but its value is easily confused with the way it is often prepared for. On one level, it gives students a demanding exercise in organizing ideas and expressing them in English within a limited time. The pressure can cultivate discipline and make clear writing a matter of sustained effort. The composition also provides a common way of evaluating writing across the country. Here, I mean standardization only in this broad sense: a shared framework for assessment. I am not discussing the detailed requirements for scoring, the allocation of marks, or the procedures through which papers are marked; those are separate evaluation issues that this essay does not develop.",
+        "n_sent": 6,
+        "error": null,
+        "elapsed": 79.1
+      }
+    ],
+    "WF-a-R": [
+      {
+        "tag": 1,
+        "len": 4247,
+        "n_calls": 5,
+        "title": "让语言参与思考：高考英语作文中的限定语",
+        "n_sent": 92,
+        "error": null,
+        "elapsed": 338.9
+      },
+      {
+        "tag": 2,
+        "len": 2263,
+        "n_calls": 5,
+        "title": "方寸之间，自有天地",
+        "n_sent": 64,
+        "error": null,
+        "elapsed": 154.5
+      },
+      {
+        "tag": 3,
+        "len": 5084,
+        "n_calls": 5,
+        "title": "The Gaokao English essay is valuable because it tests several abilities at once. Students must understand the prompt, select relevant ideas, organize them logically, and express their thoughts in English. The essay therefore reflects grammatical knowledge and vocabulary, but it can also reveal how a student interprets a question and develops an argument. Since exam writing offers little space, clarity and efficiency are especially important.",
+        "n_sent": 13,
+        "error": null,
+        "elapsed": 44.2
+      }
+    ],
+    "WF-a-NO": [
+      {
+        "tag": 1,
+        "len": 1148,
+        "n_calls": 3,
+        "title": "高考英语作文的本质与评价标准",
+        "n_sent": 32,
+        "error": null,
+        "elapsed": 30.8
+      },
+      {
+        "tag": 2,
+        "len": 1874,
+        "n_calls": 3,
+        "title": "我看高考英语作文",
+        "n_sent": 51,
+        "error": null,
+        "elapsed": 57.8
+      },
+      {
+        "tag": 3,
+        "len": 2092,
+        "n_calls": 3,
+        "title": "高考英语作文是什么？它不是英语能力的唯一证明，也不是几套模板和几个“高级词汇”的简单拼装。它更像是一次有明确任务和限制的表达训练：考生要在有限的时间内，把一个意思说明白，把一组要求完成，并让语言准确、内容真实、逻辑清楚。因此，作文的好坏不在于词汇有多难、句子有多长，而在于它是否可靠。",
+        "n_sent": 66,
+        "error": null,
+        "elapsed": 48.3
+      }
+    ]
+  },
+  "language_gate": {
+    "A": {
+      "rows": [
+        {
+          "tag": 1,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": null,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1043
+        },
+        {
+          "tag": 2,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": null,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1192
+        },
+        {
+          "tag": 3,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": null,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1228
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3
+    },
+    "S": {
+      "rows": [
+        {
+          "tag": 1,
+          "lang_cn_ratio_final": 0.9579,
+          "lang_cn_ratio_draft": 0.9051,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2863
+        },
+        {
+          "tag": 2,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": 0.9919,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1538
+        },
+        {
+          "tag": 3,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": 0.954,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2306
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3
+    },
+    "WF-p": {
+      "rows": [
+        {
+          "tag": 1,
+          "lang_cn_ratio_final": 0.5915,
+          "lang_cn_ratio_draft": 1.0,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 3198
+        },
+        {
+          "tag": 2,
+          "lang_cn_ratio_final": 0.7413,
+          "lang_cn_ratio_draft": 0.9939,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 1644
+        },
+        {
+          "tag": 3,
+          "lang_cn_ratio_final": 0.6269,
+          "lang_cn_ratio_draft": 0.992,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 3346
+        }
+      ],
+      "n_drifted_final": 3,
+      "n_drifted_draft": 0,
+      "n": 3
+    },
+    "WF-a": {
+      "rows": [
+        {
+          "tag": 1,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2350
+        },
+        {
+          "tag": 2,
+          "lang_cn_ratio_final": 0.9455,
+          "lang_cn_ratio_draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2064
+        },
+        {
+          "tag": 3,
+          "lang_cn_ratio_final": 0.0,
+          "lang_cn_ratio_draft": 0.0,
+          "drifted_final": true,
+          "drifted_draft": true,
+          "len": 3032
+        }
+      ],
+      "n_drifted_final": 1,
+      "n_drifted_draft": 1,
+      "n": 3
+    },
+    "WF-a-R": {
+      "rows": [
+        {
+          "tag": 1,
+          "lang_cn_ratio_final": 0.6803,
+          "lang_cn_ratio_draft": 0.9131,
+          "drifted_final": true,
+          "drifted_draft": false,
+          "len": 4247
+        },
+        {
+          "tag": 2,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2263
+        },
+        {
+          "tag": 3,
+          "lang_cn_ratio_final": 0.0,
+          "lang_cn_ratio_draft": 0.0,
+          "drifted_final": true,
+          "drifted_draft": true,
+          "len": 5084
+        }
+      ],
+      "n_drifted_final": 2,
+      "n_drifted_draft": 1,
+      "n": 3
+    },
+    "WF-a-NO": {
+      "rows": [
+        {
+          "tag": 1,
+          "lang_cn_ratio_final": 1.0,
+          "lang_cn_ratio_draft": 1.0,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1148
+        },
+        {
+          "tag": 2,
+          "lang_cn_ratio_final": 0.9718,
+          "lang_cn_ratio_draft": 0.9342,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 1874
+        },
+        {
+          "tag": 3,
+          "lang_cn_ratio_final": 0.9692,
+          "lang_cn_ratio_draft": 0.9673,
+          "drifted_final": false,
+          "drifted_draft": false,
+          "len": 2092
+        }
+      ],
+      "n_drifted_final": 0,
+      "n_drifted_draft": 0,
+      "n": 3
+    }
+  },
+  "basic_summary": {
+    "A": {
+      "n": 3,
+      "len_mean": 1154.3333,
+      "len_min": 1043,
+      "len_max": 1228,
+      "calls_per_run": [
+        1
+      ],
+      "errors": [],
+      "titles": [
+        "如何看待高考英语作文",
+        "高考英语作文：分数之外，更应看见成长",
+        "我看高考英语作文"
+      ],
+      "title_dup_rate": 0.0
+    },
+    "S": {
+      "n": 3,
+      "len_mean": 2235.6667,
+      "len_min": 1538,
+      "len_max": 2863,
+      "calls_per_run": [
+        4
+      ],
+      "errors": [],
+      "titles": [
+        "如何看待高考英语作文",
+        "如何看待高考英语作文",
+        "高考英语作文的综合评价与训练价值"
+      ],
+      "title_dup_rate": 0.33333333333333337
+    },
+    "WF-p": {
+      "n": 3,
+      "len_mean": 2729.3333,
+      "len_min": 1644,
+      "len_max": 3346,
+      "calls_per_run": [
+        4
+      ],
+      "errors": [],
+      "titles": [
+        "我更愿意把高考英语作文看作一次有明确对象的沟通，而不是展示英语词汇的橱窗。考生并不是面对一张白纸任意抒情，而是在题目已经规定了身份、场景、读者和写作目的的情况下，把一个意思准确地传出去。因此，当任务回应、语言准确和个人表达发生冲突时，我的取舍是：首先完成任务，其次保证语言可靠，最后才追求有特色的表达。这个顺序不是把三者人为分成高低贵贱，而是因为它们承担着不同的作用：题目决定写什么，语言规范决定读者能否正确理解，个人表达则决定读者能否看出作者自己的选择。",
+        "我对高考英语作文的看法，可能始于一张并不漂亮的模拟试卷。",
+        "我看待高考英语作文，首先会把它看成一次有明确边界和目的的语言任务，而不是一篇脱离考试条件、可以无限延长的自由抒怀。考生要在规定时间内，面对特定的身份和读者，根据题目要求选择材料、组织段落，并用英语把意思表达出来。脱离时间、篇幅和评分要求谈“英语能力”，很容易把“写得像不像范文”误当成能力本身。"
+      ],
+      "title_dup_rate": 0.0
+    },
+    "WF-a": {
+      "n": 3,
+      "len_mean": 2482.0,
+      "len_min": 2064,
+      "len_max": 3032,
+      "calls_per_run": [
+        4
+      ],
+      "errors": [],
+      "titles": [
+        "高考英语作文：准确性、统一性与真实表达的平衡",
+        "如何看待高考英语作文",
+        "The Gaokao English composition is valuable, but its value is easily confused with the way it is often prepared for. On one level, it gives students a demanding exercise in organizing ideas and expressing them in English within a limited time. The pressure can cultivate discipline and make clear writing a matter of sustained effort. The composition also provides a common way of evaluating writing across the country. Here, I mean standardization only in this broad sense: a shared framework for assessment. I am not discussing the detailed requirements for scoring, the allocation of marks, or the procedures through which papers are marked; those are separate evaluation issues that this essay does not develop."
+      ],
+      "title_dup_rate": 0.0
+    },
+    "WF-a-R": {
+      "n": 3,
+      "len_mean": 3864.6667,
+      "len_min": 2263,
+      "len_max": 5084,
+      "calls_per_run": [
+        5
+      ],
+      "errors": [],
+      "titles": [
+        "让语言参与思考：高考英语作文中的限定语",
+        "方寸之间，自有天地",
+        "The Gaokao English essay is valuable because it tests several abilities at once. Students must understand the prompt, select relevant ideas, organize them logically, and express their thoughts in English. The essay therefore reflects grammatical knowledge and vocabulary, but it can also reveal how a student interprets a question and develops an argument. Since exam writing offers little space, clarity and efficiency are especially important."
+      ],
+      "title_dup_rate": 0.0
+    },
+    "WF-a-NO": {
+      "n": 3,
+      "len_mean": 1704.6667,
+      "len_min": 1148,
+      "len_max": 2092,
+      "calls_per_run": [
+        3
+      ],
+      "errors": [],
+      "titles": [
+        "高考英语作文的本质与评价标准",
+        "我看高考英语作文",
+        "高考英语作文是什么？它不是英语能力的唯一证明，也不是几套模板和几个“高级词汇”的简单拼装。它更像是一次有明确任务和限制的表达训练：考生要在有限的时间内，把一个意思说明白，把一组要求完成，并让语言准确、内容真实、逻辑清楚。因此，作文的好坏不在于词汇有多难、句子有多长，而在于它是否可靠。"
+      ],
+      "title_dup_rate": 0.0
+    }
+  },
+  "sent_jaccard": {
+    "within_arm(噪声地板)": {
+      "A": {
+        "pairs": 3,
+        "mean": 0.0
+      },
+      "S": {
+        "pairs": 3,
+        "mean": 0.0026
+      },
+      "WF-p": {
+        "pairs": 3,
+        "mean": 0.0
+      },
+      "WF-a": {
+        "pairs": 3,
+        "mean": 0.0
+      },
+      "WF-a-R": {
+        "pairs": 3,
+        "mean": 0.0
+      },
+      "WF-a-NO": {
+        "pairs": 3,
+        "mean": 0.0
+      }
+    },
+    "cross_arm": {
+      "A|S": {
+        "pairs": 9,
+        "mean": 0.0026
+      },
+      "A|WF-p": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "A|WF-a": {
+        "pairs": 9,
+        "mean": 0.0014
+      },
+      "A|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "A|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0013
+      },
+      "S|WF-p": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "S|WF-a": {
+        "pairs": 9,
+        "mean": 0.002
+      },
+      "S|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "S|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "WF-p|WF-a": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "WF-p|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "WF-p|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "WF-a|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "WF-a|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0
+      },
+      "WF-a-R|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0
+      }
+    }
+  },
+  "ng_jaccard": {
+    "within_arm(噪声地板)": {
+      "A": {
+        "pairs": 3,
+        "mean": 0.0777
+      },
+      "S": {
+        "pairs": 3,
+        "mean": 0.0523
+      },
+      "WF-p": {
+        "pairs": 3,
+        "mean": 0.0626
+      },
+      "WF-a": {
+        "pairs": 3,
+        "mean": 0.0143
+      },
+      "WF-a-R": {
+        "pairs": 3,
+        "mean": 0.0355
+      },
+      "WF-a-NO": {
+        "pairs": 3,
+        "mean": 0.0567
+      }
+    },
+    "cross_arm": {
+      "A|S": {
+        "pairs": 9,
+        "mean": 0.0498
+      },
+      "A|WF-p": {
+        "pairs": 9,
+        "mean": 0.0197
+      },
+      "A|WF-a": {
+        "pairs": 9,
+        "mean": 0.0179
+      },
+      "A|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0103
+      },
+      "A|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0441
+      },
+      "S|WF-p": {
+        "pairs": 9,
+        "mean": 0.0274
+      },
+      "S|WF-a": {
+        "pairs": 9,
+        "mean": 0.0275
+      },
+      "S|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0156
+      },
+      "S|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0487
+      },
+      "WF-p|WF-a": {
+        "pairs": 9,
+        "mean": 0.0459
+      },
+      "WF-p|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0587
+      },
+      "WF-p|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0328
+      },
+      "WF-a|WF-a-R": {
+        "pairs": 9,
+        "mean": 0.0599
+      },
+      "WF-a|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0264
+      },
+      "WF-a-R|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0184
+      }
+    }
+  },
+  "ng_jaccard_仅同语言": {
+    "within_arm(噪声地板)": {
+      "A": {
+        "pairs": 3,
+        "mean": 0.0777
+      },
+      "S": {
+        "pairs": 3,
+        "mean": 0.0523
+      },
+      "WF-p": {
+        "pairs": 0,
+        "mean": null
+      },
+      "WF-a": {
+        "pairs": 1,
+        "mean": 0.0254
+      },
+      "WF-a-R": {
+        "pairs": 0,
+        "mean": null
+      },
+      "WF-a-NO": {
+        "pairs": 3,
+        "mean": 0.0567
+      }
+    },
+    "cross_arm": {
+      "A|S": {
+        "pairs": 9,
+        "mean": 0.0498
+      },
+      "A|WF-p": {
+        "pairs": 0,
+        "mean": null
+      },
+      "A|WF-a": {
+        "pairs": 6,
+        "mean": 0.0269
+      },
+      "A|WF-a-R": {
+        "pairs": 3,
+        "mean": 0.0194
+      },
+      "A|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0441
+      },
+      "S|WF-p": {
+        "pairs": 0,
+        "mean": null
+      },
+      "S|WF-a": {
+        "pairs": 6,
+        "mean": 0.0401
+      },
+      "S|WF-a-R": {
+        "pairs": 3,
+        "mean": 0.0267
+      },
+      "S|WF-a-NO": {
+        "pairs": 9,
+        "mean": 0.0487
+      },
+      "WF-p|WF-a": {
+        "pairs": 0,
+        "mean": null
+      },
+      "WF-p|WF-a-R": {
+        "pairs": 0,
+        "mean": null
+      },
+      "WF-p|WF-a-NO": {
+        "pairs": 0,
+        "mean": null
+      },
+      "WF-a|WF-a-R": {
+        "pairs": 2,
+        "mean": 0.0204
+      },
+      "WF-a|WF-a-NO": {
+        "pairs": 6,
+        "mean": 0.0369
+      },
+      "WF-a-R|WF-a-NO": {
+        "pairs": 3,
+        "mean": 0.0277
+      }
+    }
+  },
+  "mechanism": {
+    "WF-a": {
+      "rows": [
+        {
+          "tag": 1,
+          "n_constraints": 3,
+          "n_linked": 3,
+          "n_linked_by_structure": 3,
+          "n_linked_by_lexical": 0,
+          "n_linked_unknown": 0,
+          "link_scores_all": [],
+          "link_rate": 1.0,
+          "link_scores": [],
+          "n_gaps": 3,
+          "n_excluded": 3,
+          "no_new_constraints": false,
+          "obs_missing": null,
+          "lang_cn_ratio": 1.0,
+          "lang_valid": true,
+          "cons_hit_mean": 0.6098,
+          "cons_hit_mean_仅同语言": 0.6098,
+          "cons_hit_n": 3,
+          "excl_hit_mean": 0.2689,
+          "excl_hit_n": 3
+        },
+        {
+          "tag": 2,
+          "n_constraints": 3,
+          "n_linked": 3,
+          "n_linked_by_structure": 3,
+          "n_linked_by_lexical": 0,
+          "n_linked_unknown": 0,
+          "link_scores_all": [],
+          "link_rate": 1.0,
+          "link_scores": [],
+          "n_gaps": 3,
+          "n_excluded": 3,
+          "no_new_constraints": false,
+          "obs_missing": null,
+          "lang_cn_ratio": 0.9455,
+          "lang_valid": true,
+          "cons_hit_mean": 0.4701,
+          "cons_hit_mean_仅同语言": 0.4701,
+          "cons_hit_n": 3,
+          "excl_hit_mean": 0.1148,
+          "excl_hit_n": 3
+        },
+        {
+          "tag": 3,
+          "n_constraints": 3,
+          "n_linked": 3,
+          "n_linked_by_structure": 3,
+          "n_linked_by_lexical": 0,
+          "n_linked_unknown": 0,
+          "link_scores_all": [],
+          "link_rate": 1.0,
+          "link_scores": [],
+          "n_gaps": 3,
+          "n_excluded": 3,
+          "no_new_constraints": false,
+          "obs_missing": null,
+          "lang_cn_ratio": 0.0,
+          "lang_valid": false,
+          "cons_hit_mean": 0.0,
+          "cons_hit_mean_仅同语言": null,
+          "cons_hit_n": 3,
+          "excl_hit_mean": 0.0,
+          "excl_hit_n": 3
+        }
+      ],
+      "link_summary": {
+        "n_linked": 9,
+        "n_constraints": 9,
+        "rate": 1.0,
+        "n_by_structure": 9,
+        "n_by_lexical": 0,
+        "n_unknown": 0
+      }
+    },
+    "WF-a-R": {
+      "rows": [
+        {
+          "tag": 1,
+          "n_constraints": 3,
+          "n_linked": 3,
+          "n_linked_by_structure": 3,
+          "n_linked_by_lexical": 0,
+          "n_linked_unknown": 0,
+          "link_scores_all": [],
+          "link_rate": 1.0,
+          "link_scores": [],
+          "n_gaps": 3,
+          "n_excluded": 3,
+          "no_new_constraints": false,
+          "obs_missing": null,
+          "lang_cn_ratio": 0.6803,
+          "lang_valid": false,
+          "cons_hit_mean": 0.4248,
+          "cons_hit_mean_仅同语言": null,
+          "cons_hit_n": 3,
+          "excl_hit_mean": 0.2333,
+          "excl_hit_n": 3
+        },
+        {
+          "tag": 2,
+          "n_constraints": 3,
+          "n_linked": 3,
+          "n_linked_by_structure": 3,
+          "n_linked_by_lexical": 0,
+          "n_linked_unknown": 0,
+          "link_scores_all": [],
+          "link_rate": 1.0,
+          "link_scores": [],
+          "n_gaps": 3,
+          "n_excluded": 3,
+          "no_new_constraints": false,
+          "obs_missing": null,
+          "lang_cn_ratio": 1.0,
+          "lang_valid": true,
+          "cons_hit_mean": 0.5914,
+          "cons_hit_mean_仅同语言": 0.5914,
+          "cons_hit_n": 3,
+          "excl_hit_mean": 0.1889,
+          "excl_hit_n": 3
+        },
+        {
+          "tag": 3,
+          "n_constraints": 3,
+          "n_linked": 3,
+          "n_linked_by_structure": 3,
+          "n_linked_by_lexical": 0,
+          "n_linked_unknown": 0,
+          "link_scores_all": [],
+          "link_rate": 1.0,
+          "link_scores": [],
+          "n_gaps": 3,
+          "n_excluded": 3,
+          "no_new_constraints": false,
+          "obs_missing": null,
+          "lang_cn_ratio": 0.0,
+          "lang_valid": false,
+          "cons_hit_mean": 0.0,
+          "cons_hit_mean_仅同语言": null,
+          "cons_hit_n": 3,
+          "excl_hit_mean": 0.0,
+          "excl_hit_n": 3
+        }
+      ],
+      "link_summary": {
+        "n_linked": 9,
+        "n_constraints": 9,
+        "rate": 1.0,
+        "n_by_structure": 9,
+        "n_by_lexical": 0,
+        "n_unknown": 0
+      }
+    }
+  },
+  "ablation_obs_vs_noobs": [
+    {
+      "tag": 1,
+      "len_with_obs": 2350,
+      "len_no_obs": 1148,
+      "sent_jaccard": 0.0,
+      "with_obs_n_excluded": 3,
+      "no_obs_n_excluded": 0
+    },
+    {
+      "tag": 2,
+      "len_with_obs": 2064,
+      "len_no_obs": 1874,
+      "sent_jaccard": 0.0,
+      "with_obs_n_excluded": 3,
+      "no_obs_n_excluded": 0
+    },
+    {
+      "tag": 3,
+      "len_with_obs": 3032,
+      "len_no_obs": 2092,
+      "sent_jaccard": 0.0,
+      "with_obs_n_excluded": 3,
+      "no_obs_n_excluded": 0
+    }
+  ],
+  "swap_probe": {
+    "rows": [
+      {
+        "tag": 1,
+        "★换历史后状态变化(keep_jaccard)": 0.0,
+        "★同历史重跑状态变化(种子噪声地板)": 0.0,
+        "★换历史后已排除变化(excl_jaccard)": 0.0,
+        "★同历史重跑已排除变化": 0.0,
+        "★★同历史:排除措辞逐字在【原初稿】": 1,
+        "★★同历史:排除措辞逐字在【别处初稿】": 0,
+        "★★同历史:排除措辞条数": 3,
+        "★★换历史:排除措辞逐字在【换入初稿】": 3,
+        "★★换历史:排除措辞逐字在【原初稿】": 0,
+        "★换历史:gap实词来自换入初稿": 0.1958041958041958,
+        "★同历史:gap实词来自原初稿": 0.3054662379421222,
+        "★换历史:约束实词来自换入初稿的比例": 0.13402061855670103,
+        "★换历史:约束实词来自原初稿的比例": 0.054982817869415807,
+        "★同历史:约束实词来自原初稿的比例": 0.3076923076923077,
+        "★同历史:约束实词来自别处初稿的比例": 0.013986013986013986,
+        "实词分母(换)": 291,
+        "实词分母(同)": 286,
+        "正文句级差异(换历史)": 0.0,
+        "正文句级差异(同历史)": 0.0,
+        "n_linked_swap": 3,
+        "n_linked_same": 3
+      },
+      {
+        "tag": 2,
+        "★换历史后状态变化(keep_jaccard)": 0.0,
+        "★同历史重跑状态变化(种子噪声地板)": 0.0,
+        "★换历史后已排除变化(excl_jaccard)": 0.0,
+        "★同历史重跑已排除变化": 0.5,
+        "★★同历史:排除措辞逐字在【原初稿】": 1,
+        "★★同历史:排除措辞逐字在【别处初稿】": 0,
+        "★★同历史:排除措辞条数": 3,
+        "★★换历史:排除措辞逐字在【换入初稿】": 3,
+        "★★换历史:排除措辞逐字在【原初稿】": 0,
+        "★换历史:gap实词来自换入初稿": 0.10747663551401869,
+        "★同历史:gap实词来自原初稿": 0.375,
+        "★换历史:约束实词来自换入初稿的比例": 0.0,
+        "★换历史:约束实词来自原初稿的比例": 0.05423728813559322,
+        "★同历史:约束实词来自原初稿的比例": 0.2996845425867508,
+        "★同历史:约束实词来自别处初稿的比例": 0.0,
+        "实词分母(换)": 295,
+        "实词分母(同)": 317,
+        "正文句级差异(换历史)": 0.0,
+        "正文句级差异(同历史)": 0.008928571428571428,
+        "n_linked_swap": 3,
+        "n_linked_same": 3
+      },
+      {
+        "tag": 3,
+        "★换历史后状态变化(keep_jaccard)": 0.0,
+        "★同历史重跑状态变化(种子噪声地板)": 0.0,
+        "★换历史后已排除变化(excl_jaccard)": 0.0,
+        "★同历史重跑已排除变化": 0.0,
+        "★★同历史:排除措辞逐字在【原初稿】": 2,
+        "★★同历史:排除措辞逐字在【别处初稿】": 0,
+        "★★同历史:排除措辞条数": 2,
+        "★★换历史:排除措辞逐字在【换入初稿】": 2,
+        "★★换历史:排除措辞逐字在【原初稿】": 0,
+        "★换历史:gap实词来自换入初稿": 0.36633663366336633,
+        "★同历史:gap实词来自原初稿": 0.036231884057971016,
+        "★换历史:约束实词来自换入初稿的比例": 0.3018867924528302,
+        "★换历史:约束实词来自原初稿的比例": 0.0,
+        "★同历史:约束实词来自原初稿的比例": 0.0,
+        "★同历史:约束实词来自别处初稿的比例": 0.13855421686746988,
+        "实词分母(换)": 265,
+        "实词分母(同)": 332,
+        "正文句级差异(换历史)": 0.0,
+        "正文句级差异(同历史)": 0.0,
+        "n_linked_swap": 3,
+        "n_linked_same": 3
+      }
+    ],
+    "mean_keep_jaccard_swap": 0.0,
+    "mean_keep_jaccard_same(地板)": 0.0,
+    "mean_excl_jaccard_swap": 0.0,
+    "mean_excl_jaccard_same(地板)": 0.1667,
+    "★来源归属_换历史_来自换入初稿": 0.1453,
+    "★来源归属_换历史_来自原初稿": 0.0364,
+    "★来源归属_同历史_来自原初稿": 0.2025,
+    "★来源归属_同历史_来自别处初稿": 0.0508,
+    "n": 3
+  }
+}

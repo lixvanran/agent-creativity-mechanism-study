@@ -1,0 +1,1398 @@
+{
+  "batch_id": "arch-20261021-011715-minimax",
+  "model": "MiniMax-M3",
+  "api": "minimax",
+  "cost": {
+    "calls": 72,
+    "prompt_tokens": 57348,
+    "completion_tokens": 192704
+  },
+  "trace": [
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.73,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 454,
+        "total_characters": 0,
+        "prompt_tokens": 270,
+        "completion_tokens": 184,
+        "completion_tokens_details": {
+          "reasoning_tokens": 146
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 9.46,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 977,
+        "total_characters": 0,
+        "prompt_tokens": 208,
+        "completion_tokens": 769,
+        "completion_tokens_details": {
+          "reasoning_tokens": 247
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 207
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.5,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 472,
+        "total_characters": 0,
+        "prompt_tokens": 270,
+        "completion_tokens": 202,
+        "completion_tokens_details": {
+          "reasoning_tokens": 166
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 269
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 12.53,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1285,
+        "total_characters": 0,
+        "prompt_tokens": 208,
+        "completion_tokens": 1077,
+        "completion_tokens_details": {
+          "reasoning_tokens": 485
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 13.4,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1316,
+        "total_characters": 0,
+        "prompt_tokens": 208,
+        "completion_tokens": 1108,
+        "completion_tokens_details": {
+          "reasoning_tokens": 486
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 207
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.27,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 439,
+        "total_characters": 0,
+        "prompt_tokens": 270,
+        "completion_tokens": 169,
+        "completion_tokens_details": {
+          "reasoning_tokens": 128
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 269
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.19,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 496,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 126,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 12.06,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1430,
+        "total_characters": 0,
+        "prompt_tokens": 258,
+        "completion_tokens": 1172,
+        "completion_tokens_details": {
+          "reasoning_tokens": 482
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 21.85,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2389,
+        "total_characters": 0,
+        "prompt_tokens": 263,
+        "completion_tokens": 2126,
+        "completion_tokens_details": {
+          "reasoning_tokens": 502
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 11.21,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1163,
+        "total_characters": 0,
+        "prompt_tokens": 265,
+        "completion_tokens": 898,
+        "completion_tokens_details": {
+          "reasoning_tokens": 198
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 11.01,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1217,
+        "total_characters": 0,
+        "prompt_tokens": 273,
+        "completion_tokens": 944,
+        "completion_tokens_details": {
+          "reasoning_tokens": 315
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 6.83,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1620,
+        "total_characters": 0,
+        "prompt_tokens": 952,
+        "completion_tokens": 668,
+        "completion_tokens_details": {
+          "reasoning_tokens": 586
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 9.1,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1906,
+        "total_characters": 0,
+        "prompt_tokens": 961,
+        "completion_tokens": 945,
+        "completion_tokens_details": {
+          "reasoning_tokens": 849
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 193
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 12.34,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2581,
+        "total_characters": 0,
+        "prompt_tokens": 1884,
+        "completion_tokens": 697,
+        "completion_tokens_details": {
+          "reasoning_tokens": 621
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 193
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 22.2,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2982,
+        "total_characters": 0,
+        "prompt_tokens": 1001,
+        "completion_tokens": 1981,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1186
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 204
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.11,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 482,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 112,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 42.67,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 7966,
+        "total_characters": 0,
+        "prompt_tokens": 1966,
+        "completion_tokens": 6000,
+        "completion_tokens_details": {
+          "reasoning_tokens": 5998
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 17.12,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1623,
+        "total_characters": 0,
+        "prompt_tokens": 262,
+        "completion_tokens": 1361,
+        "completion_tokens_details": {
+          "reasoning_tokens": 693
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 15.77,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 4206,
+        "total_characters": 0,
+        "prompt_tokens": 2022,
+        "completion_tokens": 2184,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1989
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 57.67,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 4575,
+        "total_characters": 0,
+        "prompt_tokens": 1026,
+        "completion_tokens": 3549,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2352
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 58.16,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 7035,
+        "total_characters": 0,
+        "prompt_tokens": 1927,
+        "completion_tokens": 5108,
+        "completion_tokens_details": {
+          "reasoning_tokens": 3600
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.69,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 528,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 158,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 3.09,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 527,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 157,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 13.62,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1304,
+        "total_characters": 0,
+        "prompt_tokens": 276,
+        "completion_tokens": 1028,
+        "completion_tokens_details": {
+          "reasoning_tokens": 255
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 48.9,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 8918,
+        "total_characters": 0,
+        "prompt_tokens": 1966,
+        "completion_tokens": 6952,
+        "completion_tokens_details": {
+          "reasoning_tokens": 6763
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1965
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 10800
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 21.9,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2091,
+        "total_characters": 0,
+        "prompt_tokens": 295,
+        "completion_tokens": 1796,
+        "completion_tokens_details": {
+          "reasoning_tokens": 906
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 5.62,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1842,
+        "total_characters": 0,
+        "prompt_tokens": 1333,
+        "completion_tokens": 509,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2500
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 18.36,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 4244,
+        "total_characters": 0,
+        "prompt_tokens": 2260,
+        "completion_tokens": 1984,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1792
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 46.43,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 5585,
+        "total_characters": 0,
+        "prompt_tokens": 1076,
+        "completion_tokens": 4509,
+        "completion_tokens_details": {
+          "reasoning_tokens": 3812
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.17,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 469,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 99,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 18.12,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 936,
+        "total_characters": 0,
+        "prompt_tokens": 250,
+        "completion_tokens": 686,
+        "completion_tokens_details": {
+          "reasoning_tokens": 192
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 4.0,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1430,
+        "total_characters": 0,
+        "prompt_tokens": 936,
+        "completion_tokens": 494,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2500
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 42.74,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 7173,
+        "total_characters": 0,
+        "prompt_tokens": 1173,
+        "completion_tokens": 6000,
+        "completion_tokens_details": {
+          "reasoning_tokens": 5997
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 55.0,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 7030,
+        "total_characters": 0,
+        "prompt_tokens": 1030,
+        "completion_tokens": 6000,
+        "completion_tokens_details": {
+          "reasoning_tokens": 5999
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 193
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 72.4,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 7251,
+        "total_characters": 0,
+        "prompt_tokens": 1251,
+        "completion_tokens": 6000,
+        "completion_tokens_details": {
+          "reasoning_tokens": 5998
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 72.44,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 6862,
+        "total_characters": 0,
+        "prompt_tokens": 862,
+        "completion_tokens": 6000,
+        "completion_tokens_details": {
+          "reasoning_tokens": 5401
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 85.0,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 11973,
+        "total_characters": 0,
+        "prompt_tokens": 1173,
+        "completion_tokens": 10800,
+        "completion_tokens_details": {
+          "reasoning_tokens": 10799
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1172
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 10800
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 64.56,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 6407,
+        "total_characters": 0,
+        "prompt_tokens": 1251,
+        "completion_tokens": 5156,
+        "completion_tokens_details": {
+          "reasoning_tokens": 3896
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1250
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 10800
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.0,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 490,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 120,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 101.44,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 11141,
+        "total_characters": 0,
+        "prompt_tokens": 1030,
+        "completion_tokens": 10111,
+        "completion_tokens_details": {
+          "reasoning_tokens": 8917
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1029
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 10800
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 3.24,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 532,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 162,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 55.68,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 5326,
+        "total_characters": 0,
+        "prompt_tokens": 862,
+        "completion_tokens": 4464,
+        "completion_tokens_details": {
+          "reasoning_tokens": 3365
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 768
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 10800
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.48,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 493,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 123,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 3.86,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 551,
+        "total_characters": 0,
+        "prompt_tokens": 317,
+        "completion_tokens": 234,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 15.53,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 634,
+        "total_characters": 0,
+        "prompt_tokens": 332,
+        "completion_tokens": 302,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 35.55,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2813,
+        "total_characters": 0,
+        "prompt_tokens": 244,
+        "completion_tokens": 2569,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2000
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 5.0,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1497,
+        "total_characters": 0,
+        "prompt_tokens": 1012,
+        "completion_tokens": 485,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2500
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 20.83,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2025,
+        "total_characters": 0,
+        "prompt_tokens": 276,
+        "completion_tokens": 1749,
+        "completion_tokens_details": {
+          "reasoning_tokens": 815
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 25.25,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2062,
+        "total_characters": 0,
+        "prompt_tokens": 281,
+        "completion_tokens": 1781,
+        "completion_tokens_details": {
+          "reasoning_tokens": 499
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 6.41,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2015,
+        "total_characters": 0,
+        "prompt_tokens": 1377,
+        "completion_tokens": 638,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2500
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 10.38,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2339,
+        "total_characters": 0,
+        "prompt_tokens": 1723,
+        "completion_tokens": 616,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2500
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 36.57,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 5683,
+        "total_characters": 0,
+        "prompt_tokens": 976,
+        "completion_tokens": 4707,
+        "completion_tokens_details": {
+          "reasoning_tokens": 4171
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.38,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 520,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 150,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 5.06,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 569,
+        "total_characters": 0,
+        "prompt_tokens": 320,
+        "completion_tokens": 249,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 4.84,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 767,
+        "total_characters": 0,
+        "prompt_tokens": 281,
+        "completion_tokens": 486,
+        "completion_tokens_details": {
+          "reasoning_tokens": 259
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 3.72,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1137,
+        "total_characters": 0,
+        "prompt_tokens": 670,
+        "completion_tokens": 467,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2500
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 53.52,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 7396,
+        "total_characters": 0,
+        "prompt_tokens": 1396,
+        "completion_tokens": 6000,
+        "completion_tokens_details": {
+          "reasoning_tokens": 5998
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 117.69,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 14507,
+        "total_characters": 0,
+        "prompt_tokens": 1173,
+        "completion_tokens": 13334,
+        "completion_tokens_details": {
+          "reasoning_tokens": 12007
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1172
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 19440
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.52,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 520,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 150,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 28.17,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2944,
+        "total_characters": 0,
+        "prompt_tokens": 607,
+        "completion_tokens": 2337,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1449
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.54,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 517,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 147,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 59.04,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 7700,
+        "total_characters": 0,
+        "prompt_tokens": 1700,
+        "completion_tokens": 6000,
+        "completion_tokens_details": {
+          "reasoning_tokens": 5999
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 21.51,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1163,
+        "total_characters": 0,
+        "prompt_tokens": 289,
+        "completion_tokens": 874,
+        "completion_tokens_details": {
+          "reasoning_tokens": 324
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 192
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 6.8,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1790,
+        "total_characters": 0,
+        "prompt_tokens": 847,
+        "completion_tokens": 943,
+        "completion_tokens_details": {
+          "reasoning_tokens": 327
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.79,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 513,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 143,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 29.38,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2601,
+        "total_characters": 0,
+        "prompt_tokens": 266,
+        "completion_tokens": 2335,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1731
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 19.6,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 1859,
+        "total_characters": 0,
+        "prompt_tokens": 284,
+        "completion_tokens": 1575,
+        "completion_tokens_details": {
+          "reasoning_tokens": 544
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 65.93,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 8590,
+        "total_characters": 0,
+        "prompt_tokens": 1396,
+        "completion_tokens": 7194,
+        "completion_tokens_details": {
+          "reasoning_tokens": 6032
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1395
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 10800
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 25.87,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 3308,
+        "total_characters": 0,
+        "prompt_tokens": 900,
+        "completion_tokens": 2408,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1454
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 25.94,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 3825,
+        "total_characters": 0,
+        "prompt_tokens": 1323,
+        "completion_tokens": 2502,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1434
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 94.31,
+      "finish": "length",
+      "usage": {
+        "total_tokens": 12500,
+        "total_characters": 0,
+        "prompt_tokens": 1700,
+        "completion_tokens": 10800,
+        "completion_tokens_details": {
+          "reasoning_tokens": 10703
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1699
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 10800
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 128.16,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 18541,
+        "total_characters": 0,
+        "prompt_tokens": 1700,
+        "completion_tokens": 16841,
+        "completion_tokens_details": {
+          "reasoning_tokens": 14947
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 1699
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 19440
+    }
+  ]
+}

@@ -1,0 +1,1782 @@
+{
+ "meta": {
+  "pairs": [
+   [
+    "A",
+    "WF-a3"
+   ],
+   [
+    "S-self",
+    "WF-a3"
+   ],
+   [
+    "WF-a3-NO",
+    "WF-a3"
+   ],
+   [
+    "WF-p",
+    "WF-a3"
+   ]
+  ],
+  "dims": [
+   "D1_取舍明确度",
+   "D2_观点驱动力",
+   "D3_人类似然感"
+  ],
+  "judges": [
+   "MiniMax-M3"
+  ],
+  "n_samples": 51,
+  "n_results": 162,
+  "n_parse_fail": 0,
+  "srcs": [
+   "runs/arch3_compare.jsonl",
+   "runs/multitopic_T06/mt_T06.jsonl",
+   "runs/multitopic_T07/mt_T07.jsonl",
+   "runs/multitopic_T10/mt_T10.jsonl",
+   "runs/refill_T06/mt_T06.jsonl",
+   "runs/refill_T07/mt_T07.jsonl"
+  ],
+  "generated_at": "2026-10-23 23:17:40"
+ },
+ "汇总": {
+  "MiniMax-M3": {
+   "D1_取舍明确度": {
+    "A vs WF-a3": {
+     "n_pairs": 11,
+     "n_votes": 22,
+     "win": 2,
+     "tie": 0,
+     "lose": 20,
+     "位置一致数": 9,
+     "位置一致率": 0.8182
+    },
+    "S-self vs WF-a3": {
+     "n_pairs": 10,
+     "n_votes": 20,
+     "win": 5,
+     "tie": 0,
+     "lose": 15,
+     "位置一致数": 7,
+     "位置一致率": 0.7
+    },
+    "WF-a3-NO vs WF-a3": {
+     "n_pairs": 3,
+     "n_votes": 6,
+     "win": 2,
+     "tie": 0,
+     "lose": 4,
+     "位置一致数": 1,
+     "位置一致率": 0.3333
+    },
+    "WF-p vs WF-a3": {
+     "n_pairs": 3,
+     "n_votes": 6,
+     "win": 2,
+     "tie": 0,
+     "lose": 4,
+     "位置一致数": 1,
+     "位置一致率": 0.3333
+    }
+   },
+   "D2_观点驱动力": {
+    "A vs WF-a3": {
+     "n_pairs": 11,
+     "n_votes": 22,
+     "win": 3,
+     "tie": 0,
+     "lose": 19,
+     "位置一致数": 8,
+     "位置一致率": 0.7273
+    },
+    "S-self vs WF-a3": {
+     "n_pairs": 10,
+     "n_votes": 20,
+     "win": 8,
+     "tie": 0,
+     "lose": 12,
+     "位置一致数": 6,
+     "位置一致率": 0.6
+    },
+    "WF-a3-NO vs WF-a3": {
+     "n_pairs": 3,
+     "n_votes": 6,
+     "win": 3,
+     "tie": 0,
+     "lose": 3,
+     "位置一致数": 2,
+     "位置一致率": 0.6667
+    },
+    "WF-p vs WF-a3": {
+     "n_pairs": 3,
+     "n_votes": 6,
+     "win": 3,
+     "tie": 0,
+     "lose": 3,
+     "位置一致数": 2,
+     "位置一致率": 0.6667
+    }
+   },
+   "D3_人类似然感": {
+    "A vs WF-a3": {
+     "n_pairs": 11,
+     "n_votes": 22,
+     "win": 2,
+     "tie": 0,
+     "lose": 20,
+     "位置一致数": 9,
+     "位置一致率": 0.8182
+    },
+    "S-self vs WF-a3": {
+     "n_pairs": 10,
+     "n_votes": 20,
+     "win": 7,
+     "tie": 0,
+     "lose": 13,
+     "位置一致数": 5,
+     "位置一致率": 0.5
+    },
+    "WF-a3-NO vs WF-a3": {
+     "n_pairs": 3,
+     "n_votes": 6,
+     "win": 3,
+     "tie": 0,
+     "lose": 3,
+     "位置一致数": 2,
+     "位置一致率": 0.6667
+    },
+    "WF-p vs WF-a3": {
+     "n_pairs": 3,
+     "n_votes": 6,
+     "win": 5,
+     "tie": 0,
+     "lose": 1,
+     "位置一致数": 2,
+     "位置一致率": 0.6667
+    }
+   }
+  }
+ },
+ "逐条": [
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-a3-NO",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 1,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 2,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T06",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "G01",
+   "tag": 3,
+   "x": "WF-p",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T06",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T06",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T07",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "A",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "1",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "2",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D1_取舍明确度",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D2_观点驱动力",
+   "judge": "MiniMax-M3",
+   "order": 0,
+   "winner_x_vs_y": "y"
+  },
+  {
+   "topic": "T10",
+   "tag": "3",
+   "x": "S-self",
+   "y": "WF-a3",
+   "dim": "D3_人类似然感",
+   "judge": "MiniMax-M3",
+   "order": 1,
+   "winner_x_vs_y": "x"
+  }
+ ]
+}

@@ -1,0 +1,137 @@
+{
+  "生成时间": "2026-10-24 13:50:59 CST",
+  "仓库": "lixvanran/agent-creativity-mechanism-study",
+  "分支": "feature/g4-arch4-state-driven",
+  "HEAD": "738669a86651a4fa7f197e96a90a70e7f73193ab",
+  "main": "e012f1e2574cd28a5e64fc4609786a46a534efd4",
+  "工作区是否干净": "否（10 项）",
+  "更正记录约定": "历史原件保留；报告与更正记录分开（更正写在报告的更正节，不删旧表述）。v4 的「两种 0」更正见 REPORT_arch4.md §3.3b；v3/v4/v5 根因收窄见 PAPER_draft.md §7.9 与摘要⑥。",
+  "方向": [
+    {
+      "方向": "① 正式论证（第四组论证）",
+      "代码指纹": [
+        "（无代码，文档型）"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "group4_state_driven/evidence-check/",
+      "数据存在": "✘",
+      "分析入口": "—",
+      "当前报告": "group4_state_driven/第四组论证.md / 第四组论证.pdf",
+      "报告指纹": "—"
+    },
+    {
+      "方向": "② C1/C2 状态机（Phase 0/1）",
+      "代码指纹": [
+        "code/runner2.py@MISSING",
+        "code/metrics2.py@MISSING",
+        "code/gates.py@MISSING",
+        "code/probe_swap.py@MISSING",
+        "code/analyze2.py@MISSING",
+        "code/analyze_ckf.py@MISSING",
+        "code/report_p1.py@MISSING"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "group4_state_driven/data/",
+      "数据存在": "✔",
+      "分析入口": "group4_state_driven/code/analyze2.py",
+      "当前报告": "group4_state_driven/reports/REPORT_p1.md",
+      "报告指纹": "—"
+    },
+    {
+      "方向": "③ 架构化状态机 v1–v3",
+      "代码指纹": [
+        "code/workflow_arch.py@MISSING",
+        "code/workflow_arch2.py@MISSING",
+        "code/workflow_arch3.py@e9b24fea3815906c"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "group4_state_driven/data/arch3_compare.jsonl",
+      "数据存在": "✔",
+      "分析入口": "group4_state_driven/code/analyze_arch3.py",
+      "当前报告": "group4_state_driven/reports/REPORT_arch3.md",
+      "报告指纹": "5af784bb8e1b3be1"
+    },
+    {
+      "方向": "④ 架构化状态机 v4（状态进选择层）",
+      "代码指纹": [
+        "code/workflow_arch4.py@8ab38ca208f17f5c",
+        "code/run_arch4_compare.py@0290f5ffc8e7c9dc",
+        "code/analyze_arch4.py@4c5536b9481c0fc7"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "group4_state_driven/data/arch4_compare.jsonl",
+      "数据存在": "✔",
+      "分析入口": "group4_state_driven/code/analyze_arch4.py",
+      "当前报告": "group4_state_driven/reports/REPORT_arch4.md",
+      "报告指纹": "f4a5462128b4d851"
+    },
+    {
+      "方向": "⑤ 架构化状态机 v5（编号化声明）",
+      "代码指纹": [
+        "code/workflow_arch5.py@f93f5f60a3add86f",
+        "code/run_arch5_compare.py@75ed693b20a04607",
+        "code/analyze_arch5.py@152038ba48887dbe"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "group4_state_driven/data/arch5_compare.jsonl",
+      "数据存在": "✔",
+      "分析入口": "group4_state_driven/code/analyze_arch5.py",
+      "当前报告": "group4_state_driven/reports/REPORT_arch5.md",
+      "报告指纹": "871aa4cf0251a79c"
+    },
+    {
+      "方向": "⑥ v6 Stage-1（2×2，两阶段）",
+      "代码指纹": [
+        "code/workflow_arch6.py@902e93861b99060f",
+        "code/run_arch6_stage1.py@8a17f4277bf1e1ef",
+        "code/analyze_arch6.py@78f7b359d388219f",
+        "code/v6_power.py@462b4b984a7bd6ae"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "group4_state_driven/data/arch6_stage1.jsonl",
+      "数据存在": "✘",
+      "分析入口": "group4_state_driven/code/analyze_arch6.py",
+      "当前报告": "group4_state_driven/reports/REPORT_arch6_stage1.md",
+      "报告指纹": "—"
+    },
+    {
+      "方向": "⑦ 论文（终稿 + PDF）",
+      "代码指纹": [
+        "paper/PAPER_draft.md@a3a0b5e867aa1648",
+        "paper/build/build_paper_pdf.sh@b52987c3188c5ecc",
+        "paper/build/verify_paper_pdf.py@141fa1a7ba1e8831"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "group4_state_driven/paper/runs/PAPER_draft.pdf",
+      "数据存在": "✔",
+      "分析入口": "group4_state_driven/paper/build/verify_paper_pdf.py",
+      "当前报告": "group4_state_driven/paper/PAPER_draft.md",
+      "报告指纹": "a3a0b5e867aa1648"
+    },
+    {
+      "方向": "⑧ 预注册（判据唯一来源）",
+      "代码指纹": [
+        "prereg/PREREG_v5.md@06a0f00e538e958e",
+        "prereg/PREREG_v6.md@31c81dfc8ddf68a3"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "—",
+      "数据存在": "—",
+      "分析入口": "—",
+      "当前报告": "group4_state_driven/prereg/PREREG_v6.md",
+      "报告指纹": "31c81dfc8ddf68a3"
+    },
+    {
+      "方向": "⑨ 校验台账（sha256 绑 commit）",
+      "代码指纹": [
+        "SHASUMS.md@656596d978ac4c80"
+      ],
+      "实际执行版本": "feature/g4-arch4-state-driven @ 738669a",
+      "数据路径": "—",
+      "数据存在": "—",
+      "分析入口": "—",
+      "当前报告": "group4_state_driven/SHASUMS.md",
+      "报告指纹": "656596d978ac4c80"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "batch_id": "arch-20261021-003821-minimax",
+  "model": "MiniMax-M3",
+  "api": "minimax",
+  "cost": {
+    "calls": 4,
+    "prompt_tokens": 2827,
+    "completion_tokens": 9741
+  },
+  "trace": [
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 2.29,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 476,
+        "total_characters": 0,
+        "prompt_tokens": 370,
+        "completion_tokens": 106,
+        "prompt_tokens_details": {
+          "cached_tokens": 369
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 63.21,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 4790,
+        "total_characters": 0,
+        "prompt_tokens": 229,
+        "completion_tokens": 4561,
+        "completion_tokens_details": {
+          "reasoning_tokens": 3796
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 172
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 6.45,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 2041,
+        "total_characters": 0,
+        "prompt_tokens": 1157,
+        "completion_tokens": 884,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        }
+      },
+      "json_mode": true,
+      "max_tokens": 2500
+    },
+    {
+      "model": "MiniMax-M3",
+      "url_host": "api.minimaxi.com",
+      "latency": 40.5,
+      "finish": "stop",
+      "usage": {
+        "total_tokens": 5261,
+        "total_characters": 0,
+        "prompt_tokens": 1071,
+        "completion_tokens": 4190,
+        "completion_tokens_details": {
+          "reasoning_tokens": 2982
+        },
+        "prompt_tokens_details": {
+          "cached_tokens": 194
+        }
+      },
+      "json_mode": false,
+      "max_tokens": 6000
+    }
+  ]
+}

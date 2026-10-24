@@ -1,0 +1,14 @@
+
+===== T07 | batch=mt-T07-20261023-221256 =====
+  题面: 当 AI 生成的代码出了 bug，程序员要不要负责？写一篇科普小品讲清楚这件事。
+  [mt-T07-20261023-221256] S-self    #1  3456字 ok
+  [mt-T07-20261023-221256] S-self    #2  2738字 ok
+  [mt-T07-20261023-221256] S-self    #3  3532字 ok
+  [mt-T07-20261023-221256] WF-a3-NL  #1  2201字 ERR:observe:parse_failed;decide:parse_failed
+  [mt-T07-20261023-221256] WF-a3-NL  #2  7642字 ok
+  [mt-T07-20261023-221256] WF-a3-NL  #3     0字 ERR:调用失败：TimeoutError: The read operation timed out
+  [mt-T07-20261023-221256] WF-a3     #1  4130字 ok
+  [mt-T07-20261023-221256] WF-a3     #2  4241字 ok
+  [mt-T07-20261023-221256] WF-a3     #3  4517字 ok
+
+[done] runs/refill_T07

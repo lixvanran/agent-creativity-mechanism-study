@@ -1,0 +1,19 @@
+[batch] batch_id=20261020-140722-6584（所有臂必须同批）
+  [stance] C0/T01 ok  极性=pole_a
+  [stance] C0/T05 ok  极性=pole_a
+  [stance] C0/T09 ok  极性=pole_b
+[run] 作品 12 条，并发 4
+  [gen] C0/T01#1 ok  2215字
+  [gen] C0/T01#2 ok  2383字
+  [gen] C0/T05#1 ok  513字
+  [gen] C0/T05#2 ok  356字
+  [gen] C2/T05#1 ok  1016字
+  [gen] C2/T01#1 ok  1651字
+  [gen] C0/T09#1 ok  1051字
+  [gen] C0/T09#2 ok  1027字
+  [gen] C2/T05#2 ok  929字
+  [gen] C2/T09#1 ok  1511字
+  [gen] C2/T09#2 ok  1091字
+  [gen] C2/T01#2 ok  1863字
+
+[done] 调用 33 次  错误 0  token in=36119 out=20008  批=20261020-140722-6584

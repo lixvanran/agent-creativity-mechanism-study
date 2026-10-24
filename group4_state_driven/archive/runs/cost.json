@@ -1,0 +1,15 @@
+{
+  "calls": 0,
+  "errors": 0,
+  "stance_calls": 0,
+  "stance_retries": 0,
+  "stance_invalid": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "cost_cny_promo": 0.0,
+  "cost_cny_list": 0.0,
+  "price_note": "M3 ≤512K 档：五折价 输入¥2.10/百万 输出¥8.40/百万；标准价 ¥4.20/¥16.80",
+  "wall_time_s": 0.0,
+  "model": "MiniMax-M3",
+  "note": "MiniMax 无 seed / temp=0 非确定 ⇒ 采样数 N 需按检出力定，重复采样是设计的一部分"
+}

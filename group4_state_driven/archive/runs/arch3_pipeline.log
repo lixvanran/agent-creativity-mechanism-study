@@ -1,0 +1,23 @@
+=== START 2026-10-21 22:50:12 ===
+--- 补跑 WF-a3-NL（同批）---
+  [arch3-20261021-221648-minimax] WF-a3-NL   #2  2469字 ok
+  [arch3-20261021-221648-minimax] WF-a3-NL   #1  2911字 ok
+  [arch3-20261021-221648-minimax] WF-a3-NL   #3  4574字 ok
+
+[out] runs/arch3_compare.jsonl
+[batch] arch3-20261021-221648-minimax ｜ 调用 18 次 ｜ prompt=16571 completion=45837
+--- 探针（D0 / D2flip_NL / D3off_NL）---
+探针基准臂：WF-a3-NL
+WF-a3 可用样本：3
+Traceback (most recent call last):
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/probe_arch3.py", line 217, in <module>
+    main()
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/probe_arch3.py", line 174, in main
+    off_obs, off_st, off_draft = off_topic_gaps()
+                                 ^^^^^^^^^^^^^^^^
+  File "/run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/probe_arch3.py", line 141, in off_topic_gaps
+    obs, raw_o, o_st = WA3.parse_observation3(
+    ^^^^^^^^^^^^^^^^
+ValueError: not enough values to unpack (expected 3, got 2)
+=== DONE 2026-10-21 23:02:41 ===
+V3_PIPELINE_DONE

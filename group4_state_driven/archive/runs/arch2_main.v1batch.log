@@ -1,0 +1,15 @@
+  [arch2-20261021-065850] A          #3    981字  闸门通过=-  ok
+  [arch2-20261021-065850] A          #2   1037字  闸门通过=-  ok
+  [arch2-20261021-065850] A          #1   1449字  闸门通过=-  ok
+  [arch2-20261021-065850] WF-a2      #1   1383字  闸门通过=True  ok
+  [arch2-20261021-065850] WF-p       #3   3394字  闸门通过=-  ok
+  [arch2-20261021-065850] WF-p       #2      0字  闸门通过=-  ERR:workflow:截断且重试用尽（finish=length, max_tokens=19440）
+  [arch2-20261021-065850] WF-a2-NO   #1   1357字  闸门通过=True  ok
+  [arch2-20261021-065850] WF-a2-NO   #2   1711字  闸门通过=True  ok
+  [arch2-20261021-065850] WF-a2      #2   3955字  闸门通过=False  ok
+  [arch2-20261021-065850] WF-a2-NO   #3   2037字  闸门通过=True  ok
+  [arch2-20261021-065850] WF-p       #1      0字  闸门通过=-  ERR:workflow:截断且重试用尽（finish=length, max_tokens=19440）
+  [arch2-20261021-065850] WF-a2      #3   2218字  闸门通过=False  ok
+
+[out] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/runs/arch2_compare.jsonl
+[batch] arch2-20261021-065850 ｜ 调用 53 次 ｜ prompt=49958 completion=214252

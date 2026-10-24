@@ -1,0 +1,11 @@
+── G0-1 环境快照 → /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/runs/env_snapshot.json
+   OPENROUTER_BASE_URL_before       None
+   OPENROUTER_BASE_URL_pinned       https://api.minimaxi.com/v1
+   MINIMAX_SUBSCRIPTION_KEY_set     True
+   G4_REF_DIR                       /workspace/g4_ref
+   PYTHON                           3.11.2
+   ts                               2026-10-24T14:28:27
+   ★ 实际生效 OPENROUTER_BASE_URL = https://api.minimaxi.com/v1
+
+===== T10 | batch=v6s1-main-001 =====
+   T10-1      err=None  cand_ok=3  F=3  B=1  D=3  Δq=False

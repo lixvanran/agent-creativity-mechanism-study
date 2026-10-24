@@ -1,0 +1,14 @@
+探针基准臂：WF-a3-NL
+WF-a3 可用样本：3
+无关议题缺口数：3
+  [a3probe-20261021-231129] D3off_NL       #1  1679字 中文100%
+  [a3probe-20261021-231129] D2flip_NL      #1  2603字 中文98%
+  [a3probe-20261021-231129] D0_rerun       #1  3390字 中文100%
+  [a3probe-20261021-231129] D3off_NL       #2  1460字 中文100%
+  [a3probe-20261021-231129] D2flip_NL      #2  2247字 中文99%
+  [a3probe-20261021-231129] D0_rerun       #3  2336字 中文97%
+  [a3probe-20261021-231129] D3off_NL       #3  1372字 中文100%
+  [a3probe-20261021-231129] D2flip_NL      #3  2542字 中文96%
+  [a3probe-20261021-231129] D0_rerun       #2  4453字 中文97%
+
+[out] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/runs/arch3_probe.jsonl ｜ 调用 29 次

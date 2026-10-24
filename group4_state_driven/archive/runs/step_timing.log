@@ -1,0 +1,10 @@
+[    0.0s] ① import run_arch6_stage1
+[    0.2s] ② imported
+[    0.2s] ③ 题面就绪 len=63
+[    0.2s] ④ run_A 开始
+[   16.5s] ⑤ run_A 结束 err=None text_len=1580
+[   16.5s] ⑥ build_state5 开始
+[   77.5s] ⑦ build_state5 结束 gaps=3 decisions=3
+[   77.5s] ⑧ state_variants6 开始
+[   77.5s] ⑨ state_variants6 结束 qmeta={'n_decisions': 3, 'natural_quota': 0, 'dropped_quota': 0, 'quota_forced': True}
+[   77.5s] ⑩ gen_candidates_blind 开始

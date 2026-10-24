@@ -1,0 +1,6 @@
+  [arch3-20261021-221648-minimax] WF-a3      #3  1910字 ok
+  [arch3-20261021-221648-minimax] WF-a3      #2  2703字 ok
+  [arch3-20261021-221648-minimax] WF-a3      #1  2208字 ok
+
+[out] runs/arch3_compare.jsonl
+[batch] arch3-20261021-221648-minimax ｜ 调用 19 次 ｜ prompt=16289 completion=48510

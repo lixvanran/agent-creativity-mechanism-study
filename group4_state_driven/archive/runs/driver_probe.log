@@ -1,0 +1,23 @@
+WF-a 样本 3 ｜ WF-a-R 样本 3
+无关驱动内容：['不能牺牲馆员和晚间到馆者的人身安全。', '不能牺牲安静阅读、自习等核心公共服务。', '不能牺牲纳税人的公共预算和图书馆长期运营能力。']
+  ERR D3 #1: 'dict' object has no attribute 'step'
+  [dprobe-20261021-063918] D1 #1  2751字
+  [dprobe-20261021-063918] D1 #2  1679字
+  ERR D3 #2: 'dict' object has no attribute 'step'
+  [dprobe-20261021-063918] D1 #3  4186字
+  ERR D3 #3: 'dict' object has no attribute 'step'
+
+=== 驱动机有效性读数 ===
+（dist_hit = 区分性实词命中率；分母 = 该变体相对基线的区分性实词数）
+  #1 基线 dist_hit=0.504(分母264) ｜ D2 反极性 dist_hit=0.279(分母319) ｜ 漂移 2.766→0.377
+  #2 基线 dist_hit=0.299(分母244) ｜ D2 反极性 dist_hit=0.574(分母390) ｜ 漂移 1.163→0.663
+  #3 基线 dist_hit=0.000(分母337) ｜ D2 反极性 dist_hit=0.000(分母281) ｜ 漂移 0.0→0.0
+
+  D1（裸状态）—— 与基线的实词重合：
+    #1  中文占比=99%  裸状态正文 vs 原正文 实词Jaccard=0.1643 ｜ 自身驱动词命中=0.536 / 基线=0.505
+    #2  中文占比=100%  裸状态正文 vs 原正文 实词Jaccard=0.1428 ｜ 自身驱动词命中=0.375 / 基线=0.353
+    #3  中文占比=0%  裸状态正文 vs 原正文 实词Jaccard=0.2636 ｜ 自身驱动词命中=0.000 / 基线=0.000
+
+  D3（无关驱动）—— 话题漂移：
+
+[out] /run/csi/mount-root/nas/eab0d61a99b6696edb3d2aff87b585e8/第四组论证/experiment-design/runs/driver_probe.jsonl  (调用 10 次)
