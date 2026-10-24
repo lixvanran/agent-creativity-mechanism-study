@@ -79,8 +79,12 @@ DEV = "/workspace/lab/routes/DEV"
 OUT_DEFAULT = os.path.join(HERE, "runs", "policy_train")
 
 # 代理奖励权重（**事前写死**，不调）
+# ★★ 奖励权重（事前写死）：★ trap 与 width 是**新加的两项**
+#    —— 对齐负责人的两个目标："局部不钻牛角尖" + "整体思维面更宽"
 LAMBDA = dict(conflict=1.0, empty=0.5, fallback=0.5, cover=0.30, cost=0.02,
-              conflict_pairs=0.8)
+              conflict_pairs=0.8,
+              trap=6.0,      # ★ 踩一次陷阱的代价（很大 ⇒ 策略会避开）
+              width=4.0)     # ★ 分支分散度的收益（⇒ 策略会想要更宽）
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -142,13 +146,16 @@ def population_diversity(claims: Sequence[str], history: Sequence[Sequence[str]]
     return 1.0 - (sum(sims) / len(sims))
 
 
-def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
+def proxy_reward(res: Dict[str, Any], task: Optional[Dict[str, Any]] = None
+                 ) -> Dict[str, Any]:
     """从一次运行的读数里算**代理奖励**（零判官成本）。
 
-    ★★ 同一个样本同时给出两种形式，**这是受控对照的关键**：
-      · `scalar`  = 加权和（标量）⇒ argmax ⇒ **必然收敛到一点（中庸）**
-      · `(quality, diversity)` = 二元向量 ⇒ 非支配排序 ⇒ **保留不可比的多个解**
-    ⇒ 两者用**同一份代码、同一批样本、同一套更新规则**，**唯一差别是选择规则**。
+    ★★ 2026-10-24 重写奖励项以**对齐负责人给的两个目标**：
+      ① **局部不钻牛角尖** ⇒ `−λ_trap × 陷阱命中数`
+         （★ 这一项**之前完全没有** ⇒ 上一轮训练"没学出偏好"的根因就在这）
+      ② **整体思维面更宽** ⇒ `+λ_width × 分支分散度`（**集合级**，在训练循环里算）
+      ③ 闭合的代价 ⇒ `−λ_conflict_pairs × 跨槽位冲突对数`
+      ④ 成本 ⇒ `−λ_cost × 调用数`
     """
     conflicts = int(res.get("n_conflicts") or 0)
     failures = res.get("failures") or {}
@@ -169,13 +176,33 @@ def proxy_reward(res: Dict[str, Any]) -> Dict[str, Any]:
     # ★★ 冲突项（**本地检测 ⇒ 零判官成本**）：跨槽位矛盾的对数
     #   ⇒ 层3 的目标函数里**必须有"闭合的代价"**，否则策略只会一味发散
     n_conf = len(W.detect_opposite_pairs(res.get("claims") or []))
+    # ★★ 陷阱命中（**钻牛角尖的直接代价**）：只在带 trap_fingerprints 的题上可测
+    n_trap = 0
+    if task and task.get("trap_fingerprints"):
+        try:
+            import premature_closure as _PC
+            _pc = _PC.premature_closure(task, res.get("answer") or "")
+            n_trap = 1 if _pc.get("hit") else 0
+        except Exception:
+            n_trap = 0
     quality = -(LAMBDA["conflict"] * conflicts + LAMBDA["empty"] * n_empty
                 + LAMBDA["fallback"] * n_fb + LAMBDA["cost"] * calls
-                + LAMBDA["conflict_pairs"] * n_conf)
+                + LAMBDA["conflict_pairs"] * n_conf
+                + LAMBDA["trap"] * n_trap)
+    # ★★ **思维面宽度**（样本内：各分支彼此有多分散）⇒ 越高越宽
+    #    零 embedding、纯文本（Self-Sim 原口径，Lake et al. NAACL'25）
+    _paths = [p for p in (res.get("paths") or []) if p.get("claims")]
+    if len(_paths) >= 2:
+        _cl = [list(p["claims"]) for p in _paths]
+        _sim = MP.self_sim(_cl, mode="bigram") or 0.0
+        width = max(0.0, 1.0 - _sim)
+    else:
+        width = 0.0
+    r = (quality + LAMBDA["width"] * width)      # ★ 奖励 = 质量代价 + 宽度收益
     diversity = float(cover)
-    return dict(r=r, quality=quality, diversity=diversity,
+    return dict(r=r, quality=quality, diversity=diversity, width=width,
                 conflicts=conflicts, n_empty=n_empty, n_fallback=n_fb,
-                n_conflict_pairs=n_conf,
+                n_conflict_pairs=n_conf, n_trap_hits=n_trap,
                 cover=cover, calls=calls, claims=claims)
 
 
@@ -210,10 +237,20 @@ def reinforce(pol: W.ActionPolicy, spec: W.ActionSpec, failure_kind: str,
 # ══════════════════════════════════════════════════════════════════════
 # 主循环
 # ══════════════════════════════════════════════════════════════════════
-def load_tasks(n=None):
+def load_tasks(n=None, mixed=True):
+    """训练题集：**DEV 9 题 + 诱导钻牛角尖 6 题**（混合）。
+
+    ★ 必须混合：陷阱命中（钻牛角尖的代价）**只在带 trap_fingerprints 的题上可测**
+    ⇒ ⇒ 只用原来的 9 道核对型题 ⇒ **"局部不钻牛角尖"这一项永远测不到** ⇒ 策略学不到。
+    """
     with open(os.path.join(DEV, "devset.json"), encoding="utf-8") as f:
         d = json.load(f)
-    tasks = d["tasks"] if isinstance(d, dict) and "tasks" in d else d
+    tasks = list(d["tasks"] if isinstance(d, dict) and "tasks" in d else d)
+    adv_path = os.path.join(DEV, "DEV-ADV-2026-10-24.json")
+    if mixed and os.path.exists(adv_path):
+        with open(adv_path, encoding="utf-8") as f:
+            ad = json.load(f)
+        tasks = tasks + list(ad["tasks"] if isinstance(ad, dict) and "tasks" in ad else ad)
     return tasks[:n] if n else tasks
 
 
@@ -298,7 +335,7 @@ def main():
             except Exception as e:
                 print("  ⚠️ 样本失败（计入，不重试）：%s: %s" % (type(e).__name__, e), flush=True)
                 continue
-            pr = proxy_reward(res)
+            pr = proxy_reward(res, task)
             # ③ 实际发生的失败类型（用于交互项）
             fk = None
             for k in ("conflict", "empty", "all_unmentioned", "zero_load_bearing",
