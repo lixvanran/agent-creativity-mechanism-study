@@ -22,8 +22,15 @@ for _p in (_HERE, os.environ.get("REORG_WORKDIR", "")):
         sys.path.insert(0, _p)
 import reorg_patches as RP   # ★ 纯数据清单（执行器与核验器共享声明，不共享逻辑）
 
-SRC = "/workspace/lab/PAPER-2026-10-25.md"
-DST = "/workspace/lab/PAPER-三组-学习自迭代治塌缩-2026-10-25.md"
+# ★ 路径不写死（★ 交付包必须能独立跑）⇒ 由 reorg_paths 解析
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from reorg_paths import resolve_src, resolve_dst
+except ImportError:  # ★ 变异注入会把脚本复制到临时目录 ⇒ 再兜一层 cwd
+    sys.path.insert(0, os.getcwd())
+    from reorg_paths import resolve_src, resolve_dst
+SRC = resolve_src()
+DST = resolve_dst(SRC)
 
 # ============================================================
 # 1) 切块：按 markdown 标题切成 (level, title, body)

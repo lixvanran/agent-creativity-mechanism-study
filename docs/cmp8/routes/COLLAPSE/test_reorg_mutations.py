@@ -35,22 +35,21 @@ def run_variant(name, old, new, expect_kw, target="SRC", accept=None):
         assert old in ORIG, "★ 脚本锚点不存在：%r" % old[:60]
     d = tempfile.mkdtemp(prefix="mut_")
     try:
+        env = dict(os.environ)
+        env["REORG_WORKDIR"] = HERE
         if target == "SRC":
+            # ★ 走【显式环境变量接口】，不再靠字符串替换常量
             src_copy = os.path.join(d, "src.md")
             io.open(src_copy, "w", encoding="utf-8").write(
                 io.open(os.path.join(HERE, "..", "..", "PAPER-2026-10-25.md"),
                         encoding="utf-8").read().replace(old, new, 1))
-            code = ORIG.replace(
-                'SRC = "/workspace/lab/PAPER-2026-10-25.md"',
-                'SRC = %r' % src_copy)
-            code = code.replace('DST = "/workspace/lab/', 'DST = "%s/' % d)
+            env["REORG_SRC"] = src_copy
+            env["REORG_DST"] = os.path.join(d, "out.md")
             p = os.path.join(d, "reorg_paper.py")
-            io.open(p, "w", encoding="utf-8").write(code)
+            io.open(p, "w", encoding="utf-8").write(ORIG)
         else:
             p = os.path.join(d, "reorg_paper.py")
             io.open(p, "w", encoding="utf-8").write(ORIG.replace(old, new, 1))
-        env = dict(os.environ)
-        env["REORG_WORKDIR"] = HERE
         r = subprocess.run([sys.executable, p], capture_output=True, text=True,
                            cwd=HERE, timeout=180, env=env)
         out = (r.stdout or "") + (r.stderr or "")

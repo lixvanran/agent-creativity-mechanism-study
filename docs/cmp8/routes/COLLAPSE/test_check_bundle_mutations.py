@@ -24,7 +24,7 @@ NEEDED = [
     "reorg_paper.py", "reorg_patches.py", "verify_reorg.py",
     "check_patches.py", "test_reorg_mutations.py",
     "test_verify_reorg_mutations.py", "test_check_patches_mutations.py",
-    "check_bundle.py",
+    "check_bundle.py", "reorg_paths.py",
 ]
 
 

@@ -35,6 +35,9 @@ def run(name, old, new, expect_kw):
         # ★ 检查器要读 reorg_paper.py 的【基准常量】⇒ 必须一起复制
         shutil.copy2(os.path.join(HERE, "reorg_paper.py"),
                      os.path.join(d, "reorg_paper.py"))
+        # ★ 检查器还要 import reorg_paths（路径解析）⇒ 一并复制
+        shutil.copy2(os.path.join(HERE, "reorg_paths.py"),
+                     os.path.join(d, "reorg_paths.py"))
         r = subprocess.run([sys.executable, os.path.join(d, "check_patches.py")],
                            capture_output=True, text=True, cwd=d, timeout=120)
         out = (r.stdout or "") + (r.stderr or "")

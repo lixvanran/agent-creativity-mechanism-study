@@ -26,8 +26,15 @@ import sys
 from collections import Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = "/workspace/lab/PAPER-2026-10-25.md"
-DST = "/workspace/lab/PAPER-三组-学习自迭代治塌缩-2026-10-25.md"
+# ★ 路径不写死（★ 交付包必须能独立跑）
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from reorg_paths import resolve_src, resolve_dst
+except ImportError:  # ★ 变异注入会把脚本复制到临时目录 ⇒ 再兜一层 cwd
+    sys.path.insert(0, os.getcwd())
+    from reorg_paths import resolve_src, resolve_dst
+SRC = resolve_src()
+DST = resolve_dst(SRC)
 # ★ 数字 token：日期整体 / 不从字母后接 / 不接字母后
 NUM = re.compile(r"(?<![A-Za-z])\d{4}-\d{2}-\d{2}|(?<![A-Za-z])\d+(?:\.\d+)?(?![A-Za-z])")
 

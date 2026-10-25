@@ -15,8 +15,15 @@ import re
 import sys
 from collections import Counter
 
-SRC = "/workspace/lab/PAPER-2026-10-25.md"
-DST = "/workspace/lab/PAPER-三组-学习自迭代治塌缩-2026-10-25.md"
+# ★ 路径不写死（★ 交付包必须能独立跑）
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from reorg_paths import resolve_src, resolve_dst
+except ImportError:  # ★ 变异注入会把脚本复制到临时目录 ⇒ 再兜一层 cwd
+    sys.path.insert(0, os.getcwd())
+    from reorg_paths import resolve_src, resolve_dst
+SRC = resolve_src()
+DST = resolve_dst(SRC)
 
 NUM = re.compile(r"\d+(?:\.\d+)?")
 TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$")

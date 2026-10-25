@@ -14,7 +14,10 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 VER = os.path.join(HERE, "verify_reorg.py")
-DST = "/workspace/lab/PAPER-三组-学习自迭代治塌缩-2026-10-25.md"
+# ★ 目标稿路径不写死（★ 与 reorg_paths 同源解析）
+sys.path.insert(0, HERE)
+from reorg_paths import resolve_src, resolve_dst
+DST = resolve_dst(resolve_src())
 ORIG = io.open(VER, encoding="utf-8").read()
 
 
@@ -26,11 +29,12 @@ def run(name, old, new, expect_kw):
     try:
         bad = os.path.join(d, "bad.md")
         io.open(bad, "w", encoding="utf-8").write(base.replace(old, new, 1))
-        code = ORIG.replace('DST = "%s"' % DST, 'DST = %r' % bad)
+        code = ORIG  # ★ 不再靠字符串替换重定向 ⇒ 改用环境变量接口（更稳）
         p = os.path.join(d, "verify_reorg.py")
         io.open(p, "w", encoding="utf-8").write(code)
         env = dict(os.environ)
         env["REORG_WORKDIR"] = HERE
+        env["REORG_DST"] = bad   # ★ 显式接口：核验器读这个被变异的副本
         r = subprocess.run([sys.executable, p], capture_output=True, text=True,
                            cwd=HERE, timeout=180, env=env)
         out = (r.stdout or "") + (r.stderr or "")
@@ -111,11 +115,12 @@ def main():
         bad = os.path.join(d, "bad.md")
         io.open(bad, "w", encoding="utf-8").write(
             base.replace("0.43–0.48", "0.43–0.99", 1))
-        code = ORIG.replace('DST = "%s"' % DST, 'DST = %r' % bad)
+        code = ORIG  # ★ 不再靠字符串替换重定向 ⇒ 改用环境变量接口（更稳）
         p = os.path.join(d, "verify_reorg.py")
         io.open(p, "w", encoding="utf-8").write(code)
         env = dict(os.environ)
         env["REORG_WORKDIR"] = HERE
+        env["REORG_DST"] = bad   # ★ 显式接口：核验器读这个被变异的副本
         r = subprocess.run([sys.executable, p], capture_output=True, text=True,
                            cwd=HERE, timeout=180, env=env)
         print("  V6 摘要里 0.48 -> 0.99 ⇒ rc=%s" % r.returncode)
