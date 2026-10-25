@@ -1,0 +1,591 @@
+{
+  "n_total": 21,
+  "n_usable": 12,
+  "by_flag": {
+    "topic_renamed": 13,
+    "branch_deficit": 1,
+    "internal_mismatch": 8
+  },
+  "mapping": {
+    "practical-4q/A1": "T2",
+    "practical-4q/A2": "T3",
+    "practical-4q/A4": "T1",
+    "writing-3q4arm/P1": "T1",
+    "writing-3q4arm/P2": "T2",
+    "writing-3q4arm/P3": "T1"
+  },
+  "rows": [
+    {
+      "dataset": "practical-4q",
+      "stem": "A1_r1",
+      "file_tid": "A1",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": "T2",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [
+          "T2"
+        ],
+        "arm2": [
+          "T2"
+        ],
+        "arm3": [],
+        "arm4": [
+          "T1",
+          "T2"
+        ]
+      },
+      "flags": [
+        "topic_renamed(A1→T2)"
+      ],
+      "usable": true,
+      "mapped_tid": "T2"
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A1_r2",
+      "file_tid": "A1",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": "T2",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [
+          "T2"
+        ],
+        "arm2": [
+          "T2"
+        ],
+        "arm3": [
+          "T2"
+        ],
+        "arm4": [
+          "T2"
+        ]
+      },
+      "flags": [
+        "topic_renamed(A1→T2)"
+      ],
+      "usable": true,
+      "mapped_tid": "T2"
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A1_r3",
+      "file_tid": "A1",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": "T2",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [
+          "T2"
+        ],
+        "arm2": [
+          "T2"
+        ],
+        "arm3": [],
+        "arm4": [
+          "T2"
+        ]
+      },
+      "flags": [
+        "topic_renamed(A1→T2)"
+      ],
+      "usable": true,
+      "mapped_tid": "T2"
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A2_r1",
+      "file_tid": "A2",
+      "rep": 1,
+      "n_arts": 4,
+      "branch_deficit": 1,
+      "arts_content_tid": [
+        "T3"
+      ],
+      "content_tid": "T3",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [
+          "T3"
+        ],
+        "arm4": []
+      },
+      "flags": [
+        "branch_deficit(1)",
+        "topic_renamed(A2→T3)"
+      ],
+      "usable": false,
+      "mapped_tid": "T3"
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A2_r2",
+      "file_tid": "A2",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T3"
+      ],
+      "content_tid": "T3",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": [
+          "T3"
+        ]
+      },
+      "flags": [
+        "topic_renamed(A2→T3)"
+      ],
+      "usable": true,
+      "mapped_tid": "T3"
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A2_r3",
+      "file_tid": "A2",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T3"
+      ],
+      "content_tid": "T3",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [
+          "T3"
+        ],
+        "arm2": [
+          "T3"
+        ],
+        "arm3": [],
+        "arm4": [
+          "T3"
+        ]
+      },
+      "flags": [
+        "topic_renamed(A2→T3)"
+      ],
+      "usable": true,
+      "mapped_tid": "T3"
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A3_r1",
+      "file_tid": "A3",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [],
+      "content_tid": null,
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A3_r2",
+      "file_tid": "A3",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [],
+      "content_tid": null,
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A3_r3",
+      "file_tid": "A3",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [],
+      "content_tid": null,
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A4_r1",
+      "file_tid": "A4",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T1",
+        "T2"
+      ],
+      "content_tid": null,
+      "ambiguous": true,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A4_r2",
+      "file_tid": "A4",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T1"
+      ],
+      "content_tid": "T1",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "topic_renamed(A4→T1)"
+      ],
+      "usable": true,
+      "mapped_tid": "T1"
+    },
+    {
+      "dataset": "practical-4q",
+      "stem": "A4_r3",
+      "file_tid": "A4",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T1",
+        "T2"
+      ],
+      "content_tid": null,
+      "ambiguous": true,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P1_r1",
+      "file_tid": "P1",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T1",
+        "T2"
+      ],
+      "content_tid": "T1",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [
+          "T2"
+        ],
+        "arm2": [
+          "T1"
+        ],
+        "arm3": [
+          "T1"
+        ],
+        "arm4": []
+      },
+      "flags": [
+        "topic_renamed(P1→T1)"
+      ],
+      "usable": true,
+      "mapped_tid": "T1"
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P1_r2",
+      "file_tid": "P1",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T1",
+        "T2"
+      ],
+      "content_tid": "T1",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [
+          "T1"
+        ],
+        "arm2": [],
+        "arm3": [
+          "T2"
+        ],
+        "arm4": [
+          "T1"
+        ]
+      },
+      "flags": [
+        "topic_renamed(P1→T1)"
+      ],
+      "usable": true,
+      "mapped_tid": "T1"
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P1_r3",
+      "file_tid": "P1",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": null,
+      "ambiguous": true,
+      "arm_hits": {
+        "arm1": [
+          "T1"
+        ],
+        "arm2": [],
+        "arm3": [
+          "T1"
+        ],
+        "arm4": [
+          "T2"
+        ]
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P2_r1",
+      "file_tid": "P2",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": "T2",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "topic_renamed(P2→T2)"
+      ],
+      "usable": true,
+      "mapped_tid": "T2"
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P2_r2",
+      "file_tid": "P2",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T1",
+        "T2"
+      ],
+      "content_tid": "T1",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [
+          "T1"
+        ],
+        "arm4": []
+      },
+      "flags": [
+        "topic_renamed(P2→T1)"
+      ],
+      "usable": true,
+      "mapped_tid": "T1"
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P2_r3",
+      "file_tid": "P2",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": "T2",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "topic_renamed(P2→T2)"
+      ],
+      "usable": true,
+      "mapped_tid": "T2"
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P3_r1",
+      "file_tid": "P3",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": "T1",
+      "ambiguous": false,
+      "arm_hits": {
+        "arm1": [
+          "T1"
+        ],
+        "arm2": [
+          "T1"
+        ],
+        "arm3": [
+          "T1"
+        ],
+        "arm4": [
+          "T1",
+          "T2"
+        ]
+      },
+      "flags": [
+        "topic_renamed(P3→T1)"
+      ],
+      "usable": true,
+      "mapped_tid": "T1"
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P3_r2",
+      "file_tid": "P3",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": null,
+      "ambiguous": true,
+      "arm_hits": {
+        "arm1": [
+          "T1"
+        ],
+        "arm2": [],
+        "arm3": [
+          "T1"
+        ],
+        "arm4": [
+          "T2"
+        ]
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "stem": "P3_r3",
+      "file_tid": "P3",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_deficit": 0,
+      "arts_content_tid": [
+        "T2"
+      ],
+      "content_tid": null,
+      "ambiguous": true,
+      "arm_hits": {
+        "arm1": [
+          "T1"
+        ],
+        "arm2": [],
+        "arm3": [],
+        "arm4": []
+      },
+      "flags": [
+        "internal_mismatch"
+      ],
+      "usable": false,
+      "mapped_tid": null
+    }
+  ]
+}

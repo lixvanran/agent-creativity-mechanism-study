@@ -1,0 +1,446 @@
+{
+  "rows": [
+    {
+      "dataset": "practical-4q",
+      "tid": "A1",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_diversity": 0.9546,
+      "distinctness": [
+        0.937,
+        0.9242,
+        0.9595,
+        0.912,
+        0.912
+      ],
+      "arm4_survival": 0.2572,
+      "arm4_chars": 470,
+      "arm1_survival_vs_arts": 0.1323,
+      "arm1_chars": 627,
+      "arm3_chars": 317,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A1",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_diversity": 0.9442,
+      "distinctness": [
+        0.9421,
+        0.9191,
+        0.9405,
+        0.8949,
+        0.8949
+      ],
+      "arm4_survival": 0.2918,
+      "arm4_chars": 551,
+      "arm1_survival_vs_arts": 0.1445,
+      "arm1_chars": 519,
+      "arm3_chars": 449,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A1",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_diversity": 0.9595,
+      "distinctness": [
+        0.9439,
+        0.9595,
+        0.9474,
+        0.8805,
+        0.8805
+      ],
+      "arm4_survival": 0.2571,
+      "arm4_chars": 398,
+      "arm1_survival_vs_arts": 0.1154,
+      "arm1_chars": 458,
+      "arm3_chars": 350,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A2",
+      "rep": 1,
+      "n_arts": 4,
+      "branch_diversity": 0.9484,
+      "distinctness": [
+        0.9419,
+        0.9439,
+        0.9303,
+        0.9303
+      ],
+      "arm4_survival": 0.3266,
+      "arm4_chars": 595,
+      "arm1_survival_vs_arts": 0.1041,
+      "arm1_chars": 358,
+      "arm3_chars": 526,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A2",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_diversity": 0.9573,
+      "distinctness": [
+        0.9514,
+        0.954,
+        0.9409,
+        0.9248,
+        0.9248
+      ],
+      "arm4_survival": 0.2596,
+      "arm4_chars": 479,
+      "arm1_survival_vs_arts": 0.0967,
+      "arm1_chars": 402,
+      "arm3_chars": 351,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A2",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_diversity": 0.9596,
+      "distinctness": [
+        0.9596,
+        0.9467,
+        0.9161,
+        0.9161,
+        0.9333
+      ],
+      "arm4_survival": 0.2803,
+      "arm4_chars": 581,
+      "arm1_survival_vs_arts": 0.1502,
+      "arm1_chars": 563,
+      "arm3_chars": 194,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A3",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_diversity": 0.9618,
+      "distinctness": [
+        0.9618,
+        0.9587,
+        0.9473,
+        0.9473,
+        0.96
+      ],
+      "arm4_survival": 0.2539,
+      "arm4_chars": 693,
+      "arm1_survival_vs_arts": 0.0769,
+      "arm1_chars": 349,
+      "arm3_chars": 406,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A3",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_diversity": 0.9762,
+      "distinctness": [
+        0.9762,
+        0.9656,
+        0.9521,
+        0.9521,
+        0.9749
+      ],
+      "arm4_survival": 0.2443,
+      "arm4_chars": 371,
+      "arm1_survival_vs_arts": 0.0897,
+      "arm1_chars": 586,
+      "arm3_chars": 540,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A3",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_diversity": 0.969,
+      "distinctness": [
+        0.969,
+        0.9477,
+        0.9421,
+        0.9384,
+        0.9384
+      ],
+      "arm4_survival": 0.2436,
+      "arm4_chars": 522,
+      "arm1_survival_vs_arts": 0.086,
+      "arm1_chars": 591,
+      "arm3_chars": 215,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A4",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_diversity": 0.9826,
+      "distinctness": [
+        0.9745,
+        0.9702,
+        0.9788,
+        0.9702,
+        0.9707
+      ],
+      "arm4_survival": 0.229,
+      "arm4_chars": 452,
+      "arm1_survival_vs_arts": 0.0684,
+      "arm1_chars": 559,
+      "arm3_chars": 384,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A4",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_diversity": 0.9856,
+      "distinctness": [
+        0.9796,
+        0.9796,
+        0.969,
+        0.9578,
+        0.9578
+      ],
+      "arm4_survival": 0.232,
+      "arm4_chars": 527,
+      "arm1_survival_vs_arts": 0.0314,
+      "arm1_chars": 388,
+      "arm3_chars": 234,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "practical-4q",
+      "tid": "A4",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_diversity": 0.985,
+      "distinctness": [
+        0.9633,
+        0.9846,
+        0.9845,
+        0.9633,
+        0.9712
+      ],
+      "arm4_survival": 0.2245,
+      "arm4_chars": 372,
+      "arm1_survival_vs_arts": 0.0542,
+      "arm1_chars": 508,
+      "arm3_chars": 326,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P1",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_diversity": 0.9614,
+      "distinctness": [
+        0.9614,
+        0.9571,
+        0.9359,
+        0.9227,
+        0.9227
+      ],
+      "arm4_survival": 0.3049,
+      "arm4_chars": 1670,
+      "arm1_survival_vs_arts": 0.0883,
+      "arm1_chars": 822,
+      "arm3_chars": 931,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P1",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_diversity": 0.9477,
+      "distinctness": [
+        0.9382,
+        0.9377,
+        0.9223,
+        0.9223,
+        0.9257
+      ],
+      "arm4_survival": 0.2857,
+      "arm4_chars": 1223,
+      "arm1_survival_vs_arts": 0.117,
+      "arm1_chars": 1169,
+      "arm3_chars": 832,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P1",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_diversity": 0.9588,
+      "distinctness": [
+        0.9341,
+        0.9372,
+        0.9307,
+        0.9307,
+        0.9664
+      ],
+      "arm4_survival": 0.2971,
+      "arm4_chars": 1484,
+      "arm1_survival_vs_arts": 0.0784,
+      "arm1_chars": 792,
+      "arm3_chars": 1336,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P2",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_diversity": 0.962,
+      "distinctness": [
+        0.9521,
+        0.9562,
+        0.962,
+        0.9495,
+        0.9495
+      ],
+      "arm4_survival": 0.2785,
+      "arm4_chars": 1363,
+      "arm1_survival_vs_arts": 0.0508,
+      "arm1_chars": 813,
+      "arm3_chars": 887,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P2",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_diversity": 0.9622,
+      "distinctness": [
+        0.9479,
+        0.9496,
+        0.9572,
+        0.9446,
+        0.9446
+      ],
+      "arm4_survival": 0.2738,
+      "arm4_chars": 1405,
+      "arm1_survival_vs_arts": 0.0551,
+      "arm1_chars": 909,
+      "arm3_chars": 1073,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P2",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_diversity": 0.9587,
+      "distinctness": [
+        0.9527,
+        0.9587,
+        0.9529,
+        0.934,
+        0.934
+      ],
+      "arm4_survival": 0.2762,
+      "arm4_chars": 1400,
+      "arm1_survival_vs_arts": 0.0533,
+      "arm1_chars": 885,
+      "arm3_chars": 1220,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P3",
+      "rep": 1,
+      "n_arts": 5,
+      "branch_diversity": 0.9588,
+      "distinctness": [
+        0.955,
+        0.9541,
+        0.9585,
+        0.9454,
+        0.9454
+      ],
+      "arm4_survival": 0.2776,
+      "arm4_chars": 1320,
+      "arm1_survival_vs_arts": 0.0813,
+      "arm1_chars": 1025,
+      "arm3_chars": 971,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P3",
+      "rep": 2,
+      "n_arts": 5,
+      "branch_diversity": 0.9674,
+      "distinctness": [
+        0.9451,
+        0.9613,
+        0.9586,
+        0.9345,
+        0.9345
+      ],
+      "arm4_survival": 0.2527,
+      "arm4_chars": 1065,
+      "arm1_survival_vs_arts": 0.0602,
+      "arm1_chars": 773,
+      "arm3_chars": 959,
+      "arm3_survival": null
+    },
+    {
+      "dataset": "writing-3q4arm",
+      "tid": "P3",
+      "rep": 3,
+      "n_arts": 5,
+      "branch_diversity": 0.9603,
+      "distinctness": [
+        0.9484,
+        0.9696,
+        0.9503,
+        0.9484,
+        0.9503
+      ],
+      "arm4_survival": 0.2505,
+      "arm4_chars": 1121,
+      "arm1_survival_vs_arts": 0.0902,
+      "arm1_chars": 1236,
+      "arm3_chars": 712,
+      "arm3_survival": null
+    }
+  ],
+  "gaps": [
+    "practical-4q/A1_r1: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A1_r2: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A1_r3: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A2_r1: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A2_r2: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A2_r3: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A3_r1: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A3_r2: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A3_r3: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A4_r1: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A4_r2: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "practical-4q/A4_r3: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P1_r1: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P1_r2: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P1_r3: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P2_r1: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P2_r2: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P2_r3: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P3_r1: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P3_r2: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**",
+    "writing-3q4arm/P3_r3: 臂3（融合门）的分支未落盘 ⇒ 融合吃掉了多少面**算不了**"
+  ]
+}
