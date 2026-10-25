@@ -65,7 +65,9 @@ class Gh:
             except urllib.error.HTTPError as e:
                 txt = e.read().decode("utf-8", "replace")
                 last = "HTTP %s %s" % (e.code, txt[:200])
-                if e.code == 422:
+                if e.code in (404, 422):
+                    # ★ ★ 404/422 是【确定性错误】⇒ ⇒ ★ ⇒ 立刻抛，★ 【不重试】★★
+                    # ★ ★ 【★ 这是今天推送卡 4 小时的真因：★ 404 被当可重试 ⇒ ⇒ 每次白等 75s ★】★★
                     raise RuntimeError("%s %s ⇒ %s" % (method, path, last))
                 time.sleep(5 + k * 5)
             except Exception as e:
@@ -143,20 +145,17 @@ def main():
             if r:
                 mode = r.split(b"\t", 1)[0].decode().split()[0]
                 break
-        try:
-            gh.get("/git/blobs/%s" % sha)
-            skipped += 1
-        except Exception:
-            content = git("cat-file", "blob", sha, binary=True)
-            r = gh.post("/git/blobs", {"content": base64.b64encode(content).decode(),
-                                       "encoding": "base64"})
-            if r.get("sha") != sha:
-                print("✘ blob sha 不符 ★ %s ⇒ 停止" % p)
-                return 1
-            up += 1
+        # ★ 直接 POST（★ 不做 GET 探测：★ 同内容必然同 sha ⇒ ⇒ ★ ⇒ GitHub 侧幂等）
+        content = git("cat-file", "blob", sha, binary=True)
+        r = gh.post("/git/blobs", {"content": base64.b64encode(content).decode(),
+                                   "encoding": "base64"})
+        if r.get("sha") != sha:
+            print("✘ blob sha 不符 ★ %s ⇒ 停止" % p)
+            return 1
+        up += 1
         entries.append({"path": p, "mode": mode, "type": "blob", "sha": sha})
-        if (i + 1) % 25 == 0:
-            print("  ✔ blob %d/%d（★ 新上传 %d / 远端已有 %d）" % (i + 1, len(todo), up, skipped))
+        if (i + 1) % 20 == 0 or i == len(todo) - 1:
+            print("  ✔ blob %d/%d（★ 上传 %d）" % (i + 1, len(todo), up))
 
     # ★ 建 tree（★ base_tree = 远端 tree ⇒ ⇒ ★ ★ 远端文件一个不删 ★）
     t = gh.post("/git/trees", {"base_tree": remote_tree, "tree": entries})
