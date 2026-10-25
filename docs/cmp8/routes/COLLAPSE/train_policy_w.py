@@ -276,7 +276,12 @@ def run_one(llm, task, spec, seed, slots=3, rounds=2, forced_arb=None,
     return r
 
 
+# ★ 训练失败样本率上限（★ 比例 ⇒ 与 n 无关 ⇒ 阈值不是恒真）
+SAMPLE_FAIL_RATE_MAX = 0.20
+
+
 def main():
+    _n_sample_fail = 0   # ★ 失败样本计数（★ 原来静默丢）):
     ap = argparse.ArgumentParser()
     ap.add_argument("--tasks", type=int, default=3)
     ap.add_argument("--exclude", default="", help="★ 逗号分隔的 task_id，从训练题集排除（留出集用）；默认空=全部保留")
@@ -343,6 +348,8 @@ def main():
                               forced_arb=_arb, forced_arch=_arch)
             except Exception as e:
                 print("  ⚠️ 样本失败（计入，不重试）：%s: %s" % (type(e).__name__, e), flush=True)
+                # ★★ 计数（★ 原来失败样本被静默丢出 hist ⇒ 训练可能用更少的样本跑完而退出码为 0）
+                _n_sample_fail += 1
                 continue
             pr = proxy_reward(res, task)
             # ③ 实际发生的失败类型（用于交互项）
@@ -424,7 +431,17 @@ def main():
     print("=" * 72)
     print("★ 提醒：**代理奖励 ≠ 真实判据** ⇒ 必须再用完整判官比一次"
           "（学出来的 vs 查表 vs 均匀），否则不算数。")
+    # ★★ 失败样本闸门（★ 失败不许在【账目】上被吞掉）
+    _n_ok = len(hist)
+    _tot = _n_ok + _n_sample_fail
+    _rate = (_n_sample_fail / float(_tot)) if _tot else 0.0
+    print("★ 样本账目：成功 %d ／ 失败 %d（失败率 %.1f%%）" % (_n_ok, _n_sample_fail, 100 * _rate))
+    if _tot and _rate > SAMPLE_FAIL_RATE_MAX:
+        raise SystemExit("✘ ★★★ 训练失败样本率 %.1f%% > %.0f%% ⇒ **退出码非零**\n"
+                         "    ⇒ ★ 失败样本已被丢出 hist ⇒ ⇒ 策略是在【更少的样本】上训的\n"
+                         "    ⇒ ⇒ ⇒ 这样的策略不得用于任何读数。" % (100 * _rate, 100 * SAMPLE_FAIL_RATE_MAX))
 
 
 if __name__ == "__main__":
-    main()
+    # ★ 退出码真正生效（★ 原来 `main()` ⇒ 返回值被丢弃 ⇒ 恒 0）
+    sys.exit(main() or 0)

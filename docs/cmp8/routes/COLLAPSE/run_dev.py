@@ -165,7 +165,7 @@ def arm_direct(llm, task, model):
                 chat_stats=direct_stats)
 
 
-def arm_frames_vote(llm, task, model, slots=3, seed=0):
+def arm_frames_vote(llm, task, model, slots=3, seed=0, frame_seed=None):
     """★ 对照臂 `B0_frames_vote`：**每个认知帧各跑一遍独立答案，再投票**。
 
     ★ 为什么必须有（Self-Discover arXiv:2402.03620 逐字）：
@@ -174,7 +174,7 @@ def arm_frames_vote(llm, task, model, slots=3, seed=0):
     ⇒ ⇒ 没有这个臂，"多帧 ⇒ 多维度"站不住。
     ⇒ ⇒ **用与 W 臂完全相同的帧**（同 seed ⇒ 同帧集合）⇒ 公平比较。
     """
-    frames = W.select_frames(slots, seed=seed)
+    frames = W.select_frames(slots, seed=seed, frame_seed=frame_seed)
     print("      [B0fv] %d 帧各跑一遍 + plurality 投票：%s"
           % (len(frames), frames), flush=True)
     r = AO.frames_vote_baseline(llm, task, model, frames, seed=seed)
@@ -196,9 +196,9 @@ def arm_bestof(llm, task, model, n=3, seed=0):
                 illum=r.get("illum") or {}, rounds=r.get("rounds") or [])
 
 
-def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2,
+def arm_workflow(llm, task, model, seed=0, n_slots=4, max_rounds=2, frame_seed=None,
                  evolve=True, layer="L3", action_mode="lookup", policy=None):
-    wf = W.CollapseFixWorkflow(llm, n_slots=n_slots, seed=seed,
+    wf = W.CollapseFixWorkflow(llm, n_slots=n_slots, seed=seed, frame_seed=frame_seed,
                                 model=model, judge_model=model,
                                 max_rounds=max_rounds, evolve=evolve, layer=layer,
                                 action_mode=action_mode, policy=policy)
@@ -223,6 +223,8 @@ def main():
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--dry", action="store_true", help="只跑不落盘")
+    ap.add_argument("--frame-seed", type=int, default=None,
+                    help="★ 帧组合的独立 seed（与 run seed 解耦）；不传 ⇒ 与旧版逐字节一致")
     ap.add_argument("--resume", action="store_true",
                     help="★ 断点续跑：跳过 arms.jsonl 里已完成的 (题,臂,rep)")
     ap.add_argument("--action-mode", default="lookup", choices=["lookup", "policy"],
@@ -248,13 +250,24 @@ def main():
     _done = set()
     _jl = os.path.join(args.out, "arms.jsonl")
     if args.resume and os.path.exists(_jl):
+        _n_fail_skip = 0
         for _ln in open(_jl, encoding="utf-8"):
             try:
                 _d = json.loads(_ln)
-                _done.add((_d.get("task_id"), _d.get("arm"), _d.get("rep")))
             except Exception:
-                pass
+                continue
+            # ★★★ 根因修复（2026-10-25）：★ 【失败单元不算"已完成"】
+            #   ★ 原实现不看这行有没有 error ⇒ ⇒ 一次判官超时之后
+            #   ⇒ ⇒ 每次 --resume 都跳过它 ⇒ ⇒ ⇒ 失败单元被永久固化
+            #   ⇒ ⇒ ⇒ 「文件 48 行 / 有效 47 份」的真正成因
+            if _d.get("error") or _d.get("n_cards") is None:
+                _n_fail_skip += 1
+                continue
+            _done.add((_d.get("task_id"), _d.get("arm"), _d.get("rep")))
         print("断点续跑：已完成 %d 个臂，跳过它们" % len(_done))
+        if _n_fail_skip:
+            print("  ★★ 发现 %d 个【失败单元】（带 error / n_cards=None）⇒ ★ **它们不算已完成，"
+                  "本轮会重跑**" % _n_fail_skip)
     _pol = None
     if args.policy_file and os.path.exists(args.policy_file):
         with open(args.policy_file, encoding="utf-8") as f:
@@ -297,7 +310,7 @@ def main():
                                                           args.slots, rep),
                 # ★ 层2「用设计的手段」：架构先验设计好、**运行时不自修改**
                 "W_design_L2": lambda: arm_workflow(
-                    llm, task, model, seed=rep, n_slots=args.slots,
+                    llm, task, model, seed=rep, n_slots=args.slots, frame_seed=args.frame_seed,
                     max_rounds=args.rounds, evolve=False, layer="L2",
                     action_mode=args.action_mode, policy=_pol),
                 # ★ 层3「用训练/自迭代的手段」：从失败**构造新动作**、档案累积
@@ -446,6 +459,18 @@ def main():
     print("  总调用 %d 次 ／ %.1f 秒" % (summary["total_calls"], summary["secs"]))
     print("=" * 74)
 
+    # ★★★ 失败单元统计（★ 失败不许在【账目】上被吞掉）★★★
+    _err_arms = []
+    for _row in all_rows:
+        for _an, _av in (_row.get("arms") or {}).items():
+            if isinstance(_av, dict) and (_av.get("error") or _av.get("n_cards") is None):
+                _err_arms.append((_row.get("task_id"), _an, _row.get("rep"),
+                                  (_av.get("error") or "n_cards=None")[:120]))
+    summary["n_error_arms"] = len(_err_arms)
+    summary["error_arms"] = [dict(task_id=a, arm=b, rep=c, error=d) for a, b, c, d in _err_arms]
+    summary["n_units_total"] = sum(len(r.get("arms") or {}) for r in all_rows)
+    summary["n_units_valid"] = summary["n_units_total"] - len(_err_arms)
+
     if not args.dry:
         os.makedirs(args.out, exist_ok=True)
         path = os.path.join(args.out, "w_dev_run.json")
@@ -453,6 +478,20 @@ def main():
             json.dump(summary, f, ensure_ascii=False, indent=2, sort_keys=True)
         print("  落盘：%s" % path)
 
+    # ★★★ 批末闸门：★ 有失败单元 ⇒ **退出码非零**（★ 原来恒 0 ⇒ 失败完全隐形）
+    print("-" * 74)
+    print("★ 单元账目：有效 %d / 总 %d ｜ 失败单元 %d"
+          % (summary["n_units_valid"], summary["n_units_total"], len(_err_arms)))
+    if _err_arms:
+        for _a, _b, _c, _d in _err_arms[:20]:
+            print("  ✘ ★ 失败单元：%s / %s / rep%s  ⇒  %s" % (_a, _b, _c, _d))
+        raise SystemExit("✘ ★★★ 本批有 %d 个【失败单元】⇒ **退出码非零**（★ 原来恒 0 ⇒ 失败完全隐形）\n"
+                         "    ⇒ ★ 这些臂【没有读数】⇒ ⇒ summary 的 n 已悄悄变小 ⇒ ⇒ 报数必须带它\n"
+                         "    ⇒ ★ 重跑本批即可补上（★ resume 现在**不会**跳过失败单元）"
+                         % len(_err_arms))
+    print("✔ 无失败单元 ⇒ 退出码 0")
+
 
 if __name__ == "__main__":
-    main()
+    # ★ 退出码真正生效（★ 原来 `main()` ⇒ 返回值被丢弃 ⇒ 恒 0）
+    sys.exit(main() or 0)
