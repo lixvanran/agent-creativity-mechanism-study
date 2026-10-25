@@ -34,6 +34,8 @@ import space as SP               # noqa: E402
 import metrics_priorart as MP    # noqa: E402
 
 STRATEGIES = ("merged13", "lookup", "uniform")
+# ★ 判官健康度阈值：失败率 > 10% ⇒ 拦截（★ 沿用第二组健康度 ≥ 0.9 的口径）
+FAIL_RATE_MAX = 0.10
 ARMS = ("B0_direct", "B0_bestof3", "W_train_L3")
 NEG_ARMS = ("B0_direct", "B0_bestof3")
 TASKS = ("A02", "A05")
@@ -112,7 +114,8 @@ def cell_stats(rs):
         sim_n=len(sims),
         zero_inst=zero_inst,
         parsefail_pos=sum(1 for x in pf if x),
-        calls=sum(c for c in (r.get("calls") for r in good) if isinstance(c, int)),
+        calls=(sum([c for c in (r.get("calls") for r in good) if isinstance(c, int)])
+               if any(isinstance(c, int) for c in (r.get("calls") for r in good)) else None),
         judge_models=sorted({r.get("judge_model") for r in good if r.get("judge_model")}),
         same_vendor=sorted({r.get("judge_same_vendor") for r in good if r.get("judge_same_vendor") is not None}),
     )
@@ -122,6 +125,60 @@ def fmt(x, nd=2, dash="—"):
     if x is None:
         return dash
     return ("%." + str(nd) + "f") % x
+
+
+def judge_health(by):
+    """★ 按 (task, arm) 算判官健康度 ⇒ **按臂分别算**（★ 全局率会掩盖单臂失败）
+
+    ★ 三问（★ 沿用第二组口径：只锁「解析失败」，「未提及」「非主张」是合法判定）：
+      ① 仪器层零：`n_cards == 0` ⇒ 该臂的 n_dims=0 **不可信**（★ 看着像"极端塌缩"）
+      ② `parsefail_rate > 0` ⇒ 解析有失败
+      ③ 有效读数为 0 ⇒ 该臂没读数
+    """
+    out = {}
+    for (t, arm), rs in by.items():
+        good = [r for r in rs if r.get("n_cards") is not None]
+        zero = sum(1 for r in good if (r.get("n_cards") or 0) == 0)
+        pf = sum(1 for r in good if r.get("parsefail_rate"))
+        n_failed = len(rs) - len(good)
+        out[(t, arm)] = dict(n_total=len(rs), n_valid=len(good), n_failed=n_failed,
+                              fail_rate=(n_failed / float(len(rs))) if rs else None,
+                              cards0=zero, parsefail=pf,
+                              parsefail_rate=(pf / len(good)) if good else None,
+                              healthy=(len(good) > 0 and zero == 0 and pf == 0))
+    return out
+
+
+def health_gate(health, label=""):
+    """★ 闸门：不通过 ⇒ SystemExit（★ 不出表 ⇒ 坏读数进不了交稿）
+    ★ 阈值 = 0（★ 即"一个都不许有"）⇒ ⇒ 因为【仪器层零】与【任一 parse 失败】
+      都会让该臂的 n_dims 变成【不可信的 0】⇒ ⇒ 这不是"可接受的噪声"。
+    ★ 「阈值不是恒真」的自检在 --self-test 里（★ 第二组 T4 的做法）。"""
+    bad = []
+    for _k, h in health.items():
+        t, arm = _k[-2], _k[-1]
+        if h["n_valid"] == 0:
+            bad.append("%s/%s：有效读数 0" % (t, arm))
+        elif h["cards0"]:
+            bad.append("%s/%s：仪器层零 %d 份（★ n_dims=0 不可信）" % (t, arm, h["cards0"]))
+        elif h["parsefail"]:
+            bad.append("%s/%s：解析失败 %d 份（率 %.1f%%）"
+                       % (t, arm, h["parsefail"], 100.0 * h["parsefail_rate"]))
+        # ★★★ 失败单元（n_cards=None）：★ 它们【不在 good 里】⇒ ⇒ 原闸门完全看不见
+        #   ⇒ ⇒ **分母悄悄变小** ⇒ ⇒ 必须单独判（★ 阈值 10%，沿用第二组健康度 ≥0.9）
+        elif h["n_failed"] and h["fail_rate"] is not None and h["fail_rate"] > FAIL_RATE_MAX:
+            bad.append("%s/%s：失败单元 %d/%d（率 %.1f%% > %.0f%% ⇒ 判官健康度 < 0.9）"
+                       % (t, arm, h["n_failed"], h["n_total"], 100.0 * h["fail_rate"],
+                          100.0 * FAIL_RATE_MAX))
+    if bad:
+        # ★★ 专属退出码 7（★ 第二组也用 7 表示"静默消失"）
+        #   ★ **闸门拦截(7) 与 脚本崩溃(1) 必须可区分** ⇒ ⇒ 只看退出码 1 会把崩溃当拦截
+        print("✘ ★★★ 判官健康度闸门不通过%s ⇒ 【不出表】\n    ⇒ %s\n"
+                         "    ⇒ ★ 「n_dims=0」既可能是【极端塌缩】，也可能是【判官没跑】\n"
+                         "    ⇒ ★ 本项目内 logits 不可得 ⇒ 这两种在读数上【无法区分】\n"
+                         "    ⇒ ⇒ ⇒ 只能先排除后者 ⇒ ⇒ ⇒ 故拒绝出表。"
+              % (("（" + label + "）") if label else "", "\n    ⇒ ".join(bad)), file=sys.stderr)
+        raise SystemExit(7)
 
 
 def build(d, expect):
@@ -147,7 +204,11 @@ def main():
     ap.add_argument("--expect", type=int, default=48)
     ap.add_argument("--strict", action="store_true", help="不足 expect 直接 SystemExit")
     ap.add_argument("--inject", default=None, help="同时注入该 md 文件的占位块")
+    ap.add_argument("--self-test", action="store_true", help="★ 闸门自检：阈值不是恒真")
     a = ap.parse_args()
+    if a.self_test:
+        print("★ 判官健康度闸门 · 自检")
+        return _self_test()
 
     d = a.holdout_dir
     data = build(d, a.expect)
@@ -176,6 +237,13 @@ def main():
             "%s=%d" % (st, nfail_all[st]) for st in STRATEGIES if nfail_all[st])
     if partial:
         tag += "　★ 未跑满 ⇒ 缺份是【单元尚未生成】，不是解析失败（分母不等时只报读数 + 噪声地板）"
+
+    # ★★★ 闸门（★ 放在【出表之前】⇒ 不通过 ⇒ 连表都不写）
+    all_health = {}
+    for st in STRATEGIES:
+        all_health.update({(st, t, arm): h
+                           for (t, arm), h in judge_health(data[st]["by"]).items()})
+    health_gate(all_health, label="留出集三臂")
 
     L = []
     P = L.append
@@ -434,5 +502,51 @@ def inject(paper_path, text):
     print("✔ 已注入 %s" % paper_path)
 
 
+def _self_test():
+    """★ 「阈值不是恒真」的自检（★ 第二组 T4 的做法：精确构造 11% / 9% ⇒ 必须翻转）"""
+    import copy
+
+    def mk(n, n_fail, n_cards_zero=0, n_valid=None):
+        rs = []
+        for i in range(n):
+            if i < n_fail:
+                rs.append(dict(task_id="T", arm="A", rep=i, n_cards=None,
+                                n_dims=None, n_load_bearing=None, parsefail_rate=None,
+                                calls=None))
+            elif i < n_fail + n_cards_zero:
+                rs.append(dict(task_id="T", arm="A", rep=i, n_cards=0, n_dims=0,
+                                n_load_bearing=0, parsefail_rate=0.0, calls=2))
+            else:
+                rs.append(dict(task_id="T", arm="A", rep=i, n_cards=5, n_dims=2,
+                                n_load_bearing=3, parsefail_rate=0.0, calls=2))
+        return {("T", "A"): rs}
+
+    cases = [
+        ("健康批（0 失败）", mk(100, 0), True),
+        ("★ 11 份失败（11%）⇒ 闸门必须闭", mk(100, 11), False),
+        ("★ 9 份失败（9%）⇒ 闸门必须开", mk(100, 9), True),
+        ("★ 1 份仪器层零 ⇒ 闸门必须闭", mk(100, 0, n_cards_zero=1), False),
+    ]
+    ok = True
+    for label, by, want_pass in cases:
+        try:
+            health_gate(judge_health(by), label=label)
+            got = True
+            why = ""
+        except SystemExit as e:
+            got = False
+            why = str(e).split("\n")[0]
+        mark = "✔" if got == want_pass else "✘ ★"
+        if got != want_pass:
+            ok = False
+        print("  %s %-28s 期望 %s ／ 实得 %s %s"
+              % (mark, label, "通过" if want_pass else "拦截", "通过" if got else "拦截", why))
+    print("  ⇒ 阈值自检：%s" % ("全部符合预期（⇒ 阈值不是恒真）" if ok else "★★ 有反例（⇒ 阈值恒真！）"))
+    return 0 if ok else 1
+
+
 if __name__ == "__main__":
-    main()
+    # ★★ 关键：`sys.exit(main())` ⇒ ★ main() 的返回值【真正成为进程退出码】
+    #   ★ 旧写法 `main()` ⇒ ★ 返回值被丢弃 ⇒ ★★ **无论成功失败退出码都是 0**
+    #   ★★ ⇒ ⇒ 我在 EXEC-LOG 里报过的"退出码 0"因此【毫无意义】⇒ ⇒ 已作废并重测
+    sys.exit(main() or 0)

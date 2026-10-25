@@ -37,6 +37,12 @@ FALLBACK = {
 
 GROUPS = ("三组", "第二组", "层2", "第四组", "论文簇", "multi-mind")
 
+# ★★ 负责人 2026-10-25 裁决（Q4）：**FALLBACK 表保留不删** ⇒ ★ 理由：
+#   「0 命中」是【远端层被 API 重建后 sha 变了】造成的 ⇒ ⇒ 删了将来没法查
+#   「当初为什么有这条 fallback」⇒ ⇒ ⇒ **零命中的表比没有表更危险**
+#   （它看起来像"已清理干净"）⇒ ⇒ 标注为"当前 0 命中 · 保留供追溯"。
+FALLBACK_STATUS = "当前 0 命中（远端层被 API 重建后 sha 变了）· 保留供追溯 · 负责人 2026-10-25 裁决 Q4：保留不删"
+
 
 def api(path):
     r = urllib.request.Request(
@@ -81,7 +87,7 @@ def main():
 
     chain = []
     sha = api("/repos/%s/git/ref/heads/%s" % (REPO, BRANCH))["object"]["sha"]
-    for _ in range(20):
+    for _ in range(80):   # ★ 2026-10-25：20 层窗口不够（★ 实测第二组连续推了 20 层 ⇒ 本组层被挤出表）
         c = api("/repos/%s/git/commits/%s" % (REPO, sha))
         # ★ API 建的 commit：message 在顶层；GitHub 原生 commit：在 commit.message ⇒ 两种都读
         _c = c.get("commit") or {}
@@ -181,7 +187,8 @@ def main():
     out = dict(schema="remote-ref-ownership/v2",
                repo=REPO, branch=BRANCH,
                generated_at=subprocess.check_output(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"]).decode().strip(),
-               generator="tools/build_owners_json.py（v4：owner行=硬级 / 前缀反推=弱级 / 历史fallback=中级 / 皆无=未确认）",
+               generator="tools/build_owners_json.py（v5：owner行=硬级 / 前缀反推=弱级 / 历史fallback=中级 / 皆无=未确认）",
+               fallback_status=FALLBACK_STATUS,
                remote_ref_snapshot=chain[0][0] if chain else None,
                note=("★ 归属由【远端层的 tree sha】匹配【本地 commit】得到 ⇒ 再从本地 message 前缀反推组名 "
                      "⇒ ⇒ 不需要维护任何硬编码表 ⇒ ⇒ 未知一律 needs_confirmation=true，不猜。"

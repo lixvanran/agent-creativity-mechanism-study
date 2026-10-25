@@ -8,14 +8,28 @@
 但**引用别人的口径 ≠ 算得对** ⇒ 每个口径都必须有一条"给定输入、期望输出"的断言。
 ⇒ 特别是 **Pareto 非支配排序**——它是层3 目标二元化的地基，**算错就全盘皆错**。
 
-## 变异注入
-| 变异 | 必须 FAIL 的检查 |
+## 变异注入（★ 强判据：必须红在【预期的那一处】）
+
+> ★ **判据升级记录（2026-10-25）**：★ 旧判据是"有红就行"（弱形式）⇒ ⇒ **实测抓到一处
+> 【登记的预期本身就错】**：变异「pareto 档案退化成只留最优」实际红的是
+> `strategy_archive_scalar_vs_pareto`，而登记写的是 `pareto_frontiers` ⇒ ⇒ **弱判据下 100% 看不出来**。
+> ⇒ ⇒ 现判据：**预期的那一处必须出现在变红集合里**；否则这次变异【不算被验证】。
+> ⇒ ⇒ 且每次都报【哪些检查从无任何变异针对】（⇒ 查空检查/恒真）。
+> ⇒ ⇒ 动机：第二组 2026-10-24 的真 bug（`verify()` 返回元组却当布尔用 ⇒ `if e:` 恒真
+> ⇒ ⇒ 「9 次变异全绿」当时只真验了 7 次）。
+
+| 变异 | 必须 FAIL 的检查（★ 已按实测登记） |
 |---|---|
 | ESS 去掉平方 | `ess_bounds` |
 | DSE 少了 log | `dse_values` |
-| Self-Sim 不做两两平均（改成最大对） | `self_sim_pairwise` |
+| Self-Sim 恒返回 1（不真算） | `self_sim_pairwise` |
 | 支配关系放宽（只要一项更优） | `pareto_dominance` |
+| pareto 档案退化成只留最优 | `strategy_archive_scalar_vs_pareto` ★ 原写 `pareto_frontiers` 是错的 |
 | 非支配排序不剥层 | `pareto_frontiers` |
+| 碰撞比的 N2 算反（1/C ⇒ C） | `collision_ratio_values` ★ 新增 |
+| 多数票份额恒返回 1 | `majority_and_distinct` ★ 新增 |
+| 覆盖度的分母写死（coverage≡1） | `coverage_reports_denominator` ★ 新增 |
+| 逐轮权重不扣已见（cur−seen ⇒ cur） | `ess_from_rounds` ★ 新增 |
 """
 from __future__ import annotations
 
@@ -212,25 +226,33 @@ def run_checks():
 
 
 MUTATIONS = [
+    # (label, 文件, 旧片段, 新片段, ★预期必须变红的检查名)
     ("ESS 去掉平方", "metrics_priorart.py",
      "    return 1.0 / sum(p * p for p in ps)",
-     "    return 1.0 / sum(p for p in ps)"),
+     "    return 1.0 / sum(p for p in ps)",
+     ("ess_bounds",)),
 
     ("DSE 少了 log", "metrics_priorart.py",
      "        h -= p * math.log(p)",
-     "        h -= p"),
+     "        h -= p",
+     ("dse_values",)),
 
     ("Self-Sim 恒返回 1（不真算）", "metrics_priorart.py",
      "    return tot / n if n else 0.0",
-     "    return 1.0 if n else 0.0"),
+     "    return 1.0 if n else 0.0",
+     ("self_sim_pairwise",)),
 
     ("支配关系放宽（只要一项更优）", "metrics_priorart.py",
      "    return (a[0] >= b[0] and a[1] >= b[1]) and (a[0] > b[0] or a[1] > b[1])",
-     "    return (a[0] >= b[0] or a[1] >= b[1])"),
+     "    return (a[0] >= b[0] or a[1] >= b[1])",
+     ("pareto_dominance",)),
 
+    # ★★★ 更正（2026-10-25 实测）：本变异实际变红的是 strategy_archive_scalar_vs_pareto，
+    #     ★ 原登记的 pareto_frontiers 是【错的】⇒ 弱判据下看不出来。
     ("pareto 档案退化成只留最优", "metrics_priorart.py",
      """        self.items = [x for i, x in enumerate(self.items) if i in keep]""",
-     """        self.items = [x for i, x in enumerate(self.items) if i in keep][:1]"""),
+     """        self.items = [x for i, x in enumerate(self.items) if i in keep][:1]""",
+     ("strategy_archive_scalar_vs_pareto",)),
 
     ("非支配排序不剥层", "metrics_priorart.py",
      """    k = 0
@@ -240,7 +262,31 @@ MUTATIONS = [
      """    k = 0
     while False:
         if not fronts:
-            break"""),
+            break""",
+     ("pareto_frontiers",)),
+
+    # ★★ 以下 3 个是【新增】：覆盖原先【从无任何变异针对】的检查
+    #    （无变异针对 ⇒ 可能是空检查 ⇒ 变异注入测不到它）
+    ("碰撞比的 N2 算反（1/C ⇒ C）", "metrics_priorart.py",
+     "N2=(1.0 / cp) if cp > 0 else 0.0",
+     "N2=cp",
+     ("collision_ratio_values",)),
+
+    ("多数票份额恒返回 1", "metrics_priorart.py",
+     "    return max(cnt.values()) / float(len(fams))",
+     "    return 1.0",
+     ("majority_and_distinct",)),
+
+    ("覆盖度的分母写死（coverage≡1）", "metrics_priorart.py",
+     "coverage=(len(fams) / den) if den else 0.0",
+     "coverage=(1.0 if den else 0.0)",
+     ("coverage_reports_denominator",)),
+
+    # ★ 覆盖原先【从无任何变异针对】的 ess_from_rounds（★ 强判据自己报出来的空档）
+    ("逐轮权重不扣已见（cur-seen ⇒ cur）", "metrics_priorart.py",
+     "        ws.append(float(len(cur - seen)))",
+     "        ws.append(float(len(cur)))",
+     ("ess_from_rounds",)),
 ]
 
 
@@ -281,7 +327,7 @@ def main():
     with open(os.path.join(here, "metrics_priorart.py"), encoding="utf-8") as f:
         original = f.read()
     all_caught, caught = True, 0
-    for label, fname, old, new in MUTATIONS:
+    for label, fname, old, new, expect in MUTATIONS:
         tmp = tempfile.mkdtemp(prefix="mp_mut_")
         try:
             for fn in os.listdir(here):
@@ -303,24 +349,45 @@ def main():
                 if "metrics_priorart" in sys.modules:
                     del sys.modules["metrics_priorart"]
                 sys.path.insert(0, here)
-            if failed:
-                caught += 1
-                print("  ✔ 变异被抓住：%s" % label)
-                print("      ↳ 失败检查：%s" % ", ".join(failed))
-            else:
+            # ★★★ 强判据（★ 不是"有红就行"）：★ 【预期的那一处】必须在变红集合里
+            #   ★ 弱判据下，"预期登记错"完全看不出来（★ 实测抓到一处：pareto 档案退化）
+            if not failed:
                 all_caught = False
-                print("  ✘ ★ 变异**未被抓住**：%s" % label)
+                print("  ✘ ★ 变异**未被抓住**（没有任何检查变红）：%s" % label)
+            elif not set(expect).issubset(set(failed)):
+                all_caught = False
+                miss = [e for e in expect if e not in failed]
+                print("  ✘ ★ 变异被【别的检查】抓住，但【预期的那一处 %s】没红：%s"
+                      % (", ".join(miss), label))
+                print("      ↳ 实际变红：%s" % ", ".join(failed))
+                print("      ↳ ★ 判据：必须红在【预期的那一处】⇒ 否则这次变异【不算被验证】")
+            else:
+                caught += 1
+                print("  ✔ 变异被抓住（红在预期的那一处）：%s" % label)
+                print("      ↳ 预期 %s ✔ ｜ 实际变红：%s" % (", ".join(expect), ", ".join(failed)))
         except Exception:
             all_caught = False
             print("  ✘ ★ 变异导致崩溃：%s" % label)
             traceback.print_exc()
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+    # ★★ 查【空检查】：★ 从未被任何变异针对的检查 ⇒ 可能是恒真/空转的检查
+    _targeted = set()
+    for _l, _f, _o, _n, _e in MUTATIONS:
+        _targeted.update(_e)
+    _all = [c.name for c in baseline]
+    _untouched = [n for n in _all if n not in _targeted]
+    print("-" * 74)
+    if _untouched:
+        print("  ✘ ★★ 有 %d 个检查【从无任何变异针对】（⇒ 可能是空检查/恒真）：%s"
+              % (len(_untouched), ", ".join(_untouched)))
+    else:
+        print("  ✔ 全部 %d 个检查都有对应变异（⇒ 无空检查嫌疑）" % len(_all))
     print("=" * 74)
-    print("变异注入：%s（%d/%d 被抓住）"
+    print("变异注入：%s（%d/%d 被抓住，★ 强判据：必须红在预期的那一处）"
           % ("全部被抓住" if all_caught else "★有未被抓住的", caught, len(MUTATIONS)))
     print("=" * 74)
-    return 0 if all_caught else 1
+    return 0 if (all_caught and not _untouched) else 1
 
 
 if __name__ == "__main__":
