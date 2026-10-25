@@ -244,8 +244,24 @@ def main() -> int:
             mism += 1
             print("  ✘ tree 不符：★ %s" % c[:10])
     print("★ 逐 commit 回读 tree：★ %d/%d 一致" % (len(built) - mism, len(built)))
+    # ★ ★ 逐路径复核（★ 2026-10-25 补：★ ★ 卫生自检【真的抓到了这个缺口】★★）
+    # ★ ⇒ ⇒ 断言：★ 【本地有远端没有 = 0】+【同路径内容不同 = 0】★★
+    final_tree = gh.get("/git/trees/%s?recursive=1" % gh.get("/git/commits/%s" % got)["tree"]["sha"])
+    nmap = {e["path"]: e["sha"] for e in final_tree.get("tree", []) if e["type"] == "blob"}
+    lmap = {}
+    for rec in git("ls-tree", "-r", "-z", lb, binary=True).split(b"\x00"):
+        if rec:
+            meta, path = rec.split(b"\t", 1)
+            lmap[path.decode("utf-8")] = meta.decode().split()[2]
+    miss = [p for p in lmap if p not in nmap]
+    diff = [p for p in lmap if p in nmap and nmap[p] != lmap[p]]
+    print("  ★ 逐路径复核：★ 本地有远端没有 = %d ｜ 同路径内容不同 = %d" % (len(miss), len(diff)))
+    for p in miss[:5]:
+        print("      ✘ %s" % p)
+    for p in diff[:5]:
+        print("      ✘ %s" % p)
     print("★ 本次 API 调用 %d 次" % gh.n)
-    return 0 if mism == 0 else 1
+    return 0 if (mism == 0 and not miss and not diff) else 1
 
 
 if __name__ == "__main__":

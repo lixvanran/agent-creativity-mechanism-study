@@ -90,7 +90,7 @@ def main():
                 texts["%s|%s|%d" % k] = f.result()
             except Exception as e:
                 print("  ERR %s: %s" % (k, str(e)[:70]), flush=True)
-    json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(texts, open("%s/texts.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
     for a in ARMS:
         L = [len(v) for k, v in texts.items() if k.split("|")[1] == a]
         print("  %-11s %d 份，平均 %dB" % (a, len(L), sum(L) / max(len(L), 1)), flush=True)
@@ -101,7 +101,7 @@ def main():
         futs = {ex.submit(claims_of, LLM(), v): k for k, v in texts.items()}
         for f in as_completed(futs):
             allclaims[futs[f]] = f.result()
-    json.dump(allclaims, open("%s/claims.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(allclaims, open("%s/claims.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
     for a in ARMS:
         n = [len(allclaims[k]) for k in allclaims if k.split("|")[1] == a]
         print("  %-11s 每次断言 %s 条" % (a, n), flush=True)
@@ -122,7 +122,7 @@ def main():
               % (T["tid"], len(pool), s, 100 * s / max(len(pool), 1)), flush=True)
         for c, v in ok.items():
             print("     %s %s" % ("支持" if v else "不支持", c[:44]), flush=True)
-    json.dump(verdicts, open("%s/verdicts.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(verdicts, open("%s/verdicts.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
 
     print("\n== 4. 每候选奖励 ==", flush=True)
     recs = []
@@ -144,7 +144,7 @@ def main():
             reward=round(len(new) / max(len(txt), 1) * 100, 4),
             lost_penalty=round(len(lost) / max(len(txt), 1) * 100, 4),
         ))
-    json.dump(recs, open("%s/records.json" % OUT, "w"), ensure_ascii=False, indent=1)
+    json.dump(recs, open("%s/records.json" % OUT, "w"), ensure_ascii=False, indent=1, sort_keys=True)
 
     print("%-22s %6s %5s %5s %5s %7s" % ("key", "len", "clm", "sup", "new", "reward"))
     for r in sorted(recs, key=lambda x: -x["reward"]):

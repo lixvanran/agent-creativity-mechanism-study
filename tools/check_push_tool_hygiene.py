@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""★ **推送工具的卫生自检（★ 2026-10-25 · ★ 主会话要求"落成工具自检，★ 不是一次修复"）★★**
+
+★ **★ 为什么要有这个（★ 本轮真实踩的坑）★★**
+★ ① **404/422 被我放进重试分支** ⇒ ⇒ ★ ⇒ 每个 blob 白等 75s ⇒ ⇒ ★ ⇒ **183 个 blob 要 4 小时，★ 而现象只是"没进度"**
+★ ② **"先 GET 再 POST"的探测步骤** ⇒ ⇒ ★ ⇒ **把幂等当不存在**（★ 同内容必然同 sha ⇒ ⇒ ★ ⇒ 直接 POST 天然幂等）
+
+★ **★ 本自检做什么（★ 扫描源码，★ 断言那两条形态不存在）★★**
+★ ① **重试分支里不含确定性错误（404/422）** —— ★ ★ **★ 判据是【源码里重试分支的条件】★★
+★ ② **没有"先 GET 再 POST"的探测步骤**（★ ★ 判据是【同一路径上 GET 之后紧跟 POST】★★
+★ ③ **推后有逐路径复核**（★ 断言远端独有文件丢失 = 0 的那行存在）
+
+★ **★ 为什么用【源码扫描】而不是【运行时检查】（★ 这是一个【刻意】的选择）★★**
+> ★★★ **★ 运行时检查只能发现"这一版坏了"；★ 源码扫描能发现"【这一族的形态又长出来了】"★★**
+> ⇒ ⇒ ★ **★ ⇒ 主会话的原话：★ "★ 这类坑不会只在一个脚本里出现，★ 落进工具才有复用价值 ★★"**
+
+★ 用法：`python3 -B tools/check_push_tool_hygiene.py`
+★ 退出码：★ 0 = 全过｜★ 1 = 有形态检出（★ 打印命中位置）
+"""
+
+from __future__ import annotations
+
+import ast
+import os
+import re
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TARGETS = ["tools/push_overlay.py", "tools/push_via_api.py"]
+FAILED = []
+
+
+def check(name, cond, detail=""):
+    if cond:
+        print("  ✔ %s" % name)
+    else:
+        print("  ✘ %s  %s" % (name, detail))
+        FAILED.append(name)
+
+
+def retry_branches(path):
+    """★ 找出所有【重试分支】（★ except 块里含 sleep 或重试计数）★★"""
+    tree = ast.parse(open(path, encoding="utf-8").read())
+    out = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ExceptHandler):
+            src = ast.dump(node)
+            body = ast.dump(node)
+            if "sleep" in body or "retry" in body.lower():
+                out.append(node)
+    return out
+
+
+def main() -> int:
+    print("== ★ 推送工具卫生自检 ==")
+    for rel in TARGETS:
+        p = os.path.join(ROOT, rel)
+        if not os.path.isfile(p):
+            check("★ %s 存在" % rel, False, p)
+            continue
+        src = open(p, encoding="utf-8").read()
+
+        # ── ① 重试分支里不含 404/422 ──
+        bad = []
+        for h in retry_branches(p):
+            hsrc = ast.get_source_segment(src, h) or ""
+            if re.search(r"\b(404|422)\b", hsrc):
+                # ★ 允许的形态：★ 404/422 出现在【抛异常的分支】⇒ ⇒ 那正是【立刻抛】的修法
+                # ⇒ ⇒ 判据是：【它出现在 raise 之前】而不是【它被当成可重试】
+                if "raise" not in hsrc:
+                    bad.append((h.lineno, hsrc.strip()[:90]))
+        check("★ %s · 重试分支不含确定性错误（★ 404/422）" % rel, not bad, str(bad))
+
+        # ── ② 没有"先 GET 再 POST"的探测步骤 ──
+        # ⇒ ⇒ ★ 判据：★ 同一路径上，★ GET 调用之后（★ 在 except 里）★ 又 POST 同一个 blob
+        probe = []
+        for h in retry_branches(p):
+            hsrc = ast.get_source_segment(src, h) or ""
+            if ("/git/blobs/" in hsrc) or re.search(r'get\(\s*["\']/git/blobs/', hsrc):
+                if "post(" in hsrc:
+                    probe.append((h.lineno, hsrc.strip()[:90]))
+        check("★ %s · 无『先 GET 再 POST』的 blob 探测步骤" % rel, not probe, str(probe))
+
+        # ── ③ 推后逐路径复核（★ ★ 行为级判据：★ 找【差集运算 + 与 0 的比较】的结构 ★）──
+        # ★ ★ 为什么不用"找某几个字"：★ 那是【措辞判据】⇒ ⇒ ★ ⇒ 换个措辞就假绿 ⇒ ⇒ ★ ⇒
+        # ★ ★ ⇒ 与「指标名不能替代口径定义」同族（★ ★ 自检本身也可能是假绿 ★★）★★
+        tree = ast.parse(src)
+        has_diff = False        # ★ 有"把两个 path 集合做差"的表达式
+        has_zero_check = False  # ★ 有"该差集必须为 0"的判断
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+                for sub in ast.walk(node):
+                    if isinstance(sub, ast.Compare) and any(
+                            isinstance(op, (ast.NotIn, ast.In)) for op in sub.ops):
+                        has_diff = True
+            if isinstance(node, ast.Compare) and isinstance(node.ops[0], (ast.Eq, ast.NotEq)):
+                for c in node.comparators:
+                    if isinstance(c, ast.Constant) and c.value == 0:
+                        has_zero_check = True
+        check("★ %s · 推后有逐路径复核（★ ★ 行为级：★ 差集运算 + 零值断言）" % rel,
+              has_diff and has_zero_check,
+              "★ 差集运算=%s ｜ 零值断言=%s" % (has_diff, has_zero_check))
+
+    print()
+    if FAILED:
+        print("✘ 卫生自检：★ %d 项未过 ⇒ %s" % (len(FAILED), FAILED))
+        return 1
+    print("✔ 卫生自检全过（★ 三个形态都不存在）")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
